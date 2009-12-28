@@ -1,0 +1,15 @@
+syntax: glob
+*~
+*.elc
+*.pyc
+*.class
+*.entrypickle
+*.log
+.svn
+.semantic.cache
+.DS_Store
+TAGS
+_build
+auto-save-list
+anything-c-adaptive-history
+image-dired

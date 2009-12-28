@@ -1,0 +1,21 @@
+[ui]
+username = sakito <sakito@sakito.com>
+ignore=~/.hgignore
+style=compact
+[extensions]
+hgext.convert=
+hgext.graphlog=
+hgext.bookmarks=
+color=
+hggit=
+hgk=
+[color]
+status.modified = white bold red_background
+#status.modified = white bold underline red_background
+status.added = green bold
+status.removed = red bold blue_background
+status.deleted = cyan bold underline
+status.unknown = green bold underline
+status.ignored = black bold
+[hgk]
+path="/Users/sakito/bin/hgk"

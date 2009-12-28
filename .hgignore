@@ -1,0 +1,13 @@
+syntax: glob
+*~
+*.elc
+*.pyc
+*.log
+.DS_Store
+auto-save-list
+anything-c-adaptive-history
+image-dired
+lisp/*
+var/*
+share/*
+private/*

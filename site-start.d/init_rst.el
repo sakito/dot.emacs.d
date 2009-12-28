@@ -1,0 +1,82 @@
+;;; init_rst.el --- rst mode setting file
+
+;; Copyright (C) 2004-2009  sakito
+
+;; Author: sakito <sakito@sakito.com>
+;; Keywords: tools
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+;; Boston, MA 02111-1307, USA.
+
+;;; Commentary:
+
+;; 
+
+;;; Code:
+(require 'rst)
+
+;; rst-mode
+;; @see http://docutils.sourceforge.net/
+(autoload 'rst-mode "rst-mode" "mode for editing reStructuredText documents" t)
+(setq auto-mode-alist
+      (append '(
+                ("\\.rst$" . rst-mode)
+                ("\\.rest$" . rst-mode)
+                ) auto-mode-alist))
+
+(defvar rst-html-program "open"
+  "Program used to preview HTML files.")
+
+(defun rst-compile-html-preview ()
+  "Convert the document to a HTML file and launch a preview program."
+  (interactive)
+  (let* ((tmp-filename "/tmp/out.html")
+         (command (format "rst2html.py --template ~/.emacs.d/etc/rst/blog_template.txt --stylesheet-path ~/.emacs.d/etc/rst/sourcecode.css %s %s && %s %s"
+                          buffer-file-name tmp-filename
+                          rst-html-program tmp-filename)))
+    (start-process-shell-command "rst-html-preview" nil command)
+    ))
+
+(defun my-rst-mode-hook ()
+  (progn
+    (local-set-key "\C-c\C-c" 'rst-compile)
+    (local-set-key "\C-c\C-p" 'rst-compile-html-preview)
+    (local-set-key "\C-c;" 'comment-region)
+    (local-set-key "\C-c:" 'uncomment-region)
+;;    (local-set-key "\C-c\C-l" 'rst-compile-alt-toolset)
+    'turn-off-auto-fill
+;;    (local-set-key "\C-c\C-f\C-e" 'rst-change-font-emphasis)
+;;    (local-set-key "\C-c\C-f\C-n" 'rst-change-font-normal)
+;; `rst-change-font-bold'......[C-c C-f C-b] -> change font (bold)
+;; `rst-change-font-emphasis'..[C-c C-f C-e] -> change font (emphasis)
+;; `rst-change-font-underline'.[C-c C-f C-u] -> change font (underline)
+;; `rst-change-font-truetype'..[C-c C-f C-t] -> change font (truetype)
+;; `rst-change-font-bolditalic'[C-c C-f C-_] -> change font (bold-italic)
+;; `rst-change-font-normal'....[C-c C-f C-n] -> change font (normal)
+;    (require 'rst-html)
+    )
+  )
+(add-hook 'rst-mode-hook  'my-rst-mode-hook)
+(setq rst-pdf-program "open")
+;(setcdr (assq 'html rst-compile-toolsets)
+;        '("rst2html.py" ".html" "-i utf-8 -o utf-8 -l ja"))
+(setcdr (assq 'html rst-compile-toolsets)
+        '("rst2html.py" ".html" "--config ~/.emacs.d/etc/rst/def.conf"))
+;(setq rst-html-command "rst2html.py")
+;(setq rst-html-stylesheet "style.css")
+;(setq rst-html-options "-iUTF-8 -oUTF-8 -lja")
+
+(provide 'init_rst)
+;;; init_rst.el ends here

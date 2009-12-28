@@ -1,0 +1,12 @@
+screen -UxR
+#if [ $TERM = "screen" ]; then
+#    precmd () {
+#        screen -xR title $(basename $(print -P "%~"))
+#    }
+#    preexec () {
+#        screen -xR eval "title '$1'"
+#    }
+#fi
+#if [ $TERM != screen ]; then
+#   exit
+#fi
