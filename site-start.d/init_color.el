@@ -330,7 +330,8 @@
     (put-text-property 0 (length eob-text)
                        'face '(foreground-color . "slate gray") eob-text)
     (overlay-put eob-mark 'eob-overlay t)
-    (overlay-put eob-mark 'after-string eob-text)))
+    (overlay-put eob-mark 'after-string eob-text))
+  (color-theme-sakito))
 (add-hook 'find-file-hooks 'my-mark-eob)
 
 ;(defface extra-whitespace-face
@@ -370,9 +371,6 @@
 ;(set-face-foreground 'region "white")
 ;(set-face-background 'region "dim gray")
 
-;; color-thema
-(require 'color-theme)
-(color-theme-initialize)
 ;;(color-theme-high-contrast)
 ;(color-theme-greiner)
 ; Dark Green
@@ -380,14 +378,23 @@
 ;;(color-theme-arjen)
 ;(color-theme-dark-green)
 ;(color-theme-deep-blue)
-(color-theme-sakito)
 
 ;; 現在行に色を付ける
 (global-hl-line-mode)
 (hl-line-mode 1)
 
-;透過の設定
-;(set-frame-parameter (selected-frame) 'alpha '(85 50))
+;; 列に色を付ける
+;; @see http://www.emacswiki.org/emacs/CrosshairHighlighting
+;; @see http://www.emacswiki.org/emacs/VlineMode
+;; @see http://www.emacswiki.org/cgi-bin/wiki/vline.el
+;;(require 'crosshairs)
+
+;; color-thema
+(require 'color-theme)
+(eval-after-load "color-theme"
+  '(progn
+     (color-theme-initialize)
+     (color-theme-sakito)))
 
 (provide 'init_color)
 ;;; init_color.el ends here

@@ -55,6 +55,8 @@
     (local-set-key "\C-c\C-p" 'rst-compile-html-preview)
     (local-set-key "\C-c;" 'comment-region)
     (local-set-key "\C-c:" 'uncomment-region)
+    (make-local-variable 'ac-sources)
+    (setq ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-buffer ac-source-gtags ac-source-filename))
 ;;    (local-set-key "\C-c\C-l" 'rst-compile-alt-toolset)
     'turn-off-auto-fill
 ;;    (local-set-key "\C-c\C-f\C-e" 'rst-change-font-emphasis)

@@ -41,6 +41,19 @@
   (setq history-length t)
   (add-hook 'after-init-hook 'session-initialize))
 
+;; minibuffer history から重複を排除する
+(defun minibuffer-delete-duplicate ()
+  (let (list)
+    (dolist (elt (symbol-value minibuffer-history-variable))
+      (unless (member elt list)
+        (push elt list)))
+    (set minibuffer-history-variable (nreverse list))))
+(add-hook 'minibuffer-setup-hook 'minibuffer-delete-duplicate)
+
+;; kill-ring 内の重複を排除する
+(defadvice kill-new (before ys:no-kill-new-duplicates activate)
+  (setq kill-ring (delete (ad-get-arg 0) kill-ring)))
+
 ;; kill-summary
 ;(autoload 'kill-summary "kill-summary" nil t)
 ;(global-set-key "\M-y" 'kill-summary)

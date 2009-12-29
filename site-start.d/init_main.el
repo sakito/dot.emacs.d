@@ -170,6 +170,21 @@
 ;; 独自関数
 (require 'init_function)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 補完関連
+(require 'init_moccur)
+
+(require 'init_eldoc)
+
+;; anything
+(require 'init_anything)
+
+;; session
+(require 'init_session)
+
+(require 'init_ac)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; プログラミング関連
 ;;; womanの設定
@@ -195,10 +210,12 @@
 ;(require 'init_ecb)
 ;; c
 (require 'init_c)
+;; objc
+(require 'init_objc)
 ;; yasnippet
 (require 'init_yasnippet)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SCM関連
 ;; Subversion Mode
 ;; @see http://xsteve.nit.at/prg/vc_svn/
@@ -208,22 +225,6 @@
 ;(setq dvc-prefix-key [(control c) ?h])
 ; hg-mode
 (require 'ahg)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 補完関連
-(require 'ac-mode)
-;; 常にac-modeをONにする
-(add-hook 'find-file-hooks 'ac-mode-without-exception)
-
-(require 'init_moccur)
-
-(require 'init_eldoc)
-
-;; anything
-(require 'init_anything)
-
-;; session
-(require 'init_session)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 文書記述関連
