@@ -77,7 +77,6 @@
 ;; emacsclient
 (server-start)
 
-
 ; 印刷の設定
 (setq ps-multibyte-buffer 'non-latin-printer)
 
@@ -121,11 +120,19 @@
 (setq-default indent-tabs-mode nil)
 
 ;; モードラインにライン数、カラム数表示
-(line-number-mode 1)
-(column-number-mode 1)
+(line-number-mode t)
+(column-number-mode t)
 
 ;; 対応するカッコを色表示する
-(show-paren-mode 1)
+;; 特に色をつけなくてもC-M-p、C-M-n を利用すれば対応するカッコ等に移動できる
+(show-paren-mode t)
+;; カッコ対応表示のスタイル
+;; カッコその物に色が付く(デフォルト)
+;; (setq show-paren-style 'parenthesis)
+;; カッコ内に色が付く
+;; (setq show-paren-style 'expression)
+;; 画面内に収まる場合はカッコのみ、画面外に存在する場合はカッコ内全体に色が付く
+;; (setq show-paren-style 'mixed)
 
 ;; モードラインにファイルのディレクトリを表示
 ;(add-to-list 'global-mode-string '("" default-directory "-"))

@@ -274,5 +274,9 @@
       )
 )
 
+;; objc の設定
+(require 'flymake)
+(require 'init_objc)
+
 (provide 'init_ns)
 ;;; init_ns.el ends here

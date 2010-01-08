@@ -11,3 +11,4 @@ lisp/*
 var/*
 share/*
 private/*
+bin/*

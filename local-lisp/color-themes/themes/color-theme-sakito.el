@@ -99,7 +99,7 @@
       (region ((t (:background "DarkCyan"))))
       (scroll-bar ((t (:background "gray" :foreground "#506070"))))
       (secondary-selection ((t (:background "yellow" :foreground "gray10"))))
-      (show-paren-match-face ((t (:bold t :background "yellow" :foreground "red" :weight bold))))
+      (show-paren-match-face ((t (:bold t :background "yellow" :foreground "black" :weight bold))))
       (show-paren-mismatch-face ((t (:bold t :foreground "red" :foreground "yellow" :weight bold))))
       (tool-bar ((t (:background "grey75" :foreground "black" :box (:line-width 1 :style released-button)))))
       (tooltip ((t (:background "lightyellow" :foreground "black"))))

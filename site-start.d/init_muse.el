@@ -1,6 +1,6 @@
 ;;; init_muse.el --- Emacs Muse setting
 
-;; Copyright (C) 2008  sakito
+;; Copyright (C) 2008-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -126,6 +126,9 @@
 ;(add-hook 'howm-mode-on-hook 'auto-fill-mode)
 ;; howm の時は auto-fill にしない
 (add-hook 'howm-mode-on-hook 'turn-off-auto-fill)
+
+;; grep のオプション デフォルトは -Hnr --exclude-dir=RCS --exclude-dir=CVS --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_darcs
+(setq howm-view-grep-option "-Hnr --exclude-dir=RCS --exclude-dir=CVS --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_darcs --exclude-dir=.hg --include=*.howm --include=*.rst --include=*.txt")
 
 ;; http://howm.sourceforge.jp/cgi-bin/hiki/hiki.cgi?SwitchMemoDirectory
 ;(defun my-howm-set-directory (dir &optional keyfile)

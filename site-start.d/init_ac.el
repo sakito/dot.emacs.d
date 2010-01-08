@@ -36,17 +36,8 @@
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
 (require 'ac-company)
-(ac-company-define-source ac-source-company-xcode company-xcode)
 
 (setq ac-modes (append ac-modes '(rst-mode)))
-(setq ac-modes (append ac-modes '(objc-mode)))
-
-(add-hook 'objc-mode-hook
-          (lambda ()
-            (define-key objc-mode-map "TAB" 'ac-complete)
-            (push 'ac-source-company-xcode ac-sources)
-            (push 'ac-source-c++-keywords ac-sources)
-          ))
 
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
