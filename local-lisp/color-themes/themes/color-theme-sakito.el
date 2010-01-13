@@ -103,7 +103,7 @@
       (show-paren-mismatch-face ((t (:bold t :foreground "red" :foreground "yellow" :weight bold))))
       (tool-bar ((t (:background "grey75" :foreground "black" :box (:line-width 1 :style released-button)))))
       (tooltip ((t (:background "lightyellow" :foreground "black"))))
-      (trailing-whitespace ((t (:background "#102e4e"))))
+      (trailing-whitespace ((t (:underline "SteelBlue"))))
       (underline ((t (:underline t))))
       (variable-pitch ((t (:family "helv"))))
       (widget-button-face ((t (:bold t :weight bold))))
@@ -112,6 +112,7 @@
       (widget-field-face ((t (:background "dim gray"))))
       (widget-inactive-face ((t (:foreground "light gray"))))
       (widget-single-line-field-face ((t (:background "dim gray"))))
+      ;; モード毎の設定
       (rst-level-1-face ((t (:background "grey0" :foreground "white"))) t)
       (rst-level-2-face ((t (:background "grey3" :foreground "white"))) t)
       (rst-level-3-face ((t (:background "grey6" :foreground "white"))) t)
@@ -120,4 +121,7 @@
       (rst-level-6-face ((t (:background "grey15" :foreground "white"))) t)
       (vline-visual ((t (:background "gray13"))) t)
       (vline ((t (:background "gray13"))) t)
+      (nxml-element-local-name ((t (:foreground "SkyBlue1"))) t)
+      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
+      (anything-file-name ((t (:foreground "Yellow"))) t)
       )))

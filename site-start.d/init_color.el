@@ -256,16 +256,6 @@
 ;; フォントの設定
 (add-to-list 'default-frame-alist '(font . "fontset-hiramaru"))
 
-;; モードライン(下にあるやつ)の色設定
-;(set-face-foreground 'modeline "snow")
-;(set-face-background 'modeline "black")
-
-;; 色を付ける
-;; Highlighting on. modified 言語色設定
-;; hilit19カラフルになります。
-;; hilit19はEmacs21以降では極力利用しない方がいいです。
-;(require 'hilit19)
-
 ;; フォントロックの設定
 ;; hilit19はemacs19用で、メンテナンスされてません。
 ;; emacs2xではfont-lockを使うようにします。
@@ -279,9 +269,7 @@
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; @see http://www.emacswiki.org/emacs/WhiteSpace
 ;; @see http://xahlee.org/emacs/whitespace-mode.html
-(setq whitespace-style (quote
-                        (spaces tabs newline space-mark tab-mark newline-mark)))
-
+(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark))
 
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; font-lockに対応したモードでしか動作しません
@@ -316,68 +304,13 @@
 (ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
 (ad-activate 'font-lock-mode)
 
-;; EOFを表示します。微妙に変な動作しますが気にしないでください。
-(defun my-mark-eob ()
-  (let ((existing-overlays (overlays-in (point-max) (point-max)))
-        (eob-mark (make-overlay (point-max) (point-max) nil t t))
-        (eob-text "[EOB]"))
-    ;; Delete any previous EOB markers.  Necessary so that they don't
-    ;; accumulate on calls to revert-buffer.
-    (dolist (next-overlay existing-overlays)
-      (if (overlay-get next-overlay 'eob-overlay)
-          (delete-overlay next-overlay)))
-    ;; Add a new EOB marker.
-    (put-text-property 0 (length eob-text)
-                       'face '(foreground-color . "slate gray") eob-text)
-    (overlay-put eob-mark 'eob-overlay t)
-    (overlay-put eob-mark 'after-string eob-text))
-  (color-theme-sakito))
-(add-hook 'find-file-hooks 'my-mark-eob)
-
-;(defface extra-whitespace-face
-;  '((t (:background "pale green")))
-;  "Used for tabs and such.")
-
-;(defvar my-extra-keywords
-;  '(("\t" . 'extra-whitespace-face)))
-
-;(add-hook 'emacs-lisp-mode-hook
-;          (lambda ()
-;            (font-lock-add-keywords nil my-extra-keywords)))
-
-;(add-hook 'text-mode-hook
-;          (lambda ()
-;            (font-lock-add-keywords nil my-extra-keywords)))
-
-
-;; リンク等の色表示
-;; 変えてみてください
-;(custom-set-variables)
-;(custom-set-faces
-;(font-lock-comment-face ((t (:italic t :foreground "DarkOliveGreen"))))
-; '(font-lock-comment-face ((t (:italic t :foreground "dark slate grey"))))
-; '(font-lock-string-face ((t (:foreground "Brown"))))
-; '(font-lock-keyword-face ((t (:bold t :foreground "Purple4"))))
-; '(font-lock-constant-face ((t (:bold t :foreground "IndianRed4"))))
-; '(font-lock-type-face ((t (:bold t :foreground "grey40"))))
-; '(font-lock-variable-name-face ((t (:bold t :foreground "Navy"))))
-; '(font-lock-builtin-face ((t (:bold t :foreground "Orchid4")))
-; )
+;; 行末の空白を表示
+(setq-default show-trailing-whitespace t)
+;; 最後の行移行に indicat を表示
+(setq-default indicate-empty-lines t)
 
 ;; マーク領域を色付け
 (setq transient-mark-mode t)
-
-;; リージョンの色
-;(set-face-foreground 'region "white")
-;(set-face-background 'region "dim gray")
-
-;;(color-theme-high-contrast)
-;(color-theme-greiner)
-; Dark Green
-; Jonadabian Slate
-;;(color-theme-arjen)
-;(color-theme-dark-green)
-;(color-theme-deep-blue)
 
 ;; 現在行に色を付ける
 (global-hl-line-mode)
@@ -395,6 +328,12 @@
   '(progn
      (color-theme-initialize)
      (color-theme-sakito)))
+
+;; face を調査するための関数
+(defun describe-face-at-point ()
+  "Return face used at point."
+  (interactive)
+  (message "%s" (get-char-property (point) 'face)))
 
 (provide 'init_color)
 ;;; init_color.el ends here

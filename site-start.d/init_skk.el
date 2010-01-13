@@ -60,10 +60,10 @@
 (setq skk-isearch-start-mode 'latin)
 
 ;; C-x C-fでファイルを開くとSKK
-(add-hook 'find-file-hooks
-          (lambda ()
+;;(add-hook 'find-file-hooks
+;;          (lambda ()
             ;(skk-latin-mode 1)
-            ))
+;;            ))
 
 ;;(setq default-input-method "japanese-skk")
 

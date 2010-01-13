@@ -41,12 +41,12 @@
 
 (setq browse-url-browser-function 'browse-url-generic)
 (setq browse-url-generic-program "open")
-(global-set-key "\C-cv" 'browse-url-at-point)
+;;(global-set-key "\C-cv" 'browse-url-at-point)
 
 (autoload 'w3m-search "w3m-search" "Search QUERY using SEARCH-ENGINE." t)
 ;; w3m-search-engine-alistの内容を確認してください
 (setq w3m-search-default-engine "google")
-(global-set-key "\C-cs" 'w3m-search)
+;;(global-set-key "\C-cs" 'w3m-search)
 (setq w3m-mailto-url-function 'wl-draft)
 
 (autoload 'w3m-weather "w3m-weather" "Display weather report." t)

@@ -1,6 +1,6 @@
 ;;; init_nxml.el --- nxml-mode setting
 
-;; Copyright (C) 2004  sakito
+;; Copyright (C) 2004-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 
@@ -31,25 +31,15 @@
 (setq auto-mode-alist
       (cons '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|xhtml\\|html\\)\\'" . nxml-mode)
             auto-mode-alist))
+;; スラッシュの入力で終了タグを自動補完
+(setq nxml-slash-auto-complete-flag t)
 
-;; 色の設定
-;(custom-set-faces
-; '(nxml-comment-content-face ((t (:foreground "yellow4"))))
-; '(nxml-comment-delimiter-face ((t (:foreground "yellow4"))))
-; '(nxml-delimited-data-face ((t (:foreground "lime green"))))
-; '(nxml-delimiter-face ((t (:foreground "grey"))))
-; '(nxml-element-local-name-face ((t (:inherit nxml-name-face :foreground "medium turquoise"))))
-; '(nxml-name-face ((t (:foreground "rosy brown"))))
-; '(nxml-tag-slash-face ((t (:inherit nxml-name-face :foreground "grey"))))
-
-; '(nxml-comment-content-face ((t (:foreground "SkyBlue1"))))
-; '(nxml-comment-delimiter-face ((t (:foreground "SkyBlue1"))))
-; '(nxml-delimited-data-face ((t (:foreground "DarkSalmon"))))
-; '(nxml-element-local-name-face ((t (:inherit nxml-name-face :foreground "SkyBlue1"))))
-; '(nxml-name-face ((t (:foreground "SkyBlue1"))))
-; '(nxml-delimiter-face ((t (:foreground "grey"))))
-; '(nxml-tag-slash-face ((t (:inherit nxml-name-face :foreground "grey"))))
-; )
+(add-hook 'nxml-mode-hook
+          (lambda()
+            ;; キーの設定
+            (define-key nxml-mode-map (kbd "\t") 'nxml-complete)
+            (define-key nxml-mode-map (kbd "C-c C-v") 'browse-url-of-file)
+            ))
 
 ;(custom-set-variables
 ; '(rng-schema-locating-files (quote ("schemas.xml" "~/.emacs.d/share/rnc/schemas.xml" "~/.emacs.d/lisp/nxml-mode-20031031/schema/schemas.xml")))
@@ -63,22 +53,6 @@
 ;        )
 ;       rng-auto-file-name-alist-default)
 ;      )
-
-;; rng-auto-element-alistの設定
-
-
-
-;(add-hook 'nxml-mode-hook
-;          (function (lambda()
-                      ;; キーの設定
-;                      (define-key xml-mode-map "\C-c\C-zv" 'browse-url-of-file)
-
-;                      (set-face-foreground 'nxml-comment-content-face "dark slate grey")
-;                      (set-face-foreground 'sgml-start-tag-face "SkyBlue1")
-;                      (set-face-foreground 'sgml-end-tag-face "SkyBlue1")
-;                      (set-face-foreground 'sgml-doctype-face "DodgerBlue3")
-
-;                      )))
 
 (add-hook 'sgml-mode-hook
           (function

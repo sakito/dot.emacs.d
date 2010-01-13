@@ -1,6 +1,6 @@
 ;;; init_anything.el --- anything.el setting
 
-;; Copyright (C) 2009  sakito
+;; Copyright (C) 2009-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: lisp
@@ -97,10 +97,6 @@ utility mdfind.")
 ;; see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
 (require 'recentf-ext)
 (global-set-key (kbd "C-x C-b") 'anything-for-files)
-;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
-(custom-set-faces
- '(anything-file-name ((t (:foreground "Yellow"))))
- )
 
 ;; M-yでkill-ringの内容をanythingする
 (global-set-key (kbd "M-y") 'anything-show-kill-ring)
@@ -154,7 +150,7 @@ utility mdfind.")
 (ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
 (setq anything-c-adaptive-history-length 0)
 
-;; これ以降では anything を require するようなパッケージを呼んではいけません。以下の設定が上書きされて無効になります
+;; キー設定
 (define-key anything-map (kbd "C-p") 'anything-previous-line)
 (define-key anything-map (kbd "C-n") 'anything-next-line)
 (define-key anything-map (kbd "C-v") 'anything-next-source)

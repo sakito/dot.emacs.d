@@ -32,20 +32,13 @@
 
 ;; 拡張子が m もしくは mm のファイルは matlab-mode とぶつかる
 ;; 拡張子が h のファイルをそのまま設定してしまうと C や C++ 開発で困る
-;; 以下の設定は実質できない
-;(add-to-list 'auto-mode-alist '("\\.m$" . objc-mode))
-;(add-to-list 'auto-mode-alist '("\\.mm$" . objc-mode))
+;(add-to-list 'auto-mode-alist '("\\.mm?$" . objc-mode))
 ;(add-to-list 'auto-mode-alist '("\\.h$" . objc-mode))
+
 ;; magic-mode-alist を利用してファイル内容を解析してモード設定する
 (add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@implementation" . objc-mode))
 (add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@interface" . objc-mode))
 (add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@protocol" . objc-mode))
-;; (setq magic-mode-alist
-;;       (append (list
-;;                '("\\(.\\|\n\\)*\n@implementation" . objc-mode)
-;;                '("\\(.\\|\n\\)*\n@interface" . objc-mode)
-;;                '("\\(.\\|\n\\)*\n@protocol" . objc-mode))
-;;               magic-mode-alist))
 
 ;; init_ac がロードされている前提になっている
 (ac-company-define-source ac-source-company-xcode company-xcode)
@@ -53,7 +46,7 @@
 (setq ac-modes (append ac-modes '(objc-mode)))
 
 ;; ヘッダファイルを開くには ヘッダファイルにカーソル併せて C-x C-f すれば良い
-;; 上手く動作しないなら (ffap-bindings) を init.el に記述する。普通はデフォルトで on
+;; 上手く動作しないなら (ffap-bindings) を init.el に記述する
 
  (defun xcode:buildandrun ()
   (interactive)
@@ -69,7 +62,10 @@
      ))))
 
 ;; 関連ファイルを開く
-(setq cc-other-file-alist
+;; (require 'find-file)
+;; (add-to-list 'ff-other-file-alist '("\\.mm?$" (".h")))
+;; (add-to-list 'ff-other-file-alist '("\\.h$"   (".c" ".cc" ".C" ".CC" ".cxx" ".cpp" ".m" ".mm")))
+(setq ff-other-file-alist
       '(("\\.mm?$" (".h"))
         ("\\.cc$"  (".hh" ".h"))
         ("\\.hh$"  (".cc" ".C"))
@@ -136,7 +132,13 @@
 cursor is sitting on a flymake error the error information is
 displayed in the minibuffer."
   (set (make-local-variable 'post-command-hook)
-       (cons 'flymake-display-err-minibuffer post-command-hook)))
+         (cons 'flymake-display-err-minibuffer post-command-hook)))
+;;       (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
+
+;; ドキュメントの参照
+(require 'xcode-document-viewer)
+(setq xcdoc:document-path "/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_1.iPhoneLibrary.docset")
+(setq xcdoc:open-w3m-other-buffer t)
 
 ;; hook の設定
 (add-hook 'objc-mode-hook
@@ -144,6 +146,7 @@ displayed in the minibuffer."
             (define-key objc-mode-map (kbd "\t") 'ac-complete)
             (define-key objc-mode-map (kbd "C-c C-c") 'xcode/build-compile)
             (define-key objc-mode-map (kbd "C-c C-r") 'xcode:buildandrun)
+            (define-key objc-mode-map (kbd "C-c w") 'xcdoc:ask-search)
             (define-key c-mode-base-map (kbd "C-c o") 'ff-find-other-file)
             (push 'ac-source-company-xcode ac-sources)
             (push 'ac-source-c++-keywords ac-sources)

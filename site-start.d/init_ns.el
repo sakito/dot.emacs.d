@@ -274,7 +274,29 @@
       )
 )
 
+(let ((default-directory (expand-file-name "~/.emacs.d/lisp")))
+  (add-to-list 'load-path default-directory)
+  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+      (normal-top-level-add-subdirs-to-load-path)))
+
+(let ((default-directory (expand-file-name "~/.emacs.d/local-lisp")))
+  (add-to-list 'load-path default-directory)
+  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+      (normal-top-level-add-subdirs-to-load-path)))
+
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/site-start.d"))
+
+(if (eq window-system 'ns)
+    ;(setq ns-alternate-modifier (quote alt))
+    (setq ns-command-modifier (quote meta)))
+
+;; dndの動作を Emacs22と同じにする
+(define-key global-map [ns-drag-file] 'ns-find-file)
+
+(setq ns-pop-up-frames nil)
+
 ;; objc の設定
+(require 'init_ac)
 (require 'flymake)
 (require 'init_objc)
 

@@ -1,6 +1,6 @@
 ;;; init_ac.el --- ac
 
-;; Copyright (C) 2009  sakito
+;; Copyright (C) 2009-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools

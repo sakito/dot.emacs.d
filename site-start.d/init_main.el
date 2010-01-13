@@ -60,6 +60,12 @@
   (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
       (normal-top-level-add-subdirs-to-load-path)))
 
+;; private 内には自分専用の物がはいっている。依存は private 内で完結するようにしている
+(let ((default-directory (expand-file-name "~/.emacs.d/private")))
+  (add-to-list 'load-path default-directory)
+  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+      (normal-top-level-add-subdirs-to-load-path)))
+
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/site-start.d"))
 
 ;; 文字コード
@@ -286,7 +292,7 @@
 ;; wl
 ;(require 'init_wl)
 ;; w3m
-;(require 'init_w3m)
+(require 'init_w3m)
 ;; navi2ch
 (require 'init_navi2ch)
 ;; pukiwiki
@@ -336,11 +342,7 @@
 (setq mac-screencapture-default-scheme "current-directory")
 (define-key global-map "\C-cp" 'mac-screencapture)
 
-;; private 内には自分専用の物がはいっている。依存は private 内で完結するようにしている
-(let ((default-directory (expand-file-name "~/.emacs.d/private")))
-  (add-to-list 'load-path default-directory)
-  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-      (normal-top-level-add-subdirs-to-load-path)))
+
 (autoload 'seizon "seizon-mode" nil t)
 
 ;;end emacs23.el
