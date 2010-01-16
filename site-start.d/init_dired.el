@@ -90,7 +90,8 @@
 ;; w3m で表示する
 (defun dired-w3m-find-file ()
   (interactive)
-  (require 'w3m)
+  (autoload 'w3m "w3m" "Interface for w3m on Emacs." t)
+  ;;(require 'w3m)
   (let ((file (dired-get-filename)))
     (if (y-or-n-p (format "Use emacs-w3m to browse %s? "
                           (file-name-nondirectory file)))

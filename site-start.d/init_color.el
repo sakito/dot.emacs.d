@@ -259,12 +259,10 @@
 ;; フォントロックの設定
 ;; hilit19はemacs19用で、メンテナンスされてません。
 ;; emacs2xではfont-lockを使うようにします。
-(cond (
-       (fboundp 'global-font-lock-mode)
-       (global-font-lock-mode t)
-       ;(setq font-lock-maximum-decoration t)
-       (setq font-lock-support-mode 'jit-lock-mode)
-       ))
+(when (fboundp 'global-font-lock-mode)
+  (global-font-lock-mode t)
+  ;;(setq font-lock-maximum-decoration t)
+  (setq font-lock-support-mode 'jit-lock-mode))
 
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; @see http://www.emacswiki.org/emacs/WhiteSpace
@@ -306,11 +304,18 @@
 
 ;; 行末の空白を表示
 (setq-default show-trailing-whitespace t)
-;; 最後の行移行に indicat を表示
+;; EOB を表示
 (setq-default indicate-empty-lines t)
+(setq-default indicate-buffer-boundaries 'left)
 
 ;; マーク領域を色付け
 (setq transient-mark-mode t)
+
+;; 変更点に色付け
+(global-highlight-changes-mode t)
+(setq highlight-changes-visibility-initial-state t)
+(global-set-key (kbd "M-]") 'highlight-changes-next-change)
+(global-set-key (kbd "M-[")  'highlight-changes-previous-change)
 
 ;; 現在行に色を付ける
 (global-hl-line-mode)
@@ -334,6 +339,14 @@
   "Return face used at point."
   (interactive)
   (message "%s" (get-char-property (point) 'face)))
+
+;; kill-ring 中の属性を削除
+;; @see http://www-tsujii.is.s.u-tokyo.ac.jp/~yoshinag/tips/junk_elisp.html
+;; (defadvice kill-new (around my-kill-ring-disable-text-property activate)
+;;   (let ((new (ad-get-arg 0)))
+;;     (set-text-properties 0 (length new) nil new)
+;;     ad-do-it))
+
 
 (provide 'init_color)
 ;;; init_color.el ends here

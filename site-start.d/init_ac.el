@@ -32,17 +32,36 @@
 ;; @see http://www.emacswiki.org/emacs/AutoComplete
 (require 'auto-complete)
 (require 'auto-complete-config)
+(require 'auto-complete-yasnippet)
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
 (require 'ac-company)
+;; company
+(ac-company-define-source ac-source-company-elisp company-elisp)
+(ac-company-define-source ac-source-company-css company-css)
+(ac-company-define-source ac-source-company-eclim company-eclim)
+(ac-company-define-source ac-source-company-nxml company-nxml)
 
-(setq ac-modes (append ac-modes '(rst-mode)))
+(add-hook 'emacs-lisp-mode-hook
+          '(lambda()
+             (push 'ac-source-company-elisp ac-sources)))
+(add-hook 'css-mode-hook
+          '(lambda()
+             (push 'ac-source-company-css ac-sources)))
 
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
 
+;; 補完対象のモードを追加
+(setq ac-modes (append ac-modes '(rst-mode)))
+(setq ac-modes (append ac-modes '(css-mode)))
+
+;; デフォルトの補完候補
+(set-default 'ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-same-mode-buffers))
+
 ;; キー設定
+;(define-key ac-complete-mode-map "\t" 'ac-complete)
 (define-key ac-completing-map (kbd "C-n") 'ac-next)
 (define-key ac-completing-map (kbd "C-p") 'ac-previous)
 (define-key ac-completing-map (kbd "M-/") 'ac-stop)

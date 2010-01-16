@@ -152,6 +152,8 @@
 
 ;;起動時のmessageを表示しない
 (setq inhibit-startup-message t)
+;; scratch のメッセージを空にする
+(setq initial-scratch-message "")
 
 ;; スクロールのマージン
 ;; 一行ずつスクロールする
@@ -166,7 +168,6 @@
 
 ;; vc はすばらしいがわたしは利用しないので無効にする
 (setq vc-handled-backends nil)
-(setq vc-ignore-vc-files t)
 ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
 (setq vc-follow-symlinks t)
 
@@ -197,11 +198,10 @@
 
 (require 'init_ac)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; プログラミング関連
 ;;; womanの設定
-(require 'init_woman)
+;;(require 'init_woman)
 ;;;; mode-info
 (require 'init_modeinfo)
 ;;; Lisp [2004/04/17]
@@ -232,7 +232,7 @@
 ;; SCM関連
 ;; Subversion Mode
 ;; @see http://xsteve.nit.at/prg/vc_svn/
-(require 'psvn)
+;;(require 'psvn)
 ;; dvc
 ;(load-file "~/.emacs.d/lisp/dvc-snapshot/dvc-load.el")
 ;(setq dvc-prefix-key [(control c) ?h])
@@ -247,8 +247,10 @@
 ;;; htmlize
 ;; @see http://fly.srk.fer.hr/~hniksic/emacs/
 (require 'htmlize)
-;;; muse + howm
-(require 'init_muse)
+;;; howm
+(require 'init_howm)
+;; muse
+;; (require 'init_muse)
 
 ;;; sdicの設定
 ;(require 'init_sdic)
@@ -275,8 +277,7 @@
 ;; rst-mode
 (require 'init_rst)
 
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/po"))
-(load "start-po")
+(autoload 'po-mode "po-mode" "Major mode for translators when they edit PO files." t)
 (eval-after-load 'po-mode '(load "gb-po-mode"))
 
 ;(require 'sense-region)
@@ -320,11 +321,10 @@
       )
 
 ;; hatena-mode
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/hatena-mode"))
-(load "hatena-mode")
-(setq hatena-usrid "sakito")
-(setq hatena-plugin-directory "~/var/hatena/plugin/")
-(setq hatena-entry-type 0)
+;; (load "hatena-mode")
+;; (setq hatena-usrid "sakito")
+;; (setq hatena-plugin-directory "~/var/hatena/plugin/")
+;; (setq hatena-entry-type 0)
 ;(setq hatena-directory (expand-file-name "~/var/hatena/"))
 
 ;; mac-screencapture

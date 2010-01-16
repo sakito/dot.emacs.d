@@ -59,6 +59,13 @@
     (setq ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-buffer ac-source-gtags ac-source-filename))
 ;;    (local-set-key "\C-c\C-l" 'rst-compile-alt-toolset)
     'turn-off-auto-fill
+    ;; color-theme が無効になる場合があるので暫定対処 原因は後程調査 TODO
+    (set-face-background rst-level-1-face "gray0")
+    (set-face-background rst-level-2-face "gray0")
+    (set-face-background rst-level-3-face "gray0")
+    (set-face-background rst-level-4-face "gray0")
+    (set-face-background rst-level-5-face "gray0")
+    (set-face-background rst-level-6-face "gray0")
 ;;    (local-set-key "\C-c\C-f\C-e" 'rst-change-font-emphasis)
 ;;    (local-set-key "\C-c\C-f\C-n" 'rst-change-font-normal)
 ;; `rst-change-font-bold'......[C-c C-f C-b] -> change font (bold)

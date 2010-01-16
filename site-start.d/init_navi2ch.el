@@ -33,8 +33,8 @@
 ;;
 ;(setq load-path
 ;     (cons "/usr/local/share/emacs/21.3.50/site-lisp/navi2ch" load-path))
-(require 'navi2ch)
-(require 'navi2ch-localfile)
+(autoload 'navi2ch "navi2ch" "Navigator for 2ch for Emacs" t)
+(autoload 'navi2ch-localfile "navi2ch-localfile" nil t)
 ;(setq navi2ch-list-bbstable-url "http://www.2ch.net/bbsmenu.html")
 ;(setq navi2ch-list-bbstable-url "http://www6.ocn.ne.jp/~mirv/2chmenu.html")
 ;(setq navi2ch-list-bbstable-url "http://azlucky.s25.xrea.com/2chboard/bbsmenu.html")

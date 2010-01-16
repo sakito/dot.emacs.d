@@ -43,15 +43,6 @@
 ;; insert-date Key
 (define-key global-map "\C-cd" 'insert-date)
 
-;; blogger エントリー作成用
-(defun new-blogger-entry ()
-  "new Blogger entry."
-  (interactive)
-  (muse-blosxom-new-entry "memo" (format-time-string "%Y%m%d"))
-  )
-(define-key global-map "\C-cb" 'new-blogger-entry)
-
-
 ;; 透過の設定を変更
 ;; see http://emacs-fu.blogspot.com/2009/02/transparent-emacs.html
 (defun djcb-opacity-modify (&optional dec)

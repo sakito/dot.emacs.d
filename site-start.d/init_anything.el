@@ -61,20 +61,20 @@
             (thing-at-point 'symbol) nil nil nil "*anything help*"))
 
 ;; このままだと woman が動作して man が見れないので man が動作するように変更する
-(defvar anything-c-source-man-pages+
-  `((name . "Manual Pages")
-    (candidates . (lambda ()
-                    (if anything-c-man-pages
-                        anything-c-man-pages
-                      ;; XEmacs doesn't have a woman :)
-                      (setq anything-c-man-pages
-                            (ignore-errors
-                              (require 'man)
-                              (woman-file-name "")
-                              (sort (mapcar 'car woman-topic-all-completions)
-                                    'string-lessp))))))
-    (action  ("Show with man" . man))
-    (requires-pattern . 2)))
+;; (defvar anything-c-source-man-pages+
+;;   `((name . "Manual Pages")
+;;     (candidates . (lambda ()
+;;                     (if anything-c-man-pages
+;;                         anything-c-man-pages
+;;                       ;; XEmacs doesn't have a woman :)
+;;                       (setq anything-c-man-pages
+;;                             (ignore-errors
+;;                               (require 'man)
+;;                               (woman-file-name "")
+;;                               (sort (mapcar 'car woman-topic-all-completions)
+;;                                     'string-lessp))))))
+;;     (action  ("Show with man" . man))
+;;     (requires-pattern . 2)))
 ;; (anything 'anything-c-source-man-pages+)
 
 (iswitchb-mode)
@@ -95,6 +95,20 @@ utility mdfind.")
 
 ;; 最近のファイル等を anything する
 ;; see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
+;; 自動クリーニングを停止 recentf-cleanup
+(setq recentf-auto-cleanup 'never)
+;; anything で便利なので履歴の保存量を多少多めにしておく
+(setq recentf-max-saved-items 1000)
+;; 除外ファイル
+(setq recentf-exclude
+      '("\\.elc$"
+        "\\.pyc$"
+        ".recentf$"
+        ".howm-keys$"
+        "^/tmp/"))
+(add-hook 'kill-emacs-hook 'recentf-cleanup)
+;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
+;; (setq recentf-save-file "~/.emacs.d/var/recentf")
 (require 'recentf-ext)
 (global-set-key (kbd "C-x C-b") 'anything-for-files)
 

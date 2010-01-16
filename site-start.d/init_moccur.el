@@ -35,7 +35,7 @@
 
 ;;; Code:
 (setq dmoccur-exclusion-mask
-      (append '("\\~$" "\\.svn\\/\*" "\\.hg\\/\*") dmoccur-exclusion-mask))
+      (append '("\\~$" "\\.hg\\/\*" "\\.git\\/\*" "\\.pyc$") dmoccur-exclusion-mask))
 
 
 (provide 'init_moccur)

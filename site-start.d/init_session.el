@@ -54,6 +54,10 @@
 (defadvice kill-new (before ys:no-kill-new-duplicates activate)
   (setq kill-ring (delete (ad-get-arg 0) kill-ring)))
 
+;; バッファでの同名ファイルに識別子を付与する
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+
 ;; kill-summary
 ;(autoload 'kill-summary "kill-summary" nil t)
 ;(global-set-key "\M-y" 'kill-summary)

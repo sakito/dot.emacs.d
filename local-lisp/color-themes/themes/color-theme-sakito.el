@@ -5,7 +5,7 @@
    "Color theme by Tomas Cerha, created 2001-11-13. color-theme-deep-blue"
    (interactive)
    (color-theme-install
-    '(color-theme-deep-blue
+    '(color-theme-sakito
       ((background-color . "#102e4e")
        (background-mode . dark)
        (border-color . "black")
@@ -113,15 +113,25 @@
       (widget-inactive-face ((t (:foreground "light gray"))))
       (widget-single-line-field-face ((t (:background "dim gray"))))
       ;; モード毎の設定
-      (rst-level-1-face ((t (:background "grey0" :foreground "white"))) t)
-      (rst-level-2-face ((t (:background "grey3" :foreground "white"))) t)
-      (rst-level-3-face ((t (:background "grey6" :foreground "white"))) t)
-      (rst-level-4-face ((t (:background "grey9" :foreground "white"))) t)
-      (rst-level-5-face ((t (:background "grey12" :foreground "white"))) t)
-      (rst-level-6-face ((t (:background "grey15" :foreground "white"))) t)
-      (vline-visual ((t (:background "gray13"))) t)
-      (vline ((t (:background "gray13"))) t)
-      (nxml-element-local-name ((t (:foreground "SkyBlue1"))) t)
+      ;; rst
+      (rst-level-1-face ((t (:background "gray0" :foreground "white"))))
+      (rst-level-2-face ((t (:background "gray3" :foreground "white"))))
+      (rst-level-3-face ((t (:background "gray6" :foreground "white"))))
+      (rst-level-4-face ((t (:background "gray9" :foreground "white"))))
+      (rst-level-5-face ((t (:background "gray12" :foreground "white"))))
+      (rst-level-6-face ((t (:background "gray15" :foreground "white"))))
+      ;; howm
+      ;;(howm-mode-title-face ((t (:background "grey15" :foreground "OliveDrab1"))))
+      (howm-mode-title-face ((t (:background "gray0" :foreground "white"))))
+      ;; vline
+      (vline-visual ((t (:background "gray13"))))
+      (vline ((t (:background "gray13"))))
+      ;; xxml
+      (nxml-element-local-name ((t (:foreground "SkyBlue1"))))
+      ;; anything
       ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
-      (anything-file-name ((t (:foreground "Yellow"))) t)
+      (anything-file-name ((t (:foreground "Yellow"))))
+      ;; 変更点のハイライト
+      (highlight-changes ((t (:foreground nil :background "#382f2f"))))
+      (highlight-changes-delete ((t (:foreground nil :background "#916868"))))
       )))

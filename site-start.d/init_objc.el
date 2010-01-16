@@ -132,8 +132,8 @@
 cursor is sitting on a flymake error the error information is
 displayed in the minibuffer."
   (set (make-local-variable 'post-command-hook)
-         (cons 'flymake-display-err-minibuffer post-command-hook)))
-;;       (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
+;;         (cons 'flymake-display-err-minibuffer post-command-hook)))
+       (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
 
 ;; ドキュメントの参照
 (require 'xcode-document-viewer)
@@ -143,7 +143,8 @@ displayed in the minibuffer."
 ;; hook の設定
 (add-hook 'objc-mode-hook
           (lambda ()
-            (define-key objc-mode-map (kbd "\t") 'ac-complete)
+;;            (define-key objc-mode-map (kbd "\t") 'ac-complete)
+            (define-key objc-mode-map (kbd "M-/") 'ac-complete)
             (define-key objc-mode-map (kbd "C-c C-c") 'xcode/build-compile)
             (define-key objc-mode-map (kbd "C-c C-r") 'xcode:buildandrun)
             (define-key objc-mode-map (kbd "C-c w") 'xcdoc:ask-search)
@@ -154,11 +155,6 @@ displayed in the minibuffer."
             (flymake-mode t)
             ;; (which-function-mode t)
           ))
-
-;(push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
-;;(push '("\\.mm$" flymake-objc-init) flymake-allowed-file-name-masks)
-;;(push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
-
 
 (require 'xcode)
 
