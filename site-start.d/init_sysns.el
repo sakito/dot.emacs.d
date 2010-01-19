@@ -1,4 +1,4 @@
-;;; init_ns.el --- ns
+;;; init_sysns.el --- ns
 
 ;; Copyright (C) 2009  sakito
 
@@ -20,13 +20,9 @@
 
 ;;; Commentary:
 
-;; 
+;; Emacs 23 nextstep port 用の設定
 
 ;;; Code:
-;; 文字コード
-(set-language-environment 'Japanese)
-;; 極力UTF-8とする
-(prefer-coding-system 'utf-8)
 
 ;(set-default-font
 ; "-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
@@ -37,14 +33,7 @@
 ;(setq mac-pass-command-to-system nil)
 ;(setq mac-pass-option-to-system nil)
 
- (set-frame-parameter (selected-frame) 'alpha '(85 50))
-
-(setq backup-by-copying t)
-(setq backup-directory-alist
-      '(
-        ("^/etc/" . "~/.emacs.d/var/etc")
-        ("." . "~/.emacs.d/var/emacs")
-        ))
+(set-frame-parameter (selected-frame) 'alpha '(85 50))
 
 (when (< emacs-major-version 23)
  (setq fixed-width-use-QuickDraw-for-ascii t)
@@ -274,21 +263,9 @@
       )
 )
 
-(let ((default-directory (expand-file-name "~/.emacs.d/lisp")))
-  (add-to-list 'load-path default-directory)
-  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-      (normal-top-level-add-subdirs-to-load-path)))
 
-(let ((default-directory (expand-file-name "~/.emacs.d/local-lisp")))
-  (add-to-list 'load-path default-directory)
-  (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-      (normal-top-level-add-subdirs-to-load-path)))
-
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/site-start.d"))
-
-(if (eq window-system 'ns)
-    ;(setq ns-alternate-modifier (quote alt))
-    (setq ns-command-modifier (quote meta)))
+;; (setq ns-alternate-modifier (quote alt))
+(setq ns-command-modifier (quote meta))
 
 ;; dndの動作を Emacs22と同じにする
 (define-key global-map [ns-drag-file] 'ns-find-file)
@@ -300,5 +277,5 @@
 (require 'flymake)
 (require 'init_objc)
 
-(provide 'init_ns)
-;;; init_ns.el ends here
+(provide 'init_sysns)
+;;; init_sysns.el ends here

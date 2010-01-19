@@ -39,9 +39,10 @@
      ;; dired-x では C-x C-j がdired-jump になるので skk-modeに再割り当て
      (global-set-key (kbd "C-x C-j") 'skk-mode)
      ;; システムのlsでなくls-lispを利用して表示
-     (load-library "ls-lisp")
+     (require 'ls-lisp)
+     ;; (load-safe "ls-lisp")
      ;; ls のオプション
-     (setq dired-listing-switches "-lah")
+     (setq dired-listing-switches "-lahF")
      ;; ディレクトリをより上に表示
      (setq ls-lisp-dirs-first t)
      ;; dired-find-alternate-fileを有効化
@@ -71,21 +72,21 @@
         ("\\.jpg$" "qlmanage -p")
         ("\\.pdf$" "open")))
 
-;; opne コマンドでファイルを開く
+;; open コマンドでファイルを開く
 (defun dired-open ()
   (interactive)
   (let ((file (dired-get-filename)))
-    (unless (file-directory-p file))
-    ;; file がディレクトリでない場合
-    (start-process "open" "*diredopen" "open" file)))
+    (unless (file-directory-p file)
+      ;; file がディレクトリでない場合
+      (start-process "open" "*diredopen" "open" file))))
 
 ;; QuickLookでファイルを開く
 (defun dired-quickLook ()
   (interactive)
   (let ((file (dired-get-filename)))
-    (unless (file-directory-p file))
-    ;; file がディレクトリでない場合
-    (start-process "QuickLook" "*diredQuickLook" "/usr/bin/qlmanage" "-p" (shell-quote-argument file))))
+    (unless (file-directory-p file)
+      ;; file がディレクトリでない場合
+      (start-process "QuickLook" "*diredQuickLook" "/usr/bin/qlmanage" "-p" (shell-quote-argument file)))))
 
 ;; w3m で表示する
 (defun dired-w3m-find-file ()

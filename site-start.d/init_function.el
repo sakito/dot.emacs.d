@@ -80,6 +80,5 @@
 (global-set-key (kbd "C-9") '(lambda()(interactive)(djcb-opacity-modify t)))
 (global-set-key (kbd "C-0") '(lambda()(interactive)(modify-frame-parameters nil `((alpha . (100 20))))))
 
-
 (provide 'init_function)
 ;;; init_function.el ends here

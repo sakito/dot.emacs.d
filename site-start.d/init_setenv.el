@@ -26,15 +26,11 @@
 ;;; Code:
 
 ;; PATH設定
-;(add-to-list 'exec-path (expand-file-name "/usr/local/bin" "~/bin" "/sw/bin"))
-(setq exec-path
-      (append
-       (list "/usr/local/bin" "/sw/bin" "/usr/bin" "~/bin") exec-path)
-      )
-
-(setenv "PATH"
-        (concat '"/usr/local/bin:/sw/bin:" (getenv "PATH"))
-        )
+(add-to-list 'exec-path (expand-file-name "/usr/local/bin"))
+(add-to-list 'exec-path (expand-file-name "/usr/bin"))
+(add-to-list 'exec-path (expand-file-name "/sw/bin"))
+(add-to-list 'exec-path (expand-file-name "~/bin"))
+(setenv "PATH" (concat '"/usr/local/bin:/sw/bin:" (getenv "PATH")))
 
 ;; JDEEの設定に移動
 ;;(setenv "JAVA_HOME" "/Library/Java/Home")

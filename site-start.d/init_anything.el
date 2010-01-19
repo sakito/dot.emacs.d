@@ -77,8 +77,9 @@
 ;;     (requires-pattern . 2)))
 ;; (anything 'anything-c-source-man-pages+)
 
-(iswitchb-mode)
-(anything-iswitchb-setup)
+;; メンテナンスされてないので利用しちゃいけない
+;; (iswitchb-mode)
+;; (anything-iswitchb-setup)
 
 ;;; Spotlight (MacOS X desktop search)
 (defvar anything-c-source-mac-spotlight-home
@@ -99,12 +100,16 @@ utility mdfind.")
 (setq recentf-auto-cleanup 'never)
 ;; anything で便利なので履歴の保存量を多少多めにしておく
 (setq recentf-max-saved-items 1000)
+
+;; 保存ファイルのの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
+(when (boundp 'recentf-keep) (add-to-list 'recentf-keep 'file-remote-p))
 ;; 除外ファイル
 (setq recentf-exclude
       '("\\.elc$"
         "\\.pyc$"
         ".recentf$"
         ".howm-keys$"
+        "^/var/folders/"
         "^/tmp/"))
 (add-hook 'kill-emacs-hook 'recentf-cleanup)
 ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下

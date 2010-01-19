@@ -21,11 +21,211 @@
 
 ;;; Commentary:
 
-;; フォントの設定
+;; フォントの設定を集めたもの
+;; 実験した物など様々雑多な物が混在しており、正常に動作しない物を普通にのこっています。
+
 (add-to-list 'load-path (expand-file-name "~/Sites/develop/fixed-width-fontset/"))
 
 ;;; Code:
 (provide 'init_fontset)
+
+;(setq-default line-spacing 0.3)
+
+;; see http://www.emacswiki.org/emacs/SetFonts
+;; see http://macemacsjp.sourceforge.jp/matsuan/FontSettingJp.html
+;; see http://sourceforge.jp/projects/macemacsjp/lists/archive/users/2005-November/000780.html
+; M-x mac-font-panel-mode
+; M-x describe-font
+;(set-default-font
+;(setq fixed-width-use-QuickDraw-for-ascii t)
+;(setq mac-allow-anti-aliasing t)
+(create-fontset-from-ascii-font
+;"-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+;"-*-Osaka-normal-normal-normal-*-16-*-*-*-m-0-iso10646-1"
+"-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+;"-*-Lucida Grande-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+;"-*-M+2P+IPAG circle-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "myhiramin")
+(set-fontset-font "fontset-myhiramin" 'japanese-jisx0208
+                  '("hiragino mincho pro" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'katakana-jisx0201
+                  '("hiragino mincho pro" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'japanese-jisx0212
+                  '("hiragino mincho pro" . "iso10646-*"))
+;(set-fontset-font "fontset-myhiraginomin" 'mule-unicode-0100-24ff
+;                  '("Lucida Grande" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'thai-tis620
+                  '("ayuthaya" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'chinese-gb2312
+                  '("stkaiti*" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'chinese-big5-1
+                  '("lisong pro*" . "iso10646-*"))
+(set-fontset-font "fontset-myhiramin" 'korean-ksc5601
+                  '("applemyungjo*" . "iso10646-*"))
+
+;; osaka = osaka + monaco
+;; hiramaru = ヒラギノ丸ゴ + monaco
+;; hirakaku_w3 = ヒラギノ角ゴ w3 + monaco
+;; hirakaku_w6 = ヒラギノ角ゴ w6 + monaco
+;; hirakaku_w8 = ヒラギノ角ゴ w8 + monaco
+;; hiramin_w3 = ヒラギノ明朝 w3 + courier
+;; hiramin_w6 = ヒラギノ明朝 w6 + courier
+
+;; osaka等幅:  -*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1
+;; monaco等幅: -*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1
+;; courier等幅:-*-Courier-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1
+
+;; M-x set-default-font
+;; ヒラギノ角ゴ Pro W3:Hiragino Kaku Gothic Pro-normal-normal-normal
+;; ヒラギノ角ゴ Pro W6:Hiragino Kaku Gothic Pro-bold-normal-normal
+;; ヒラギノ角ゴ ProN W3:Hiragino Kaku Gothic ProN-normal-normal-normal
+;; ヒラギノ角ゴ ProN W6:Hiragino Kaku Gothic ProN-bold-normal-normal
+;; ヒラギノ角ゴ Std W8:Hiragino Kaku Gothic Std-wnormal-normal-normal
+;; ヒラギノ角ゴ StdN W8:Hiragino Kaku Gothic StdN-normal-normal-normal
+;; ヒラギノ丸ゴ Pro W4:Hiragino Maru Gothic Pro-normal-normal-normal
+;; ヒラギノ丸ゴ ProN W4:Hiragino Maru Gothic ProN-normal-normal-normal
+;; ヒラギノ明朝 Pro W3:Hiragino Mincho Pro-normal-normal-normal
+;; ヒラギノ明朝 Pro W6:Hiragino Mincho Pro-bold-normal-normal
+;; ヒラギノ明朝 ProN W3:Hiragino Mincho ProN-normal-normal-normal
+;; ヒラギノ明朝 ProN W6:Hiragino Mincho ProN-bold-normal-normal
+
+
+
+;; hiramaru = ヒラギノ丸ゴ + monaco
+(create-fontset-from-ascii-font
+ "-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+; "-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hiramaru")
+(set-fontset-font "fontset-hiramaru" 'japanese-jisx0208
+                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'katakana-jisx0201
+                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'japanese-jisx0212
+                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
+;(set-fontset-font "fontset-hiramaru" 'mule-unicode-0100-24ff
+;                  '("Monaco" . "iso10646-1"))
+(set-fontset-font "fontset-hiramaru" 'thai-tis620
+                  '("Ayuthaya" . "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'chinese-gb2312
+                  '("STHeiti*" . "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'chinese-big5-1
+                  '("LiSong Pro*" . "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'korean-ksc5601
+                  '("AppleGothic*" . "iso10646-*"))
+
+(create-fontset-from-fontset-spec
+ (concat
+  "-*-fixed-medium-r-normal--14-*-*-*-*-*-fontset-hiramaru2"
+  ",ascii:-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+  ",japanese-jisx0208:hiragino maru gothic pro"
+  ",katakana-jisx0201:hiragino maru gothic pro"
+  ",japanese-jisx0212:hiragino maru gothic pro"
+  ",unicode:Osaka"
+  ",thai-tis620:ayuthaya"
+  ",chinese-gb2312:stheiti*"
+  ",chinese-big5-1:lisong pro*"
+  ",korean-ksc5601:applegothic*"
+  ))
+
+;; hirakaku_w3 = ヒラギノ角ゴ w3 + monaco
+(create-fontset-from-ascii-font
+"-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hirakaku_w3")
+(set-fontset-font "fontset-hirakaku_w3" 'japanese-jisx0208
+                  '("Hiragino Kaku Gothic Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'katakana-jisx0201
+                  '("Hiragino Kaku Gothic Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'japanese-jisx0212
+                  '("Hiragino Kaku Gothic Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'thai-tis620
+                  '("ayuthaya" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'chinese-gb2312
+                  '("stkaiti*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'chinese-big5-1
+                  '("lisong pro*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w3" 'korean-ksc5601
+                  '("applemyungjo*" . "unicode-bmp"))
+
+
+;; hirakaku_w6 = ヒラギノ角ゴ w6 + monaco
+(create-fontset-from-ascii-font
+"-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hirakaku_w6")
+(set-fontset-font "fontset-hirakaku_w6" 'japanese-jisx0208
+                  '("Hiragino Kaku Gothic Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'katakana-jisx0201
+                  '("Hiragino Kaku Gothic Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'japanese-jisx0212
+                  '("Hiragino Kaku Gothic Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'thai-tis620
+                  '("ayuthaya" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'chinese-gb2312
+                  '("stkaiti*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'chinese-big5-1
+                  '("lisong pro*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w6" 'korean-ksc5601
+                  '("applemyungjo*" . "unicode-bmp"))
+
+
+;; hirakaku_w8 = ヒラギノ角ゴ w8 + monaco
+(create-fontset-from-ascii-font
+"-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hirakaku_w8")
+(set-fontset-font "fontset-hirakaku_w8" 'japanese-jisx0208
+                  '("Hiragino Kaku Gothic Pro W8" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'katakana-jisx0201
+                  '("Hiragino Kaku Gothic Pro W8" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'japanese-jisx0212
+                  '("Hiragino Kaku Gothic Pro W8" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'thai-tis620
+                  '("ayuthaya" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'chinese-gb2312
+                  '("stkaiti*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'chinese-big5-1
+                  '("lisong pro*" . "unicode-bmp"))
+(set-fontset-font "fontset-hirakaku_w8" 'korean-ksc5601
+                  '("applemyungjo*" . "unicode-bmp"))
+
+
+;; hiramin_w3 = ヒラギノ明朝 w3 + courier
+(create-fontset-from-ascii-font
+"-*-Courier-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hiramin_w3")
+(set-fontset-font "fontset-hiramin_w3" 'japanese-jisx0208
+                  '("Hiragino Mincho Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'katakana-jisx0201
+                  '("Hiragino Mincho Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'japanese-jisx0212
+                  '("Hiragino Mincho Pro W3" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'thai-tis620
+                  '("ayuthaya" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'chinese-gb2312
+                  '("stkaiti*" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'chinese-big5-1
+                  '("lisong pro*" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w3" 'korean-ksc5601
+                  '("applemyungjo*" . "unicode-bmp"))
+
+;; hiramin_w6 = ヒラギノ明朝 w6 + courier
+(create-fontset-from-ascii-font
+"-*-Courier-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hiramin_w6")
+(set-fontset-font "fontset-hiramin_w6" 'japanese-jisx0208
+                  '("Hiragino Mincho Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'katakana-jisx0201
+                  '("Hiragino Mincho Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'japanese-jisx0212
+                  '("Hiragino Mincho Pro W6" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'thai-tis620
+                  '("ayuthaya" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'chinese-gb2312
+                  '("stkaiti*" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'chinese-big5-1
+                  '("lisong pro*" . "unicode-bmp"))
+(set-fontset-font "fontset-hiramin_w6" 'korean-ksc5601
+                  '("applemyungjo*" . "unicode-bmp"))
+
+;;  create-fontset-from-fontset-spec によるフォント設定
 
 ;; (create-fontset-from-fontset-spec
 ;;  (concat
@@ -237,194 +437,5 @@
           ("^-apple-hiragino.*" . 1.2)
           (,(encode-coding-string ".*ヒラギノ丸ゴ pro w4.*" 'emacs-mule) . 1.2)
           ("-cdac$" . 1.3))))
-
-;; osaka等幅、monaco
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-monaco16,"
-;  "japanese-jisx0208:-apple-osaka-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;  "katakana-jisx0201:apple-helvetica-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;  "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-monaco16")
-;(setq default-frame-alist (append '((font . "fontset-monaco16"))))
-
-
-;; ヒラギノ,monaco
-;(if (eq window-system 'mac)
-;    (progn
-;      (create-fontset-from-fontset-spec
-;       (concat
-;        "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-hiragino16,"
-;        "japanese-jisx0208:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;        "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;        "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;      (set-default-font "fontset-hiragino16")
-;      (setq default-frame-alist (append '((font . "fontset-hiragino16"))))
-;      ))
-
-;(require 'carbon-font)
-
-;(set-default-font "fontset-hiraginokaku")
-
-;(setq default-frame-alist (append (list
-;                                   '(font . "fontset-hiragino16")
-;                                   )default-frame-alist))
-;(setq face-font-rescale-alist (append (list
-;                                       '(".*-bold.*" . 0.95)
-;                                       )face-font-rescale-alist))
-
-;(if (eq window-system 'mac)
-;    (progn
-;      (create-fontset-from-fontset-spec
-;       (concat
-;        "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-hiragino16,"
-;        "japanese-jisx0208:-apple-ヒラギノ丸ゴ pro w4-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;        "katakana-jisx0201:-apple-ヒラギノ丸ゴ pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;        "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;      (set-default-font "fontset-hiragino16")
-;      (setq default-frame-alist (append '((font . "fontset-hiragino16"))))
-;      ))
-
-;(if (eq window-system 'mac)
-;    (progn
-;      (create-fontset-from-fontset-spec
-;       (concat
-;        "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-hiragino16,"
-;        "japanese-jisx0208:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;        "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;        "latin-iso8859-1:-*-fixed-medium-i-normal-*-16-*-*-*-*-*-iso8859-1,"
-;        "latin-iso8859-2:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-2,"
-;        "latin-iso8859-3:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-3,"
-;        "latin-iso8859-4:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-4,"
-;        "cyrillic-iso8859-5:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-5,"
-;        "greek-iso8859-7:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-7,"
-;        "latin-iso8859-9:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-9,"
-;        "vietnamese-viscii-lower:-*-fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1,"
-;        "vietnamese-viscii-upper:-*-fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1"))
-;      (set-default-font "fontset-hiragino16")
-;      (setq default-frame-alist (append '((font . "fontset-hiragino16"))))
-;      ))
-
-;(if (eq window-system 'mac)
-;    (progn
-;      (create-fontset-from-fontset-spec
-;       (concat
-;        "-*-gentium-medium-r-normal-*-16-*-*-*-*-*-fontset-hiragino16,"
-;        "japanese-jisx0208:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;        "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-        ;"latin-iso8859-1:-*-fixed-medium-i-normal-*-16-*-*-*-*-*-iso8859-1,"
-        ;"latin-iso8859-2:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-2,"
-        ;"latin-iso8859-3:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-3,"
-        ;"latin-iso8859-4:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-4,"
-;        "cyrillic-iso8859-5:-apple-lucida grande-medium-r-normal--14-14-75-75-m-140-mac-roman,"
-;        "greek-iso8859-7:-apple-lucida grande-medium-r-normal--14-14-75-75-m-140-mac-roman,"
-        ;"latin-iso8859-9:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-9,"
-        ;"vietnamese-viscii-lower:-*-fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1,"
-        ;"vietnamese-viscii-upper:-*-fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1"
-;        "ascii:-*-fixed-medium-r-normal-*-14-*-*-*-*-*-iso8859-7"
-;        ))
-;      (set-default-font "fontset-hiragino16")
-;      (setq default-frame-alist (append '((font . "fontset-hiragino16"))))
-;      ))
-
-
-;; 全角 2 ： 半角 1 の実験
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-24-*-*-*-*-*-fontset-osaka24,"
-;  "japanese-jisx0208:-apple-osaka\201|\223\231\225\235-medium-r-normal--24-240-75-75-m-240-jisx0208.1983-sjis,"
-;  "katakana-jisx0201:-apple-osaka\201|\223\231\225\235-medium-r-normal--24-240-75-75-m-240-jisx0208.1983-sjis,"
-;  "ascii:-apple-osaka-medium-r-normal--24-240-75-75-m-240-jisx0208.1983-sjis"))
-;(set-default-font "fontset-osaka24")
-;(setq default-frame-alist (append '((font . "fontset-osaka24"))))
-
-;;false
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-24-*-*-*-*-*-fontset-hiragino24,"
-;  "japanese-jisx0208:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--24-220-75-75-m-180-jisx0208.1983-sjis,"
-;  "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--24-220-75-75-m-180-mac-roman,"
-;  "ascii:-apple-times-medium-r-normal--24-240-75-75-m-240-mac-roman"))
-;(set-default-font "fontset-hiragino24")
-;(setq default-frame-alist (append '((font . "fontset-hiragino24"))))
-
-
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-monaco16,"
-;  "japanese-jisx0208:-apple-osaka-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;  "katakana-jisx0201:apple-helvetica-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;  "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-monaco16")
-;;;(when (/= window-system 'x)
-;(setq default-frame-alist (append '((font . "fontset-monaco16"))))
-;;;)
-
-;; 解像度により上記が大きい場合は以下
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-12-*-*-*-*-*-fontset-monaco12,"
-;  "japanese-jisx0208:-apple-osaka-medium-r-normal--14-140-*-m-140-jisx0208.1983-sjis,"
-;  "ascii:-apple-monaco-medium-r-normal-*-12-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-monaco12")
-;(setq default-frame-alist (append '((font . "fontset-monaco12"))))
-
-
-
-;; 以下はあくまでも参考です。エラーになる物があります。
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-mikachan,"
-;  "japanese-jisx0208:-misc-mikachan-medium-r-normal-*-14-*-*-*-*-*-jisx0208.1983-*,"
-;  "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;  "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-mikachan")
-;(setq default-frame-alist (append '((font . "fontset-mikachan"))))
-
-;; monaco
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-monaco16,"
-;  "japanese-jisx0208:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;  "katakana-jisx0201:-apple-\203q\203\211\203m\203m\212\333\203s pro w4-medium-r-normal--14-140-75-75-m-140-mac-roman,"
-;  "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-monaco16")
-;(setq default-frame-alist (append '((font . "fontset-monaco16"))))
-
-;(create-fontset-from-fontset-spec
-; (concat
-;  "-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-monaco16,"
-;  "japanese-jisx0208:-apple-osaka-medium-r-normal--16-160-75-75-m-160-jisx0208.1983-sjis,"
-;  "ascii:-apple-monaco-medium-r-normal-*-14-*-*-*-*-*-mac-roman"))
-;(set-default-font "fontset-monaco16")
-;(when (/= window-system 'x)
-;(setq default-frame-alist (append '((font . "fontset-monaco16"))))
-;)
-
-;"japanese-jisx0201:,"  
-;(require 'bitmap)
-;(set-face-font 'default "-*-fixed-medium-r-normal-*-18-*")
-;(set-face-font 'default "-*-courier-medium-r-normal-*-18-*")
-;(set-face-font 'default "-*-monaco-medium-r-normal-*-14-*")
-;(if (fboundp 'new-fontset)
-;    (progn
-;      (create-fontset-from-fontset-spec
-;       "-*-fixed-medium-r-normal-*-18-*-*-*-*-*-fontset-mac,
-;        mac-roman-lower:-*-Monaco-*-*-*-*-14-*-*-*-*-*-mac-roman,
-;        mac-roman-upper:-*-Monaco-*-*-*-*-14-*-*-*-*-*-mac-roman,
-;        thai-tis620:-ETL-Fixed-*-*-*-*-16-*-*-*-*-*-tis620.2529-1,
-;        lao:-Misc-Fixed-*-*-*-*-16-*-*-*-*-*-MuleLao-1,
-;        vietnamese-viscii-lower:-ETL-Fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1,
-;        vietnamese-viscii-upper:-ETL-Fixed-*-*-*-*-16-*-*-*-*-*-viscii1.1-1,
-;        chinese-big5-1:-*-Nice Taipei Mono-*-*-*-*-12-*-*-*-*-*-big5,
-;        chinese-big5-2:-*-Nice Taipei Mono-*-*-*-*-12-*-*-*-*-*-big5,
-;        chinese-gb2312:-*-Beijing-*-*-*-*-16-*-*-*-*-*-gb2312,
-;        japanese-jisx0208:-apple-osaka-medium-r-normal--18-180-75-75-m-180-jisx0208.1983-sjis,
-;        katakana-jisx0201:-*-*-*-*-*-*-16-*-*-*-*-*-JISX0201.1976-0,
-;        korean-ksc5601:-*-Seoul-*-*-*-*-16-*-*-*-*-*-ksc5601"
-;       t)))
-;(load "~/src/intlfonts-1.2/bdf_intn")
-;(load "~/src/intlfonts-1.2/bdf_intn24")
-
 
 ;;; init_fontset.el ends here

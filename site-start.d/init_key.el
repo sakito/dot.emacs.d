@@ -51,6 +51,19 @@
 ;; C-x C-u にて選択範囲を大文字に変換する機能
 (put 'upcase-region 'disabled nil)
 
+;; cua-mode に移行
+;;(require 'sense-region)
+;;(defadvice set-mark-command (around sense-region-set-mark-23 activate)
+;;  (if (and (mell-transient-region-active-p)
+;;           sense-region-mode)
+;;      (copy-face 'region 'sense-region-region-face))
+;;  ad-do-it)
+;;(sense-region-on)
+
+;; CUA-mode にて矩形選択のみを有効化
+(setq cua-enable-cua-keys nil)
+(cua-mode t)
+
 ;; C-x C-b でバッファリストを開く時に、ウィンドウを分割しない
 ;(global-set-key "\C-x\C-b" 'buffer-menu)
 ;; バッファを切り替えるのに C-x C-b で electric-buffer-list を使う
