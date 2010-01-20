@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_sysns.el --- ns
 
 ;; Copyright (C) 2009  sakito

@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;emacs23.el -- emacs23 init setting elisp file
 
 ;; Copyright (C) 2009-2010  sakito
@@ -70,8 +72,6 @@
 ;(require 'init_mmm)
 ;;; smart-compie
 (require 'init_smartcompile)
-;; ecb
-;(require 'init_ecb)
 ;; c
 (require 'init_c)
 ;; objc
@@ -100,8 +100,6 @@
 (require 'htmlize)
 ;; howm
 (require 'init_howm)
-;; muse
-;; (require 'init_muse)
 ;; sdicの設定
 ;(require 'init_sdic)
 ;; Dictionary.app 呼びだし

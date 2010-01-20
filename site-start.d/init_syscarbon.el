@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_syscarbon.el --- carbon emacs
 
 ;; Copyright (C) 2010  sakito

@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_global.el --- global
 
 ;; Copyright (C) 2010  sakito
@@ -31,6 +33,7 @@
 (set-language-environment 'Japanese)
 ;; 極力UTF-8とする
 (prefer-coding-system 'utf-8)
+(setq locale-coding-system 'utf-8)
 
 ;; ログの長さを無限に
 ;;(setq message-log-max 't)
@@ -41,9 +44,6 @@
 ;(menu-bar-mode nil)
 ;;; toolbar
 (tool-bar-mode 0)
-
-(setq user-full-name "sakito")
-(setq user-mail-address "sakito@sakito.com")
 
 ;; ファイルを編集した場合コピーにてバックアップする
 ;; inode 番号を変更しない
@@ -147,6 +147,15 @@
     (or load-status
         (message (format "[load-safe] failed %s" loadlib)))
     load-status))
+(defun autoload-if-found (functions file &optional docstring interactive type)
+  "set autoload iff. FILE has found."
+  (if (not (listp functions))
+      (setq functions (list functions)))
+  (and (locate-library file)
+       (progn
+         (dolist (function functions)
+           (autoload function file docstring interactive type))
+         t )))
 
 (provide 'init_global)
 ;;; init_global.el ends here

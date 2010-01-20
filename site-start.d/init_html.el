@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_html.el --- html
 
 ;; Copyright (C) 2008  sakito

@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_psgml.el --- psgml Setting
 
 ;; Copyright (C) 2004  sakito

@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_sql.el --- sql mode setting file
 
 ;; Copyright (C) 2004  sakito
@@ -26,10 +28,10 @@
 
 ;;; Code:
 
-;(autoload 'sql-mode "sql" "SQL Edit mode" t)
+;; (autoload 'sql-mode "sql" "SQL Edit mode" t)
 ;(setq sql-user "test")
-(require 'plsql)
-(setq plsql-indent 2)
+;; (require 'plsql)
+;; (setq plsql-indent 2)
 (setq sql-user "testuser")
 (setq sql-password "")
 (setq sql-postgres-program "/usr/local/bin/psql")

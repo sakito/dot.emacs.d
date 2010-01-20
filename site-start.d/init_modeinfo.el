@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_modeinfo.el --- mode-info
 
 ;; Copyright (C) 2004  sakito

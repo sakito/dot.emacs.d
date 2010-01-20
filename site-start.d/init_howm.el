@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_howm.el --- Emacs howm setting
 
 ;; Copyright (C) 2010  sakito

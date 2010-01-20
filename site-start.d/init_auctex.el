@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_auctex.el --- auctex setting file
 
 ;; Copyright (C) 2004  sakito

@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_nxml.el --- nxml-mode setting
 
 ;; Copyright (C) 2004-2010  sakito

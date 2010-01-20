@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_ac.el --- ac
 
 ;; Copyright (C) 2009-2010  sakito

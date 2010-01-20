@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_yasnippet.el --- yasnippet
 
 ;; Copyright (C) 2009  sakito
@@ -27,23 +29,22 @@
 ;;; Code:
 (require 'yasnippet)
 
+(setq yas/root-directory "~/.emacs.d/etc/snippets")
 ;; メニューは使わない
 (setq yas/use-menu nil)
 
 ;; トリガはSPC, 次の候補への移動はTAB
-;(setq yas/trigger-key (kbd "SPC"))
-;(setq yas/next-field-key (kbd "TAB"))
+;; (setq yas/trigger-key (kbd "SPC"))
+;; (setq yas/next-field-key (kbd "TAB"))
 
 ;; http://svn.coderepos.org/share/lang/elisp/anything-c-yasnippet/anything-c-yasnippet.el
 (require 'anything-c-yasnippet)
 (setq anything-c-yas-space-match-any-greedy t)
 (global-set-key (kbd "C-c y") 'anything-c-yas-complete)
 
-;; js2-mode へのyas/minor-mode の関連づけ 0.6.0以上では不要
-;(add-to-list 'yas/extra-mode-hooks 'js2-mode-hook)
-
 (yas/initialize)
-(yas/load-directory "~/.emacs.d/etc/snippets")
+;; ファイルが増加すると起動に時間がかかるようになる
+(yas/load-directory yas/root-directory)
 
 (provide 'init_yasnippet)
 ;;; init_yasnippet.el ends here

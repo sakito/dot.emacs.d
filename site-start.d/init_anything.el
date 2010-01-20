@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+
 ;;; init_anything.el --- anything.el setting
 
 ;; Copyright (C) 2009-2010  sakito
@@ -26,7 +28,8 @@
 
 ;;; Code:
 (require 'anything)
-(require 'anything-config)
+;;(require 'anything-config)
+(require 'anything-private-config)
 (require 'anything-match-plugin)
 
 (global-set-key (kbd "C-;") 'anything)
@@ -53,10 +56,10 @@
   (interactive)
   (anything '(anything-c-source-info-elisp
               anything-c-source-info-cl
-              anything-c-source-man-pages
+;;              anything-c-source-man-pages
               anything-c-source-info-pages
-              anything-c-source-emacs-commands
-              anything-c-source-emacs-functions
+;;              anything-c-source-emacs-commands
+;;              anything-c-source-emacs-functions
               )
             (thing-at-point 'symbol) nil nil nil "*anything help*"))
 
@@ -164,10 +167,10 @@ utility mdfind.")
              (local-set-key (kbd "O") 'anything-c-moccur-dired-do-moccur-by-moccur)))
 
 ;; session を利用するため anything-c-adaptive-save-history を作成しない
-(remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
-(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
-(ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
-(setq anything-c-adaptive-history-length 0)
+;;(remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
+;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
+;;(ad-disable-advice 'anything-select-action l'before 'anything-c-adaptive-select-action)
+;;(setq anything-c-adaptive-history-length 0)
 
 ;; キー設定
 (define-key anything-map (kbd "C-p") 'anything-previous-line)
