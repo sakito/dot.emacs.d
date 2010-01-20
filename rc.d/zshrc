@@ -51,7 +51,11 @@ export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/local
 # mysql
 export PATH=/usr/local/mysql/bin:$PATH
 
+# LaTeX
 export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:$PATH
+
+# Git
+export PATH=$PATH:/usr/local/git/bin
 
 # TeX
 export TEXINPUTS=/Users/sakito/lib/tex//:${TEXINPUTS}
@@ -161,7 +165,10 @@ fi
 
 # カラー記述を簡略化
 autoload -Uz colors; colors
+# 左プロンプト
 PROMPT="%{$fg[green]%}%n@%m%{$fg[red]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%{$reset_color%} "
+
+# 右プロンプト
 
 # バージョン管理システム関連の情報を表示(zsh >=4.3.6)
 autoload -Uz vcs_info
@@ -195,7 +202,12 @@ psvar=()
 vcs_info
 [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
 
-RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%1v%f|)%{$reset_color%}"
+if [ "$EMACS" ];then
+    # Emacs の ansi-term では右プロンプトを表示しない
+    RPROMPT=""
+else
+    RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%1v%f|)%{$reset_color%}"
+fi
 #RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%v|)"
 }
 #RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%1v%f|)%{$reset_color%}"
@@ -339,6 +351,7 @@ alias reload="source ~/.zshrc"
 #alias xreadiary="~/bin/lftp_diary.command"
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
+alias easy_install64="sudo env ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common' easy_install -UZ "
 
 #-----------------------------------------------------------------
 # キーバインド設定

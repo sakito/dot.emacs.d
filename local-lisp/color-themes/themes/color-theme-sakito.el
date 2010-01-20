@@ -135,3 +135,4 @@
       (highlight-changes ((t (:foreground nil :background "#382f2f"))))
       (highlight-changes-delete ((t (:foreground nil :background "#916868"))))
       )))
+(provide 'color-theme-sakito)

@@ -24,8 +24,11 @@
 
 ;;; Code:
 
+(setq user-full-name "sakito")
+(setq user-mail-address "sakito@sakito.com")
+
 ;; 詳細時間計測用
-;;(load "~/.emacs.d/private/private/timelag.el")
+;; (load "~/.emacs.d/private/private/timelag.el")
 
 ;; Emacs 設定ディレクトリを設定。Emacs 22以下用
 ;; Emacs 23.1 以上では user-emacs-directory 変数が用意されているのでそれを利用
@@ -82,12 +85,9 @@
 
 
 ;; 環境依存設定
-(when mac-p
-  (require 'init_main))
-(when carbon-p
-  (require 'init_syscarbon))
-(when ns-p
-  (require 'init_sysns))
+(when mac-p (require 'init_main))
+(when carbon-p (require 'init_syscarbon))
+(when ns-p (require 'init_sysns))
 
 ;; 終了時バイトコンパイル
 (add-hook 'kill-emacs-query-functions
@@ -99,7 +99,7 @@
             (byte-recompile-directory (concat user-emacs-directory "site-start.d") 0)
             ))
 
-;; 起動時間計測
+;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
 (when emacs23-p
   (defun message-startup-time ()
     (message "Emacs loaded in %dms"
