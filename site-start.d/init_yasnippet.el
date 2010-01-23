@@ -29,7 +29,12 @@
 ;;; Code:
 (require 'yasnippet)
 
+;; snippet のディレクトリを設定
 (setq yas/root-directory "~/.emacs.d/etc/snippets")
+;; 複数ディレクトリの場合は以下のようにする
+;; (setq yas/root-directory '("~/.emacs.d/lisp/yasnippet-0.6.1c/snippets"
+;;                            "~/.emacs.d/etc/snippets"))
+
 ;; メニューは使わない
 (setq yas/use-menu nil)
 
@@ -42,9 +47,12 @@
 (setq anything-c-yas-space-match-any-greedy t)
 (global-set-key (kbd "C-c y") 'anything-c-yas-complete)
 
+;; 初期化
 (yas/initialize)
 ;; ファイルが増加すると起動に時間がかかるようになる
 (yas/load-directory yas/root-directory)
+;; 複数ディレクトリの場合
+;;(mapc 'yas/load-directory yas/root-directory)
 
 (provide 'init_yasnippet)
 ;;; init_yasnippet.el ends here

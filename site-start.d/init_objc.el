@@ -87,8 +87,6 @@
         ("\\.hpp$" (".cpp" ".c"))))
 
 ;; flymake
-(set-face-background 'flymake-errline "red4")
-(set-face-background 'flymake-warnline "dark slate blue")
 (defvar flymake-objc-compiler "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc")
 (defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-std=c99" "-isysroot" "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.1.2.sdk" "-framework" "CoreFoundation" "-framework" "Foundation" "-framework" "UIKit"))
 (defvar flymake-last-position nil)
@@ -105,37 +103,6 @@
                      temp-file
                      (file-name-directory buffer-file-name))))
    (list flymake-objc-compiler (append flymake-objc-compile-default-options flymake-objc-compile-options (list local-file)))))
-
-(defun flymake-display-err-minibuffer ()
-  "Display any errors or warnings for the current line in the minibuffer."
-  (interactive)
-  (let* ((line-no (flymake-current-line-no))
-         (line-err-info-list (nth 0 (flymake-find-err-info flymake-err-info line-no)))
-         (count (length line-err-info-list)))
-    (while (> count 0)
-      (when line-err-info-list
-        (let* ((file (flymake-ler-file (nth (1- count) line-err-info-list)))
-               (full-file (flymake-ler-full-file (nth (1- count) line-err-info-list)))
-               (text (flymake-ler-text (nth (1- count) line-err-info-list)))
-               (line (flymake-ler-line (nth (1- count) line-err-info-list))))
-          (message "[%s] %s" line text)))
-      (setq count (1- count)))))
-
-(defadvice flymake-goto-next-error (after display-message activate compile)
-  "Display the error in the minibuffer."
-  (flymake-display-err-minibuffer))
-
-(defadvice flymake-goto-prev-error (after display-message activate compile)
-  "Display the error in the minibuffer."
-  (flymake-display-err-minibuffer))
-
-(defadvice flymake-mode (before post-command-stuff activate compile)
-  "Add functionality to the post command hook so that if the
-cursor is sitting on a flymake error the error information is
-displayed in the minibuffer."
-  (set (make-local-variable 'post-command-hook)
-;;         (cons 'flymake-display-err-minibuffer post-command-hook)))
-       (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
 
 ;; ドキュメントの参照
 (require 'xcode-document-viewer)

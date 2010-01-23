@@ -59,8 +59,16 @@
 ;; バッファでの同名ファイルに識別子を付与する
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+;; バッファ名が重複しなくてもディレクトリ名を付与する
+;; 数字は表示階層の深さ だいたい3階層までに抑えるし、howm で年月が見える等の理由で一階層上まで見えるのが好み
+(setq uniquify-min-dir-content 2)
+;; uniquify-ignore-buffers-re を設定すると対象外のバッファを指定できるがデフォルトで特殊バッファは基本よける
 
-;; kill-summary
+;; モードラインにファイルのディレクトリを表示 uniquify-min-dir-content による実質不要
+;; (add-to-list 'global-mode-string '("" default-directory "-"))
+;; (add-to-list 'global-mode-string '(:eval (skt:relative-path default-directory)))
+
+;; kill-summary anything の機能を利用するようにしたので不要
 ;(autoload 'kill-summary "kill-summary" nil t)
 ;(global-set-key "\M-y" 'kill-summary)
 

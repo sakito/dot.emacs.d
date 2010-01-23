@@ -27,31 +27,7 @@
 
 ;;; Code:
 
-
-;;; フォントの設定
-;; hiramaru = ヒラギノ丸ゴ + monaco
-(create-fontset-from-ascii-font
- "-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
-; "-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
- nil "hiramaru")
-(set-fontset-font "fontset-hiramaru" 'japanese-jisx0208
-                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'katakana-jisx0201
-                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'japanese-jisx0212
-                  '("Hiragino Maru Gothic Pro" . "iso10646-*"))
-;(set-fontset-font "fontset-hiramaru" 'mule-unicode-0100-24ff
-;                  '("Monaco" . "iso10646-1"))
-(set-fontset-font "fontset-hiramaru" 'thai-tis620
-                  '("Ayuthaya" . "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'chinese-gb2312
-                  '("STHeiti*" . "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'chinese-big5-1
-                  '("LiSong Pro*" . "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'korean-ksc5601
-                  '("AppleGothic*" . "iso10646-*"))
-
-;;色の設定です変更してください
+;; デフォルトのフレーム設定
 (setq default-frame-alist
       (append (list
                     '(width . 140)
@@ -67,8 +43,32 @@
 ;(set-frame-parameter (selected-frame) 'alpha '(95 15))
 (add-to-list 'default-frame-alist '(alpha . (85 20)))
 
-;; フォントの設定
+;;; フォントの設定
+;; hiramaru = ヒラギノ丸ゴ + Menlo
+(create-fontset-from-ascii-font
+;; "-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ "-*-Menlo-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+;; "-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
+ nil "hiramaru")
+(set-fontset-font "fontset-hiramaru"
+                  'japanese-jisx0208
+                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'katakana-jisx0201
+                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'japanese-jisx0212
+                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'thai-tis620
+                  (font-spec :family "Ayuthaya" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'chinese-gb2312
+                  (font-spec :family "STHeiti" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'chinese-big5-1
+                  (font-spec :family "LiSong Pro" :registry "iso10646-*"))
+(set-fontset-font "fontset-hiramaru" 'korean-ksc5601
+                  (font-spec :family "AppleGothic" :registry "iso10646-*"))
 (add-to-list 'default-frame-alist '(font . "fontset-hiramaru"))
+;; 等幅にするためのフォントサイズのリスケール
+(setq face-font-rescale-alist '((".*Hiragino*" . 1.2)))
+
 
 ;; フォントロックの設定
 ;; hilit19はemacs19用で、メンテナンスされてません。

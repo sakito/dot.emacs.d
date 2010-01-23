@@ -45,6 +45,13 @@
 ;; insert-date Key
 (define-key global-map "\C-cd" 'insert-date)
 
+;; 絶対パスを相対パスに変換
+(defun skt:relative-path (path)
+  (when (file-exists-p path)
+    (let ((home (expand-file-name (concat "~/" ""))))
+      (if (string-match (concat "^" home)  path)
+          (replace-match "~/" t t path) path))))
+
 ;; 透過の設定を変更
 ;; see http://emacs-fu.blogspot.com/2009/02/transparent-emacs.html
 (defun djcb-opacity-modify (&optional dec)
@@ -78,9 +85,9 @@
 ;; C-8 will increase opacity (== decrease transparency)
 ;; C-9 will decrease opacity (== increase transparency
 ;; C-0 will returns the state to normal
-(global-set-key (kbd "C-8") '(lambda()(interactive)(djcb-opacity-modify)))
-(global-set-key (kbd "C-9") '(lambda()(interactive)(djcb-opacity-modify t)))
-(global-set-key (kbd "C-0") '(lambda()(interactive)(modify-frame-parameters nil `((alpha . (100 20))))))
+;; (global-set-key (kbd "C-8") '(lambda()(interactive)(djcb-opacity-modify)))
+;; (global-set-key (kbd "C-9") '(lambda()(interactive)(djcb-opacity-modify t)))
+;; (global-set-key (kbd "C-0") '(lambda()(interactive)(modify-frame-parameters nil `((alpha . (100 20))))))
 
 (provide 'init_function)
 ;;; init_function.el ends here

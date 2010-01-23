@@ -54,6 +54,7 @@
 (require 'init_eldoc)
 
 ;;; プログラミング関連
+(require 'init_flymake)
 ; womanの設定
 ;;(require 'init_woman)
 ;;;; mode-info
@@ -72,6 +73,7 @@
 ;(require 'init_mmm)
 ;;; smart-compie
 (require 'init_smartcompile)
+
 ;; c
 (require 'init_c)
 ;; objc

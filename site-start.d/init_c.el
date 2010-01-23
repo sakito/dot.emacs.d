@@ -49,35 +49,6 @@
              (c-toggle-hungry-state t)
              ))
 
-;; flymakeを設定
-(require 'flymake)
-(defun flymake-get-make-cmdline (source base-dir)
-  (list "make"
-        (list "-s" "-C"
-              base-dir
-              (concat "CHK_SOURCES=" source)
-              "SYNTAX_CHECK_MODE=1")))
-
-; flymakeのエラー表示をミニバッファに表示
-; @see http://www.credmp.org/2007/07/20/on-the-fly-syntax-checking-java-in-emacs/
-(defun credmp/flymake-display-err-minibuf ()
-  "Displays the error/warning for the current line in the minibuffer"
-  (interactive)
-  (let* ((line-no             (flymake-current-line-no))
-         (line-err-info-list  (nth 0 (flymake-find-err-info flymake-err-info line-no)))
-         (count               (length line-err-info-list))
-         )
-    (while (> count 0)
-      (when line-err-info-list
-        (let* ((file       (flymake-ler-file (nth (1- count) line-err-info-list)))
-               (full-file  (flymake-ler-full-file (nth (1- count) line-err-info-list)))
-               (text (flymake-ler-text (nth (1- count) line-err-info-list)))
-               (line       (flymake-ler-line (nth (1- count) line-err-info-list))))
-          (message "[%s] %s" line text)
-          )
-        )
-      (setq count (1- count)))))
-
 ;; ffapの設定
 (ffap-bindings)
 (setq ffap-c-path
@@ -99,7 +70,7 @@
 ; @see http://d.hatena.ne.jp/higepon/20060212/1139757670
 (defun my-insert-printf-debug ()
   (interactive)
-  (insert-string "printf(\"%s %s:%d\\n\", __func__, __FILE__, __LINE__);")
+  (insert "printf(\"%s %s:%d\\n\", __func__, __FILE__, __LINE__);")
   (indent-according-to-mode))
 
 (add-hook 'c++-mode-hook

@@ -80,8 +80,8 @@
 ;;     (requires-pattern . 2)))
 ;; (anything 'anything-c-source-man-pages+)
 
-;; メンテナンスされてないので利用しちゃいけない
 ;; (iswitchb-mode)
+;; メンテナンスされてないので利用しちゃいけない
 ;; (anything-iswitchb-setup)
 
 ;;; Spotlight (MacOS X desktop search)
@@ -105,7 +105,9 @@ utility mdfind.")
 (setq recentf-max-saved-items 1000)
 
 ;; 保存ファイルのの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
-(when (boundp 'recentf-keep) (add-to-list 'recentf-keep 'file-remote-p))
+(require 'recentf)
+(add-to-list 'recentf-keep 'file-remote-p)
+(add-to-list 'recentf-keep 'file-readable-p)
 ;; 除外ファイル
 (setq recentf-exclude
       '("\\.elc$"
@@ -114,7 +116,7 @@ utility mdfind.")
         ".howm-keys$"
         "^/var/folders/"
         "^/tmp/"))
-(add-hook 'kill-emacs-hook 'recentf-cleanup)
+(add-hook 'kill-emacs-query-functions 'recentf-cleanup)
 ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
 ;; (setq recentf-save-file "~/.emacs.d/var/recentf")
 (require 'recentf-ext)

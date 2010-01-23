@@ -88,10 +88,6 @@
 (line-number-mode t)
 (column-number-mode t)
 
-;; モードラインにファイルのディレクトリを表示
-;(add-to-list 'global-mode-string '("" default-directory "-"))
-
-
 ;; TAB はスペース 4 個ぶんを基本
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)

@@ -76,6 +76,8 @@
              (define-key term-raw-map (kbd "C-n") 'next-line)
              ;; (define-key term-raw-map (kbd "C-y") nil)
              (define-key term-raw-map (kbd "M-x") 'execute-extended-command)
+             ;; 削除
+             (define-key term-raw-map (kbd "C-h") 'term-send-backspace)
              ;; elscreen de C-z を利用するので有効にする
              (define-key term-raw-map (kbd "C-z")
                (lookup-key (current-global-map) (kbd "C-z")))))
