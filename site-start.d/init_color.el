@@ -33,7 +33,7 @@
                     '(width . 140)
                     '(height . 55)
                     '(top . 90)
-                    '(left . 500)
+                    '(left . 600)
                     '(vertical-scroll-bars . nil)
                     )
               default-frame-alist)
@@ -43,31 +43,40 @@
 ;(set-frame-parameter (selected-frame) 'alpha '(95 15))
 (add-to-list 'default-frame-alist '(alpha . (85 20)))
 
+
 ;;; フォントの設定
-;; hiramaru = ヒラギノ丸ゴ + Menlo
-(create-fontset-from-ascii-font
-;; "-*-Monaco-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
- "-*-Menlo-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
-;; "-*-Osaka-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1"
- nil "hiramaru")
-(set-fontset-font "fontset-hiramaru"
+;; システム依存を排除するために一旦デフォルトフォントセットを上書き
+;; 漢字は IPAゴジック + かな英数字は September を設定(等幅以外はインストールしてない)
+;; jisx0208の範囲の漢字は September にすべきかもしれない
+(set-frame-font "September-16")
+(set-fontset-font t
                   'japanese-jisx0208
-                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'katakana-jisx0201
-                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'japanese-jisx0212
-                  (font-spec :family "Hiragino Maru Gothic Pro" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'thai-tis620
-                  (font-spec :family "Ayuthaya" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'chinese-gb2312
-                  (font-spec :family "STHeiti" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'chinese-big5-1
-                  (font-spec :family "LiSong Pro" :registry "iso10646-*"))
-(set-fontset-font "fontset-hiramaru" 'korean-ksc5601
-                  (font-spec :family "AppleGothic" :registry "iso10646-*"))
-(add-to-list 'default-frame-alist '(font . "fontset-hiramaru"))
-;; 等幅にするためのフォントサイズのリスケール
-(setq face-font-rescale-alist '((".*Hiragino*" . 1.2)))
+                  (font-spec :family "IPAGothic"))
+(set-fontset-font t
+                  'katakana-jisx0201
+                  (font-spec :family "IPAGothic"))
+(set-fontset-font t
+                  'japanese-jisx0212
+                  (font-spec :family "IPAGothic"))
+(set-fontset-font t
+                  'japanese-jisx0213.2004-1
+                  (font-spec :family "IPAGothic"))
+;; 一部の文字を September にする
+;; 記号         3000-303F http://www.triggertek.com/r/unicode/3000-303F
+;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
+;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
+(set-fontset-font t
+                  '( #x3000 .  #x30ff)
+                  (font-spec :family "September")
+                  nil
+                  'prepend)
+;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
+(set-fontset-font t
+                  '( #xff00 .  #xffef)
+                  (font-spec :family "September")
+                  nil
+                  'prepend)
+
 
 
 ;; フォントロックの設定
@@ -86,20 +95,14 @@
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; font-lockに対応したモードでしか動作しません
 (defface my-mark-tabs
-  '(
-    (t
-     (:foreground "red" :underline t)
-     )) nil)
+  '((t (:foreground "red" :underline t)))
+  nil :group 'skt)
 (defface my-mark-whitespace
-  '(
-    (t
-     (:background "gray")
-     )) nil)
+  '((t (:background "gray")))
+  nil :group 'skt)
 (defface my-mark-lineendspaces
-  '(
-    (t
-     (:foreground "SteelBlue" :underline t)
-     )) nil)
+  '((t (:foreground "SteelBlue" :underline t)))
+  nil :group 'skt)
 
 (defvar my-mark-tabs 'my-mark-tabs)
 (defvar my-mark-whitespace 'my-mark-whitespace)
@@ -111,7 +114,7 @@
    '(
      ("\t" 0 my-mark-tabs append)
      ("　" 0 my-mark-whitespace append)
-     ("[ \t]+$" 0 my-mark-lineendspaces append)
+;;     ("[ \t]+$" 0 my-mark-lineendspaces append)
      )))
 (ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
 (ad-activate 'font-lock-mode)
@@ -152,6 +155,7 @@
      (color-theme-sakito)))
 
 ;; face を調査するための関数
+;; いろいろ知りたい場合は C-u C-x =
 (defun describe-face-at-point ()
   "Return face used at point."
   (interactive)

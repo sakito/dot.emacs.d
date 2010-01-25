@@ -56,8 +56,11 @@
         ("." . "~/.emacs.d/var/emacs")
         ))
 
-;; emacsclient
-(server-start)
+;; emacsclient を利用するためにサーバ起動
+;; サーバが起動していた場合は先に起動していた方を優先
+(require 'server)
+(unless (server-running-p) (server-start))
+
 
 ;;起動時のmessageを表示しない
 (setq inhibit-startup-message t)
@@ -128,7 +131,7 @@
 ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
 (setq vc-follow-symlinks t)
 
-;; 共通系関数
+;; 安全な実行のための共通系関数
 
 ;; @see http://www.sodan.org/~knagano/emacs/dotemacs.html
 (defmacro eval-safe (&rest body)
@@ -152,6 +155,7 @@
          (dolist (function functions)
            (autoload function file docstring interactive type))
          t )))
+
 
 (provide 'init_global)
 ;;; init_global.el ends here
