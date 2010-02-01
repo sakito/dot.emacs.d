@@ -48,34 +48,74 @@
 ;; システム依存を排除するために一旦デフォルトフォントセットを上書き
 ;; 漢字は IPAゴジック + かな英数字は September を設定(等幅以外はインストールしてない)
 ;; jisx0208の範囲の漢字は September にすべきかもしれない
+;; face の設定は基本的に全て color-thema に設定する方針
+;; japanese-jisx0213.2004-1 = japanese-jisx0213-a + japanese-jisx0213-1
+;; japanese-jisx0213-1 = japanese-jisx0208 のほぼ上位互換
+;; japanese-jisx0213-2 = code-offset #x150000
+;; japanese-jisx0212 = code-offset #x148000 
+;; japanese-jisx0208 = code-offset #x140000
+(set-face-attribute 'default
+                    nil
+                    :family "September"
+                    :height 160)
 (set-frame-font "September-16")
-(set-fontset-font t
-                  'japanese-jisx0208
-                  (font-spec :family "IPAGothic"))
-(set-fontset-font t
-                  'katakana-jisx0201
-                  (font-spec :family "IPAGothic"))
-(set-fontset-font t
-                  'japanese-jisx0212
-                  (font-spec :family "IPAGothic"))
-(set-fontset-font t
-                  'japanese-jisx0213.2004-1
-                  (font-spec :family "IPAGothic"))
+(set-fontset-font nil
+                  'unicode
+                  (font-spec :family "IPAGothic")
+                  nil
+                  'append)
+;; (set-fontset-font nil
+;;                   'thai-tis620
+;;                   (font-spec :family "Ayuthaya")
+;;                   nil
+;;                   'prepend)
+;; (set-fontset-font nil
+;;                   'chinese-gb2312
+;;                   (font-spec :family "STHeiti")
+;;                   nil
+;;                   'prepend)
+;; (set-fontset-font nil
+;;                   'chinese-big5-1
+;;                   (font-spec :family "LiSong Pro")
+;;                   nil
+;;                   'prepend)
+;; (set-fontset-font nil
+;;                   'korean-ksc5601
+;;                   (font-spec :family "AppleGothic")
+;;                   nil
+;;                   'prepend)
+;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
+;; http://apagreekkeys.org/NAUdownload.html
+(set-fontset-font nil
+                  'greek-iso8859-7
+                  (font-spec :family "New Athena Unicode")
+                  nil
+                  'prepend)
 ;; 一部の文字を September にする
 ;; 記号         3000-303F http://www.triggertek.com/r/unicode/3000-303F
 ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
 ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
-(set-fontset-font t
+(set-fontset-font nil
                   '( #x3000 .  #x30ff)
                   (font-spec :family "September")
                   nil
                   'prepend)
 ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
-(set-fontset-font t
+(set-fontset-font nil
                   '( #xff00 .  #xffef)
                   (font-spec :family "September")
                   nil
                   'prepend)
+
+
+;; 等幅のフォントセットを幾つか作成予定
+;; ヒラギノ 角ゴ ProN + Menlo
+(create-fontset-from-ascii-font "Menlo-14" nil "menlokakugo")
+(set-fontset-font "fontset-menlokakugo"
+                  'unicode
+                  (font-spec :family "Hiragino Kaku Gothic ProN" :size 16))
+;; 確認用 (set-frame-font "fontset-menlokakugo")
+;; (add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))  ;; 実際に設定する場合
 
 
 
