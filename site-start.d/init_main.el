@@ -38,6 +38,8 @@
 (require 'init_function)
 ;;; SKK
 (require 'init_skk)
+;; migemo
+(require 'init_cmigemo)
 ;; session
 (require 'init_session)
 ;;; Elscreen

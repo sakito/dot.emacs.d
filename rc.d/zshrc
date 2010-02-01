@@ -73,7 +73,7 @@ export  PAGER=less
 export  CLICOLOR_FORCE=1
 
 #CC setting
-export CC=cc
+#export CC=cc
 
 # set man command env.
 export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/sw/man

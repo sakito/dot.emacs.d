@@ -10,6 +10,8 @@ hgext.bookmarks=
 color=
 hggit=
 hgk=
+mq=
+purge=
 [diff]
 git = True
 [color]

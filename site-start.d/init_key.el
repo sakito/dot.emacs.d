@@ -35,23 +35,24 @@
       ))
 
 ;;コマンドキーをMetaキーとして利用
-(if (eq window-system 'mac)
-    (setq mac-command-key-is-meta t)
-    (setq mac-command-key-is-meta nil)
+(when mac-p
+      (setq mac-command-key-is-meta t)
+      (setq mac-command-key-is-meta nil)
+      (setq ns-command-modifier (quote meta))
   )
 
 (if (eq window-system 'ns)
     ;(setq ns-alternate-modifier (quote alt))
-    (setq ns-command-modifier (quote meta)))
+    (setq ns-command-modifier (quote meta))
+  )
 
 ;; dndの動作を Emacs22と同じにする
 (define-key global-map [ns-drag-file] 'ns-find-file)
 
-
 ;; C-x C-l にて選択範囲を小文字に変換する機能
-(put 'downcase-region 'disabled nil)
+;; (put 'downcase-region 'disabled nil)
 ;; C-x C-u にて選択範囲を大文字に変換する機能
-(put 'upcase-region 'disabled nil)
+;; (put 'upcase-region 'disabled nil)
 
 ;; cua-mode に移行
 ;;(require 'sense-region)
@@ -93,14 +94,19 @@
 ;;; インプットメソッド対応パッチにてctrキーをOS側に渡さない設定
 ;(mac-add-ignore-shortcut '(control))
 ;; システムに装飾キー渡さない
-(setq mac-pass-control-to-system nil)
-(setq mac-pass-command-to-system nil)
-(setq mac-pass-option-to-system nil)
+(when mac-p
+  (setq mac-pass-control-to-system nil)
+  (setq mac-pass-command-to-system nil)
+  (setq mac-pass-option-to-system nil)
 
-;(add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
-;(mac-translate-from-yen-to-backslash)
-;;; 入力モードを英語に変更
-;(setq mac-ts-script-language-on-focus '(0 . 0))
+  ;; 起動したら US にする
+  (add-hook 'after-init-hook 'mac-change-language-to-us)
+  ;; minibuffer 内は US にする
+  (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
+  (mac-translate-from-yen-to-backslash)
+  ;; 入力モードを英語に変更
+  (setq mac-ts-script-language-on-focus '(0 . 0))
+  )
 
 (provide 'init_key)
 ;;; init_key.el ends here

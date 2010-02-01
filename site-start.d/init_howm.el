@@ -44,6 +44,12 @@
                 )
               auto-mode-alist))
 
+;; howm 以外から *.howm を開いたときも常に howm-mode
+(add-hook 'find-file-hooks
+          (lambda ()
+            (when (string-match "\\.howm$" (buffer-file-name))
+              (howm-mode t))))
+
 ;; テンプレートの形式を変更
 (setq howm-template
       (concat howm-view-title-header " %title%cursor\n========================================\n\n"))
