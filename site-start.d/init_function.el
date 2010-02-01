@@ -33,7 +33,7 @@
 (defun time-stamp-date ()
   "Retune the current time as a string in Date from."
   ;(format-time-string "[%04Y/%02m/%02d]")
-  (format-time-string "%04Y/%02m/%02d: ")
+  (format-time-string "%04Y-%02m-%02d: ")
   )
 
 (defun insert-date nil

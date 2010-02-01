@@ -47,6 +47,17 @@
              (c-set-offset 'innamespace 0)
              ; 連続するスペースをバックスペース一回で削除する
              (c-toggle-hungry-state t)
+             ;; 対応する括弧の挿入
+             (make-variable-buffer-local 'skeleton-pair)
+             (make-variable-buffer-local 'skeleton-pair-on-word)
+             (setq skeleton-pair-on-word t)
+             (setq skeleton-pair t)
+             (make-variable-buffer-local 'skeleton-pair-alist)
+             (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+             (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
+             (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+             (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+             (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
              ))
 
 ;; ffapの設定
@@ -84,6 +95,8 @@
 (add-hook 'makefile-mode-hook
           (function (lambda ()
                       (whitespace-mode t)
+                      ;; suspicious-lines を無視しておく
+                      (fset 'makefile-warn-suspicious-lines 'ignore)
                       (setq indent-tabs-mode t))))
 
 (provide 'init_c)

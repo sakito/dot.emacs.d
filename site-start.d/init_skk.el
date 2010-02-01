@@ -50,7 +50,7 @@
 ;(setq skk-jisyo-code 'utf-8-unix)
 
 ;;"「"を入力したら"」"も自動で挿入
-(setq skk-auto-insert-paren t)
+;; (setq skk-auto-insert-paren t)
 
 ;;漢字登録時の送り仮名ミスをチェック
 (setq skk-check-okurigana-on-touroku t)
@@ -68,7 +68,6 @@
 ;;            ))
 
 ;;(setq default-input-method "japanese-skk")
-
 
 (provide 'init_skk)
 ;;; init_skk.el ends here

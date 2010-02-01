@@ -87,10 +87,13 @@
         ("\\.hpp$" (".cpp" ".c"))))
 
 ;; flymake
-(defvar flymake-objc-compiler "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc")
-(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-std=c99" "-isysroot" "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.1.2.sdk" "-framework" "CoreFoundation" "-framework" "Foundation" "-framework" "UIKit"))
+(defvar xcode:gccver "4.0")
+(defvar xcode:sdkver "3.1.2")
+(defvar xcode:sdkpath "/Developer/Platforms/iPhoneSimulator.platform/Developer")
+(defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneOS" xcode:sdkver ".sdk"))
+(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
+(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x objective-c" "-std=c99"))
 (defvar flymake-last-position nil)
-;; /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.0 -Wall -Wextra -fsyntax-only -std=c99 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.1.2.sdk
 (defcustom flymake-objc-compile-options '("-I.")
   "Compile option for objc check."
   :group 'flymake
@@ -121,6 +124,7 @@
             (push 'ac-source-company-xcode ac-sources)
             (push 'ac-source-c++-keywords ac-sources)
             (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
+            (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
             (flymake-mode t)
             ;; (which-function-mode t)
           ))
