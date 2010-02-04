@@ -35,6 +35,10 @@
 (require 'auto-complete)
 (require 'auto-complete-config)
 (require 'auto-complete-yasnippet)
+;; http://www.emacswiki.org/emacs/anything-show-completion.el
+(require 'anything-show-completion)
+(setq anything-show-completion-minimum-window-height 4)
+
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
@@ -62,8 +66,14 @@
 ;; デフォルトの補完候補
 (set-default 'ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-same-mode-buffers))
 
+;; 補完を anything する
+;; http://www.emacswiki.org/cgi-bin/wiki/download/ac-anything.el
+(require 'ac-anything)
+(define-key ac-completing-map (kbd "C-:") 'ac-complete-with-anything)
+
 ;; キー設定
-;(define-key ac-complete-mode-map "\t" 'ac-complete)
+(define-key ac-completing-map "\t" 'ac-complete)
+(define-key ac-completing-map (kbd "C-m") 'ac-complete)
 (define-key ac-completing-map (kbd "C-n") 'ac-next)
 (define-key ac-completing-map (kbd "C-p") 'ac-previous)
 (define-key ac-completing-map (kbd "M-/") 'ac-stop)

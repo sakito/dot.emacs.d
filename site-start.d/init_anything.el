@@ -32,6 +32,22 @@
 (require 'anything-private-config)
 (require 'anything-match-plugin)
 
+(and (equal current-language-environment "Japanese")
+     (require 'anything-migemo nil t))
+
+;; http://bitbucket.org/buzztaiki/elisp/src/tip/descbinds-anything.el
+(require 'descbinds-anything)
+(descbinds-anything-install)
+
+(require 'anything-complete nil t)
+;; 150 秒の待ちが発生したらでシンボルを更新
+(anything-lisp-complete-symbol-set-timer 150)
+
+(anything-read-string-mode 1)
+
+;; http://www.emacswiki.org/emacs/anything-show-completion.el
+(require 'anything-show-completion)
+
 (global-set-key (kbd "C-;") 'anything)
 (setq anything-sources
       '(
