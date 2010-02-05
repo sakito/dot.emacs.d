@@ -120,7 +120,7 @@
 ;;; Code:
 
 (require 'anything)
-(require 'cl)
+(eval-when-compile (require 'cl))
 
 ;;;; multiple patterns
 (defvar anything-use-multiple-patterns t
@@ -243,7 +243,8 @@
 ;;;; Highlight matches
 (defface anything-match
   '((t (:inherit match)))
-  "Face used to highlight matches.")
+  "Face used to highlight matches."
+  :group 'anything)
 
 (defvar anything-mp-highlight-delay 0.7
   "Highlight matches with `anything-match' face after this many seconds.

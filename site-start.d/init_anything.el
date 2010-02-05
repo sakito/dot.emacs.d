@@ -40,8 +40,8 @@
 (descbinds-anything-install)
 
 (require 'anything-complete nil t)
-;; 150 秒の待ちが発生したらでシンボルを更新
-(anything-lisp-complete-symbol-set-timer 150)
+;; 150 秒の待機が発生したらシンボルを更新
+;; (anything-lisp-complete-symbol-set-timer 150)
 
 (anything-read-string-mode 1)
 
@@ -178,7 +178,10 @@ utility mdfind.")
 (global-set-key (kbd "M-o") 'anything-c-moccur-occur-by-moccur)
 ;;ディレクトリ
 ;(global-set-key (kbd "C-M-o") 'anything-c-moccur-dmoccur)
-(global-set-key (kbd "C-M-o") 'moccur-grep)
+;; grep
+(require 'anything-grep)
+;;(global-set-key (kbd "C-M-o") 'moccur-grep)
+(global-set-key (kbd "C-M-o") 'anything-grep)
 ;; dired
 (add-hook 'dired-mode-hook
           '(lambda ()
@@ -189,6 +192,7 @@ utility mdfind.")
 ;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
 ;;(ad-disable-advice 'anything-select-action l'before 'anything-c-adaptive-select-action)
 ;;(setq anything-c-adaptive-history-length 0)
+
 
 ;; キー設定
 (define-key anything-map (kbd "C-p") 'anything-previous-line)

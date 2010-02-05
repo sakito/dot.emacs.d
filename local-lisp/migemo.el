@@ -210,7 +210,7 @@
 	(setq migemo-buffer (get-buffer-create " *migemo*"))
 	(setq migemo-process (migemo-start-process 
 			      "migemo" migemo-buffer migemo-command options))
-	(process-kill-without-query migemo-process)
+	(set-process-query-on-exit-flag migemo-process nil)
 	t)))
 
 (defun migemo-replace-in-string (string from to)

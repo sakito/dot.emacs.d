@@ -34,11 +34,13 @@
 
 (defface ac-yasnippet-candidate-face
   '((t (:background "sandybrown" :foreground "black")))
-  "Face for yasnippet candidate.")
+  "Face for yasnippet candidate."
+  :group 'ac-yasnippet)
 
 (defface ac-yasnippet-selection-face
   '((t (:background "coral3" :foreground "white"))) 
-  "Face for the yasnippet selected candidate.")
+  "Face for the yasnippet selected candidate."
+  :group 'ac-yasnippet)
 
 (defvar ac-source-yasnippet
   '((candidates . ac-yasnippet-candidate)

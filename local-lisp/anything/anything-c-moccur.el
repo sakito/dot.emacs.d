@@ -416,7 +416,7 @@ nilなら使用しない"
 
 (defun anything-c-moccur-occur-by-moccur-persistent-action (candidate)
   (anything-c-moccur-widen-if-need)
-  (goto-line (string-to-number candidate))
+  (goto-char (point-min)) (forward-line (1- (string-to-number candidate)))
   (recenter anything-c-moccur-recenter-count)
   (when (overlayp anything-c-moccur-current-line-overlay)
     (move-overlay anything-c-moccur-current-line-overlay
@@ -427,7 +427,7 @@ nilなら使用しない"
 
 (defun anything-c-moccur-occur-by-moccur-goto-line (candidate)
   (anything-c-moccur-widen-if-need)     ;utility
-  (goto-line (string-to-number candidate))
+  (goto-char (point-min)) (forward-line (1-  (string-to-number candidate)))
   (recenter anything-c-moccur-recenter-count))
 
 (defvar anything-c-source-occur-by-moccur
@@ -553,7 +553,7 @@ nilなら使用しない"
         (let ((line-number (string-to-number real-candidate)))
           (when (and (numberp line-number)
                      (not (= line-number 0)))
-            (goto-line line-number)
+            (goto-char (point-min)) (forward-line (1- line-number))
       
             (recenter anything-c-moccur-recenter-count)
             (when (overlayp anything-c-moccur-current-line-overlay)
@@ -572,7 +572,7 @@ nilなら使用しない"
                  (stringp file-path)
                  (file-readable-p file-path))
         (find-file file-path)
-        (goto-line line-number)))))
+        (goto-char (point-min)) (forward-line (1- line-number))))))
 
 (defvar anything-c-source-dmoccur
   '((name . "DMoccur")
