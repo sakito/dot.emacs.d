@@ -28,6 +28,7 @@
 
 ;;; Code:
 
+(require 'smartchr)
 ;; スタイル設定
 (add-hook 'c-mode-common-hook
           '(lambda()
@@ -55,9 +56,14 @@
              (make-variable-buffer-local 'skeleton-pair-alist)
              (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
              (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
-             (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+             ;; (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
              (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
              (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
+             ;; @see http://tech.kayac.com/archive/emacs-tips-smartchr.html
+             (local-set-key (kbd "=") (smartchr '(" = " " == "  "=")))
+             ;; !! がカーソルの位置
+             (local-set-key (kbd "{") (smartchr '("{ `!!' }" "{")))
+             (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
              ))
 
 ;; ffapの設定
