@@ -1147,21 +1147,21 @@
                                              anything-default-directory)))
                             (type . file))
 
-                           ((name . "Manual Pages")
-                            (candidates . ,(progn
-                                             ;; XEmacs doesn't have a woman :)
-                                             (declare (special woman-file-name
-                                                               woman-topic-all-completions))
-                                             (condition-case nil
-                                                 (progn
-                                                   (require 'woman)
-                                                   (woman-file-name "")
-                                                   (sort (mapcar 'car
-                                                                 woman-topic-all-completions)
-                                                         'string-lessp))
-                                               (error nil))))
-                            (action . (("Open Manual Page" . woman)))
-                            (requires-pattern . 2))
+                           ;; ((name . "Manual Pages")
+                           ;;  (candidates . ,(progn
+                           ;;                   ;; XEmacs doesn't have a woman :)
+                           ;;                   (declare (special woman-file-name
+                           ;;                                     woman-topic-all-completions))
+                           ;;                   (condition-case nil
+                           ;;                       (progn
+                           ;;                         (require 'woman)
+                           ;;                         (woman-file-name "")
+                           ;;                         (sort (mapcar 'car
+                           ;;                                       woman-topic-all-completions)
+                           ;;                               'string-lessp))
+                           ;;                     (error nil))))
+                           ;;  (action . (("Open Manual Page" . woman)))
+                           ;;  (requires-pattern . 2))
 
                            ((name . "Complex Command History")
                             (candidates . (lambda ()
