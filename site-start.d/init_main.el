@@ -57,6 +57,7 @@
 
 ;;; プログラミング関連
 (require 'init_flymake)
+(require 'init_diff)
 ; womanの設定
 ;;(require 'init_woman)
 ;;;; mode-info
