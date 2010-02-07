@@ -299,12 +299,14 @@ It asks COMMAND for grep command line and PWD for current directory."
    (progn
      (grep-compute-defaults)
      (let ((default (grep-default-command)))
-       (list (read-from-minibuffer "Run grep (like this): "
-				   (if current-prefix-arg
-				       default grep-command)
-				   nil nil 'grep-history
-				   (if current-prefix-arg nil default))
-             (read-directory-name "Directory: " default-directory default-directory t)))))
+       (list 
+        (read-directory-name "Directory: " default-directory default-directory t)
+        (read-from-minibuffer "Run grep (like this): "
+                              (if current-prefix-arg
+                                  default grep-command)
+                              nil nil 'grep-history
+                              (if current-prefix-arg nil default))
+        ))))
   (anything-grep-base (list (agrep-source (agrep-preprocess-command command) pwd))))
 ;; (anything-grep "grep -Hin agrep anything-grep.el" default-directory)
 
