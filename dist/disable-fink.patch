@@ -1,0 +1,32 @@
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -2737,12 +2737,6 @@
+     opsys=darwin
+     # Define CPP as follows to make autoconf work correctly.
+     CPP="${CC-cc} -E -no-cpp-precomp"
+-    # Use fink packages if available.
+-    if test -d /sw/include && test -d /sw/lib; then
+-      GCC_TEST_OPTIONS="-I/sw/include -L/sw/lib"
+-      CPP="${CPP} ${GCC_TEST_OPTIONS}"
+-      NON_GCC_TEST_OPTIONS=${GCC_TEST_OPTIONS}
+-    fi
+   ;;
+ 
+   ## HP 9000 series 700 and 800, running HP/UX
+diff --git a/configure.in b/configure.in
+--- a/configure.in
++++ b/configure.in
+@@ -470,12 +470,6 @@
+     opsys=darwin
+     # Define CPP as follows to make autoconf work correctly.
+     CPP="${CC-cc} -E -no-cpp-precomp"
+-    # Use fink packages if available.
+-    if test -d /sw/include && test -d /sw/lib; then
+-      GCC_TEST_OPTIONS="-I/sw/include -L/sw/lib"
+-      CPP="${CPP} ${GCC_TEST_OPTIONS}"
+-      NON_GCC_TEST_OPTIONS=${GCC_TEST_OPTIONS}
+-    fi
+   ;;
+ 
+   ## HP 9000 series 700 and 800, running HP/UX
