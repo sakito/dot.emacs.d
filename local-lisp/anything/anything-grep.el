@@ -299,12 +299,14 @@ It asks COMMAND for grep command line and PWD for current directory."
    (progn
      (grep-compute-defaults)
      (let ((default (grep-default-command)))
-       (list (read-directory-name "Directory: " default-directory default-directory t)
-             (read-from-minibuffer "Run grep (like this): "
-                                   (if current-prefix-arg
-                                       default grep-command)
-                                   nil nil 'grep-history
-                                   (if current-prefix-arg nil default))))))
+       (list
+        (read-from-minibuffer "Run grep (like this): "
+                              (if current-prefix-arg
+                                  default grep-command)
+                              nil nil 'grep-history
+                              (if current-prefix-arg nil default))
+        (read-directory-name "Directory: " default-directory default-directory t)
+        ))))
   (anything-grep-base (list (agrep-source (agrep-preprocess-command command) pwd))))
 ;; (anything-grep "grep -Hin agrep anything-grep.el" default-directory)
 
@@ -330,9 +332,10 @@ It asks COMMAND for grep command line and PWD for current directory."
 It asks NAME for location name and QUERY."
   ;; DRY
   (interactive
-   (list (completing-read "Grep by name: " anything-grep-alist
-                          nil t nil nil agbn-last-name)
-         (read-string "Grep query: ")))
+   (list
+    (read-string "Grep query: ")
+    (completing-read "Grep by name: " anything-grep-alist
+                     nil t nil nil agbn-last-name)))
   (setq query (or query (read-string "Grep query: ")))
   (setq name (or name
                  (completing-read "Grep by name: " anything-grep-alist
