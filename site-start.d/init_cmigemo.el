@@ -38,6 +38,12 @@
 ;; 辞書の文字コードを指定．
 (setq migemo-coding-system 'utf-8-unix)
 
+;; 初期は無効にしておく M-m で toggle できる
+(setq migemo-isearch-enable-p nil)
+
+;; M-m が結構押しずらいので C-t にも設定しておく
+(define-key isearch-mode-map (kbd "C-t") 'migemo-isearch-toggle-migemo)
+
 (load-library "migemo")
 ;; 起動時に初期化
 (migemo-init)
