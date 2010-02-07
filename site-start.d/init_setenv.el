@@ -32,7 +32,7 @@
 (add-to-list 'exec-path (expand-file-name "/usr/bin"))
 (add-to-list 'exec-path (expand-file-name "/sw/bin"))
 (add-to-list 'exec-path (expand-file-name "~/bin"))
-(setenv "PATH" (concat '"/usr/local/bin:/sw/bin:" (getenv "PATH")))
+(setenv "PATH" (concat '"/usr/local/bin:/sw/bin:~/bin:" (getenv "PATH")))
 
 ;; JDEEの設定に移動
 ;;(setenv "JAVA_HOME" "/Library/Java/Home")

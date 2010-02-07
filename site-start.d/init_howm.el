@@ -54,17 +54,16 @@
 (setq howm-template
       (concat howm-view-title-header " %title%cursor\n========================================\n\n"))
 
-;; タイトル色
-;;(set-face-foreground 'howm-mode-title-face "OliveDrab1")
-;(set-face-foreground 'howm-mode-keyword-face "yellow") ;; <<<
-;(set-face-foreground 'howm-mode-ref-face "yellow") ;; >>>
-;(set-face-foreground 'action-lock-face "cyan") ;; 下線文字
-;(set-face-underline 'action-lock-face t) ;; 下線は文字と同色 (Emacs 21)
-;(set-face-underline 'action-lock-face "blue") ;; 下線 (Emacs 21)
-
 ;; RET でファイルを開く際, 一覧バッファを消す
 ;; C-u RET なら残る
 (setq howm-view-summary-persistent nil)
+
+;; GNU grepを使用する
+;; (setq howm-view-use-grep t)
+;; (setq howm-view-grep-command "grep")
+;; (setq howm-view-fgrep-command "grep")
+;; (setq howm-view-grep-extended-option "-E")
+;; (setq howm-view-grep-fixed-option "-F")
 
 ;; howm の時は auto-fill にする
 ;(add-hook 'howm-mode-on-hook 'auto-fill-mode)
@@ -73,25 +72,6 @@
 
 ;; grep のオプション デフォルトは -Hnr --exclude-dir=RCS --exclude-dir=CVS --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_darcs
 (setq howm-view-grep-option "-Hnr --exclude-dir=RCS --exclude-dir=CVS --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_darcs --exclude-dir=.hg --include=*.howm --include=*.rst --include=*.txt")
-
-;; http://howm.sourceforge.jp/cgi-bin/hiki/hiki.cgi?SwitchMemoDirectory
-;(defun my-howm-set-directory (dir &optional keyfile)
-;  `(lambda ()
-;     (interactive)
-;     (setq howm-directory ,dir)
-;     (when ,keyfile
-;       (setq howm-keyword-file ,keyfile))
-;     (setq howm-menu-next-expiry-time (current-time))
-;     (message "%s" ,dir)))
-
-;; 切り替えてメニューを呼ぶ (thx > [[2ch:619]]さん)
-;(defun my-howm-switch-directory (dir &optional keyfile)
-;  (funcall (my-howm-set-directory dir keyfile))
-;  (howm-menu))
-
-;(global-set-key "\C-c,1" (my-howm-set-directory "~/howm" "~/.howm-keys"))
-;(global-set-key "\C-c,2" (my-howm-set-directory "~/Documents/blogger" "~/Documents/blogger/.howm-keys"))
-
 
 (provide 'init_howm)
 ;;; init_howm.el ends here

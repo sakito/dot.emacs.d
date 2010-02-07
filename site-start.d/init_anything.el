@@ -51,7 +51,7 @@
 (global-set-key (kbd "C-;") 'anything)
 (setq anything-sources
       '(
-        anything-c-source-mac-spotlight
+;;        anything-c-source-mac-spotlight
         anything-c-source-buffers+
 ;;        anything-c-source-buffer-not-found
         anything-c-source-file-name-history
@@ -186,6 +186,16 @@ utility mdfind.")
 (add-hook 'dired-mode-hook
           '(lambda ()
              (local-set-key (kbd "O") 'anything-c-moccur-dired-do-moccur-by-moccur)))
+
+;; anything-grep-by-name
+(setq anything-grep-alist
+      '(
+        ;; howm-directory 以下から再帰的にegrepをかける。不要なファイルは除かれる。
+        ("howm" ("ack-grep -af | xargs egrep -Hin %s" "~/howm"))
+        ;; 全バッファのファイル名においてegrepをかける。moccurの代わり。
+        ("buffers" ("egrep -Hin %s $buffers" "/"))
+        ))
+;; (anything-grep-by-name nil "howm")
 
 ;; session を利用するため anything-c-adaptive-save-history を作成しない
 ;;(remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
