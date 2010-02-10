@@ -94,6 +94,7 @@
 ;(load-file "~/.emacs.d/lisp/dvc-snapshot/dvc-load.el")
 ;(setq dvc-prefix-key [(control c) ?h])
 ; hg-mode
+(setenv "HGENCODING" "utf-8")
 (require 'ahg)
 
 
@@ -106,14 +107,14 @@
 ;; howm
 (require 'init_howm)
 ;; sdicの設定
-;(require 'init_sdic)
+;;(require 'init_sdic)
 ;; Dictionary.app 呼びだし
 (require 'init_adic)
 (define-key global-map "\C-cw" 'ite-dict-func)
 ;; AUC TeX
 ;; (require 'init_auctex)
 ;; htmlhelperの設定
-(require 'init_html)
+;; (require 'init_html)
 ;; css-modeの設定
 (require 'init_css)
 ;;; nxml-mode

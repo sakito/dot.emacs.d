@@ -22,20 +22,31 @@
 
 ;;; Commentary:
 
-;; 
+;; 詳細は http://www.bookshelf.jp/soft/meadow_50.html#SEC751
+
+;;; Code:
 
 (require 'color-moccur)
 (require 'moccur-edit)
 
-;; 複数の検索語や、特定のフェイスのみマッチ等の機能を有効にする
-;; 詳細は http://www.bookshelf.jp/soft/meadow_50.html#SEC751
+;; スペース区切りで複数文字を検索条件に指定
 (setq moccur-split-word t)
 
 ;; migemoがrequireできる環境ならmigemoを使う
 (when (require 'migemo nil t) ;第三引数がnon-nilだとloadできなかった場合にエラーではなくnilを返す
   (setq moccur-use-migemo t))
 
-;;; Code:
+;; 別ウィンドウで該当ファイルを開かない。エンターした場合にだけ開く
+(setq moccur-grep-following-mode-toggle nil)
+
+(require 'color-grep)
+
+;; grep コマンドを ack に置換
+(setq grep-command "ack-grep -a --nocolor ")
+;; grep-find コマンドを ack に置換
+(setq grep-find-command "ack-grep --nocolor --nogroup ")
+
+;; 除外ファイルリスト
 (setq dmoccur-exclusion-mask
       (append '("\\~$" "\\.hg\\/\*" "\\.git\\/\*" "\\.pyc$") dmoccur-exclusion-mask))
 

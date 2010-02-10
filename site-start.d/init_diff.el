@@ -33,7 +33,7 @@
 ;; 最初から縦分割  | で切り替え
 (setq ediff-split-window-function 'split-window-horizontally)
 
-;; m(ediff-toggle-wide-display) で frame の最大化と元の状態を toggle する
+;; m(ediff-toggle-wide-display) で最大化が可能
 
 ;; 終了時ウィンドウを復旧
 (add-hook 'ediff-load-hook

@@ -192,6 +192,8 @@ utility mdfind.")
       '(
         ;; howm-directory 以下から再帰的にegrepをかける。不要なファイルは除かれる。
         ("howm" ("ack-grep -af | xargs egrep -Hin %s" "~/howm"))
+        ;; *.el に対してegrepをかける。
+        ("dotemacs" ("egrep -Hin %s *.el" "~/.emacs.d/site-lisp"))
         ;; 全バッファのファイル名においてegrepをかける。moccurの代わり。
         ("buffers" ("egrep -Hin %s $buffers" "/"))
         ))

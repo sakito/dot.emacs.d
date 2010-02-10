@@ -30,9 +30,11 @@
 (cd "~/")
 
 ;; 文字コード
-(set-language-environment 'Japanese)
+;;(set-language-environment 'Japanese)
+(set-language-environment  'utf-8)
 ;; 極力UTF-8とする
 (prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8-unix)
 (setq locale-coding-system 'utf-8)
 
 ;; ログの長さを無限に
