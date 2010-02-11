@@ -46,7 +46,9 @@
 ;; 適用するモードを限定
 (add-hook 'c-mode-common-hook 'smartchr-custom-keybindings)
 (add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
-(add-hook 'css-mode-common-hook 'smartchr-custom-keybindings)
+(add-hook 'css-mode-hook 'smartchr-custom-keybindings)
+(add-hook 'nxml-mode-hook 'smartchr-custom-keybindings)
+(add-hook 'emacs-lisp-mode-hook 'smartchr-custom-keybindings)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here

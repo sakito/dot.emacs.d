@@ -23,44 +23,33 @@
 
 ;;; Commentary: nxml-modeを便利に利用するための設定
 
-;; 
+;; nxml-mode は Emacs 23 から標準搭載です
+;; Emacs 22 の場合は以下より取得
+;; @http://www.thaiopensource.com/download/
 
 ;;; Code:
 
-;;; nxml-mode
-;; @http://www.thaiopensource.com/download/
-;(load "~/.emacs.d/lisp/nxml-mode-20041004/rng-auto.el")
-(setq auto-mode-alist
-      (cons '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|xhtml\\|html\\)\\'" . nxml-mode)
-            auto-mode-alist))
-;; スラッシュの入力で終了タグを自動補完
-(setq nxml-slash-auto-complete-flag t)
+(add-to-list 'auto-mode-alist
+             '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|svg\\|xhtml\\|html\\)\\'" . nxml-mode))
 
-(add-hook 'nxml-mode-hook
-          (lambda()
-            ;; キーの設定
-            (define-key nxml-mode-map (kbd "\t") 'nxml-complete)
-            (define-key nxml-mode-map (kbd "C-c C-v") 'browse-url-of-file)
-            ))
+(eval-after-load "nxml-mode"
+  '(progn
+     ;; スラッシュの入力で終了タグを自動補完
+     (setq nxml-slash-auto-complete-flag t)
+     (add-hook 'nxml-mode-hook
+               (lambda()
+                 ;; キーの設定
+                 (define-key nxml-mode-map (kbd "\t") 'nxml-complete)
+                 ;; 補完キーを変更しておかないと cua とぶつかる
+                 (define-key nxml-mode-map (kbd "C-c C-t") 'nxml-complete)
+                 (define-key nxml-mode-map (kbd "C-c C-v") 'browse-url-of-file)
+                 ))
+     ))
 
-;(custom-set-variables
-; '(rng-schema-locating-files (quote ("schemas.xml" "~/.emacs.d/share/rnc/schemas.xml" "~/.emacs.d/lisp/nxml-mode-20031031/schema/schemas.xml")))
-; )
-
-;; rng-auto-file-name-alistの設定
-;(setq rng-auto-file-name-alist
-;      (append
-;       (list
-;        '(".*\\.xslt\\'" "~/.emacs.d/lisp/nxml-mode/schema/xslt.rnc")
-;        )
-;       rng-auto-file-name-alist-default)
-;      )
-
-(add-hook 'sgml-mode-hook
-          (function
-           (lambda ()
-             (nxml-mode)
-             )))
+(eval-after-load "rng-loc"
+  '(progn
+     (add-to-list 'rng-schema-locating-files (expand-file-name "~/.emacs.d/etc/schema/schemas.xml"))
+     ))
 
 (provide 'init_nxml)
 ;;; init_nxml.el ends here
