@@ -34,6 +34,7 @@
 (require 'init_shell)
 ;; キー設定
 (require 'init_key)
+(require 'init_smartchr)
 ;; 独自関数
 (require 'init_function)
 ;;; SKK

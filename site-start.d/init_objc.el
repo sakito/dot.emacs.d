@@ -92,7 +92,8 @@
 (defvar xcode:sdkpath "/Developer/Platforms/iPhoneSimulator.platform/Developer")
 (defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneOS" xcode:sdkver ".sdk"))
 (defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
-(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x objective-c" "-std=c99"))
+;;(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x" "objective-c" "-std=c99"))
+(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99"))
 (defvar flymake-last-position nil)
 (defcustom flymake-objc-compile-options '("-I.")
   "Compile option for objc check."
@@ -113,24 +114,23 @@
 (setq xcdoc:open-w3m-other-buffer t)
 
 ;; hook の設定
+(require 'xcode)
 (add-hook 'objc-mode-hook
           (lambda ()
 ;;            (define-key objc-mode-map (kbd "\t") 'ac-complete)
             (define-key objc-mode-map (kbd "M-/") 'ac-complete)
-            (define-key objc-mode-map (kbd "C-c C-c") 'xcode/build-compile)
+            (define-key objc-mode-map (kbd "C-c C-c") 'xcode:build-compile)
             (define-key objc-mode-map (kbd "C-c C-r") 'xcode:buildandrun)
             (define-key objc-mode-map (kbd "C-c w") 'xcdoc:ask-search)
             (define-key c-mode-base-map (kbd "C-c o") 'ff-find-other-file)
             (push 'ac-source-company-xcode ac-sources)
+;;            (push 'ac-source-etags ac-sources)
             (push 'ac-source-c++-keywords ac-sources)
             (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
             (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
             (flymake-mode t)
             ;; (which-function-mode t)
           ))
-
-(require 'xcode)
-
 
 (provide 'init_objc)
 ;;; init_objc.el ends here

@@ -28,7 +28,6 @@
 
 ;;; Code:
 
-(require 'smartchr)
 ;; スタイル設定
 (add-hook 'c-mode-common-hook
           '(lambda()
@@ -48,22 +47,17 @@
              (c-set-offset 'innamespace 0)
              ; 連続するスペースをバックスペース一回で削除する
              (c-toggle-hungry-state t)
-             ;; 対応する括弧の挿入
-             (make-variable-buffer-local 'skeleton-pair)
-             (make-variable-buffer-local 'skeleton-pair-on-word)
-             (setq skeleton-pair-on-word t)
-             (setq skeleton-pair t)
-             (make-variable-buffer-local 'skeleton-pair-alist)
-             (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
-             (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
+             ;; 対応する括弧の挿入 しばらく smartchr を利用してみる
+             ;; (make-variable-buffer-local 'skeleton-pair)
+             ;; (make-variable-buffer-local 'skeleton-pair-on-word)
+             ;; (setq skeleton-pair-on-word t)
+             ;; (setq skeleton-pair t)
+             ;; (make-variable-buffer-local 'skeleton-pair-alist)
+             ;; (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+             ;; (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
              ;; (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
-             (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
-             (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
-             ;; @see http://tech.kayac.com/archive/emacs-tips-smartchr.html
-             (local-set-key (kbd "=") (smartchr '(" = " " == "  "=")))
-             ;; !! がカーソルの位置
-             (local-set-key (kbd "{") (smartchr '("{ `!!' }" "{")))
-             (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+             ;; (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+             ;; (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
              ))
 
 ;; ffapの設定

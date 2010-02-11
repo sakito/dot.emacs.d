@@ -57,6 +57,9 @@ export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:$PATH
 # Git
 export PATH=$PATH:/usr/local/git/bin
 
+# Haskell
+export PATH=$PATH:$HOME/.cabal/bin
+
 # TeX
 export TEXINPUTS=/Users/sakito/lib/tex//:${TEXINPUTS}
 
@@ -76,7 +79,7 @@ export  CLICOLOR_FORCE=1
 #export CC=cc
 
 # set man command env.
-export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/sw/man
+export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man
 export MANPAGER=/usr/bin/less
 export MANWIDTH=80
 

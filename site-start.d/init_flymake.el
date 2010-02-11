@@ -60,13 +60,14 @@
   "Display the error in the minibuffer."
   (flymake-display-err-minibuffer))
 
-(defadvice flymake-mode (before post-command-stuff activate compile)
-  "Add functionality to the post command hook so that if the
-cursor is sitting on a flymake error the error information is
-displayed in the minibuffer."
-  (set (make-local-variable 'post-command-hook)
-;;         (cons 'flymake-display-err-minibuffer post-command-hook)))
-       (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
+;; (defadvice flymake-mode (before post-command-stuff activate compile)
+;;   "Add functionality to the post command hook so that if the
+;; cursor is sitting on a flymake error the error information is
+;; displayed in the minibuffer."
+;;   (set (make-local-variable 'post-command-hook)
+;;        (add-hook 'post-command-hook 'flymake-display-err-minibuffer)))
+
+(define-key global-map (kbd "C-c e") 'flymake-display-err-minibuffer)
 
 (provide 'init_flymake)
 ;;; init_flymake.el ends here
