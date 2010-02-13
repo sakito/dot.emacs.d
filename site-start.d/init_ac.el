@@ -38,17 +38,32 @@
 (require 'anything-show-completion)
 (setq anything-show-completion-minimum-window-height 4)
 
+;; デフォルトの補完候補
+(set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
+
+;; 対象の全てで補完を有効にする
+(global-auto-complete-mode t)
+
+;; 補完対象のモードを追加
+(setq ac-modes (append ac-modes '(rst-mode)))
+(setq ac-modes (append ac-modes '(css-mode)))
+(setq ac-modes (append ac-modes '(nxml-mode)))
+
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
 (require 'etags-table)
+;; find /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.2.sdk/System/Library/Frameworks -name "*.h" | xargs etags -f obcj.TAGS -l objc
 (add-to-list  'etags-table-alist
               '("\\.m$" "~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
 (add-to-list  'etags-table-alist
-              '("\\.[ch]$" . "~/.emacs.d/share/tags/c.TAGS"))
+              '("\\.[ch]$" "~/.emacs.d/share/tags/c.TAGS"))
 (add-to-list  'etags-table-alist
-              '("\\.scm$" . "~/.emacs.d/share/tags/gauche.TAGS"))
+              '("\\.scm$" "~/.emacs.d/share/tags/gauche.TAGS"))
+;; find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" | xargs etags -f python.TAGS -l python
 (add-to-list  'etags-table-alist
-              '("\\.p[lm]$" . "~/.emacs.d/share.tags/perl.TAGS"))
+              '("\\.py$" "~/.emacs.d/share/tags/python.TAGS"))
+(add-to-list  'etags-table-alist
+              '("\\.p[lm]$" "~/.emacs.d/share/tags/perl.TAGS"))
 ;; etags 補完候補
 (defvar ac-source-etags
   '((candidates . (lambda ()
@@ -60,18 +75,13 @@
 ;; objc hook
 (add-hook 'objc-mode-hook
           (lambda ()
+            (make-local-variable 'ac-sources)
             (push 'ac-source-etags ac-sources)))
-
-;; デフォルトの補完候補
-(set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
-
-;; 対象の全てで補完を有効にする
-(global-auto-complete-mode t)
-
-;; 補完対象のモードを追加
-(setq ac-modes (append ac-modes '(rst-mode)))
-(setq ac-modes (append ac-modes '(css-mode)))
-(setq ac-modes (append ac-modes '(nxml-mode)))
+;; python hook
+(add-hook 'python-mode-hook
+          (lambda ()
+            (make-local-variable 'ac-sources)
+            (push 'ac-source-etags ac-sources)))
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
@@ -84,6 +94,7 @@
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
+            (make-local-variable 'ac-sources)
             (push 'ac-source-company-elisp ac-sources)))
 (add-hook 'css-mode-hook
           (lambda ()

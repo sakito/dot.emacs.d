@@ -88,9 +88,11 @@
 
 
 ;; 環境依存設定
-(when mac-p (require 'init_main))
-(when carbon-p (require 'init_syscarbon))
-(when ns-p (require 'init_sysns))
+(cond
+ (mac-p (require 'init_main))
+ (carbon-p (require 'init_syscarbon))
+ (ns-p (require 'init_sysns))
+ )
 
 ;; 終了時バイトコンパイル
 (add-hook 'kill-emacs-query-functions

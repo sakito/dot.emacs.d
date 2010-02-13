@@ -77,14 +77,25 @@
 (defun anything-help-at-point ()
   "Preconfigured `anything' for searching help at point."
   (interactive)
-  (anything '(anything-c-source-info-elisp
-              anything-c-source-info-cl
-;;              anything-c-source-man-pages
-              anything-c-source-info-pages
-;;              anything-c-source-emacs-commands
-;;              anything-c-source-emacs-functions
-              )
-            (thing-at-point 'symbol) nil nil nil "*anything help*"))
+  (anything
+   (cond
+    ((eq major-mode 'python-mode)
+     '(anything-c-source-info-python-module
+       anything-c-source-info-python-class
+       anything-c-source-info-python-function
+       anything-c-source-info-python-misc
+       ))
+    ;;((eq major-mode 'emacs-lisp-mode)
+    (t
+     '(anything-c-source-info-elisp
+       anything-c-source-info-cl
+       ;; anything-c-source-man-pages
+       anything-c-source-info-pages
+       ;; anything-c-source-emacs-commands
+       ;; anything-c-source-emacs-functions
+       ))
+    )
+   (thing-at-point 'symbol) nil nil nil "*anything help*"))
 
 ;; このままだと woman が動作して man が見れないので man が動作するように変更する
 ;; (defvar anything-c-source-man-pages+

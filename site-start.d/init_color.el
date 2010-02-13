@@ -3,7 +3,7 @@
 ;;; init_color.el --- color setting file
 
 
-;; Copyright (C) 2004  sakito
+;; Copyright (C) 2004-2010  sakito
 ;; Author: sakito <sakito@sakito.com>
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -54,6 +54,7 @@
 ;; japanese-jisx0213-2 = code-offset #x150000
 ;; japanese-jisx0212 = code-offset #x148000 
 ;; japanese-jisx0208 = code-offset #x140000
+(when mac-p
 (set-face-attribute 'default
                     nil
                     :family "September"
@@ -106,7 +107,7 @@
                   (font-spec :family "September")
                   nil
                   'prepend)
-
+)
 
 ;; 等幅のフォントセットを幾つか作成予定
 ;; ヒラギノ 角ゴ ProN + Menlo
