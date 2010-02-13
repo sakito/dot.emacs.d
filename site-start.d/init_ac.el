@@ -54,7 +54,7 @@
 (require 'etags-table)
 ;; find /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.2.sdk/System/Library/Frameworks -name "*.h" | xargs etags -f obcj.TAGS -l objc
 (add-to-list  'etags-table-alist
-              '("\\.m$" "~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
+              '("\\.m$" "~/.emacs.d/share/tags/objc.TAGS"))
 (add-to-list  'etags-table-alist
               '("\\.[ch]$" "~/.emacs.d/share/tags/c.TAGS"))
 (add-to-list  'etags-table-alist
@@ -70,6 +70,7 @@
          (all-completions ac-target (tags-completion-table))))
     (candidate-face . ac-candidate-face)
     (selection-face . ac-selection-face)
+    (symbol . "e")
     (requires . 3))
   "etags をソースにする")
 ;; objc hook
@@ -95,7 +96,9 @@
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)
-            (push 'ac-source-company-elisp ac-sources)))
+            (push 'ac-source-company-elisp ac-sources)
+            (push 'ac-source-variables ac-sources)
+            (push 'ac-source-functions ac-sources)))
 (add-hook 'css-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)

@@ -90,10 +90,10 @@
 (defvar xcode:gccver "4.0")
 (defvar xcode:sdkver "3.1.2")
 (defvar xcode:sdkpath "/Developer/Platforms/iPhoneSimulator.platform/Developer")
-(defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneOS" xcode:sdkver ".sdk"))
+(defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneSimulator" xcode:sdkver ".sdk"))
 (defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
 ;;(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x" "objective-c" "-std=c99"))
-(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99"))
+(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99" "-isysroot" xcode:sdk))
 (defvar flymake-last-position nil)
 (defcustom flymake-objc-compile-options '("-I.")
   "Compile option for objc check."
