@@ -128,7 +128,8 @@
             (push 'ac-source-c++-keywords ac-sources)
             (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
             (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
-            (flymake-mode t)
+            (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+                (flymake-mode t))
             ;; (which-function-mode t)
           ))
 

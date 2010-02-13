@@ -43,6 +43,11 @@
 ;; 150 秒の待機が発生したらシンボルを更新
 ;; (anything-lisp-complete-symbol-set-timer 150)
 
+;;(require 'anything-etags)
+;; (setq tags-table-list '("~/.emacs.d/share/tags/TAGS" "TAGS"))
+;; (require 'anything-yaetags)
+;; (global-set-key (kbd "M-.") 'anything-yaetags-find-tag)
+
 (anything-read-string-mode 1)
 
 ;; http://www.emacswiki.org/emacs/anything-show-completion.el
@@ -57,6 +62,8 @@
         anything-c-source-file-name-history
         anything-c-source-kill-ring
         anything-c-source-bookmarks
+;;        anything-c-source-yaetags-select
+;;        anything-c-source-etags-select
 ;;        anything-c-source-info-pages
 ;;        anything-c-source-info-elisp
 ;;        anything-c-source-man-pages

@@ -34,11 +34,44 @@
 ;; @see http://www.emacswiki.org/emacs/AutoComplete
 (require 'auto-complete)
 (require 'auto-complete-config)
-(require 'auto-complete-yasnippet)
 ;; http://www.emacswiki.org/emacs/anything-show-completion.el
 (require 'anything-show-completion)
 (setq anything-show-completion-minimum-window-height 4)
 
+;; etags ファイルの候補を設定
+;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
+(require 'etags-table)
+(add-to-list  'etags-table-alist
+              '("\\.m$" "~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
+(add-to-list  'etags-table-alist
+              '("\\.[ch]$" . "~/.emacs.d/share/tags/c.TAGS"))
+(add-to-list  'etags-table-alist
+              '("\\.scm$" . "~/.emacs.d/share/tags/gauche.TAGS"))
+(add-to-list  'etags-table-alist
+              '("\\.p[lm]$" . "~/.emacs.d/share.tags/perl.TAGS"))
+;; etags 補完候補
+(defvar ac-source-etags
+  '((candidates . (lambda ()
+         (all-completions ac-target (tags-completion-table))))
+    (candidate-face . ac-candidate-face)
+    (selection-face . ac-selection-face)
+    (requires . 3))
+  "etags をソースにする")
+;; objc hook
+(add-hook 'objc-mode-hook
+          (lambda ()
+            (push 'ac-source-etags ac-sources)))
+
+;; デフォルトの補完候補
+(set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
+
+;; 対象の全てで補完を有効にする
+(global-auto-complete-mode t)
+
+;; 補完対象のモードを追加
+(setq ac-modes (append ac-modes '(rst-mode)))
+(setq ac-modes (append ac-modes '(css-mode)))
+(setq ac-modes (append ac-modes '(nxml-mode)))
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
@@ -50,21 +83,17 @@
 (ac-company-define-source ac-source-company-nxml company-nxml)
 
 (add-hook 'emacs-lisp-mode-hook
-          '(lambda()
-             (push 'ac-source-company-elisp ac-sources)))
+          (lambda ()
+            (push 'ac-source-company-elisp ac-sources)))
 (add-hook 'css-mode-hook
-          '(lambda()
-             (push 'ac-source-company-css ac-sources)))
-
-;; 対象の全てで補完を有効にする
-(global-auto-complete-mode t)
-
-;; 補完対象のモードを追加
-(setq ac-modes (append ac-modes '(rst-mode)))
-(setq ac-modes (append ac-modes '(css-mode)))
-
-;; デフォルトの補完候補
-(set-default 'ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-same-mode-buffers))
+          (lambda ()
+            (make-local-variable 'ac-sources)
+            (push 'ac-source-css-keywords ac-sources)
+            (push 'ac-source-company-css ac-sources)))
+(add-hook 'nxml-mode-hook
+          (lambda ()
+            (make-local-variable 'ac-sources)
+            (push 'ac-source-company-nxml ac-sources)))
 
 ;; 補完を anything する
 ;; http://www.emacswiki.org/cgi-bin/wiki/download/ac-anything.el
