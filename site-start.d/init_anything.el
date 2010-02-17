@@ -97,39 +97,6 @@
     )
    (thing-at-point 'symbol) nil nil nil "*anything help*"))
 
-;; このままだと woman が動作して man が見れないので man が動作するように変更する
-;; (defvar anything-c-source-man-pages+
-;;   `((name . "Manual Pages")
-;;     (candidates . (lambda ()
-;;                     (if anything-c-man-pages
-;;                         anything-c-man-pages
-;;                       ;; XEmacs doesn't have a woman :)
-;;                       (setq anything-c-man-pages
-;;                             (ignore-errors
-;;                               (require 'man)
-;;                               (woman-file-name "")
-;;                               (sort (mapcar 'car woman-topic-all-completions)
-;;                                     'string-lessp))))))
-;;     (action  ("Show with man" . man))
-;;     (requires-pattern . 2)))
-;; (anything 'anything-c-source-man-pages+)
-
-;; (iswitchb-mode)
-;; メンテナンスされてないので利用しちゃいけない
-;; (anything-iswitchb-setup)
-
-;;; Spotlight (MacOS X desktop search)
-(defvar anything-c-source-mac-spotlight-home
-  '((name . "mdfindhome")
-    (candidates . (lambda ()
-                    (start-process "mdfind-process" nil "mdfind" "-onlyin" "~/" anything-pattern)))
-    (type . file)
-    (requires-pattern . 3)
-    (delayed))
-  "Source for retrieving files via Spotlight's command line
-utility mdfind.")
-;; (anything 'anything-c-source-mac-spotlight-home)
-
 
 ;; 最近のファイル等を anything する
 ;; see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
@@ -153,20 +120,20 @@ utility mdfind.")
 (add-hook 'kill-emacs-query-functions 'recentf-cleanup)
 ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
 ;; (setq recentf-save-file "~/.emacs.d/var/recentf")
-(require 'recentf-ext)
-(global-set-key (kbd "C-x C-b") 'anything-for-files)
-
-;; M-yでkill-ringの内容をanythingする
-(global-set-key (kbd "M-y") 'anything-show-kill-ring)
 
 ;; C-x C-b のバッファリストをanythingする
 ;(global-set-key (kbd "C-x C-b") 'anything-for-buffers)  これだと色つかないので以下にした
 ;(global-set-key (kbd "C-x C-b") (lambda () (interactive) (anything 'anything-c-source-buffers+)))
+(require 'recentf-ext)
+(global-set-key (kbd "C-x C-b") 'anything-for-files)
 ;; current-buffer も末尾に表示する
 (setq anything-allow-skipping-current-buffer nil)
 
-;;split-root http://nschum.de/src/emacs/split-root/
+;; M-yでkill-ringの内容をanythingする
+(global-set-key (kbd "M-y") 'anything-show-kill-ring)
+
 ;; anything した時のウィンドウを常に下部に開く。高さは比率にて自動算出
+;; split-root http://nschum.de/src/emacs/split-root/
 (require 'split-root)
 ;; 比率
 (defvar anything-compilation-window-height-percent 30.0)
@@ -199,7 +166,7 @@ utility mdfind.")
 ;; grep
 (require 'anything-grep)
 ;;(global-set-key (kbd "C-M-o") 'moccur-grep)
-(global-set-key (kbd "C-M-o") 'anything-grep)
+;;(global-set-key (kbd "C-M-o") 'anything-grep)
 ;; dired
 (add-hook 'dired-mode-hook
           '(lambda ()
@@ -222,6 +189,28 @@ utility mdfind.")
 ;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
 ;;(ad-disable-advice 'anything-select-action l'before 'anything-c-adaptive-select-action)
 ;;(setq anything-c-adaptive-history-length 0)
+
+;; anything-project の設定
+;; @see http://github.com/imakado/anything-project/blob/master/anything-project.el
+(require 'anything-project)
+;; 設定試行錯誤中
+(add-to-list 'ap:default-project-root-files ".hg")
+(ap:add-project
+ :name 'emacs-lisp
+ :look-for '("init.el")
+ :include-regexp '("\\.el$")
+ )
+(ap:add-project
+ :name 'python
+ :look-for '("config.py" "conf.py")
+ :include-regexp '("\\.py$" "\\.rst$")
+ )
+(ap:add-project
+ :name 'howm
+ :look-for '("0000-00-00-000000.howm")
+ :include-regexp '("\\.howm$" "\\.txt$" "\\.rst$")
+ )
+(global-set-key (kbd "C-M-o") 'anything-project-grep)
 
 
 ;; キー設定

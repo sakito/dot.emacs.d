@@ -64,15 +64,6 @@
 (autoload 'doctest-mode
   "doctest-mode" "Editing mode for Python Doctest examples." t)
 
-(add-hook 'python-mode-hook
-          (lambda ()
-            (require 'pycomplete)
-            (setq indent-tabs-mode nil)
-            ;; (set (make-variable-buffer-local 'beginning-of-defun-function)
-            ;;      'py-beginning-of-def-or-class)
-            (setq outline-regexp "def\\|class "))
-          )
-
 ;; Pymacs
 (require 'pymacs)
 (autoload 'pymacs-apply "pymacs")
@@ -101,21 +92,6 @@
 (when (require 'anything-show-completion nil t)
   (use-anything-show-completion 'anything-ipython-complete
                                 '(length initial-pattern)))
-
-;; pysmell http://pypi.python.org/pypi/pysmell
-;; easy_install -UZ pysmell
-;; pysmell /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -x site-packages test -o PYSMELLTAGS
-;; (require 'pysmell)
-;; (add-hook 'python-mode-hook (lambda () (pysmell-mode 1)))
-;; (defvar ac-source-pysmell
-;;   '((candidates
-;;      . (lambda ()
-;;          (pysmell-get-all-completions))))
-;;   "Source for PySmell")
-;; (add-hook 'python-mode-hook
-;;           '(lambda ()
-;;              (make-local-variable 'ac-sources)
-;;              (push 'ac-source-pysmell ac-sources)))
 
 ;; anything で info 参照
 ;; もっと効率的に記述できることはわかっているが、都合により現在はこの記述にしておく

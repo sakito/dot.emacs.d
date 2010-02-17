@@ -2,7 +2,7 @@
 
 ;;; init_rst.el --- rst mode setting file
 
-;; Copyright (C) 2004-2009  sakito
+;; Copyright (C) 2004-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -32,8 +32,13 @@
 ;; rst-mode
 ;; @see http://docutils.sourceforge.net/
 (autoload 'rst-mode "rst-mode" "mode for editing reStructuredText documents" t)
+
+;; (setq default-major-mode 'rst-mode)
+;; (setq initial-major-mode 'rst-mode)
+
 (setq auto-mode-alist
       (append '(
+                ("\\.txt$" . rst-mode)
                 ("\\.rst$" . rst-mode)
                 ("\\.rest$" . rst-mode)
                 ) auto-mode-alist))

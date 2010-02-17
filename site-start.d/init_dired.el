@@ -2,7 +2,7 @@
 
 ;;; init_dired.el --- dired setting file
 
-;; Copyright (C) 2004  sakito
+;; Copyright (C) 2004-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -38,6 +38,9 @@
   '(progn
      ;; dired-x を起動
      (require 'dired-x)
+     ;; s で並び変え、C-u s で元に戻る
+     ;; @see http://www.meadowy.org/~shirai/elips/sorter.el
+     (require 'sorter)
      ;; dired-x では C-x C-j がdired-jump になるので skk-modeに再割り当て
      (global-set-key (kbd "C-x C-j") 'skk-mode)
      ;; システムのlsでなくls-lispを利用して表示

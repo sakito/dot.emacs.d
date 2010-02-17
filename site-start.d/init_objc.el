@@ -2,7 +2,7 @@
 
 ;;; init_objc.el --- objc
 
-;; Copyright (C) 2009  sakito
+;; Copyright (C) 2009-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: languages
@@ -25,12 +25,14 @@
 ;; 
 
 ;;; Code:
+(when (or mac-p ns-p carbon-p)
 
 ;; XCode 側設定
 ;; 環境設定->ファイルタイプ-> text -> sourcecode -> sourcecode.c -> その他 -> Emacs.app
 ;; 「その他」から選択すること。デフォルトに存在する emacs は Terminal.app が起動してしまう
 ;; 通常は以下を設定しないとフレームが新規作成される。パッチを当てていると不要
-;; (setq ns-pop-up-frames nil)
+(when ns-p
+  (setq ns-pop-up-frames nil))
 
 ;; 拡張子が m もしくは mm のファイルは matlab-mode とぶつかる
 ;; 拡張子が h のファイルをそのまま設定してしまうと C や C++ 開発で困る
@@ -123,15 +125,14 @@
             (define-key objc-mode-map (kbd "C-c C-r") 'xcode:buildandrun)
             (define-key objc-mode-map (kbd "C-c w") 'xcdoc:ask-search)
             (define-key c-mode-base-map (kbd "C-c o") 'ff-find-other-file)
-            (push 'ac-source-company-xcode ac-sources)
-;;            (push 'ac-source-etags ac-sources)
-            (push 'ac-source-c++-keywords ac-sources)
             (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
             (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
             (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
                 (flymake-mode t))
             ;; (which-function-mode t)
           ))
+
+)
 
 (provide 'init_objc)
 ;;; init_objc.el ends here

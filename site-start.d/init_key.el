@@ -46,6 +46,16 @@
 (setq cua-enable-cua-keys nil)
 (cua-mode t)
 
+;; fullscreen を toggle する
+(defun toggle-fullscreen ()
+  (interactive)
+  (if (frame-parameter nil 'fullscreen)
+      (set-frame-parameter nil 'fullscreen nil)
+    (set-frame-parameter nil 'fullscreen 'fullboth)
+    ))
+(global-set-key (kbd "C-c m") 'mac-toggle-fullscreen)
+
+
 (when ns-p
   ;; 
   ;; (setq ns-alternate-modifier (quote alt))
@@ -75,16 +85,7 @@
   (mac-translate-from-yen-to-backslash)
   ;; 入力モードを英語に変更
   (setq mac-ts-script-language-on-focus '(0 . 0))
-
-  ;; fullscreen を toggle する
-
-  (defun mac-toggle-fullscreen ()
-    (interactive)
-    (if (frame-parameter nil 'fullscreen)
-        (set-frame-parameter nil 'fullscreen nil)
-      (set-frame-parameter nil 'fullscreen 'fullboth)
-      ))
-  (global-set-key (kbd "C-c m") 'mac-toggle-fullscreen))
+)
 
 (provide 'init_key)
 ;;; init_key.el ends here

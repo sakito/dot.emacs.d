@@ -36,9 +36,12 @@
   (setq session-initialize '(de-saveplace session keys menus places)
         session-globals-include '((kill-ring 50)
                                   (session-file-alist 500 t)
-                                  (file-name-history 100))
+                                  (file-name-history 10000))
         ;; 保存時でなく閉じた時のカーソル位置を記憶する
         session-undo-check -1)
+  ;; 記憶容量を倍に設定しておく
+  (setq session-globals-max-string  2048)
+  (setq session-registers-max-string 2048)
   ;; ミニバッファ履歴リストの長さ制限を無くす
   (setq history-length t)
   (add-hook 'after-init-hook 'session-initialize))

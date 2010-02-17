@@ -44,6 +44,12 @@
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
 
+;; 補完候補数
+;;(setq ac-candidate-limit 20)
+
+;; 補完候補のソース
+;;(setq ac-use-comphist t)
+
 ;; 補完対象のモードを追加
 (setq ac-modes (append ac-modes '(rst-mode)))
 (setq ac-modes (append ac-modes '(css-mode)))
@@ -54,9 +60,9 @@
 (require 'etags-table)
 ;; find /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.2.sdk/System/Library/Frameworks -name "*.h" | xargs etags -f obcj.TAGS -l objc
 (add-to-list  'etags-table-alist
-              '("\\.m$" "~/.emacs.d/share/tags/objc.TAGS"))
+              '("\\.[mh]$" "~/.emacs.d/share/tags/objc.TAGS"))
 (add-to-list  'etags-table-alist
-              '("\\.[ch]$" "~/.emacs.d/share/tags/c.TAGS"))
+              '("\\.c$" "~/.emacs.d/share/tags/c.TAGS"))
 (add-to-list  'etags-table-alist
               '("\\.scm$" "~/.emacs.d/share/tags/gauche.TAGS"))
 ;; find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" | xargs etags -f python.TAGS -l python
@@ -77,12 +83,19 @@
 (add-hook 'objc-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)
-            (push 'ac-source-etags ac-sources)))
+            ;; 既存に存在するかを無視して先頭に追加
+            (push 'ac-source-c++-keywords ac-sources)
+            ;; (push 'ac-source-company-xcode ac-sources)
+            ;; 末尾に追加
+            ;;(push 'ac-source-etags ac-sources)
+            (setq ac-sources (append ac-sources '(ac-source-etags)))
+            ))
 ;; python hook
 (add-hook 'python-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)
-            (push 'ac-source-etags ac-sources)))
+            ;; 末尾に追加
+            (setq ac-sources (append ac-sources '(ac-source-etags)))))
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el

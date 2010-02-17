@@ -40,9 +40,7 @@
       )
 
 ;; 背景の透過
-;(set-frame-parameter (selected-frame) 'alpha '(95 15))
 (add-to-list 'default-frame-alist '(alpha . (85 20)))
-
 
 ;;; フォントの設定
 ;; システム依存を排除するために一旦デフォルトフォントセットを上書き
@@ -65,26 +63,6 @@
                   (font-spec :family "IPAGothic")
                   nil
                   'append)
-;; (set-fontset-font nil
-;;                   'thai-tis620
-;;                   (font-spec :family "Ayuthaya")
-;;                   nil
-;;                   'prepend)
-;; (set-fontset-font nil
-;;                   'chinese-gb2312
-;;                   (font-spec :family "STHeiti")
-;;                   nil
-;;                   'prepend)
-;; (set-fontset-font nil
-;;                   'chinese-big5-1
-;;                   (font-spec :family "LiSong Pro")
-;;                   nil
-;;                   'prepend)
-;; (set-fontset-font nil
-;;                   'korean-ksc5601
-;;                   (font-spec :family "AppleGothic")
-;;                   nil
-;;                   'prepend)
 ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
 ;; http://apagreekkeys.org/NAUdownload.html
 (set-fontset-font nil
@@ -110,19 +88,19 @@
 )
 
 ;; 等幅のフォントセットを幾つか作成予定
-;; ヒラギノ 角ゴ ProN + Menlo
-(create-fontset-from-ascii-font "Menlo-14" nil "menlokakugo")
-(set-fontset-font "fontset-menlokakugo"
-                  'unicode
-                  (font-spec :family "Hiragino Kaku Gothic ProN" :size 16))
-;; 確認用 (set-frame-font "fontset-menlokakugo")
-;; (add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))  ;; 実際に設定する場合
 
+(when (find-font (font-spec :family "Menlo"))
+  ;; ヒラギノ 角ゴ ProN + Menlo
+  (create-fontset-from-ascii-font "Menlo-14" nil "menlokakugo")
+  (set-fontset-font "fontset-menlokakugo"
+                    'unicode
+                    (font-spec :family "Hiragino Kaku Gothic ProN" :size 16))
+  ;; 確認用 (set-frame-font "fontset-menlokakugo")
+  ;; (add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))  ;; 実際に設定する場合
+  )
 
 
 ;; フォントロックの設定
-;; hilit19はemacs19用で、メンテナンスされてません。
-;; emacs2xではfont-lockを使うようにします。
 (when (fboundp 'global-font-lock-mode)
   (global-font-lock-mode t)
   ;;(setq font-lock-maximum-decoration t)
