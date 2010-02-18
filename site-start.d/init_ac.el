@@ -44,13 +44,23 @@
 (setq ac-auto-start nil)
 ;; 数字を指定すると ac が起動する文字数になる
 ;(setq ac-auto-start 2)
+
 ;; 起動キーの設定
 (ac-set-trigger-key "TAB")
+
+;; 待ち時間を長めに取る
+(setq ac-delay 5.0)
+
 ;; 候補の最大件数 デフォルトは 10件
 (setq ac-candidate-limit 100)
 
-;; 補完候補のソース
-;;(setq ac-use-comphist t)
+;; 補完候補のソート
+(setq ac-use-comphist t)
+
+;; ソートファイルの保存場所を変更
+(setq ac-comphist-file
+      (expand-file-name (concat user-emacs-directory
+                                "/var/ac-comphist.dat")))
 
 ;; 補完対象のモードを追加
 (setq ac-modes (append ac-modes '(rst-mode)))
@@ -131,7 +141,7 @@
 (define-key ac-completing-map (kbd "C-:") 'ac-complete-with-anything)
 
 ;; キー設定
-(define-key ac-completing-map "\t" 'ac-complete)
+;; (define-key ac-completing-map "\t" 'ac-complete)
 (define-key ac-completing-map (kbd "C-m") 'ac-complete)
 (define-key ac-completing-map (kbd "C-n") 'ac-next)
 (define-key ac-completing-map (kbd "C-p") 'ac-previous)
