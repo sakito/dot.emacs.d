@@ -202,7 +202,7 @@
  )
 (ap:add-project
  :name 'python
- :look-for '("config.py" "conf.py")
+ :look-for '("setup.py" "config.py" "conf.py")
  :include-regexp '("\\.py$" "\\.rst$")
  )
 (ap:add-project
@@ -213,11 +213,13 @@
 (global-set-key (kbd "C-M-o") 'anything-project-grep)
 
 
-;; キー設定
-(define-key anything-map (kbd "C-p") 'anything-previous-line)
-(define-key anything-map (kbd "C-n") 'anything-next-line)
-(define-key anything-map (kbd "C-v") 'anything-next-source)
-(define-key anything-map (kbd "M-v") 'anything-previous-source)
+;; キー設定 現在以下は設定すみなのでする必要はない
+;;(define-key anything-map (kbd "C-p") 'anything-previous-line)
+;;(define-key anything-map (kbd "C-n") 'anything-next-line)
+;;(define-key anything-map (kbd "M-n") 'anything-next-source)
+;;(define-key anything-map (kbd "M-p") 'anything-previous-source)
+;;(define-key anything-map (kbd "C-v") 'anything-next-page)
+;;(define-key anything-map (kbd "M-v") 'anything-previous-page)
 
 (provide 'init_anything)
 ;;; init_anything.el ends here

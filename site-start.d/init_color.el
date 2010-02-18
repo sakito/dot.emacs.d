@@ -170,8 +170,14 @@
 (eval-after-load "color-theme"
   '(progn
      (color-theme-initialize)
-     (require 'color-theme-sakito)
-     (color-theme-sakito)))
+     (cond
+      (mac-p
+       (require 'color-theme-sakito)
+       (color-theme-sakito))
+      (windows-p
+       (require 'color-theme-ntemacs)
+       (color-theme-ntemacs))
+      )))
 
 ;; face を調査するための関数
 ;; いろいろ知りたい場合は C-u C-x =

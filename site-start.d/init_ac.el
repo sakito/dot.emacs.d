@@ -26,10 +26,6 @@
 
 ;;; Code:
 
-;(require 'ac-mode)
-;; 常にac-modeをONにする
-;(add-hook 'find-file-hooks 'ac-mode-without-exception)
-
 ;; @see http://github.com/m2ym/auto-complete
 ;; @see http://www.emacswiki.org/emacs/AutoComplete
 (require 'auto-complete)
@@ -44,8 +40,14 @@
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
 
-;; 補完候補数
-;;(setq ac-candidate-limit 20)
+;; 自動で起動するのを停止
+(setq ac-auto-start nil)
+;; 数字を指定すると ac が起動する文字数になる
+;(setq ac-auto-start 2)
+;; 起動キーの設定
+(ac-set-trigger-key "TAB")
+;; 候補の最大件数 デフォルトは 10件
+(setq ac-candidate-limit 100)
 
 ;; 補完候補のソース
 ;;(setq ac-use-comphist t)
@@ -109,9 +111,10 @@
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)
-            (push 'ac-source-company-elisp ac-sources)
             (push 'ac-source-variables ac-sources)
-            (push 'ac-source-functions ac-sources)))
+            (push 'ac-source-functions ac-sources)
+            (push 'ac-source-company-elisp ac-sources)
+            ))
 (add-hook 'css-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)
@@ -133,15 +136,6 @@
 (define-key ac-completing-map (kbd "C-n") 'ac-next)
 (define-key ac-completing-map (kbd "C-p") 'ac-previous)
 (define-key ac-completing-map (kbd "M-/") 'ac-stop)
-
-;; 自動で起動するのを停止
-(setq ac-auto-start nil)
-;; 数字を指定すると ac が起動する文字数になる
-;(setq ac-auto-start 2)
-;; 起動キーの設定
-(ac-set-trigger-key "TAB")
-;; 候補の最大件数 デフォルトは 10件
-(setq ac-candidate-max 20)
 
 (provide 'init_ac)
 ;;; init_ac.el ends here
