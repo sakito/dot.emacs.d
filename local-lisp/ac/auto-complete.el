@@ -183,8 +183,13 @@
   :prefix "ac-")
 
 (defcustom ac-delay 0.1
-  "Delay to show menu."
+  "Delay to completions will be available."
   :type 'float
+  :group 'auto-complete)
+
+(defcustom ac-auto-show-menu t
+  "Non-nil means completion menu will be automatically shown."
+  :type 'boolean
   :group 'auto-complete)
 
 (defcustom ac-use-fuzzy t
@@ -200,6 +205,11 @@
 (defcustom ac-use-comphist nil
   "Non-nil means use intelligent completion history."
   :type 'boolean
+  :group 'auto-complete)
+
+(defcustom ac-comphist-threshold 0.7
+  "Percentage of ignoring low scored candidates."
+  :type 'float
   :group 'auto-complete)
 
 (defcustom ac-comphist-file
@@ -340,6 +350,9 @@ a prefix doen't contain any upper case letters."
 (defvar ac-menu nil
   "Menu instance.")
 
+(defvar ac-show-menu nil
+  "Flag to show menu on timer tick.")
+
 (defvar ac-quick-help nil
   "Quick help instance")
 
@@ -370,7 +383,10 @@ If there is no common part, this will be nil.")
   "Overlay for prefix string.")
 
 (defvar ac-timer nil
-  "Menu idle timer.")
+  "Completion idle timer.")
+
+(defvar ac-show-menu-timer nil
+  "Show menu idle timer.")
 
 (defvar ac-quick-help-timer nil
   "Quick help idle timer.")
@@ -650,8 +666,7 @@ You can not use it in source definition like (prefix . `NAME')."
         (overlay-put overlay 'after-string nil)))))
 
 (defun ac-inline-update ()
-  (when (and ac-completing ac-prefix
-             (stringp (setq ac-common-part (try-completion ac-prefix ac-candidates))))
+  (when (and ac-completing ac-prefix (stringp ac-common-part))
     (let ((common-part-length (length ac-common-part))
           (prefix-length (length ac-prefix)))
       (if (> common-part-length prefix-length)
@@ -785,8 +800,21 @@ You can not use it in source definition like (prefix . `NAME')."
         finally return
         (progn
           (delete-dups candidates)
-          (if ac-comphist
-              (ac-comphist-sort ac-comphist candidates prefix-len)
+          (if ac-use-comphist
+              (if ac-show-menu
+                  (let* ((pair (ac-comphist-sort ac-comphist candidates prefix-len ac-comphist-threshold))
+                         (n (car pair))
+                         (result (cdr pair))
+                         (cons (if (> n 0) (nthcdr (1- n) result)))
+                         (cdr (cdr cons)))
+                    (if cons (setcdr cons nil))
+                    (setq ac-common-part (try-completion ac-prefix result))
+                    (if cons (setcdr cons cdr))
+                    result)
+                (setq candidates (ac-comphist-sort ac-comphist candidates prefix-len ))
+                (setq ac-common-part (if candidates (popup-x-to-string (car candidates))))
+                candidates)
+            (setq ac-common-part (try-completion ac-prefix candidates))
             candidates))))
 
 (defun ac-update-candidates (cursor scroll-top)
@@ -805,7 +833,8 @@ You can not use it in source definition like (prefix . `NAME')."
   (if (and (not ac-fuzzy-enable)
            (<= (length ac-candidates) 1))
       (popup-hide ac-menu)
-    (popup-draw ac-menu)))
+    (if ac-show-menu
+        (popup-draw ac-menu))))
 
 (defun ac-reposition ()
   "Force to redraw candidate menu with current `ac-candidates'."
@@ -830,9 +859,11 @@ You can not use it in source definition like (prefix . `NAME')."
   (ac-inline-delete)
   (ac-menu-delete)
   (ac-cancel-timer)
+  (ac-cancel-show-menu-timer)
   (ac-cancel-quick-help-timer)
   (setq ac-cursor-color nil
         ac-inline nil
+        ac-show-menu nil
         ac-menu nil
         ac-completing nil
         ac-point nil
@@ -897,7 +928,7 @@ that have been made before in this function."
     (setq ac-timer (run-with-idle-timer ac-delay ac-delay 'ac-update))))
 
 (defun ac-cancel-timer ()
-  (when (timerp  ac-timer)
+  (when (timerp ac-timer)
     (cancel-timer ac-timer)
     (setq ac-timer nil)))
 
@@ -920,6 +951,22 @@ that have been made before in this function."
           (ac-menu-create ac-point preferred-width ac-menu-height)))
       (ac-update-candidates 0 0)
       t)))
+
+(defun ac-set-show-menu-timer ()
+  (when (and (floatp ac-auto-show-menu) (null ac-show-menu-timer))
+    (setq ac-show-menu-timer (run-with-idle-timer ac-auto-show-menu ac-auto-show-menu 'ac-show-menu))))
+
+(defun ac-cancel-show-menu-timer ()
+  (when (timerp ac-show-menu-timer)
+    (cancel-timer ac-show-menu-timer)
+    (setq ac-show-menu-timer nil)))
+
+(defun ac-show-menu ()
+  (when (not (eq ac-show-menu t))
+    (setq ac-show-menu t)
+    (ac-inline-hide)
+    (ac-remove-quick-help)
+    (ac-update t)))
 
 (defun ac-set-quick-help-timer ()
   (when (and ac-use-quick-help
@@ -964,22 +1011,25 @@ that have been made before in this function."
   "Database of completion history.")
 
 (defun ac-comphist-make (&optional n tab seq)
-  (list (or n 5) (or tab (ac-comphist-make-tab)) seq))
+  (list (or n 5) (or tab (ac-comphist-make-tab)) seq (make-hash-table :test 'equal :weakness t)))
 
-(defun ac-comphist-n (db)
+(defsubst ac-comphist-n (db)
   (nth 0 db))
 
-(defun ac-comphist-make-tab ()
+(defsubst ac-comphist-make-tab ()
   (make-hash-table :test 'equal))
 
-(defun ac-comphist-tab (db)
+(defsubst ac-comphist-tab (db)
   (nth 1 db))
 
-(defun ac-comphist-seq (db)
+(defsubst ac-comphist-seq (db)
   (nth 2 db))
 
-(defun ac-comphist-set-seq (db seq)
+(defsubst ac-comphist-set-seq (db seq)
   (setf (nth 2 db) seq))
+
+(defsubst ac-comphist-cache (db)
+  (nth 3 db))
 
 (defun ac-comphist-get (db string &optional create)
   (let* ((tab (ac-comphist-tab db))
@@ -1020,33 +1070,55 @@ that have been made before in this function."
 
 (defun ac-comphist-freq (db string prefix)
   (setq prefix (min prefix (1- (length string))))
-  (let ((index (ac-comphist-get db string))
-        (freq 0.0))
-    (when index
-      (loop with seq = (ac-comphist-seq db)
-            for p from 1 to (1- (length string))
-            for r = (/ (float (if (<= p prefix) p (max 0 (- prefix (- p prefix))))) prefix)
-            for stat = (ac-comphist-stat db index p)
-            if (and stat (> r 0))
-            do
-            (loop with found
-                  for i from 1
-                  for s in seq
-                  if (equal string s)
+  (let ((cache (gethash string (ac-comphist-cache db))))
+    (or (and cache (aref cache prefix))
+        (let ((index (ac-comphist-get db string))
+              (freq 0.0))
+          (when index
+            (loop with seq = (ac-comphist-seq db)
+                  for p from 1 to (1- (length string))
+                  for r = (/ (float (if (<= p prefix) p (max 0 (- prefix (- p prefix))))) prefix)
+                  for stat = (ac-comphist-stat db index p)
+                  if (and stat (> r 0))
                   do
-                  (setq found t)
-                  (incf freq (* (aref stat i) r))
-                  finally
-                  (unless found
-                    (incf freq (* (aref stat 0) r))))))
-    (floor freq)))
+                  (loop with found
+                        for i from 1
+                        for s in seq
+                        if (equal string s)
+                        do
+                        (setq found t)
+                        (incf freq (* (aref stat i) r))
+                        finally
+                        (unless found
+                          (incf freq (* (aref stat 0) r))))))
+          (setq freq (floor freq))
+          (unless cache
+            (setq cache (make-vector (length string) nil))
+            (puthash string cache (ac-comphist-cache db)))
+          (aset cache prefix freq)
+          freq))))
 
-(defun ac-comphist-sort (db collection prefix)
-  (mapcar 'car
-          (sort (mapcar (lambda (string)
-                          (cons string (ac-comphist-freq db string prefix)))
-                        collection)
-                (lambda (a b) (< (cdr b) (cdr a))))))
+(defun ac-comphist-sort (db collection prefix &optional threshold)
+  (let (result
+        (n 0)
+        (total 0)
+        (cur 0))
+    (setq result (mapcar (lambda (a)
+                           (when (and cur threshold)
+                             (if (>= cur (* total threshold))
+                                 (setq cur nil)
+                               (incf n)
+                               (incf cur (cdr a))))
+                           (car a))
+                         (sort (mapcar (lambda (string)
+                                         (let ((freq (ac-comphist-freq db string prefix)))
+                                           (incf total freq)
+                                           (cons string freq)))
+                                       collection)
+                               (lambda (a b) (< (cdr b) (cdr a))))))
+    (if threshold
+        (cons n result)
+      result)))
 
 (defun ac-comphist-serialize (db)
   (let (alist)
@@ -1097,6 +1169,10 @@ that have been made before in this function."
 (defun ac-isearch ()
   (interactive)
   (when (ac-menu-live-p)
+    (setq ac-dwim-enable t)
+    (ac-cancel-show-menu-timer)
+    (ac-cancel-quick-help-timer)
+    (popup-draw ac-menu)
     (popup-isearch ac-menu)))
 
 
@@ -1127,6 +1203,7 @@ that have been made before in this function."
     (let ((ac-match-function 'fuzzy-all-completions))
       (if ac-fuzzy-cursor-color
           (set-cursor-color ac-fuzzy-cursor-color))
+      (setq ac-show-menu t)
       (setq ac-fuzzy-enable t)
       (setq ac-triggered nil)
       (ac-update t)))
@@ -1137,6 +1214,7 @@ that have been made before in this function."
   (interactive)
   (when (ac-menu-live-p)
     (popup-next ac-menu)
+    (setq ac-show-menu t)
     (if (eq this-command 'ac-next)
         (setq ac-dwim-enable t))))
 
@@ -1145,6 +1223,7 @@ that have been made before in this function."
   (interactive)
   (when (ac-menu-live-p)
     (popup-previous ac-menu)
+    (setq ac-show-menu t)
     (if (eq this-command 'ac-previous)
         (setq ac-dwim-enable t))))
 
@@ -1162,6 +1241,7 @@ that have been made before in this function."
         (if (and (> (popup-direction ac-menu) 0)
                  (ac-menu-at-wrapper-line-p))
             (ac-reposition))
+        (setq ac-show-menu t)
         string))))
 
 (defun ac-expand-common ()
@@ -1207,6 +1287,7 @@ that have been made before in this function."
             (ac-abort)
             (unless nomessage (message "Nothing to complete")))
         (setq ac-cursor-color (frame-parameter (selected-frame) 'cursor-color)
+              ac-show-menu (if (eq ac-auto-show-menu t) t)
               ac-current-sources sources
               ac-buffer (current-buffer)
               ac-point point
@@ -1216,6 +1297,7 @@ that have been made before in this function."
         (when (or init (null ac-prefix-overlay))
           (ac-init))
         (ac-set-timer)
+        (ac-set-show-menu-timer)
         (ac-set-quick-help-timer)
         (ac-put-prefix-overlay)))))
 
