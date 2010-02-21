@@ -28,8 +28,8 @@
 
 ;;; Code:
 (require 'anything)
-;;(require 'anything-config)
-(require 'anything-private-config)
+(require 'anything-config)
+;;(require 'anything-private-config)
 (require 'anything-match-plugin)
 
 (and (equal current-language-environment "Japanese")
@@ -56,19 +56,17 @@
 (global-set-key (kbd "C-;") 'anything)
 (setq anything-sources
       '(
-;;        anything-c-source-mac-spotlight
         anything-c-source-buffers+
-;;        anything-c-source-buffer-not-found
         anything-c-source-file-name-history
+        anything-c-source-files-in-current-dir+
         anything-c-source-kill-ring
         anything-c-source-bookmarks
+        anything-c-source-extended-command-history
+        anything-c-source-emacs-commands
+;;        anything-c-source-buffer-not-found
+;;        anything-c-source-mac-spotlight
 ;;        anything-c-source-yaetags-select
 ;;        anything-c-source-etags-select
-;;        anything-c-source-info-pages
-;;        anything-c-source-info-elisp
-;;        anything-c-source-man-pages
-;;        anything-c-source-locate
-;;        anything-c-source-emacs-commands
 ;;        anything-c-source-emacs-functions
         ))
 
@@ -167,6 +165,7 @@
 (require 'anything-grep)
 ;;(global-set-key (kbd "C-M-o") 'moccur-grep)
 ;;(global-set-key (kbd "C-M-o") 'anything-grep)
+(global-set-key (kbd "C-M-o") 'moccur-grep-find)
 ;; dired
 (add-hook 'dired-mode-hook
           '(lambda ()
@@ -210,7 +209,7 @@
  :look-for '("0000-00-00-000000.howm")
  :include-regexp '("\\.howm$" "\\.txt$" "\\.rst$")
  )
-(global-set-key (kbd "C-M-o") 'anything-project-grep)
+(global-set-key (kbd "C-c C-f") 'anything-project)
 
 
 ;; キー設定 現在以下は設定すみなのでする必要はない

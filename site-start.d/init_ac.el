@@ -52,7 +52,7 @@
 (setq ac-delay 5.0)
 
 ;; 候補の最大件数 デフォルトは 10件
-(setq ac-candidate-limit 100)
+(setq ac-candidate-limit nil)
 
 ;; 補完候補のソート
 (setq ac-use-comphist t)
@@ -62,10 +62,21 @@
       (expand-file-name (concat user-emacs-directory
                                 "/var/ac-comphist.dat")))
 
+;; @see http://nschum.de/src/emacs/company-mode/
+;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
+(require 'ac-company)
+;; company
+(ac-company-define-source ac-source-company-elisp company-elisp)
+(ac-company-define-source ac-source-company-css company-css)
+(ac-company-define-source ac-source-company-eclim company-eclim)
+(ac-company-define-source ac-source-company-nxml company-nxml)
+(ac-company-define-source ac-source-company-etags company-etags)
+
 ;; 補完対象のモードを追加
 (setq ac-modes (append ac-modes '(rst-mode)))
 (setq ac-modes (append ac-modes '(css-mode)))
 (setq ac-modes (append ac-modes '(nxml-mode)))
+(setq ac-modes (append ac-modes '(objc-mode)))
 
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
@@ -85,7 +96,8 @@
 ;; etags 補完候補
 (defvar ac-source-etags
   '((candidates . (lambda ()
-         (all-completions ac-target (tags-completion-table))))
+                    (all-completions ac-target (tags-lazy-completion-table))))
+    ;; (all-completions ac-target (tags-completion-table))))
     (candidate-face . ac-candidate-face)
     (selection-face . ac-selection-face)
     (symbol . "e")
@@ -108,16 +120,6 @@
             (make-local-variable 'ac-sources)
             ;; 末尾に追加
             (setq ac-sources (append ac-sources '(ac-source-etags)))))
-
-;; @see http://nschum.de/src/emacs/company-mode/
-;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el
-(require 'ac-company)
-;; company
-(ac-company-define-source ac-source-company-elisp company-elisp)
-(ac-company-define-source ac-source-company-css company-css)
-(ac-company-define-source ac-source-company-eclim company-eclim)
-(ac-company-define-source ac-source-company-nxml company-nxml)
-
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)

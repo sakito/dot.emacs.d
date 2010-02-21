@@ -47,8 +47,6 @@
 ;; init_ac がロードされている前提になっている
 (ac-company-define-source ac-source-company-xcode company-xcode)
 
-(setq ac-modes (append ac-modes '(objc-mode)))
-
 ;; ヘッダファイルを開くには ヘッダファイルにカーソル併せて C-x C-f すれば良い
 ;; 上手く動作しないなら (ffap-bindings) を init.el に記述する
 

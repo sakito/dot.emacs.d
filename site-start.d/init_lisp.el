@@ -42,61 +42,22 @@
 (require 'el-mock)
 (require 'el-expectations)
 
-(add-hook 'lisp-interaction-mode-hook
-          '(lambda()
-             (progn
- ;;               (define-key lisp-interaction-mode-map "("
- ;;                 'insert-parens)
- ;;               (define-key lisp-interaction-mode-map ")"
- ;;                 'insert-close-paren)
- ;;               (define-key lisp-interaction-mode-map "\""
- ;;                 'insert-double-quotation)
- ;;               (define-key lisp-interaction-mode-map "\C-c)"
- ;;                 'insert-parens-region)
-               (define-key lisp-interaction-mode-map "\C-c\C-c"
-                 'emacs-lisp-byte-compile)
-               (define-key lisp-interaction-mode-map "\C-c\C-r"
-                 'emacs-lisp-byte-compile-and-load)
-               (define-key lisp-interaction-mode-map "\C-c\C-e"
-                 'eval-current-buffer)
-               (define-key lisp-interaction-mode-map "\C-c\C-f"
-                 'compile-defun)
-               (define-key lisp-interaction-mode-map "\C-c\C-d"
-                 'eval-defun)
-               (define-key lisp-interaction-mode-map "\C-c;"
-                 'comment-region)
-               (define-key lisp-interaction-mode-map "\C-c:"
-                 'uncomment-region)
-               (when (fboundp 'expectations)
-                 (define-key lisp-interaction-mode-map "\C-c\C-t"
-                   'expectations-execute)
-                 )
-               )))
+(defun skt:emacs-lisp-hook ()
+  (setq indent-tabs-mode nil)
+  (local-set-key (kbd "C-c C-c") 'emacs-lisp-byte-compile)
+  (local-set-key (kbd "C-c C-r") 'emacs-lisp-byte-compile-and-load)
+  (local-set-key (kbd "C-c C-e") 'eval-current-buffer)
+  ;; (local-set-key (kbd "C-c C") 'compile-defun)
+  (local-set-key (kbd "C-c C-d") 'eval-defun)
+  (local-set-key (kbd "C-c ;") 'comment-dwim)
+  (local-set-key (kbd "C-c :") 'comment-dwim)
+  (when (fboundp 'expectations)
+    ;; C-M-x compile-defun
+    (local-set-key (kbd "C-c C-t") 'expectations-execute))
+  )
 
-(add-hook 'emacs-lisp-mode-hook
-          '(lambda()
-             (progn
-               (setq indent-tabs-mode nil)
-               (define-key emacs-lisp-mode-map "\C-c\C-c"
-                 'emacs-lisp-byte-compile)
-               (define-key emacs-lisp-mode-map "\C-c\C-r"
-                 'emacs-lisp-byte-compile-and-load)
-               (define-key emacs-lisp-mode-map "\C-c\C-e"
-                 'eval-current-buffer)
-               (define-key emacs-lisp-mode-map "\C-c\C-f"
-                 'compile-defun)
-               (define-key emacs-lisp-mode-map "\C-c\C-d"
-                 'eval-defun)
-               (define-key emacs-lisp-mode-map "\C-c;"
-                 'comment-region)
-               (define-key emacs-lisp-mode-map "\C-c:"
-                 'uncomment-region)
-               (when (fboundp 'expectations)
-                 (define-key emacs-lisp-mode-map "\C-c\C-t"
-                   'expectations-execute)
-                 )
-               )))
-
+(add-hook 'lisp-interaction-mode-hook 'skt:emacs-lisp-hook)
+(add-hook 'emacs-lisp-mode-hook 'skt:emacs-lisp-hook)
 
 (provide 'init_lisp)
 ;;; init_lisp.el ends here
