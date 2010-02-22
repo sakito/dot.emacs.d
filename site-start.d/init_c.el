@@ -61,7 +61,7 @@
              ))
 
 ;; ffapの設定
-(ffap-bindings)
+;;(ffap-bindings)
 (setq ffap-c-path
       '("/usr/include" "/usr/local/include"))
 ;; 新規ファイルの場合には確認する
@@ -77,16 +77,16 @@
 ;; 定型文の挿入
 
 
-;; デバッグ文の挿入
+;; デバッグ文の挿入 yasnippet で同様の事が可能なので不要
 ; @see http://d.hatena.ne.jp/higepon/20060212/1139757670
-(defun my-insert-printf-debug ()
-  (interactive)
-  (insert "printf(\"%s %s:%d\\n\", __func__, __FILE__, __LINE__);")
-  (indent-according-to-mode))
+;; (defun my-insert-printf-debug ()
+;;   (interactive)
+;;   (insert "printf(\"%s %s:%d\\n\", __func__, __FILE__, __LINE__);")
+;;   (indent-according-to-mode))
 
-(add-hook 'c++-mode-hook
-          (function (lambda ()
-                      (define-key c++-mode-map (kbd "C-c p") 'my-insert-printf-debug))))
+;; (add-hook 'c++-mode-hook
+;;           (function (lambda ()
+;;                       (define-key c++-mode-map (kbd "C-c p") 'my-insert-printf-debug))))
 
 ;; コンパイルセッセージの縦幅
 (setq compilation-window-height 8)

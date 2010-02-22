@@ -127,6 +127,21 @@
 ;; current-buffer も末尾に表示する
 (setq anything-allow-skipping-current-buffer nil)
 
+;; C-x C-f の先頭を ffap 系にする
+(setq anything-find-file-additional-sources-at-first
+      '(anything-c-source-ffap-line
+        anything-c-source-ffap-guesser))
+(setq anything-find-file-additional-sources
+      '(anything-c-source-locate))
+(defadvice arfn-sources
+  (after additional-arfn-sources-at-first activate)
+  "Add additional sources at first."
+  (setq ad-return-value
+        (append anything-find-file-additional-sources-at-first
+                ad-return-value)))
+;;(ad-deactivate 'arfn-sources)
+
+
 ;; M-yでkill-ringの内容をanythingする
 (global-set-key (kbd "M-y") 'anything-show-kill-ring)
 

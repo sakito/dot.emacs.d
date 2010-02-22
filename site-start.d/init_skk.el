@@ -57,6 +57,7 @@
 
 ;; 変換候補をインラインに表示
 (setq skk-show-inline t)
+;;(setq skk-show-inline 'vertical)
 
 ;; isearch時にSKKをオフ
 (setq skk-isearch-start-mode 'latin)

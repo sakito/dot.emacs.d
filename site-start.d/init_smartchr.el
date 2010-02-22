@@ -43,12 +43,27 @@
   (local-set-key (kbd "@") (smartchr '("@\"`!!'\"" "@")))
   )
 
+(defun skelton-custom-keybindigs ()
+;;   (make-variable-buffer-local 'skeleton-pair)
+;;  (make-variable-buffer-local 'skeleton-pair-on-word)
+;;  (make-variable-buffer-local 'skeleton-pair-alist)
+  (setq skeleton-pair t)
+  (setq skeleton-pair-on-word t)
+  (setq skeleton-end-hook nil)
+  (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
+  )
+
 ;; 適用するモードを限定
 (add-hook 'c-mode-common-hook 'smartchr-custom-keybindings)
 (add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
 (add-hook 'css-mode-hook 'smartchr-custom-keybindings)
 (add-hook 'nxml-mode-hook 'smartchr-custom-keybindings)
-(add-hook 'emacs-lisp-mode-hook 'smartchr-custom-keybindings)
+(add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
+(add-hook 'python-mode-hook 'skelton-custom-keybindigs)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here

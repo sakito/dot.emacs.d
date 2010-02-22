@@ -32,8 +32,13 @@
 
 ;;; Shellの設定
 ;; M-x anshi-term、term
-(setq shell-file-name "/bin/zsh")
-(setq explicit-shell-file-name "/bin/zsh")
+(cond
+ (mac-p
+  (setq shell-file-name "/sw/bin/zsh")
+  (setq explicit-shell-file-name "/sw/bin/zsh"))
+ (t
+  (setq shell-file-name "/bin/zsh")
+  (setq explicit-shell-file-name "/bin/zsh")))
 ;(setq shell-file-name "/bin/bash")
 (setenv "SHELL" shell-file-name)
 (setq explicit-shell-file-name shell-file-name)
@@ -88,6 +93,17 @@
   "Set `ansi-color-for-comint-mode' to t." t)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
+;; shell-pop の設定
+;; @see http://www.emacswiki.org/emacs-en/ShellPop
+(require 'shell-pop)
+(shell-pop-set-internal-mode "term")
+(shell-pop-set-window-height 40)
+(cond
+ (mac-p
+  (shell-pop-set-internal-mode-shell "/sw/bin/zsh"))
+ (t
+  (shell-pop-set-internal-mode-shell "/bin/zsh")))
+(global-set-key [f8] 'shell-pop)
 
 (provide 'init_shell)
 ;;; init_shell.el ends here
