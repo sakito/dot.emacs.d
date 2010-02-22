@@ -32,13 +32,8 @@
 
 ;;; Shellの設定
 ;; M-x anshi-term、term
-(cond
- (mac-p
-  (setq shell-file-name "/sw/bin/zsh")
-  (setq explicit-shell-file-name "/sw/bin/zsh"))
- (t
-  (setq shell-file-name "/bin/zsh")
-  (setq explicit-shell-file-name "/bin/zsh")))
+(setq shell-file-name (executable-find "zsh"))
+(setq explicit-shell-file-name (executable-find "zsh"))
 ;(setq shell-file-name "/bin/bash")
 (setenv "SHELL" shell-file-name)
 (setq explicit-shell-file-name shell-file-name)
@@ -98,11 +93,8 @@
 (require 'shell-pop)
 (shell-pop-set-internal-mode "term")
 (shell-pop-set-window-height 40)
-(cond
- (mac-p
-  (shell-pop-set-internal-mode-shell "/sw/bin/zsh"))
- (t
-  (shell-pop-set-internal-mode-shell "/bin/zsh")))
+
+(shell-pop-set-internal-mode-shell (executable-find "zsh"))
 (global-set-key [f8] 'shell-pop)
 
 (provide 'init_shell)
