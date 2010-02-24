@@ -39,6 +39,9 @@
 ;; C-x C-u にて選択範囲を大文字に変換する機能
 ;; (put 'upcase-region 'disabled nil)
 
+;; C-m は 改行とインデントに割り当て(SKK に取られてしまうから)
+(global-set-key (kbd "C-m") 'newline-and-indent)
+
 ;; cua-mode に移行
 ;;(require 'sense-region)
 

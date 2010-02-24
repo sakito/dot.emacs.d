@@ -33,30 +33,40 @@
 ;;
 (require 'skk-autoloads)
 (setq skk-preload t)
+
+;; C-\ でも SKK に切り替えられるように設定
+(setq default-input-method "japanese-skk")
+
 ;(global-set-key "\C-x\C-j" 'skk-mode)
 ;(global-set-key "\C-xj" 'skk-auto-fill-mode)
 ;(global-set-key "\C-xt" 'skk-tutorial)
 ;(setq skk-large-jisyo "/usr/local/share/skk/SKK-JISYO.L")
 ;(setq skk-number-style 0)
 ;(setq date-ad 1)
+
 (skk-mode)
 
 (setq skk-rom-kana-rule-list
       (append skk-rom-kana-rule-list
               '(("@" nil "@"))))
 
-(setq skk-server-host "localhost")
-(setq skk-server-portnum 1178)
+(when (or mac-p linux-p)
+  (setq skk-server-host "localhost")
+  (setq skk-server-portnum 1178))
 ;(setq skk-jisyo-code 'utf-8-unix)
 
 ;;"「"を入力したら"」"も自動で挿入
 ;; (setq skk-auto-insert-paren t)
 
-;;漢字登録時の送り仮名ミスをチェック
+;; 送り仮名が厳密に正しい候補を優先して表示
+(setq skk-henkan-strict-okuri-precedence t)
+
+;;漢字登録時、送り仮名が厳密に正しいかをチェック
 (setq skk-check-okurigana-on-touroku t)
 
 ;; 変換候補をインラインに表示
 (setq skk-show-inline t)
+;; 縦に表示したい場合以下を設定
 ;;(setq skk-show-inline 'vertical)
 
 ;; isearch時にSKKをオフ
