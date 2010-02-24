@@ -32,19 +32,30 @@
 
 ;;; Shellの設定
 ;; M-x anshi-term、term
-(setq shell-file-name (executable-find "zsh"))
-(setq explicit-shell-file-name (executable-find "zsh"))
-;(setq shell-file-name "/bin/bash")
+
+;; 極力どの環境でも極力動作するように判定
+(defun skt:shell ()
+  (or (executable-find "zsh")
+      (executable-find "bash")
+      (executable-find "cmdproxy")
+      (error "can't find 'shell' command in PATH!!")))
+
+(setq shell-file-name (skt:shell))
 (setenv "SHELL" shell-file-name)
 (setq explicit-shell-file-name shell-file-name)
-;(setq explicit-bash-args '("-login" "-i"))
-;(setq shell-command-switch "-c")
-;(setq win32-quote-process-args t)
+
+;; TODO
+;;(setq explicit-bash-args '("-login" "-i"))
+;;(setq shell-command-switch "-c")
+;;(setq win32-quote-process-args t)
+
+;; system の terminfo を利用する
 (setq system-uses-terminfo t)
 
+;; term の設定
 (require 'term)
 
-(defun term-send-escape  () (interactive) (term-send-raw-string (kbd "ESC")))
+(defun term-send-escape () (interactive) (term-send-raw-string (kbd "ESC")))
 (eval-after-load 'term
   (progn
     ;; C-c ESC でエスケープを送信
@@ -94,7 +105,7 @@
 (shell-pop-set-internal-mode "term")
 (shell-pop-set-window-height 40)
 
-(shell-pop-set-internal-mode-shell (executable-find "zsh"))
+(shell-pop-set-internal-mode-shell shell-file-name)
 (global-set-key [f8] 'shell-pop)
 
 (provide 'init_shell)
