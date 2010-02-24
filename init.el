@@ -31,7 +31,7 @@
 ;; (load "~/.emacs.d/private/private/timelag.el")
 
 ;; 常時デバッグ状態
-(setq debug-on-error  t)
+(setq debug-on-error t)
 
 ;; Emacs 設定ディレクトリを設定。Emacs 22以下用
 ;; Emacs 23.1 以上では user-emacs-directory 変数が用意されているのでそれを利用
