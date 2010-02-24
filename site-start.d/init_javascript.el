@@ -42,10 +42,21 @@
 (autoload 'js2-mode "js2" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.json$" . js2-mode))
+
+(autoload 'js-comint "js-comint" nil t)
+
+(setq inferior-js-program-command "java org.mozilla.javascript.tools.shell.Main")
+
 (add-hook 'js2-mode-hook
           (lambda ()
             (setq indent-tabs-mode t)
-            (setq tab-width 2)))
+            (setq tab-width 2)
+            (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
+            (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
+            (local-set-key (kbd "C-c b") 'js-send-buffer)
+            (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
+            (local-set-key (kbd "C-c l") 'js-load-file-and-go)
+            ))
 
 (provide 'init_javascript)
 ;;; init_javascript.el ends here
