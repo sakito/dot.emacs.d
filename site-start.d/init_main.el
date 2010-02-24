@@ -22,7 +22,8 @@
 
 ;;; Commentary:
 
-;; mac 環境における設定
+;; 環境における設定
+;; 個人的に重要な物を上になるべく配置
 
 ;;; Code:
 
@@ -32,30 +33,34 @@
 (require 'init_color)
 ;; shell、eshell 関連
 (require 'init_shell)
+;; Lisp
+(require 'init_lisp)
 ;; キー設定
 (require 'init_key)
-(require 'init_smartchr)
+;; anything
+(require 'init_anything)
 ;; 独自関数
 (require 'init_function)
 ;;; SKK
 (require 'init_skk)
+;; rst-mode
+(require 'init_rst)
+;; smartchr
+(require 'init_smartchr)
 ;; migemo
 (require 'init_cmigemo)
-;; session
-(require 'init_session)
 ;;; Elscreen
 (require 'init_elscreen)
+;; session
+(require 'init_session)
 ;; dired
 (require 'init_dired)
 ;; moccur
 (require 'init_moccur)
-;; anything
-(require 'init_anything)
 ;; auto-complete
 (require 'init_ac)
 ;; eldoc
 (require 'init_eldoc)
-
 ;;; プログラミング関連
 (require 'init_flymake)
 (require 'init_diff)
@@ -63,8 +68,6 @@
 ;;(require 'init_woman)
 ;;;; mode-info
 (require 'init_modeinfo)
-;;; Lisp [2004/04/17]
-(require 'init_lisp)
 ;;; Pythonの設定
 (require 'init_python)
 ;;; Gaucheの設定
@@ -77,16 +80,15 @@
 ;(require 'init_mmm)
 ;;; smart-compie
 (require 'init_smartcompile)
-
 ;; c
 (require 'init_c)
 ;; objc
-(require 'init_objc)
+(when mac-p
+  (require 'init_objc))
 ;; yasnippet
 (require 'init_yasnippet)
 ;; javascript-mode
 (require 'init_javascript)
-
 ;;; SCM関連
 ;; Subversion Mode
 ;; @see http://xsteve.nit.at/prg/vc_svn/
@@ -97,8 +99,6 @@
 ; hg-mode
 (setenv "HGENCODING" "utf-8")
 (require 'ahg)
-
-
 ;;; 文書記述関連
 ;; auto-insert
 (require 'init_autoinsert)
@@ -125,8 +125,6 @@
 ;(require 'init_hnf)
 ;; bhl mode
 ;;(require 'init_bhl)
-;; rst-mode
-(require 'init_rst)
 
 (autoload 'po-mode "po-mode" "Major mode for translators when they edit PO files." t)
 (eval-after-load 'po-mode '(load "gb-po-mode"))
