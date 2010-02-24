@@ -1,31 +1,38 @@
 # -*- mode:sh -*-
 # ~/.zshrc 
 # 作成開始: [2002/10/01]
-# 最終変更:[2008/06/11]
 # 
 #-----------------------------------------------------------------
 # 基本設定
 #-----------------------------------------------------------------
 WORDCHARS="*?_-.[]~=&;\!#$%^(){}<>"
 HISTSIZE=4096
-HISTFILE=/Users/sakito/var/zsh/zsh_history
+HISTFILE=${HOME}/var/zsh/zsh_history
 SAVEHIST=4096
 umask 022
+
+#-----------------------------------------------------------------
+# 判定用関数
+#-----------------------------------------------------------------
+# Mac OS X特有の設定を切り分るための関数
+isdarwin(){
+    [[ $OSTYPE == darwin* ]] && return 0
+    return 1
+}
 
 #-----------------------------------------------------------------
 # 環境変数
 #-----------------------------------------------------------------
 # setup shell dir
 #SHELL=/bin/zsh
-export SHELL=/sw/bin/zsh
+isdarwin && export SHELL=/sw/bin/zsh
 
 export PREFIX=/usr/local
 #export EXEC_PREFIX=/usr/local/bin
 
 export CVS_RSH="ssh"
 export DISPLAY="localhost"
-#export SSH_ASKPASS="/Users/sakito/opt/SSHPassKey.app/Contents/MacOS/SSHPassKey"
-export PYTHONSTARTUP="/Users/sakito/.pythonrc.py"
+export PYTHONSTARTUP="${HOME}/.pythonrc.py"
 
 # 時刻の設定
 export TZ=JST-9
@@ -34,36 +41,31 @@ export TZ=JST-9
 export LC_ALL="ja_JP.UTF-8"
 
 # for screen(chmod 700)
-export SCREENDIR=/Users/sakito/.screen
+export SCREENDIR=${HOME}/.screen
 
-# Mac OS X特有の設定を切り分るための関数
-isdarwin(){
-    [[ $OSTYPE == darwin* ]] && return 0
-    return 1
-}
 
 # fink setting
 isdarwin && source /sw/bin/init.sh
 
 # set path
-export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/sakito/bin:${MAVEN_HOME}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${HOME}/bin/air/bin
+export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/local/bin:/bin:/usr/local/sbin:${PATH}:/usr/sbin:${HOME}/bin:${MAVEN_HOME}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${HOME}/bin/air/bin
 
 # mysql
-export PATH=/usr/local/mysql/bin:$PATH
+export PATH=/usr/local/mysql/bin:${PATH}
 
 # LaTeX
-export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:$PATH
+export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
 
 # Git
-export PATH=$PATH:/usr/local/git/bin
+export PATH=${PATH}:/usr/local/git/bin
 
 # Haskell
-export PATH=$PATH:$HOME/.cabal/bin
+export PATH=${PATH}:${HOME}/.cabal/bin
 
 # TeX
-export TEXINPUTS=/Users/sakito/lib/tex//:${TEXINPUTS}
+export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
 
-export  TMP="$HOME/tmp"
+export  TMP="${HOME}/tmp"
 export  EDITOR="/usr/local/bin/emacsclient"
 
 # less
@@ -93,22 +95,22 @@ export ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common'
 
 ### Java
 # Jakarta Maven
-#MAVEN_HOME=/Users/sakito/opt/maven-1.0-rc2
+#MAVEN_HOME=${HOME}/opt/maven-1.0-rc2
 #export MAVEN_HOME
 
 # Apache Forrest
-#FORREST_HOME=/Users/sakito/opt/apache-forrest-0.4-bin
+#FORREST_HOME=${HOME}/opt/apache-forrest-0.4-bin
 #export FORREST_HOME
 #PATH=$PATH:$FORREST_HOME/bin
 #export PATH
 
 #CLASSPATH
 #export CLASSPATH=${CLASSPATH}:.
-if [ -r /Users/sakito/lib/java/classpath ]; then
+if [ -r ${HOME}/lib/java/classpath ]; then
   if [ -z "$CLASSPATH" ]; then
-    export CLASSPATH=`cat /Users/sakito/lib/java/classpath`
+    export CLASSPATH=`cat ${HOME}/lib/java/classpath`
   else
-    export CLASSPATH=`cat /Users/sakito/lib/java/classpath`:$CLASSPATH
+    export CLASSPATH=`cat ${HOME}/lib/java/classpath`:$CLASSPATH
   fi
 fi
 
@@ -159,7 +161,6 @@ fi
 # ■ の部分は、vim挿入モードにて、[C-v]押したあとに[Esc]
 #PROMPT="%{[32m%}%n@%m%{[35m%}${WINDOW:+[$WINDOW]}%{[33m%}%(4~,%-1~/.../%3~,%~)%{[m%}%# "
 #RPROMPT='%{[33m%}%h %{[36m%}%T%{[m%}'
-# sakito@sakito[0]%
 #PROMPT="%{[32m%}%n@%m%{[35m%}${WINDOW:+[$WINDOW]}%{[m%}%# "
 #PROMPT="%{fg[green]%n@%m%{fg[red]${WINDOW:+[$WINDOW]}%{[m%}%# "
 #PROMPT="%{$fg[green]%}%#%{$reset_color%} "
@@ -351,7 +352,6 @@ alias x=start
 alias j=jobs
 alias reload="source ~/.zshrc"
 
-#alias xreadiary="~/bin/lftp_diary.command"
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
 alias easy_install64="sudo env ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common' easy_install -UZ "
