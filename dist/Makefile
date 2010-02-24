@@ -61,6 +61,9 @@ install: compile
 	sudo make install ; \
 	@echo "sudo cp -R mac/Emacs.app /Application"
 
+# lisp
+installlib: apelinstall skkinstall auctexinstall howminstall w3minstall
+
 # apel
 apelinstall:
 	${CURL} http://kanji.zinbun.kyoto-u.ac.jp/~tomo/lemi/dist/apel/${APEL_SRC}.tar.gz ; \
@@ -105,4 +108,14 @@ auctexinstall:
 	./configure --prefix=${USER-EMACS-DIRECTORY} --with-lispdir=${LISPDIR} ; \
 	make ; \
 	make install
+
+# emacs-w3m
+w3minstall:
+	cvs -d :pserver:anonymous@cvs.namazu.org:/storage/cvsroot co emacs-w3m ; \
+	cd emacs-w3m ; \
+	autoconf ; \
+	./configure --with-lispdir=~/.emacs.d/lisp/w3m --datarootdir=~/.emacs.d/share --with-icondir=~/.emacs.d/share/icon ; \
+	make ; \
+	make install ; \
+	make install-icons
 
