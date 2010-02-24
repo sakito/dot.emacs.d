@@ -56,13 +56,15 @@
 (global-set-key (kbd "C-;") 'anything)
 (setq anything-sources
       '(
+        anything-c-source-ffap-line
+        anything-c-source-ffap-guesser
         anything-c-source-buffers+
         anything-c-source-file-name-history
         anything-c-source-files-in-current-dir+
-        anything-c-source-kill-ring
-        anything-c-source-bookmarks
         anything-c-source-extended-command-history
         anything-c-source-emacs-commands
+        anything-c-source-kill-ring
+        anything-c-source-bookmarks
 ;;        anything-c-source-buffer-not-found
 ;;        anything-c-source-mac-spotlight
 ;;        anything-c-source-yaetags-select
