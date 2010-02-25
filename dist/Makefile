@@ -10,8 +10,9 @@ EMACS_SRC = emacs-${EMACS_VERSION}
 USER-EMACS-DIRECTORY=${HOME}/.emacs.d
 LISPDIR=${USER-EMACS-DIRECTORY}/lisp
 VERSION_SPECIFIC_LISPDIR=${USER-EMACS-DIRECTORY}/lisp
+BINDIR=${USER-EMACS-DIRECTORY}/bin
+SHAREDIR=${USER-EMACS-DIRECTORY}/share
 INFODIR=${USER-EMACS-DIRECTORY}/share/info
-DATADIR=${USER-EMACS-DIRECTORY}/share/skk
 
 ##
 APEL_SRC=apel-10.7
@@ -70,7 +71,7 @@ apelinstall:
 	${TAR} ${APEL_SRC}.tar.gz; \
 	cd ${APEL_SRC}; \
 	make LISPDIR=${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR} ; \
-	make install ${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR}
+	make install LISPDIR=${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR}
 
 # skk
 skkinstall:
@@ -84,19 +85,19 @@ skkinstall:
 	echo "(add-to-list 'load-path \"$(LISPDIR)/emu\")" >> $(SKK_CFG); \
 	echo '(setq APEL_DIR "$(LISPDIR)/apel")' >> $(SKK_CFG); \
 	echo '(setq EMU_DIR "$(LISPDIR)/emu")' >> $(SKK_CFG); \
-	echo '(setq SKK_DATADIR "$(DATADIR)")' >> $(SKK_CFG); \
+	echo '(setq SKK_DATADIR "$(SHAREDIR)/skk")' >> $(SKK_CFG); \
 	echo '(setq SKK_INFODIR "$(INFODIR)")' >> $(SKK_CFG); \
-	echo '(setq SKK_LISPDIR "$(LISPDIR)")' >> $(SKK_CFG); \
+	echo '(setq SKK_LISPDIR "$(LISPDIR)/skk")' >> $(SKK_CFG); \
 	echo '(setq SKK_SET_JISYO t)' >> $(SKK_CFG); \
 	make LISPDIR=${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR} ; \
-	make install ${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR}
+	make install LISPDIR=${LISPDIR} VERSION_SPECIFIC_LISPDIR=${VERSION_SPECIFIC_LISPDIR} INFODIR=${INFODIR}
 
 # howm
 howminstall:
 	${CURL} http://howm.sourceforge.jp/a/${HOWM_SRC}.tar.gz; \
 	${TAR} ${HOWM_SRC}.tar.gz; \
 	cd ${HOWM_SRC}; \
-	./configure --with-lispdir=${LISPDIR} --with-docdir=$HOME/.emacs.d/share/howm --with-extdir=$HOME/.emacs.d/bin; \
+	./configure --with-lispdir=${LISPDIR} --with-docdir=${SHAREDIR}/howm --with-extdir=${BINDIR}/bin; \
 	make; \
 	make install
 
@@ -114,7 +115,7 @@ w3minstall:
 	cvs -d :pserver:anonymous@cvs.namazu.org:/storage/cvsroot co emacs-w3m ; \
 	cd emacs-w3m ; \
 	autoconf ; \
-	./configure --with-lispdir=~/.emacs.d/lisp/w3m --datarootdir=~/.emacs.d/share --with-icondir=~/.emacs.d/share/icon ; \
+	./configure --with-lispdir=${LISPDIR}/w3m --datarootdir=${SHAREDIR} --with-icondir=${SHAREDIR}/icon ; \
 	make ; \
 	make install ; \
 	make install-icons
