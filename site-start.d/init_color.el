@@ -28,16 +28,32 @@
 ;;; Code:
 
 ;; デフォルトのフレーム設定
-(setq default-frame-alist
-      (append (list
-                    '(width . 140)
-                    '(height . 55)
-                    '(top . 90)
-                    '(left . 600)
-                    '(vertical-scroll-bars . nil)
-                    )
-              default-frame-alist)
-      )
+;; ディスプレイサイズによって分離する試み 途中
+(cond
+ ;; 1920 * 1200 ディスプレイ
+ ;; デュアルだったりトリプルだったりするので width の方は条件に入れてない
+ ((= (display-pixel-height) 1200)
+  (setq default-frame-alist
+        (append (list
+                 '(width . 140)
+                 '(height . 55)
+                 '(top . 90)
+                 '(left . 600)
+                 )
+                default-frame-alist)))
+ ;; とりあえずその他 完全に未確認で分岐できる事を確認するためのコード
+ (t
+  (setq default-frame-alist
+        (append (list
+                 '(width . 100)
+                 '(height . 40)
+                 '(top . 90)
+                 '(left . 100)
+                 )
+                default-frame-alist))))
+
+;; 垂直スクロール用のスクロールバーを付けない
+(add-to-list 'default-frame-alist '(vertical-scroll-bars . nil))
 
 ;; 背景の透過
 (add-to-list 'default-frame-alist '(alpha . (85 20)))
