@@ -63,8 +63,11 @@
 (require 'init_eldoc)
 ;;; プログラミング関連
 (require 'init_flymake)
+;; vsc and scm
+(require 'init_scm)
+;; diff
 (require 'init_diff)
-; womanの設定
+; woman は mac で動作しない
 ;;(require 'init_woman)
 ;;;; mode-info
 (require 'init_modeinfo)
@@ -72,7 +75,7 @@
 (require 'init_python)
 ;;; Gaucheの設定
 (require 'init_gauche)
-;;; JDEE [2002/06/25]
+;;; JDEE
 ;(require 'init_jdee)
 ;;;; sql-mode
 (require 'init_sql)
@@ -89,16 +92,6 @@
 (require 'init_yasnippet)
 ;; javascript-mode
 (require 'init_javascript)
-;;; SCM関連
-;; Subversion Mode
-;; @see http://xsteve.nit.at/prg/vc_svn/
-;;(require 'psvn)
-;; dvc
-;(load-file "~/.emacs.d/lisp/dvc-snapshot/dvc-load.el")
-;(setq dvc-prefix-key [(control c) ?h])
-; hg-mode
-(setenv "HGENCODING" "utf-8")
-(require 'ahg)
 ;;; 文書記述関連
 ;; auto-insert
 (require 'init_autoinsert)

@@ -126,13 +126,6 @@
 ;; 終了時に聞く
 (setq confirm-kill-emacs 'y-or-n-p)
 
-;; vc
-
-;; vc はすばらしいがわたしは利用しないので無効にする
-(setq vc-handled-backends nil)
-;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
-(setq vc-follow-symlinks t)
-
 ;; 安全な実行のための共通系関数
 
 ;; @see http://www.sodan.org/~knagano/emacs/dotemacs.html
