@@ -32,6 +32,12 @@
 ;;(require 'anything-private-config)
 (require 'anything-match-plugin)
 
+;; session を利用するため anything-c-adaptive-save-history を作成しない
+(remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
+(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
+(ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
+(setq anything-c-adaptive-history-length 0)
+
 (and (equal current-language-environment "Japanese")
      (require 'anything-migemo nil t))
 
@@ -71,6 +77,31 @@
 ;;        anything-c-source-etags-select
 ;;        anything-c-source-emacs-functions
         ))
+
+(setq anything-for-files-prefered-list
+      '(anything-c-source-ffap-line
+        anything-c-source-ffap-guesser
+        anything-c-source-buffers+
+        anything-c-source-recentf
+        anything-c-source-bookmarks
+        anything-c-source-file-cache
+        anything-c-source-files-in-current-dir+
+        ))
+
+;; C-x C-f の先頭を ffap 系にする
+(setq anything-find-file-additional-sources-at-first
+      '(anything-c-source-ffap-line
+        anything-c-source-ffap-guesser))
+;; 追加のソース
+;; (setq anything-find-file-additional-sources
+;;       '(anything-c-source-locate))
+(defadvice arfn-sources
+  (after additional-arfn-sources-at-first activate)
+  "Add additional sources at first."
+  (setq ad-return-value
+        (append anything-find-file-additional-sources-at-first
+                ad-return-value)))
+;;(ad-deactivate 'arfn-sources)
 
 (global-set-key (kbd "C-c i") 'anything-help-at-point)
 ;; 検索の対象を変更した物を作成
@@ -122,27 +153,10 @@
 ;; (setq recentf-save-file "~/.emacs.d/var/recentf")
 
 ;; C-x C-b のバッファリストをanythingする
-;(global-set-key (kbd "C-x C-b") 'anything-for-buffers)  これだと色つかないので以下にした
-;(global-set-key (kbd "C-x C-b") (lambda () (interactive) (anything 'anything-c-source-buffers+)))
 (require 'recentf-ext)
 (global-set-key (kbd "C-x C-b") 'anything-for-files)
 ;; current-buffer も末尾に表示する
 (setq anything-allow-skipping-current-buffer nil)
-
-;; C-x C-f の先頭を ffap 系にする
-(setq anything-find-file-additional-sources-at-first
-      '(anything-c-source-ffap-line
-        anything-c-source-ffap-guesser))
-(setq anything-find-file-additional-sources
-      '(anything-c-source-locate))
-(defadvice arfn-sources
-  (after additional-arfn-sources-at-first activate)
-  "Add additional sources at first."
-  (setq ad-return-value
-        (append anything-find-file-additional-sources-at-first
-                ad-return-value)))
-;;(ad-deactivate 'arfn-sources)
-
 
 ;; M-yでkill-ringの内容をanythingする
 (global-set-key (kbd "M-y") 'anything-show-kill-ring)
@@ -200,12 +214,6 @@
         ))
 ;; (anything-grep-by-name nil "howm")
 
-;; session を利用するため anything-c-adaptive-save-history を作成しない
-;;(remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
-;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
-;;(ad-disable-advice 'anything-select-action l'before 'anything-c-adaptive-select-action)
-;;(setq anything-c-adaptive-history-length 0)
-
 ;; anything-project の設定
 ;; @see http://github.com/imakado/anything-project/blob/master/anything-project.el
 (require 'anything-project)
@@ -224,7 +232,7 @@
 (ap:add-project
  :name 'howm
  :look-for '("0000-00-00-000000.howm")
- :include-regexp '("\\.howm$" "\\.txt$" "\\.rst$")
+ :include-regexp '("\\.howm$" "\\.txt$" "\\.rsr$")
  )
 (global-set-key (kbd "C-c C-f") 'anything-project)
 
