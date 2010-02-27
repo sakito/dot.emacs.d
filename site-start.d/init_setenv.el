@@ -32,7 +32,8 @@
 (add-to-list 'exec-path (expand-file-name "/usr/bin"))
 (add-to-list 'exec-path (expand-file-name "/sw/bin"))
 (add-to-list 'exec-path (expand-file-name "~/bin"))
-(setenv "PATH" (concat "/usr/local/bin:/sw/bin:~/bin:" (getenv "PATH")))
+(add-to-list 'exec-path (expand-file-name "~/.emacs.d/bin"))
+(setenv "PATH" (concat "/usr/local/bin:/sw/bin:~/bin:~/.emacs.d/bin" (getenv "PATH")))
 (setenv "MANPATH" (concat "/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man" (getenv "MANPATH")))
 
 ;; JDEEの設定に移動

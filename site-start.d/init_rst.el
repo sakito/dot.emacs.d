@@ -56,14 +56,18 @@
     (start-process-shell-command "rst-html-preview" nil command)
     ))
 
-(defun my-rst-mode-hook ()
+(defun skt:rst-mode-hook ()
   (progn
-    (local-set-key "\C-c\C-c" 'rst-compile)
-    (local-set-key "\C-c\C-p" 'rst-compile-html-preview)
-    (local-set-key "\C-c;" 'comment-region)
-    (local-set-key "\C-c:" 'uncomment-region)
-    (make-local-variable 'ac-sources)
-    (setq ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-buffer ac-source-gtags ac-source-filename))
+    (local-set-key (kbd "C-c C-c") 'rst-compile)
+    (local-set-key (kbd "C-c C-p") 'rst-compile-html-preview)
+    (local-set-key (kbd "C-c ;") 'comment-dwim)
+    (local-set-key (kbd "C-c :") 'comment-dwim)
+    (when (fboundp 'anything-project)
+      ;; rst-goto-section を上書きしている
+      (local-set-key (kbd "C-c C-f") 'anything-project))
+    (when (fboundp 'auto-complete)
+      (make-local-variable 'ac-sources)
+      (setq ac-sources '(ac-source-yasnippet ac-source-abbrev ac-source-words-in-buffer ac-source-gtags ac-source-filename)))
 ;;    (local-set-key "\C-c\C-l" 'rst-compile-alt-toolset)
     'turn-off-auto-fill
     ;; color-theme が無効になる場合があるので暫定対処 原因は後程調査 TODO
@@ -84,7 +88,7 @@
 ;    (require 'rst-html)
     )
   )
-(add-hook 'rst-mode-hook  'my-rst-mode-hook)
+(add-hook 'rst-mode-hook  'skt:rst-mode-hook)
 (setq rst-pdf-program "open")
 ;(setcdr (assq 'html rst-compile-toolsets)
 ;        '("rst2html.py" ".html" "-i utf-8 -o utf-8 -l ja"))
