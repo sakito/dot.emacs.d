@@ -232,7 +232,7 @@
 (ap:add-project
  :name 'howm
  :look-for '("0000-00-00-000000.howm")
- :include-regexp '("\\.howm$" "\\.txt$" "\\.rsr$")
+ :include-regexp '("\\.howm$" "\\.txt$" "\\.rst$")
  )
 (global-set-key (kbd "C-c C-f") 'anything-project)
 
