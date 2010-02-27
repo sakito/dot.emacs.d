@@ -75,6 +75,8 @@
 (require 'init_python)
 ;;; Gaucheの設定
 (require 'init_gauche)
+;;; OCaml
+(require 'init_ocaml)
 ;;; JDEE
 ;(require 'init_jdee)
 ;;;; sql-mode
