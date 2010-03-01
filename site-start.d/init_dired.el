@@ -30,6 +30,10 @@
 
 ;; wdired-change-to-wdired-mode等をちゃんと利用してそれから考えるべし
 
+(when mac-p
+    (require 'ucs-normalize)
+    (setq file-name-coding-system 'utf-8-hfs))
+
 ;; dired 上で r を押すと wdired-change-to-wdired-mode を動作させる
 (require 'wdired)
 (define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
