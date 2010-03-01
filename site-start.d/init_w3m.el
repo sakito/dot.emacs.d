@@ -38,7 +38,7 @@
 ;; browse-url w3m
 ;(setq browse-url-browser-function 'w3m-browse-url)
 ;(autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
-;(global-set-key "\C-xm" 'browse-url-at-point)
+(global-set-key (kbd "C-x m") 'browse-url-at-point)
 ;(setq browse-url-netscape-program "~/bin/open_navigator.sh")
 
 (setq browse-url-browser-function 'browse-url-generic)

@@ -4899,7 +4899,8 @@ Return nil if bmk is not a valid bookmark."
      ("Open file externally" . anything-c-open-file-externally)
      ("Open file with default tool" . anything-c-open-file-with-default-tool))
     (action-transformer anything-c-transform-file-load-el
-                        anything-c-transform-file-browse-url)
+;;                        anything-c-transform-file-browse-url
+                        )
     (candidate-transformer anything-c-w32-pathname-transformer
                            anything-c-skip-current-file
                            anything-c-skip-boring-files

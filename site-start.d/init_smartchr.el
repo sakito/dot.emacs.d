@@ -65,6 +65,7 @@
 (add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'python-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
+(add-hook 'tuareg-mode-hook 'skelton-custom-keybindigs)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here

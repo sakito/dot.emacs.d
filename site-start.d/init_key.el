@@ -56,7 +56,7 @@
       (set-frame-parameter nil 'fullscreen nil)
     (set-frame-parameter nil 'fullscreen 'fullboth)
     ))
-(global-set-key (kbd "C-c m") 'mac-toggle-fullscreen)
+(global-set-key (kbd "C-c m") 'toggle-fullscreen)
 
 
 (when ns-p
