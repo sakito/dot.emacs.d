@@ -28,17 +28,20 @@
 
 ;; @see http://github.com/m2ym/auto-complete
 ;; @see http://www.emacswiki.org/emacs/AutoComplete
-(require 'auto-complete)
+;; @see http://cx4a.org/software/auto-complete/manual.ja.html
 (require 'auto-complete-config)
-;; http://www.emacswiki.org/emacs/anything-show-completion.el
-(require 'anything-show-completion)
-(setq anything-show-completion-minimum-window-height 4)
+;; デフォルト設定にしたいなら以下を記述
+;; (ac-config-default)
 
 ;; デフォルトの補完候補
 (set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
 
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
+
+;; http://www.emacswiki.org/emacs/anything-show-completion.el
+(require 'anything-show-completion)
+(setq anything-show-completion-minimum-window-height 4)
 
 ;; 自動で起動するのを停止
 (setq ac-auto-start nil)
@@ -51,11 +54,19 @@
 ;; 待ち時間を長めに取る
 (setq ac-delay 5.0)
 
+;; 補完メニューを自動表示しない
+;;(setq ac-auto-show-menu nil)
+;; 以下のように設定すると待ち時間を設定する 0.8秒後に自動で表示
+;;(setq ac-auto-show-menu 0.8)
+
 ;; 候補の最大件数 デフォルトは 10件
 (setq ac-candidate-limit nil)
 
 ;; 補完候補のソート
 (setq ac-use-comphist t)
+
+;; クイックヘルプが表示されるとバッファが大きく変更される場合があるので停止
+(setq ac-use-quick-help nil)
 
 ;; ソートファイルの保存場所を変更
 (setq ac-comphist-file
