@@ -47,6 +47,9 @@
 ;;; toolbar
 (tool-bar-mode 0)
 
+;; 警告を視覚的にする
+(setq visible-bell t)
+
 ;; ファイルを編集した場合コピーにてバックアップする
 ;; inode 番号を変更しない
 (setq backup-by-copying t)
