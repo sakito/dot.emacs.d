@@ -52,49 +52,23 @@
 ;; system の terminfo を利用する
 (setq system-uses-terminfo t)
 
-;; term の設定
-(require 'term)
-
-(defun term-send-escape () (interactive) (term-send-raw-string (kbd "ESC")))
-(eval-after-load 'term
-  (progn
-    ;; C-c ESC でエスケープを送信
-    '(define-key term-raw-escape-map (kbd "ESC") 'term-send-escape)
-    ;; キーの上書きを停止
-    '(mapcar
-      (lambda (key) (define-key term-raw-map key nil))
-      (list
-       (kbd "M-:")
-       (kbd "M-w")
-       (kbd "M->")
-       (kbd "M-<")
-
-       (kbd "C-\\")
-       (kbd "C-a")
-       (kbd "C-e")
-       (kbd "C-f")
-       (kbd "C-h")
-       (kbd "C-j")
-       (kbd "C-k")
-       (kbd "C-l")
-       (kbd "C-u")
-       (kbd "C-y")))))
-
+;; @see http://www.emacswiki.org/emacs/MultiTerm
+(require 'multi-term)
 (add-hook 'term-mode-hook
           '(lambda ()
+             ;; 実行する shell の設定
+             (setq multi-term-program shell-file-name)
+             ;; default-directory が存在しなかった場合に開くディレクトリ
+             (setq multi-term-default-dir "~/.emacs.d")
+             ;; 一部キーが取られるので無視設定
+             ;; デフォルトは '("C-z" "C-x" "C-c" "C-h" "C-y" "<ESC>")
+             (add-to-list 'term-unbind-key-list '"M-x")
              ;; Emacs の標準的キー割り当てにする
-             (define-key term-raw-map (kbd "C-p") 'previous-line)
-             (define-key term-raw-map (kbd "C-n") 'next-line)
-             ;; (define-key term-raw-map (kbd "C-y") nil)
-             (define-key term-raw-map (kbd "M-x") 'execute-extended-command)
-             ;; 削除
              (define-key term-raw-map (kbd "C-h") 'term-send-backspace)
-             ;; elscreen de C-z を利用するので有効にする
-             (define-key term-raw-map (kbd "C-z")
-               (lookup-key (current-global-map) (kbd "C-z")))))
+             (define-key term-raw-map (kbd "C-y") 'term-paste)
+             ))
 
-
-;;; shell-mode でエスケープを綺麗に表示
+;; shell-mode でエスケープを綺麗に表示
 (autoload 'ansi-color-for-comint-mode-on "ansi-color"
   "Set `ansi-color-for-comint-mode' to t." t)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -102,9 +76,14 @@
 ;; shell-pop の設定
 ;; @see http://www.emacswiki.org/emacs-en/ShellPop
 (require 'shell-pop)
-(shell-pop-set-internal-mode "term")
-(shell-pop-set-window-height 40)
-
+;; multi-term に対応
+(add-to-list 'shell-pop-internal-mode-list '("multi-term" "*multi-term*" '(lambda () (multi-term))))
+(shell-pop-set-internal-mode "multi-term")
+;; frame の高さからサイズを決定
+(defvar shell-pop-window-height-percent 80.0)
+(shell-pop-set-window-height (truncate (* (frame-height)
+                                          (/ shell-pop-window-height-percent
+                                             100.0))))
 (shell-pop-set-internal-mode-shell shell-file-name)
 (global-set-key [f8] 'shell-pop)
 

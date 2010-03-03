@@ -32,13 +32,14 @@
 (cond
  ;; 1920 * 1200 ディスプレイ
  ;; デュアルだったりトリプルだったりするので width の方は条件に入れてない
+ ;; 設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する
  ((= (display-pixel-height) 1200)
   (setq default-frame-alist
         (append (list
-                 '(width . 140)
-                 '(height . 55)
+                 '(width . 170)
+                 '(height . 60)
                  '(top . 90)
-                 '(left . 600)
+                 '(left . 500)
                  )
                 default-frame-alist)))
  ;; とりあえずその他 完全に未確認で分岐できる事を確認するためのコード
