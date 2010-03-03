@@ -28,18 +28,23 @@
 ;;; Code:
 
 ;; PATH設定
-(add-to-list 'exec-path (expand-file-name "/usr/local/bin"))
-(add-to-list 'exec-path (expand-file-name "/usr/bin"))
-(add-to-list 'exec-path (expand-file-name "/sw/bin"))
-(add-to-list 'exec-path (expand-file-name "~/bin"))
-(add-to-list 'exec-path (expand-file-name "~/.emacs.d/bin"))
-(setenv "PATH" (concat "/usr/local/bin:/sw/bin:~/bin:~/.emacs.d/bin" (getenv "PATH")))
-(setenv "MANPATH" (concat "/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man" (getenv "MANPATH")))
+;; Mac OS X の bash の PATH は /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
+;; 多数の実行環境にて極力汎用的にパスが設定されるようしたい
+(dolist (dir (list
+               "/sbin"
+               "/usr/sbin"
+               "/bin"
+               "/usr/bin"
+               "/sw/bin"
+               "/usr/local/bin"
+               (expand-file-name "~/bin")
+               (expand-file-name "~/.emacs.d/bin")
+               ))
+  (when (and (file-exists-p dir) (not (member dir exec-path)))
+    (setenv "PATH" (concat dir ":" (getenv "PATH")))
+    (setq exec-path (append (list dir) exec-path))))
 
-;; JDEEの設定に移動
-;;(setenv "JAVA_HOME" "/Library/Java/Home")
-;;(setenv "ANT_HOME" "/sw/lib/ant")
-;;(setenv "LC_ALL" "en")
+(setenv "MANPATH" (concat "/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man" (getenv "MANPATH")))
 
 (setenv "CVS_RSH" "ssh")
 (setenv "DISPLAY" "localhost")

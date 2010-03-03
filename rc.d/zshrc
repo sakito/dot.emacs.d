@@ -20,6 +20,12 @@ isdarwin(){
     return 1
 }
 
+# Emacs の term で動作させた場合
+isemacs(){
+    [[ "$EMACS" != "" ]] && return 0
+    return 1
+}
+
 #-----------------------------------------------------------------
 # 環境変数
 #-----------------------------------------------------------------
@@ -42,7 +48,6 @@ export LC_ALL="ja_JP.UTF-8"
 
 # for screen(chmod 700)
 export SCREENDIR=${HOME}/.screen
-
 
 # fink setting
 isdarwin && source /sw/bin/init.sh
@@ -154,15 +159,6 @@ fi
 # 45     バックを紫
 # 46     バックを水色
 # 47     バックを白
-#PROMPT="%B%n@%m[%(?.%!.ERROR:%?)]%b%% "
-#precmd() { RPROMPT="[$PWD]" }
-#PROMPT="[%(?.%!.ERROR:%?)]%b%% "
-#precmd() { RPROMPT="[$PWD]" }
-# ■ の部分は、vim挿入モードにて、[C-v]押したあとに[Esc]
-#PROMPT="%{[32m%}%n@%m%{[35m%}${WINDOW:+[$WINDOW]}%{[33m%}%(4~,%-1~/.../%3~,%~)%{[m%}%# "
-#RPROMPT='%{[33m%}%h %{[36m%}%T%{[m%}'
-#PROMPT="%{[32m%}%n@%m%{[35m%}${WINDOW:+[$WINDOW]}%{[m%}%# "
-#PROMPT="%{fg[green]%n@%m%{fg[red]${WINDOW:+[$WINDOW]}%{[m%}%# "
 #PROMPT="%{$fg[green]%}%#%{$reset_color%} "
 #PROMPT="%{$fg[green]%}@%#%{$reset_color%} "
 #PROMPT="%{$fg[green]%}%n@%m%{$fg[red]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%{$reset_color%} "
@@ -210,7 +206,7 @@ if [ "$EMACS" ];then
     # Emacs の ansi-term では右プロンプトを表示しない
     RPROMPT=""
 else
-    RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%1v%f|)%{$reset_color%}"
+    RPROMPT="%{$color%}[%39<...<%~]%1(v|%F{green}%1v%f|)%{$reset_color%}"
 fi
 #RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%v|)"
 }
