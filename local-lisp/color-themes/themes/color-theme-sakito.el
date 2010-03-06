@@ -115,7 +115,7 @@
       (widget-single-line-field-face ((t (:background "dim gray"))))
       ;; モード毎の設定
       ;; whitespcae
-      (whitespace-space ((t (:family "September" :foreground "aquamarine" :height 1.1))))
+      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine" :height 1.1))))
       ;; rst
       (rst-level-1-face ((t (:background "gray0" :foreground "white"))))
       (rst-level-2-face ((t (:background "gray3" :foreground "white"))))

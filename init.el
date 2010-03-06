@@ -59,12 +59,9 @@
                   ;; 初期設定ファイル
                   "site-start.d")
 
-;; 全環境共通設定
-(require 'init_global)
-
+;; Emacs の種類バージョンを判別するための変数を定義
 ;; @see http://github.com/elim/dotemacs/blob/master/init.el
 (defun x->bool (elt) (not (not elt)))
-;; Emacs の種類バージョンを判別するための変数を定義
 (defvar emacs22-p (equal emacs-major-version 22))
 (defvar emacs23-p (equal emacs-major-version 23))
 (defvar darwin-p (eq system-type 'darwin))
@@ -86,6 +83,26 @@
 (defvar meadow-p (featurep 'meadow))
 (defvar windows-p (or cygwin-p nt-p meadow-p))
 
+;; 文字コード
+;;(set-language-environment 'Japanese)
+(set-language-environment  'utf-8)
+;; 極力UTF-8とする
+(cond
+ (mac-p
+  ;; Mac OS X の HFC+ ファイルフォーマットではファイル名は NFD (の様な物)で扱う
+  ;; 以下はファイル名を NFC で扱う環境と共同作業等する場合の対処
+  (require 'ucs-normalize)
+  (prefer-coding-system 'utf-8-hfs)
+  (set-default-coding-systems 'utf-8-hfs-unix)
+  (setq file-name-coding-system 'utf-8-hfs)
+  (setq locale-coding-system 'utf-8-hfs))
+ (t
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8-unix)
+  (setq locale-coding-system 'utf-8)))
+
+;; 全環境共通設定
+(require 'init_global)
 
 ;; 環境依存設定
 (cond

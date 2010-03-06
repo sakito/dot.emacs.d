@@ -30,12 +30,6 @@
 
 ;; wdired-change-to-wdired-mode等をちゃんと利用してそれから考えるべし
 
-;; Mac OS X の HFC+ ファイルフォーマットではファイル名は NFD で扱う
-;; 以下はファイル名を NFC で扱う環境と共同作業等する場合の対処
-(when mac-p
-    (require 'ucs-normalize)
-    (setq file-name-coding-system 'utf-8-hfs))
-
 ;; dired 上で r を押すと wdired-change-to-wdired-mode を動作させる
 (require 'wdired)
 (define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
