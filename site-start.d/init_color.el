@@ -36,8 +36,8 @@
  ((= (display-pixel-height) 1200)
   (setq default-frame-alist
         (append (list
-                 '(width . 170)
-                 '(height . 60)
+                 '(width . 190)
+                 '(height . 65)
                  '(top . 90)
                  '(left . 500)
                  )
@@ -73,8 +73,8 @@
 (set-face-attribute 'default
                     nil
                     :family "September"
-                    :height 160)
-(set-frame-font "September-16")
+                    :height 140)
+(set-frame-font "September-14")
 (set-fontset-font nil
                   'unicode
                   (font-spec :family "IPAGothic")

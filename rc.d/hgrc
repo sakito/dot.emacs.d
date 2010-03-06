@@ -19,7 +19,7 @@ git = True
 cmd.ediff = sh
 opts.ediff = -c 'if [ -d $0 ]; then emacsclient --eval "(ediff-directories \"$0\" \"$1\" \"\")"; else emacsclient --eval "(ediff-files \"$0\" \"$1\")"; fi'
 [merge-tools]
-emacs.args = --eval "(ediff-merge-with-ancestor \"$local\" \"$other\" \"$base\" nil \"$output\")"
+emacsclient.args = --eval "(progn (raise-frame (selected-frame))(x-focus-frame (selected-frame))(ediff-merge-with-ancestor \"$local\" \"$other\" \"$base\" nil \"$output\"))"
 [color]
 status.modified = white bold red_background
 #status.modified = white bold underline red_background

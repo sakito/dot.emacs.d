@@ -2,7 +2,7 @@
 
 ;;; init_elscreen.el --- elscreen
 
-;; Copyright (C) 2009  sakito
+;; Copyright (C) 2009-2010 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -31,6 +31,7 @@
 (setq dnd-open-file-other-window nil)
 ;(require 'elscreen-dnd)
 ;(load "elscreen-wl" "ElScreen WL" t)
+(require 'elscreen-server)
 
 (provide 'init_elscreen)
 ;;; init_elscreen.el ends here

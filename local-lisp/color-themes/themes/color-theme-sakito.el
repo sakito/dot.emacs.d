@@ -113,9 +113,9 @@
       (widget-field-face ((t (:background "dim gray"))))
       (widget-inactive-face ((t (:foreground "light gray"))))
       (widget-single-line-field-face ((t (:background "dim gray"))))
-      ;; モード毎の設定
+      ;; モード毎の設定
       ;; whitespcae
-      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine" :height 1.1))))
+      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine"))))
       ;; rst
       (rst-level-1-face ((t (:background "gray0" :foreground "white"))))
       (rst-level-2-face ((t (:background "gray3" :foreground "white"))))
@@ -132,7 +132,7 @@
       ;; xxml
       (nxml-element-local-name ((t (:foreground "SkyBlue1"))))
       ;; anything
-      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
+      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
       (anything-file-name ((t (:foreground "Yellow"))))
       ;; 変更点のハイライト
       (highlight-changes ((t (:foreground nil :background "#382f2f"))))
