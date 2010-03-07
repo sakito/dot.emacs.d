@@ -57,7 +57,12 @@
 ;; サーバが起動していた場合は先に起動していた方を優先
 (require 'server)
 (unless (server-running-p) (server-start))
-
+(setq server-visit-hook
+      '(lambda () 
+         ;; Frame を全面にする
+         (raise-frame (selected-frame))
+         ;; キーボードフォーカスを選択しているFrameにする
+         (x-focus-frame (selected-frame))))
 
 ;;起動時のmessageを表示しない
 (setq inhibit-startup-message t)
