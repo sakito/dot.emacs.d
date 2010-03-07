@@ -59,7 +59,7 @@
 (unless (server-running-p) (server-start))
 (setq server-visit-hook
       '(lambda () 
-         ;; Frame を全面にする
+         ;; Frame を前面にする
          (raise-frame (selected-frame))
          ;; キーボードフォーカスを選択しているFrameにする
          (x-focus-frame (selected-frame))))
