@@ -86,19 +86,21 @@
 ;; 文字コード
 ;;(set-language-environment 'Japanese)
 (set-language-environment  'utf-8)
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8-unix)
 ;; 極力UTF-8とする
 (cond
  (mac-p
   ;; Mac OS X の HFC+ ファイルフォーマットではファイル名は NFD (の様な物)で扱う
   ;; 以下はファイル名を NFC で扱う環境と共同作業等する場合の対処
   (require 'ucs-normalize)
-  (prefer-coding-system 'utf-8-hfs)
-  (set-default-coding-systems 'utf-8-hfs-unix)
   (setq file-name-coding-system 'utf-8-hfs)
   (setq locale-coding-system 'utf-8-hfs))
+ (windows-p
+  (setq file-name-coding-system 'sjis)
+  (setq locale-coding-system 'utf-8))
  (t
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8-unix)
+  (setq file-name-coding-system 'utf-8)
   (setq locale-coding-system 'utf-8)))
 
 ;; 全環境共通設定
