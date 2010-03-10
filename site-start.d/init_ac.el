@@ -88,6 +88,7 @@
 (setq ac-modes (append ac-modes '(css-mode)))
 (setq ac-modes (append ac-modes '(nxml-mode)))
 (setq ac-modes (append ac-modes '(objc-mode)))
+(setq ac-modes (append ac-modes '(tuareg-mode)))
 
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))

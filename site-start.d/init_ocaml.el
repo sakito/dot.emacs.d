@@ -34,6 +34,8 @@
 (defun skt:tuareg-mode-hook ()
   (progn
     'tuareg-imenu-set-imenu
+    (setq tuareg-interactive-program "ocaml")
+    (setq camldebug-command-name "ocamldebug")
     (local-set-key (kbd "C-c C-c") 'tuareg-eval-buffer)
     ))
 

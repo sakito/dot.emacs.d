@@ -43,6 +43,10 @@
   (local-set-key (kbd "@") (smartchr '("@\"`!!'\"" "@")))
   )
 
+(defun smartchr-custom-keybindings-ocaml ()
+  (local-set-key (kbd ";") (smartchr '(";;" ";")))
+  )
+
 (defun skelton-custom-keybindigs ()
 ;;   (make-variable-buffer-local 'skeleton-pair)
 ;;  (make-variable-buffer-local 'skeleton-pair-on-word)
@@ -66,6 +70,7 @@
 (add-hook 'python-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'tuareg-mode-hook 'skelton-custom-keybindigs)
+(add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here
