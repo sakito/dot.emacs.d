@@ -102,6 +102,7 @@
         (append anything-find-file-additional-sources-at-first
                 ad-return-value)))
 ;;(ad-deactivate 'arfn-sources)
+(global-set-key (kbd "C-x C-f") 'anything-find-files)
 
 (global-set-key (kbd "C-c i") 'anything-help-at-point)
 ;; 検索の対象を変更した物を作成
