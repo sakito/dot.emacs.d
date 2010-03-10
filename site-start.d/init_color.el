@@ -46,8 +46,8 @@
  (t
   (setq default-frame-alist
         (append (list
-                 '(width . 100)
-                 '(height . 40)
+                 '(width . 140)
+                 '(height . 50)
                  '(top . 90)
                  '(left . 100)
                  )

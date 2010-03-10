@@ -9,6 +9,7 @@ syntax: glob
 .svn
 .semantic.cache
 .DS_Store
+Thumbs.db
 TAGS
 _build
 auto-save-list
