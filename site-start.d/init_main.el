@@ -116,23 +116,16 @@
 ;;; nxml-mode
 ;; @http://www.thaiopensource.com/download/
 (require 'init_nxml)
-;;;; hns-mode
-;(require 'init_hnf)
-;; bhl mode
-;;(require 'init_bhl)
+;; php-mode
+(require 'init_php)
 
 (autoload 'po-mode "po-mode" "Major mode for translators when they edit PO files." t)
 (eval-after-load 'po-mode '(load "gb-po-mode"))
 
-;;; ネットワーク関連
-;; wl
-;; (require 'init_wl)
 ;; w3m
 (require 'init_w3m)
 ;; navi2ch 常時利用はしないことにしました
 ;; (require 'init_navi2ch)
-;; pukiwiki
-;; (require 'init_pukiwiki)
 ;; irc
 ;; (require 'init_irc)
 
