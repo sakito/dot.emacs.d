@@ -89,6 +89,7 @@
 (setq ac-modes (append ac-modes '(nxml-mode)))
 (setq ac-modes (append ac-modes '(objc-mode)))
 (setq ac-modes (append ac-modes '(tuareg-mode)))
+(setq ac-modes (append ac-modes '(haskell-mode)))
 
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
@@ -120,7 +121,7 @@
           (lambda ()
             (make-local-variable 'ac-sources)
             ;; 既存に存在するかを無視して先頭に追加
-            (push 'ac-source-c++-keywords ac-sources)
+            ;; (push 'ac-source-c++-keywords ac-sources)
             ;; (push 'ac-source-company-xcode ac-sources)
             ;; 末尾に追加
             ;;(push 'ac-source-etags ac-sources)
