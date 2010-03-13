@@ -13,6 +13,7 @@ hgk=
 mq=
 purge=
 extdiff=
+progress=
 [diff]
 git = True
 [extdiff]
