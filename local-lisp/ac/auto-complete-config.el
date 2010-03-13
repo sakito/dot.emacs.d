@@ -37,15 +37,21 @@
 
 (defvar ac-imenu-index nil)
 
-(defun ac-imenu-candidate ()
-  (let ((i 0)
-        (stack ac-imenu-index)
-        candidates
-        node)
-    (while (and stack
-                (< i ac-limit))
-      (setq node (pop stack))
-      (when (consp node)
+(ac-clear-variable-every-minute 'ac-imenu-index)
+
+(defun ac-imenu-candidates ()
+  (loop with i = 0
+        with stack = (progn
+                       (unless (local-variable-p 'ac-imenu-index)
+                         (make-local-variable 'ac-imenu-index))
+                       (or ac-imenu-index
+                           (setq ac-imenu-index (ignore-errors (imenu--make-index-alist)))))
+        with result
+        while (and stack (or (not (integerp ac-limit))
+                             (< i ac-limit)))
+        for node = (pop stack)
+        if (consp node)
+        do
         (let ((car (car node))
               (cdr (cdr node)))
           (if (consp cdr)
@@ -54,14 +60,16 @@
                     cdr)
             (when (and (stringp car)
                        (string-match (concat "^" (regexp-quote ac-prefix)) car))
-              (push car candidates)
-              (setq i (1+ i)))))))
-    (nreverse candidates)))
+              ;; Remove extra characters
+              (if (string-match "^.*\\(()\\|=\\|<>\\)$" car)
+                  (setq car (substring car 0 (match-beginning 1))))
+              (push car result)
+              (incf i))))
+        finally return (nreverse result)))
 
 (ac-define-source imenu
   '((depends imenu)
-    (init . (setq ac-imenu-index (ignore-errors (imenu--make-index-alist))))
-    (candidates . ac-imenu-candidate)))
+    (candidates . ac-imenu-candidates)))
 
 ;; gtags
 
@@ -134,16 +142,16 @@
 
 ;; semantic
 
-(defun ac-semantic-candidate (prefix)
+(defun ac-semantic-candidates (prefix)
   (mapcar 'semantic-tag-name
           (ignore-errors
-            (or (or (semantic-analyze-possible-completions
-                     (semantic-analyze-current-context)))
-                (senator-find-tag-for-completion (regexp-quote prefix))))))
+            (or (semantic-analyze-possible-completions
+                 (semantic-analyze-current-context))
+                (senator-find-tag-for-completion prefix)))))
 
 (ac-define-source semantic
   '((depends semantic-ia)
-    (candidates . (lambda () (all-completions ac-prefix (ac-semantic-candidate ac-prefix))))
+    (candidates . (ac-semantic-candidates ac-prefix))
     (prefix . c-dot)))
 
 ;; eclim
@@ -154,7 +162,8 @@
 
 (ac-define-source eclim
   '((candidates . ac-eclim-candidates)
-    (prefix . c-dot)))
+    (prefix . c-dot)
+    (requires . 0)))
 
 
 
@@ -224,12 +233,17 @@
   (setq ac-sources (append '(ac-source-functions ac-source-yasnippet ac-source-variables ac-source-symbols ac-source-features) ac-sources)))
 
 (defun ac-cc-mode-setup ()
-  (setq ac-sources (append '(ac-source-semantic ac-source-yasnippet ac-source-imenu ac-source-gtags) ac-sources)))
+  (setq ac-sources (append '(ac-source-yasnippet ac-source-gtags) ac-sources)))
+
+(defun ac-ruby-mode-setup ()
+  (make-local-variable 'ac-ignores)
+  (add-to-list 'ac-ignores "end"))
 
 (defun ac-config-default ()
-  (setq-default ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-dictionary))
+  (setq-default ac-sources '(ac-source-abbrev ac-source-dictionary ac-source-words-in-same-mode-buffers))
   (add-hook 'emacs-lisp-mode-hook 'ac-emacs-lisp-mode-setup)
   (add-hook 'c-mode-common-hook 'ac-cc-mode-setup)
+  (add-hook 'ruby-mode-hook 'ac-ruby-mode-setup)
   (add-hook 'auto-complete-mode-hook 'ac-common-setup)
   (global-auto-complete-mode t))
 

@@ -52,7 +52,7 @@
 (ac-set-trigger-key "TAB")
 
 ;; 待ち時間を長めに取る
-(setq ac-delay 5.0)
+(setq ac-delay 0.2)
 
 ;; 補完メニューを自動表示しない
 ;;(setq ac-auto-show-menu nil)
