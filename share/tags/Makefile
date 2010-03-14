@@ -7,17 +7,24 @@ pyetags:
 	find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" | xargs etags -f python.TAGS -l python
 
 objcetags:
-	s="\t ";\
-	S="[$$s]*";\
-	w="_a-zA-Z0-9";\
-	CN="[A-Z][$$w]*";\
-	NM="[$$w][$$w]*";\
-	SDK="/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.2.sdk/System/Library/Frameworks";\
+	s="\t "; \
+	S="[$$s]*"; \
+	w="_a-zA-Z0-9"; \
+	CN="[A-Z][$$w]*"; \
+	NM="[$$w][$$w]*"; \
+	SDK="/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.2.sdk/System/Library/Frameworks"; \
 	find $$SDK -name "*.h" | xargs etags -a --declarations -r "/$$S[-+]$$S(\($$S$$NM\)\{1,3\}$$S\**$$S)?$$S\($$NM\)$$S[:;]/\2/" -f frm.tags;\
 	sed "/^@class/d" frm.tags > objc.TAGS
 
-#haskelletags:
-#	find "/Library/Frameworks/GHC.framework/Versions/Current/usr/lib/" -name \*.hi | xargs hasktags -e
+haskelletags:
+	VER=6.12.1; \
+	SRC=ghc-$${VER}-src.tar.bz2; \
+	if [ ! -f $${SRC} ]; \
+	then curl -O http://www.haskell.org/ghc/dist/$${VER}/$${SRC}; \
+	fi; \
+	tar xvfj $${SRC}; \
+	find . -name \*.*hs | xargs hasktags -e; \
+	mv TAGS haskell.TAGS
 
 # otags を利用した方が良いかもしれない
 ocamletags:

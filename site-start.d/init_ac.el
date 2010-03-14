@@ -106,6 +106,12 @@
               '("\\.py$" "~/.emacs.d/share/tags/python.TAGS"))
 (add-to-list  'etags-table-alist
               '("\\.p[lm]$" "~/.emacs.d/share/tags/perl.TAGS"))
+;; Haskell
+(add-to-list  'etags-table-alist
+              '("\\.hs$" "~/.emacs.d/share/tags/haskell.TAGS"))
+;; Ocaml
+(add-to-list  'etags-table-alist
+              '("\\.ml$" "~/.emacs.d/share/tags/ocaml.TAGS"))
 ;; etags 補完候補
 (defvar ac-source-etags
   '((candidates . (lambda ()
