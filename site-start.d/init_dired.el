@@ -45,7 +45,7 @@
      (global-set-key (kbd "C-x C-j") 'skk-mode)
      ;; システムのlsでなくls-lispを利用して表示
      (require 'ls-lisp)
-     ;; (load-safe "ls-lisp")
+     (setq ls-lisp-use-insert-directory-program nil)
      ;; ls のオプション
      (setq dired-listing-switches "-lahF")
      ;; ディレクトリをより上に表示
@@ -61,7 +61,7 @@
      ;; 再帰削除
 ;;     (setq dired-recursive-deletes 'always)
      ;; C-x 2 で分割した隣にコピーや移動をする
-     ;; (setq dired-dwim-target t)
+     (setq dired-dwim-target t)
 ;;     (define-key dired-mode-map "\C-m" 'dired-find-alternate-file)
      (define-key dired-mode-map (kbd "C-x m") 'dired-w3m-find-file)
      ;; zキーで対応するプログラムでファイルを開く
