@@ -49,6 +49,15 @@
 (setq cua-enable-cua-keys nil)
 (cua-mode t)
 
+;; window の移動
+(defun other-window-or-split ()
+  (interactive)
+  (when (one-window-p)
+    (split-window-horizontally))
+  (other-window 1))
+(global-set-key (kbd "C-t") 'other-window-or-split)
+
+
 ;; fullscreen を toggle する
 (defun toggle-fullscreen ()
   (interactive)
