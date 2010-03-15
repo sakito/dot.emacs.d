@@ -104,17 +104,26 @@ This is faster than prin1-to-string in many cases."
         maximize (string-width (popup-x-to-string item)) into width
         finally return (* (ceiling (/ (or width 0) 10.0)) 10)))
 
+;; truncated-partial-width-window-p is not defined in Emacs 22
+(defun ac-truncated-partial-width-window-p (&optional window)
+  (unless window
+    (setq window (selected-window)))
+  (unless (window-full-width-p window)
+    (let ((t-p-w-w (buffer-local-value 'truncate-partial-width-windows
+				       (window-buffer window))))
+      (if (integerp t-p-w-w)
+	  (< (window-width window) t-p-w-w)
+	t-p-w-w))))
+
 (defun popup-current-physical-column ()
-  (let (column)
-    (when popup-use-optimized-column-computation
-      (let ((c (current-column)))
-        (cond
-         (truncate-lines
-          (setq column c))
-         ((< c (window-width))
-          (setq column c)))))
-    (or column
-        (setq column (car (posn-col-row (posn-at-point)))))))
+  (or (when (and popup-use-optimized-column-computation
+                 (eq (window-hscroll) 0))
+        (let ((current-column (current-column)))
+          (if (or (ac-truncated-partial-width-window-p)
+                  truncate-lines
+                  (< current-column (window-width)))
+              current-column)))
+      (car (posn-col-row (posn-at-point)))))
 
 (defun popup-last-line-of-buffer-p ()
   (save-excursion (end-of-line) (/= (forward-line) 0)))
@@ -773,8 +782,7 @@ See also `popup-item-propertize'."
           (goto-char (point-min))
           (display-buffer (current-buffer)))
         (block nil
-          (while (setq event (read-event))
-            (clear-this-command-keys)
+          (while (setq event (progn (clear-this-command-keys) (read-event)))
             (case (key-binding (vector event))
               ('scroll-other-window
                (scroll-other-window))

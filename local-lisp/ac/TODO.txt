@@ -6,3 +6,5 @@
 - performance issue (cache issue)
 - asynchronous processing
 - kanji henkan support
+- create menu if needed
+- quick help positioning on tabs (bug)

@@ -37,7 +37,7 @@
 
 (defvar ac-imenu-index nil)
 
-(ac-clear-variable-every-minute 'ac-imenu-index)
+(ac-clear-variable-every-10-minutes 'ac-imenu-index)
 
 (defun ac-imenu-candidates ()
   (loop with i = 0
@@ -69,7 +69,8 @@
 
 (ac-define-source imenu
   '((depends imenu)
-    (candidates . ac-imenu-candidates)))
+    (candidates . ac-imenu-candidates)
+    (symbol . "s")))
 
 ;; gtags
 
@@ -91,7 +92,8 @@
   '((candidates . ac-gtags-candidate)
     (candidate-face . ac-gtags-candidate-face)
     (selection-face . ac-gtags-selection-face)
-    (requires . 3)))
+    (requires . 3)
+    (symbol . "s")))
 
 ;; yasnippet
 
@@ -152,7 +154,9 @@
 (ac-define-source semantic
   '((depends semantic-ia)
     (candidates . (ac-semantic-candidates ac-prefix))
-    (prefix . c-dot)))
+    (prefix . c-dot)
+    (requires . 0)
+    (symbol . "f")))
 
 ;; eclim
 
@@ -163,7 +167,8 @@
 (ac-define-source eclim
   '((candidates . ac-eclim-candidates)
     (prefix . c-dot)
-    (requires . 0)))
+    (requires . 0)
+    (symbol . "f")))
 
 
 
@@ -230,7 +235,7 @@
   (add-to-list 'ac-sources 'ac-source-filename))
 
 (defun ac-emacs-lisp-mode-setup ()
-  (setq ac-sources (append '(ac-source-functions ac-source-yasnippet ac-source-variables ac-source-symbols ac-source-features) ac-sources)))
+  (setq ac-sources (append '(ac-source-features ac-source-functions ac-source-yasnippet ac-source-variables ac-source-symbols) ac-sources)))
 
 (defun ac-cc-mode-setup ()
   (setq ac-sources (append '(ac-source-yasnippet ac-source-gtags) ac-sources)))
