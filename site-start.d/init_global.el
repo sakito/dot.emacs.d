@@ -93,6 +93,9 @@
 (line-number-mode t)
 (column-number-mode t)
 
+;; リージョンを kill-ring に入れないで削除できるようにする
+(delete-selection-mode t)
+
 ;; TAB はスペース 4 個ぶんを基本
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
