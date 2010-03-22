@@ -39,6 +39,15 @@
   (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
   )
 
+(defun smartchr-custom-keybindings-rst ()
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+  (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
+  (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+  (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+  )
+
 (defun smartchr-custom-keybindings-objc ()
   (local-set-key (kbd "@") (smartchr '("@\"`!!'\"" "@")))
   )
@@ -69,6 +78,7 @@
 (add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'python-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
+(add-hook 'rst-mode-hook 'smartchr-custom-keybindings-rst)
 (add-hook 'tuareg-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
 

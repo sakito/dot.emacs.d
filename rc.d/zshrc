@@ -52,6 +52,9 @@ export SCREENDIR=${HOME}/.screen
 # fink setting
 isdarwin && source /sw/bin/init.sh
 
+# MacPorts
+isdarwin && export PATH=/opt/local/bin:${PATH}
+
 # set path
 export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/local/bin:/bin:/usr/local/sbin:${PATH}:/usr/sbin:${HOME}/bin:${MAVEN_HOME}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${HOME}/bin/air/bin
 

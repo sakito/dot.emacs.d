@@ -73,6 +73,13 @@
   "Set `ansi-color-for-comint-mode' to t." t)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
+;; キー
+(global-set-key (kbd "C-c t") '(lambda ()
+                                 (interactive)
+                                 (if (get-buffer "*terminal<1>*")
+                                     (switch-to-buffer "*terminal<1>*")
+                                 (multi-term))))
+
 ;; shell-pop の設定
 ;; @see http://www.emacswiki.org/emacs-en/ShellPop
 (require 'shell-pop)

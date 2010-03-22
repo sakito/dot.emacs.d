@@ -35,6 +35,7 @@
                "/usr/sbin"
                "/bin"
                "/usr/bin"
+               "/opt/local/bin"
                "/sw/bin"
                "/usr/local/bin"
                (expand-file-name "~/bin")

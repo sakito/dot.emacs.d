@@ -68,6 +68,7 @@
 (require 'init_ac)
 (require 'flymake)
 (require 'init_objc)
+(require 'init_shell)
 
 (provide 'init_sysns)
 ;;; init_sysns.el ends here

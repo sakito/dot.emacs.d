@@ -44,6 +44,8 @@
   (setq session-registers-max-string 2048)
   ;; ミニバッファ履歴リストの長さ制限を無くす
   (setq history-length t)
+  ;; session で無視するファイル設定
+  (setq session-set-file-name-exclude-regexp "/\\.overview\\|.session\\|.recentf\\|.howm-keys\\|^/var/folders/\\|News/")
   (add-hook 'after-init-hook 'session-initialize))
 
 ;; minibuffer history から重複を排除する
