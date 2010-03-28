@@ -4,7 +4,8 @@ all:
 	@echo "etags"
 
 pyetags:
-	find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" | xargs etags -f python.TAGS -l python
+	#find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" -not -name '_test.py' | xargs etags -f python.TAGS --append -l python
+	find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" -not -name '_test.py' | xargs etags -f python.TAGS --append --regex='/^[ \t]+def[ \t]+\([a-zA-Z_0-9]+\)/\1/'
 
 objcetags:
 	s="\t "; \
