@@ -84,10 +84,10 @@
 ;; @see http://www.emacswiki.org/emacs-en/ShellPop
 (require 'shell-pop)
 ;; multi-term に対応
-(add-to-list 'shell-pop-internal-mode-list '("multi-term" "*multi-term*" '(lambda () (multi-term))))
+(add-to-list 'shell-pop-internal-mode-list '("multi-term" "*terminal<1>*" '(lambda () (multi-term))))
 (shell-pop-set-internal-mode "multi-term")
 ;; frame の高さからサイズを決定
-(defvar shell-pop-window-height-percent 80.0)
+(defvar shell-pop-window-height-percent 50.0)
 (shell-pop-set-window-height (truncate (* (frame-height)
                                           (/ shell-pop-window-height-percent
                                              100.0))))

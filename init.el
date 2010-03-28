@@ -91,7 +91,7 @@
 ;; 極力UTF-8とする
 (cond
  (mac-p
-  ;; Mac OS X の HFC+ ファイルフォーマットではファイル名は NFD (の様な物)で扱う
+  ;; Mac OS X の HFS+ ファイルフォーマットではファイル名は NFD (の様な物)で扱う
   ;; 以下はファイル名を NFC で扱う環境と共同作業等する場合の対処
   (require 'ucs-normalize)
   (setq file-name-coding-system 'utf-8-hfs)
