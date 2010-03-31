@@ -45,7 +45,7 @@
   (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
   (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
-  (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd ">") (smartchr '(">>>" ">" " => " " => '`!!''" " => \"`!!'\"")))
   )
 
 (defun smartchr-custom-keybindings-objc ()
@@ -53,6 +53,7 @@
   )
 
 (defun smartchr-custom-keybindings-ocaml ()
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(* `!!' *)" "(")))
   (local-set-key (kbd ";") (smartchr '(";;" ";")))
   )
 
@@ -71,16 +72,32 @@
   )
 
 ;; 適用するモードを限定
-(add-hook 'c-mode-common-hook 'smartchr-custom-keybindings)
+(dolist (hook (list
+              'c-mode-common-hook
+              'css-mode-hook
+              'nxml-mode-hook
+              ))
+  (add-hook hook 'smartchr-custom-keybindings))
+
+(dolist (hook (list
+              'emacs-lisp-mode-hook
+              'python-mode-hook
+              'makefile-mode-hook
+              ))
+  (add-hook hook 'skelton-custom-keybindigs))
+
 (add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
-(add-hook 'css-mode-hook 'smartchr-custom-keybindings)
-(add-hook 'nxml-mode-hook 'smartchr-custom-keybindings)
-(add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
-(add-hook 'python-mode-hook 'skelton-custom-keybindigs)
-(add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'rst-mode-hook 'smartchr-custom-keybindings-rst)
-(add-hook 'tuareg-mode-hook 'skelton-custom-keybindigs)
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
+
+;; (add-hook 'c-mode-common-hook 'smartchr-custom-keybindings)
+;; (add-hook 'css-mode-hook 'smartchr-custom-keybindings)
+;; (add-hook 'nxml-mode-hook 'smartchr-custom-keybindings)
+;; (add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
+;; (add-hook 'python-mode-hook 'skelton-custom-keybindigs)
+;; (add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
+
+
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here
