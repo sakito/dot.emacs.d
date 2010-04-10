@@ -49,14 +49,19 @@ export LC_ALL="ja_JP.UTF-8"
 # for screen(chmod 700)
 export SCREENDIR=${HOME}/.screen
 
+# set path
+# Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
+
 # fink setting
 isdarwin && source /sw/bin/init.sh
 
-# MacPorts
-isdarwin && export PATH=/opt/local/bin:${PATH}
+export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
+# export PATH=/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
+export PATH=/usr/local/sbin:${PATH}
+export PATH=/usr/local/bin:${PATH}
 
-# set path
-export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/local/bin:/bin:/usr/local/sbin:${PATH}:/usr/sbin:${HOME}/bin:${MAVEN_HOME}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${HOME}/bin/air/bin
+# MacPorts
+isdarwin && export PATH=${PATH}:/opt/local/bin
 
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
@@ -69,6 +74,26 @@ export PATH=${PATH}:/usr/local/git/bin
 
 # Haskell
 export PATH=${PATH}:${HOME}/.cabal/bin
+
+# 最優先パス
+export PATH=${HOME}/bin:${PATH}
+export PATH=${HOME}/bin/air/bin:${PATH}
+
+# Java
+### Java
+# Jakarta Maven
+# export MAVEN_HOME=${HOME}/bin/maven
+# export PATH=${MAVEN_HOME}/bin:${PATH}
+
+#CLASSPATH
+#export CLASSPATH=${CLASSPATH}:.
+if [ -r ${HOME}/lib/java/classpath ]; then
+  if [ -z "$CLASSPATH" ]; then
+    export CLASSPATH=`cat ${HOME}/lib/java/classpath`
+  else
+    export CLASSPATH=`cat ${HOME}/lib/java/classpath`:$CLASSPATH
+  fi
+fi
 
 # TeX
 export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
@@ -100,28 +125,6 @@ export CVSROOT=$HOME/var/cvs
 export HGENCODING=utf-8
 
 export ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common'
-
-### Java
-# Jakarta Maven
-#MAVEN_HOME=${HOME}/opt/maven-1.0-rc2
-#export MAVEN_HOME
-
-# Apache Forrest
-#FORREST_HOME=${HOME}/opt/apache-forrest-0.4-bin
-#export FORREST_HOME
-#PATH=$PATH:$FORREST_HOME/bin
-#export PATH
-
-#CLASSPATH
-#export CLASSPATH=${CLASSPATH}:.
-if [ -r ${HOME}/lib/java/classpath ]; then
-  if [ -z "$CLASSPATH" ]; then
-    export CLASSPATH=`cat ${HOME}/lib/java/classpath`
-  else
-    export CLASSPATH=`cat ${HOME}/lib/java/classpath`:$CLASSPATH
-  fi
-fi
-
 
 #-----------------------------------------------------------------
 # 非端末プロセスなら終了
