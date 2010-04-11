@@ -54,7 +54,11 @@
 
 (defun smartchr-custom-keybindings-ocaml ()
   (local-set-key (kbd "(") (smartchr '("(`!!')" "(* `!!' *)" "(")))
+  (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
   (local-set-key (kbd ";") (smartchr '(";;" ";")))
+  (local-set-key (kbd ">") (smartchr '(">" " -> ")))
   )
 
 (defun skelton-custom-keybindigs ()

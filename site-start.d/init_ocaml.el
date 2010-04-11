@@ -36,6 +36,18 @@
     'tuareg-imenu-set-imenu
     (setq tuareg-interactive-program "ocaml")
     (setq camldebug-command-name "ocamldebug")
+
+    ;; インデント
+    (setq tuareg-in-indent 0)
+    (setq tuareg-function-indent 0)
+    (setq tuareg-parser-indent 0)
+    (setq tuareg-match-indent 0)
+    (setq tuareg-lazy-paren t)
+    (setq tuareg-electric-indent nil)
+    (setq tuareg-leading-star-in-doc t)
+    (setq tuareg-with-indent 0)
+
+    ;; キー
     (local-set-key (kbd "C-c C-c") 'tuareg-eval-buffer)
     ))
 
