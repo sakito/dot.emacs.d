@@ -7,7 +7,8 @@
 %(body)s
 
 <br />
-以下コピペ用
+以下コピペ用<br />
+<input type="text" value="%(title)s">
 <textarea rows="30" cols="100">
 %(body)s
 </textarea>
