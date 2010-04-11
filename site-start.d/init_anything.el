@@ -27,7 +27,7 @@
 ;; 
 
 ;;; Code:
-(require 'anything)
+;;(require 'anything)
 (require 'anything-config)
 ;;(require 'anything-private-config)
 (require 'anything-match-plugin)
@@ -89,19 +89,33 @@
         ))
 
 ;; C-x C-f の先頭を ffap 系にする
-(setq anything-find-file-additional-sources-at-first
-      '(anything-c-source-ffap-line
-        anything-c-source-ffap-guesser))
+;; (setq anything-find-file-additional-sources-at-first
+;;       '(
+;;         anything-c-source-ffap-line
+;;         anything-c-source-ffap-guesser
+;;         ))
 ;; 追加のソース
 ;; (setq anything-find-file-additional-sources
 ;;       '(anything-c-source-locate))
-(defadvice arfn-sources
-  (after additional-arfn-sources-at-first activate)
-  "Add additional sources at first."
-  (setq ad-return-value
-        (append anything-find-file-additional-sources-at-first
-                ad-return-value)))
+;; (defadvice arfn-sources
+;;   (after additional-arfn-sources-at-first activate)
+;;   "Add additional sources at first."
+;;   (setq ad-return-value
+;;         (append anything-find-file-additional-sources-at-first
+;;                 ad-return-value)))
 ;;(ad-deactivate 'arfn-sources)
+
+;; (defun skt:anything-find-files ()
+;;   "Preconfigured anything for `find-file'."
+;;   (interactive)
+;;   (let ((fap (ffap-guesser)))
+;;     (if (and fap (file-exists-p fap)) 
+;;         (anything 'anything-c-source-find-files (expand-file-name fap))))
+;;   (anything (anything-c-source-find-files (expand-file-name default-directory))
+;;             'anything-c-source-recentf
+;;             )
+;;   )
+
 (global-set-key (kbd "C-x C-f") 'anything-find-files)
 
 (global-set-key (kbd "C-c i") 'anything-help-at-point)
@@ -121,7 +135,7 @@
     (t
      '(anything-c-source-info-elisp
        anything-c-source-info-cl
-       ;; anything-c-source-man-pages
+;;       anything-c-source-man-pages
        anything-c-source-info-pages
        ;; anything-c-source-emacs-commands
        ;; anything-c-source-emacs-functions

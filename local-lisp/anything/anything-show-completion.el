@@ -1,5 +1,5 @@
 ;;; anything-show-completion.el --- Show selection in buffer for anything completion
-;; $Id: anything-show-completion.el,v 1.19 2009/11/19 20:16:51 rubikitch Exp rubikitch $
+;; $Id: anything-show-completion.el,v 1.19 2009-11-19 20:16:51 rubikitch Exp $
 
 ;; Copyright (C) 2009  hchbaw
 ;; Copyright (C) 2009  rubikitch
@@ -97,7 +97,7 @@
 ;;; History:
 
 ;; $Log: anything-show-completion.el,v $
-;; Revision 1.19  2009/11/19 20:16:51  rubikitch
+;; Revision 1.19  2009-11-19 20:16:51  rubikitch
 ;; asc-display-function: Fix an error "Window height XX too small (after splitting)"
 ;;
 ;; Revision 1.18  2009/11/19 17:27:59  rubikitch
@@ -161,7 +161,7 @@
 
 ;;; Code:
 
-(defvar anything-show-completion-version "$Id: anything-show-completion.el,v 1.19 2009/11/19 20:16:51 rubikitch Exp rubikitch $")
+(defvar anything-show-completion-version "$Id: anything-show-completion.el,v 1.19 2009-11-19 20:16:51 rubikitch Exp $")
 (require 'anything)
 (defgroup anything-show-completion nil
   "anything-show-completion"
@@ -266,5 +266,5 @@ It is evaluated in `asc-display-overlay'."
 (provide 'anything-show-completion)
 ;; (asc-display-function anything-buffer)
 ;; How to save (DO NOT REMOVE!!)
-;; (emacswiki-post "anything-show-completion.el")
+;; (progn (magit-push) (emacswiki-post "anything-show-completion.el"))
 ;;; anything-show-completion.el ends here
