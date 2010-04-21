@@ -116,9 +116,26 @@
 ;;             )
 ;;   )
 
+;; anything-find-files を上書き
+(defun anything-find-files ()
+  "Preconfigured `anything' for anything implementation of `find-file'."
+  (interactive)
+  (anything 'anything-c-source-find-files
+            (anything-find-files-input (ffap-guesser) (thing-at-point 'filename))
+            "Find Files or Url: " nil nil "*Anything Find Files*"))
+
+(defun anything-find-files-input (fap tap)
+  "Default input of `anything-find-files'."
+  (let* ((file-p (and fap (file-exists-p fap)
+                      (file-exists-p
+                       (file-name-directory (expand-file-name tap)))))
+         (input  (if file-p (expand-file-name fap) fap)))
+    (or input (expand-file-name default-directory))))
+
+;; anything 本体では anything-quit-and-find-file 
 (global-set-key (kbd "C-x C-f") 'anything-find-files)
 
-(global-set-key (kbd "C-c i") 'anything-help-at-point)
+
 ;; 検索の対象を変更した物を作成
 (defun anything-help-at-point ()
   "Preconfigured `anything' for searching help at point."
@@ -143,6 +160,7 @@
     )
    (thing-at-point 'symbol) nil nil nil "*anything help*"))
 
+(global-set-key (kbd "C-c i") 'anything-help-at-point)
 
 ;; 最近のファイル等を anything する
 ;; see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
