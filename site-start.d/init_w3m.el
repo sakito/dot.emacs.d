@@ -24,29 +24,34 @@
 
 ;;; Commentary:
 
-;; 
-
-;;; Code:
-;;; w3m[2002/02/26]
+;;; w3m
 ;; @see http://w3m.sourceforge.net/index.ja.html
 ;; @see http://emacs-w3m.namazu.org/
-;; @version current stable
-;;
+
+;;; Code:
 (autoload 'w3m "w3m" "Interface for w3m on Emacs." t)
 (autoload 'w3m-find-file "w3m" "w3m interface function for local file." t)
 
-;; browse-url w3m
-;(setq browse-url-browser-function 'w3m-browse-url)
-;(autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
+;; リンク を w3m で開く
 (global-set-key (kbd "C-x m") 'browse-url-at-point)
-;(setq browse-url-netscape-program "~/bin/open_navigator.sh")
+;; (global-set-key (kbd "C-c v") 'browse-url-at-point)
+
+;; 画像を最初から表示
+(setq w3m-default-display-inline-images t)
+
+;; (setq browse-url-browser-function 'w3m-browse-url)
+;; (autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
 
 (setq browse-url-browser-function 'browse-url-generic)
 (setq browse-url-generic-program "open")
-;;(global-set-key "\C-cv" 'browse-url-at-point)
+(setq w3m-image-viewer "open")
 
+;; ホームページの設定
+(setq w3m-home-page "http://www.google.co.jp/")
+
+;; 検索
 (autoload 'w3m-search "w3m-search" "Search QUERY using SEARCH-ENGINE." t)
-;; w3m-search-engine-alistの内容を確認してください
+;; w3m-search-engine-alist の内容を確認してください
 (setq w3m-search-default-engine "google")
 ;;(global-set-key "\C-cs" 'w3m-search)
 (setq w3m-mailto-url-function 'wl-draft)
@@ -54,9 +59,8 @@
 (autoload 'w3m-weather "w3m-weather" "Display weather report." t)
 (autoload 'w3m-antenna "w3m-antenna" "Report chenge of WEB sites." t)
 (setq w3m-use-form t)
-;(setq w3m-command "/usr/local/bin/w3m")
-(setq w3m-display-inline-image nil)
-(setq w3m-icon-directory "/usr/local/share/emacs/21.3.50/etc/w3m/icons")
+
+;;(setq w3m-icon-directory "/usr/local/share/emacs/21.3.50/etc/w3m/icons")
 
 (setq mime-setup-enable-inline-html nil)
 (eval-after-load "mime-view"
@@ -73,8 +77,6 @@
      (set-alist 'mime-view-type-subtype-score-alist
                 '(text . html) 3)
      ))
-
-(setq w3m-image-viewer "open")
 
 (provide 'init_w3m)
 ;;; init_w3m.el ends here

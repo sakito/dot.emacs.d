@@ -31,6 +31,8 @@
 ;; ddskkでは不要です
 ;; @see http://openlab.ring.gr.jp/skk/index-j.html
 ;;
+;; 色設定
+(setq skk-cursor-hiragana-color "hot pink")
 (require 'skk-autoloads)
 (setq skk-preload t)
 
@@ -77,8 +79,6 @@
 ;;          (lambda ()
             ;(skk-latin-mode 1)
 ;;            ))
-
-;;(setq default-input-method "japanese-skk")
 
 (provide 'init_skk)
 ;;; init_skk.el ends here
