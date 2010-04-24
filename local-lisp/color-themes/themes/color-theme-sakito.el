@@ -21,20 +21,48 @@
        (widget-mouse-face . highlight))
 ;;      (default ((t (:stipple nil :background "#102e4e" :foreground "#eeeeee" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :width normal :family "misc-fixed"))))
       (default ((t (:stipple nil :background "#102e4e" :foreground "#eeeeee" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :family "September"))))
+
       (bold ((t (:bold t :weight bold :height 1.1))))
       (italic ((t (:italic t :slant italic :height 1.1))))
       (bold-italic ((t (:italic t :bold t :slant italic :weight bold :height 1.1))))
       (fixed-pitch ((t (:family "September"))))
       (variable-pitch ((t (:family "September"))))
+      (underline ((t (:underline t))))
+      (menu ((t (:background "gray" :foreground "black" :family "September"))))
       (border ((t (:background "black"))))
+      (cursor ((t (:background "green" :foreground "black"))))
+      (fringe ((t (:background "#405060"))))
       (mouse ((t (:background "white"))))
       (region ((t (:background "DarkCyan"))))
-      (menu ((t (:background "gray" :foreground "black" :family "September"))))
+      (secondary-selection ((t (:background "yellow" :foreground "gray10"))))
+      (highlight ((t (:background "darkgreen"))))
+      (scroll-bar ((t (:background "gray" :foreground "#506070"))))
+      (tool-bar ((t (:background "grey75" :foreground "black" :box (:line-width 1 :style released-button)))))
+      (tooltip ((t (:background "lightyellow" :foreground "black"))))
+      (header-line ((t (:box (:line-width 2 :style released-button) :background "grey20" :foreground "grey90" :box nil))))
+
+      ;; isearch
+      (isearch ((t (:background "palevioletred2" :foreground "brown4"))))
+      (isearch-lazy-highlight-face ((t (:background "paleturquoise4"))))
+
+      ;; whitespcae
+      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine"))))
+      ;; 行末半角スペース
+      (trailing-whitespace ((t (:underline "SteelBlue"))))
+
+      ;; info
       (Info-title-1-face ((t (:bold t :weight bold :family "September" :height 1.728))))
       (Info-title-2-face ((t (:bold t :family "September" :weight bold :height 1.44))))
       (Info-title-3-face ((t (:bold t :weight bold :family "September" :height 1.2))))
       (Info-title-4-face ((t (:bold t :family "September" :weight bold))))
-      (calendar-today-face ((t (:background "blue"))))
+
+      (info-header-node ((t (:foreground "DeepSkyBlue1"))))
+      (info-header-xref ((t (:bold t :weight bold :foreground "SeaGreen2"))))
+      (info-menu-5 ((t (:foreground "wheat"))))
+      (info-menu-header ((t (:bold t :family "September" :weight bold))))
+      (info-node ((t (:foreground "DeepSkyBlue1"))))
+      (info-xref ((t (:bold t :foreground "SeaGreen2" :weight bold))))
+
       (change-log-acknowledgement-face ((t (:italic t :slant italic :foreground "CadetBlue"))))
       (change-log-conditionals-face ((t (:foreground "SeaGreen2"))))
       (change-log-date-face ((t (:foreground "burlywood"))))
@@ -43,9 +71,10 @@
       (change-log-function-face ((t (:foreground "SeaGreen2"))))
       (change-log-list-face ((t (:bold t :weight bold :foreground "DeepSkyBlue1"))))
       (change-log-name-face ((t (:foreground "gold"))))
+
       (comint-highlight-input ((t (:bold t :weight bold))))
       (comint-highlight-prompt ((t (:foreground "cyan"))))
-      (cursor ((t (:background "green" :foreground "black"))))
+
       (cvs-filename-face ((t (:foreground "lightblue"))))
       (cvs-handled-face ((t (:foreground "pink"))))
       (cvs-header-face ((t (:bold t :foreground "lightyellow" :weight bold))))
@@ -53,7 +82,11 @@
       (cvs-msg-face ((t (:italic t :slant italic))))
       (cvs-need-action-face ((t (:foreground "orange"))))
       (cvs-unknown-face ((t (:foreground "red"))))
+
+      (calendar-today-face ((t (:background "blue"))))
       (diary-face ((t (:foreground "orange red"))))
+      (holiday-face ((t (:foreground "green"))))
+
       (diff-added ((t (:background "gray26" :foreground "LightGoldenrod1"))))
       (diff-removed ((t (:background "gray26" :foreground "deep sky blue"))))
       (diff-changed ((t (:foreground "DeepSkyBlue1"))))
@@ -64,6 +97,7 @@
       (diff-hunk-header ((t (:background "grey45" :foreground "light pink"))))
       (diff-index ((t (:bold t :weight bold :background "grey60" :foreground "thistle"))))
       (diff-nonexistent ((t (:bold t :weight bold :background "grey60"))))
+      
       (font-latex-bold-face ((t (:bold t :foreground "OliveDrab" :weight bold))))
       (font-latex-italic-face ((t (:italic t :foreground "OliveDrab" :slant italic))))
       (font-latex-math-face ((t (:foreground "burlywood"))))
@@ -83,39 +117,20 @@
       (font-lock-type-face ((t (:foreground "CadetBlue1"))))
       (font-lock-variable-name-face ((t (:foreground "SeaGreen2"))))
       (font-lock-warning-face ((t (:foreground "yellow"))))
-      (fringe ((t (:background "#405060"))))
-      (header-line ((t (:box (:line-width 2 :style released-button) :background "grey20" :foreground "grey90" :box nil))))
-      (highlight ((t (:background "darkgreen"))))
-      (holiday-face ((t (:foreground "green"))))
-      (info-header-node ((t (:foreground "DeepSkyBlue1"))))
-      (info-header-xref ((t (:bold t :weight bold :foreground "SeaGreen2"))))
-      (info-menu-5 ((t (:foreground "wheat"))))
-      (info-menu-header ((t (:bold t :family "September" :weight bold))))
-      (info-node ((t (:foreground "DeepSkyBlue1"))))
-      (info-xref ((t (:bold t :foreground "SeaGreen2" :weight bold))))
-      (isearch ((t (:background "palevioletred2" :foreground "brown4"))))
-      (isearch-lazy-highlight-face ((t (:background "paleturquoise4"))))
-      (modeline ((t (:background "gray" :foreground "black" :box (:line-width 2 :style released-button)))))
-      (modeline-buffer-id ((t (:background "gray" :foreground "black" :box (:line-width 2 :style released-button)))))
-      (modeline-mousable ((t (:background "gray" :foreground "black" :box (:line-width 2 :style released-button)))))
-      (modeline-mousable-minor-mode ((t (:background "gray" :foreground "black" :box (:line-width 2 :style released-button)))))
-      (scroll-bar ((t (:background "gray" :foreground "#506070"))))
-      (secondary-selection ((t (:background "yellow" :foreground "gray10"))))
+
+      (mode-line ((t (:foreground "#ccd8e5" :background "#4c657f" :box (:color "#4c657f" :line-width 2)))))
+      (mode-line-inactive ((t (:foreground "#B2BECC" :background "#334C66" :box (:color "#334C66" :line-width 2)))))
+
       (show-paren-match-face ((t (:bold t :background "yellow" :foreground "black" :weight bold))))
       (show-paren-mismatch-face ((t (:bold t :foreground "red" :foreground "yellow" :weight bold))))
-      (tool-bar ((t (:background "grey75" :foreground "black" :box (:line-width 1 :style released-button)))))
-      (tooltip ((t (:background "lightyellow" :foreground "black"))))
-      (trailing-whitespace ((t (:underline "SteelBlue"))))
-      (underline ((t (:underline t))))
+
       (widget-button-face ((t (:bold t :weight bold))))
       (widget-button-pressed-face ((t (:foreground "red"))))
       (widget-documentation-face ((t (:foreground "lime green"))))
       (widget-field-face ((t (:background "dim gray"))))
       (widget-inactive-face ((t (:foreground "light gray"))))
       (widget-single-line-field-face ((t (:background "dim gray"))))
-      ;; モード毎の設定
-      ;; whitespcae
-      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine"))))
+
       ;; rst
       (rst-level-1-face ((t (:background "gray0" :foreground "white"))))
       (rst-level-2-face ((t (:background "gray3" :foreground "white"))))
@@ -123,19 +138,25 @@
       (rst-level-4-face ((t (:background "gray9" :foreground "white"))))
       (rst-level-5-face ((t (:background "gray12" :foreground "white"))))
       (rst-level-6-face ((t (:background "gray15" :foreground "white"))))
+
       ;; howm
       ;;(howm-mode-title-face ((t (:background "grey15" :foreground "OliveDrab1"))))
       (howm-mode-title-face ((t (:background "gray0" :foreground "white"))))
+
       ;; vline
       (vline-visual ((t (:background "gray13"))))
       (vline ((t (:background "gray13"))))
-      ;; xxml
+
+      ;; nxml
       (nxml-element-local-name ((t (:foreground "SkyBlue1"))))
+
       ;; anything
-      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
+      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
       (anything-file-name ((t (:foreground "Yellow"))))
+
       ;; 変更点のハイライト
       (highlight-changes ((t (:foreground nil :background "#382f2f"))))
       (highlight-changes-delete ((t (:foreground nil :background "#916868"))))
+
       )))
 (provide 'color-theme-sakito)
