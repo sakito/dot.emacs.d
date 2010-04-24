@@ -119,7 +119,7 @@
       (font-lock-warning-face ((t (:foreground "yellow"))))
 
       (mode-line ((t (:foreground "#ccd8e5" :background "#4c657f" :box (:color "#4c657f" :line-width 2)))))
-      (mode-line-inactive ((t (:foreground "#B2BECC" :background "#334C66" :box (:color "#334C66" :line-width 2)))))
+      (mode-line-inactive ((t (:foreground "#99a4b2" :background "#19324c" :box (:color "#19324c" :line-width 2)))))
 
       (show-paren-match-face ((t (:bold t :background "yellow" :foreground "black" :weight bold))))
       (show-paren-mismatch-face ((t (:bold t :foreground "red" :foreground "yellow" :weight bold))))
