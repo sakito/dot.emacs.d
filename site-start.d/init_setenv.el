@@ -47,6 +47,8 @@
 
 (setenv "MANPATH" (concat "/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/share/man" (getenv "MANPATH")))
 
+(setenv "JAVA_OPTS" "-Dfile.encoding=UTF-8")
+
 (setenv "CVS_RSH" "ssh")
 (setenv "DISPLAY" "localhost")
 (setenv "SSH_AUTH_SOCK" (getenv "SSH_AUTH_SOCK"))

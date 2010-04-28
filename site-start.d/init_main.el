@@ -116,6 +116,8 @@
 ;;; nxml-mode
 ;; @http://www.thaiopensource.com/download/
 (require 'init_nxml)
+;; scala-mode
+(require 'init_scala)
 ;; haskel-mode
 (require 'init_haskell)
 ;; php-mode

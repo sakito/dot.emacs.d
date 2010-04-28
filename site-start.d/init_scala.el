@@ -26,5 +26,15 @@
 
 (require 'scala-mode-auto)
 
+(defun skt:scala-mode-hook ()
+  (progn
+    ;; キー
+    (local-set-key (kbd "C-c !") 'scala-run-scala)
+    (local-set-key (kbd "C-c C-c") 'scala-eval-buffer)
+;;    (local-set-key (kbd "RET") 'reindent-then-newline-and-indent)
+    ))
+
+(add-hook 'scala-mode-hook 'skt:scala-mode-hook)
+
 (provide 'init_scala)
 ;;; init_scala.el ends here
