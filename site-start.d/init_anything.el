@@ -129,7 +129,7 @@
   (let* ((file-p (and fap (file-exists-p fap)
                       (file-exists-p
                        (file-name-directory (expand-file-name tap)))))
-         (input  (if file-p (expand-file-name fap) fap)))
+         (input  (if file-p (expand-file-name fap) (expand-file-name tap))))
     (or input (expand-file-name default-directory))))
 
 ;; anything 本体では anything-quit-and-find-file 

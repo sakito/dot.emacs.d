@@ -74,350 +74,330 @@
 ;; different sources. Each anything command should have own anything
 ;; buffer, because M-x anything-resume revives anything command.
 
-;;; Commands:
-;;
-;; Below are complete command list:
-;;
-;;  `anything-c-describe-anything-bindings'
-;;    [OBSOLETE] Describe `anything' bindings.
-;;  `anything-for-files'
-;;    Preconfigured `anything' for opening files.
-;;  `anything-info-at-point'
-;;    Preconfigured `anything' for searching info at point.
-;;  `anything-show-kill-ring'
-;;    Preconfigured `anything' for `kill-ring'. It is drop-in replacement of `yank-pop'.
-;;  `anything-minibuffer-history'
-;;    Preconfigured `anything' for `minibuffer-history'.
-;;  `anything-gentoo'
-;;    Preconfigured `anything' for gentoo linux.
-;;  `anything-surfraw-only'
-;;    Preconfigured `anything' for surfraw.
-;;  `anything-imenu'
-;;    Preconfigured `anything' for `imenu'.
-;;  `anything-google-suggest'
-;;    Preconfigured `anything' for google search with google suggest.
-;;  `anything-yahoo-suggest'
-;;    Preconfigured `anything' for Yahoo searching with Yahoo suggest.
-;;  `anything-for-buffers'
-;;    Preconfigured `anything' for buffer.
-;;  `anything-bbdb'
-;;    Preconfigured `anything' for BBDB.
-;;  `anything-locate'
-;;    Preconfigured `anything' for Locate.
-;;  `anything-w3m-bookmarks'
-;;    Preconfigured `anything' for w3m bookmark.
-;;  `anything-colors'
-;;    Preconfigured `anything' for color.
-;;  `anything-bm-list'
-;;    Preconfigured `anything' for visible bookmarks.
-;;  `anything-timers'
-;;    Preconfigured `anything' for timers.
-;;  `anything-kill-buffers'
-;;    Preconfigured `anything' to kill buffer you selected.
-;;  `anything-query-replace-regexp'
-;;    Preconfigured `anything' : Drop-in replacement of `query-replace-regexp' with building regexp visually.
-;;  `anything-regexp'
-;;    Preconfigured `anything' : It is like `re-builder'. It helps buliding regexp and replacement.
-;;  `anything-insert-buffer-name'
-;;    Insert buffer name.
-;;  `anything-insert-symbol'
-;;    Insert current symbol.
-;;  `anything-insert-selection'
-;;    Insert current selection.
-;;  `anything-show-buffer-only'
-;;    [OBSOLETE] Only show sources about buffer.
-;;  `anything-show-bbdb-only'
-;;    [OBSOLETE] Only show sources about BBDB.
-;;  `anything-show-locate-only'
-;;    [OBSOLETE] Only show sources about Locate.
-;;  `anything-show-info-only'
-;;    [OBSOLETE] Only show sources about Info.
-;;  `anything-show-imenu-only'
-;;    [OBSOLETE] Only show sources about Imenu.
-;;  `anything-show-files-only'
-;;    [OBSOLETE] Only show sources about File.
-;;  `anything-show-w3m-bookmarks-only'
-;;    [OBSOLETE] Only show source about w3m bookmark.
-;;  `anything-show-colors-only'
-;;    [OBSOLETE] Only show source about color.
-;;  `anything-show-kill-ring-only'
-;;    [OBSOLETE] Only show source about kill ring.
-;;  `anything-show-this-source-only'
-;;    Only show this source.
-;;  `anything-test-sources'
-;;    List all anything sources for test.
-;;  `anything-select-source'
-;;    Select source.
-;;  `anything-find-files-down-one-level'
-;;    Go down one level like unix command `cd ..'.
-;;  `anything-find-files'
-;;    Preconfigured `anything' for anything implementation of `find-file'.
-;;  `anything-write-file'
-;;    Preconfigured `anything' providing completion for `write-file'.
-;;  `anything-insert-file'
-;;    Preconfigured `anything' providing completion for `insert-file'.
-;;  `anything-dired-rename-file'
-;;    Preconfigured `anything' to rename files from dired.
-;;  `anything-dired-copy-file'
-;;    Preconfigured `anything' to copy files from dired.
-;;  `anything-dired-symlink-file'
-;;    Preconfigured `anything' to symlink files from dired.
-;;  `anything-dired-hardlink-file'
-;;    Preconfigured `anything' to hardlink files from dired.
-;;  `anything-dired-bindings'
-;;    Replace usual dired commands `C' and `R' by anything ones.
-;;  `anything-bookmark-ext'
-;;    Preconfigured `anything' for bookmark-extensions sources.
-;;  `anything-simple-call-tree'
-;;    Preconfigured `anything' for simple-call-tree. List function relationships.
-;;  `anything-mark-ring'
-;;    Preconfigured `anything' for `anything-c-source-mark-ring'.
-;;  `anything-global-mark-ring'
-;;    Preconfigured `anything' for `anything-c-source-global-mark-ring'.
-;;  `anything-yaoddmuse-cache-pages'
-;;    Fetch the list of files on emacswiki and create cache file.
-;;  `anything-yaoddmuse-emacswiki-edit-or-view'
-;;    Preconfigured `anything' to edit or view EmacsWiki page.
-;;  `anything-yaoddmuse-emacswiki-post-library'
-;;    Preconfigured `anything' to post library to EmacsWiki.
-;;  `anything-emms-stream-edit-bookmark'
-;;    Change the information of current emms-stream bookmark from anything.
-;;  `anything-emms-stream-delete-bookmark'
-;;    Delete an emms-stream bookmark from anything.
-;;  `anything-call-source'
-;;    Preconfigured `anything' to call anything source.
-;;  `anything-call-source-from-anything'
-;;    Call anything source within `anything' session.
-;;  `anything-occur'
-;;    Preconfigured Anything for Occur source.
-;;  `anything-create-from-anything'
-;;    Run `anything-create' from `anything' as a fallback.
-;;  `anything-create'
-;;    Preconfigured `anything' to do many create actions from STRING.
-;;  `anything-top'
-;;    Preconfigured `anything' for top command.
-;;  `anything-select-xfont'
-;;    Preconfigured `anything' to select Xfont.
-;;  `anything-apt'
-;;    Preconfigured `anything' : frontend of APT package manager.
-;;  `anything-c-set-variable'
-;;    Set value to VAR interactively.
-;;  `anything-c-adaptive-save-history'
-;;    Save history information to file given by `anything-c-adaptive-history-file'.
-;;
-;;; Customizable Options:
-;;
-;; Below are customizable option list:
-;;
-;;  `anything-c-use-standard-keys'
-;;    Whether use standard keybindings. (no effect)
-;;    default = nil
-;;  `anything-c-adaptive-history-file'
-;;    Path of file where history information is stored.
-;;    default = "~/.emacs.d/anything-c-adaptive-history"
-;;  `anything-c-adaptive-history-length'
-;;    Maximum number of candidates stored for a source.
-;;    default = 50
-;;  `anything-c-google-suggest-url'
-;;    URL used for looking up Google suggestions.
-;;    default = "http://google.com/complete/search?output=toolbar&q="
-;;  `anything-c-google-suggest-search-url'
-;;    URL used for Google searching.
-;;    default = "http://www.google.com/search?ie=utf-8&oe=utf-8&q="
-;;  `anything-google-suggest-use-curl-p'
-;;    *When non--nil use CURL to get info from `anything-c-google-suggest-url'.
-;;    default = nil
-;;  `anything-c-yahoo-suggest-url'
-;;    Url used for looking up Yahoo suggestions.
-;;    default = "http://search.yahooapis.com/WebSearchService/V1/relatedSuggestion?appid=Generic&query="
-;;  `anything-c-yahoo-suggest-search-url'
-;;    Url used for Yahoo searching.
-;;    default = "http://search.yahoo.com/search?&ei=UTF-8&fr&h=c&p="
-;;  `anything-c-boring-buffer-regexp'
-;;    The regexp that match boring buffers.
-;;    default = (rx (or (group bos " ") "*anything" " *Echo Area" " *Minibuf"))
-;;  `anything-c-boring-file-regexp'
-;;    The regexp that match boring files.
-;;    default = (rx (or (and "/" ... ...) (and line-start ".#") (and ... eol)))
-;;  `anything-kill-ring-threshold'
-;;    *Minimum length to be listed by `anything-c-source-kill-ring'.
-;;    default = 10
-;;  `anything-su-or-sudo'
-;;    What command to use for root access.
-;;    default = "su"
-;;  `anything-for-files-prefered-list'
-;;    Your prefered sources to find files.
-;;    default = (quote (anything-c-source-ffap-line anything-c-source-ffap-guesser anything-c-source-buffers+ anything-c-source-recentf anything-c-source-bookmarks ...))
-;;  `anything-create--actions-private'
-;;    User defined actions for `anything-create' / `anything-c-source-create'.
-;;    default = nil
-;;  `anything-allow-skipping-current-buffer'
-;;    Show current buffer or not in anything buffer
-;;    default = t
-;;  `anything-c-enable-eval-defun-hack'
-;;    *If non-nil, execute `anything' using the source at point when C-M-x is pressed.
-;;    default = t
-;;  `anything-tramp-verbose'
-;;    *Just like `tramp-verbose' but specific to anything.
-;;    default = 0
+;;; Autodoc documentation:
+;;  ---------------------
 
-;;
-;; Anything sources can be tested by M-x `anything-call-source'.
-;; Below are complete source list you can setup in the first argument
-;;
-;;  Buffer:
-;;     `anything-c-source-buffers'		(Buffers)
-;;     `anything-c-source-buffer-not-found'	(Create buffer)
-;;     `anything-c-source-buffers+'		(Buffers)
-;;  File:
-;;     `anything-c-source-file-name-history'		(File Name History)
-;;     `anything-c-source-files-in-current-dir'		(Files from Current Directory)
-;;     `anything-c-source-files-in-current-dir+'	(Files from Current Directory)
-;;     `anything-c-source-find-files'			(Find Files (`C-.':Go to precedent level))
-;;     `anything-c-source-file-cache'			(File Cache)
-;;     `anything-c-source-locate'			(Locate)
-;;     `anything-c-source-recentf'			(Recentf)
-;;     `anything-c-source-ffap-guesser'			(File at point)
-;;     `anything-c-source-ffap-line'			(File/Lineno at point)
-;;     `anything-c-source-files-in-all-dired'		(Files in all dired buffer.)
-;;  info:
-;;     `anything-c-source-info-pages'			(Info Pages)
-;;     `anything-c-source-info-elisp'			(Info index: elisp)
-;;     `anything-c-source-info-cl'			(Info index: cl)
-;;     `anything-c-source-info-org'			(Info index: org)
-;;     `anything-c-source-info-ratpoison'		(Info index: ratpoison)
-;;     `anything-c-source-info-zsh'			(Info index: zsh)
-;;     `anything-c-source-info-bash'			(Info index: bash)
-;;     `anything-c-source-info-coreutils'		(Info index: coreutils)
-;;     `anything-c-source-info-fileutils'		(Info index: fileutils)
-;;     `anything-c-source-info-find'			(Info index: find)
-;;     `anything-c-source-info-sh-utils'		(Info index: sh-utils)
-;;     `anything-c-source-info-textutils'		(Info index: textutils)
-;;     `anything-c-source-info-libc'			(Info index: libc)
-;;     `anything-c-source-info-make'			(Info index: make)
-;;     `anything-c-source-info-automake'		(Info index: automake)
-;;     `anything-c-source-info-autoconf'		(Info index: autoconf)
-;;     `anything-c-source-info-emacs-lisp-intro'	(Info index: emacs-lisp-intro)
-;;     `anything-c-source-info-emacs'			(Info index: emacs)
-;;     `anything-c-source-info-elib'			(Info index: elib)
-;;     `anything-c-source-info-eieio'			(Info index: eieio)
-;;     `anything-c-source-info-gauche-refe'		(Info index: gauche)
-;;     `anything-c-source-info-guile'			(Info index: guile)
-;;     `anything-c-source-info-guile-tut'		(Info index: guile-tut)
-;;     `anything-c-source-info-goops'			(Info index: goops)
-;;     `anything-c-source-info-screen'			(Info index: screen)
-;;     `anything-c-source-info-latex'			(Info index: latex)
-;;     `anything-c-source-info-gawk'			(Info index: gawk)
-;;     `anything-c-source-info-sed'			(Info index: sed)
-;;     `anything-c-source-info-m4'			(Info index: m4)
-;;     `anything-c-source-info-wget'			(Info index: wget)
-;;     `anything-c-source-info-binutils'		(Info index: binutils)
-;;     `anything-c-source-info-as'			(Info index: as)
-;;     `anything-c-source-info-bfd'			(Info index: bfd)
-;;     `anything-c-source-info-gprof'			(Info index: gprof)
-;;     `anything-c-source-info-ld'			(Info index: ld)
-;;     `anything-c-source-info-diff'			(Info index: diff)
-;;     `anything-c-source-info-flex'			(Info index: flex)
-;;     `anything-c-source-info-grep'			(Info index: grep)
-;;     `anything-c-source-info-gzip'			(Info index: gzip)
-;;     `anything-c-source-info-libtool'			(Info index: libtool)
-;;     `anything-c-source-info-texinfo'			(Info index: texinfo)
-;;     `anything-c-source-info-info'			(Info index: info)
-;;     `anything-c-source-info-gdb'			(Info index: gdb)
-;;     `anything-c-source-info-stabs'			(Info index: stabs)
-;;     `anything-c-source-info-cvsbook'			(Info index: cvsbook)
-;;     `anything-c-source-info-cvs'			(Info index: cvs)
-;;     `anything-c-source-info-bison'			(Info index: bison)
-;;     `anything-c-source-info-id-utils'		(Info index: id-utils)
-;;     `anything-c-source-info-global'			(Info index: global)
-;;  Help:
-;;     `anything-c-source-man-pages'    (Manual Pages)
-;;  Command:
-;;     `anything-c-source-complex-command-history'	(Complex Command History)
-;;     `anything-c-source-extended-command-history'	(Emacs Commands History)
-;;     `anything-c-source-emacs-commands'		(Emacs Commands)
-;;     `anything-c-source-lacarte'			(Lacarte)
-;;  Function:
-;;     `anything-c-source-emacs-functions'		(Emacs Functions)
-;;     `anything-c-source-emacs-functions-with-abbrevs' (Emacs Functions)
-;;  Variable:
-;;     `anything-c-source-emacs-variables'	(Emacs Variables)
-;;  Bookmark:
-;;     `anything-c-source-bookmarks'			(Bookmarks)
-;;     `anything-c-source-bookmark-set'			(Set Bookmark)
-;;     `anything-c-source-bookmarks-ssh'		(Bookmarks-ssh)
-;;     `anything-c-source-bookmarks-su'			(Bookmarks-root)
-;;     `anything-c-source-bookmarks-local'		(Bookmarks-Local)
-;;     `anything-c-source-bookmark-regions'		(Bookmark Regions)
-;;     `anything-c-source-bookmark-w3m'			(Bookmark W3m)
-;;     `anything-c-source-bookmark-man'			(Bookmark Woman&Man)
-;;     `anything-c-source-bookmark-gnus'		(Bookmark Gnus)
-;;     `anything-c-source-bookmark-info'		(Bookmark Info)
-;;     `anything-c-source-bookmark-files&dirs'		(Bookmark Files&Directories)
-;;     `anything-c-source-bookmark-su-files&dirs'	(Bookmark Root-Files&Directories)
-;;     `anything-c-source-bookmark-ssh-files&dirs'	(Bookmark Ssh-Files&Directories)
-;;     `anything-c-source-firefox-bookmarks'		(Firefox Bookmarks)
-;;     `anything-c-source-w3m-bookmarks'		(W3m Bookmarks)
-;;  Library:
-;;     `anything-c-source-elisp-library-scan'   (Elisp libraries (Scan))
-;;  Programming:
-;;     `anything-c-source-imenu'				(Imenu)
-;;     `anything-c-source-ctags'				(Exuberant ctags)
-;;     `anything-c-source-semantic'				(Semantic Tags)
-;;     `anything-c-source-simple-call-tree-functions-callers'   (Function is called by)
-;;     `anything-c-source-simple-call-tree-callers-functions'   (Function calls)
-;;     `anything-c-source-commands-and-options-in-file'		(Commands/Options in file)
-;;  Color and Face:
-;;     `anything-c-source-customize-face'	(Customize Face)
-;;     `anything-c-source-colors'		(Colors)
-;;  Search Engine:
-;;     `anything-c-source-tracker-search'	(Tracker Search)
-;;     `anything-c-source-mac-spotlight'	(mdfind)
-;;  Kill ring:
-;;     `anything-c-source-kill-ring'    (Kill Ring)
-;;  Mark ring:
-;;     `anything-c-source-mark-ring'		(mark-ring)
-;;     `anything-c-source-global-mark-ring'	(global-mark-ring)
-;;  Register:
-;;     `anything-c-source-register'	(Registers)
-;;  Headline Extraction:
-;;     `anything-c-source-fixme'				(TODO/FIXME/DRY comments)
-;;     `anything-c-source-rd-headline'				(RD HeadLine)
-;;     `anything-c-source-oddmuse-headline'			(Oddmuse HeadLine)
-;;     `anything-c-source-emacs-source-defun'			(Emacs Source DEFUN)
-;;     `anything-c-source-emacs-lisp-expectations'		(Emacs Lisp Expectations)
-;;     `anything-c-source-emacs-lisp-toplevels'			(Emacs Lisp Toplevel / Level 4 Comment / Linkd Star)
-;;     `anything-c-source-org-headline'				(Org HeadLine)
-;;     `anything-c-source-yaoddmuse-emacswiki-edit-or-view'	(Yaoddmuse Edit or View (EmacsWiki))
-;;     `anything-c-source-yaoddmuse-emacswiki-post-library'	(Yaoddmuse Post library (EmacsWiki))
-;;     `anything-c-source-eev-anchor'				(Anchors)
-;;  Misc:
-;;     `anything-c-source-org-keywords'		(Org Keywords)
-;;     `anything-c-source-picklist'		(Picklist)
-;;     `anything-c-source-bbdb'			(BBDB)
-;;     `anything-c-source-evaluation-result'    (Evaluation Result)
-;;     `anything-c-source-calculation-result'   (Calculation Result)
-;;     `anything-c-source-google-suggest'	(Google Suggest)
-;;     `anything-c-source-yahoo-suggest'	(Yahoo Suggest)
-;;     `anything-c-source-surfraw'		(Surfraw)
-;;     `anything-c-source-emms-streams'		(Emms Streams)
-;;     `anything-c-source-emms-dired'		(Music Directory)
-;;     `anything-c-source-jabber-contacts'	(Jabber Contacts)
-;;     `anything-c-source-call-source'		(Call anything source)
-;;     `anything-c-source-occur'		(Occur)
-;;     `anything-c-source-create'		(Create)
-;;     `anything-c-source-minibuffer-history'   (Minibuffer History)
-;;     `anything-c-source-elscreen'		(Elscreen)
-;;  System:
-;;     `anything-c-source-top'				(Top (Press C-c C-u to refresh))
-;;     `anything-c-source-absolute-time-timers'		(Absolute Time Timers)
-;;     `anything-c-source-idle-time-timers'		(Idle Time Timers)
-;;     `anything-c-source-xrandr-change-resolution'	(Change Resolution)
-;;     `anything-c-source-xfonts'			(X Fonts)
-;;     `anything-c-source-apt'				(APT)
-;;     `anything-c-source-gentoo'			(Portage sources)
-;;     `anything-c-source-use-flags'			(Use Flags)
-;;     `anything-c-source-emacs-process'		(Emacs Process)
+;;  * Commands defined here are:
+;; [EVAL] (autodoc-document-lisp-buffer :type 'command :prefix "anything-" :docstring t)
+;; `anything-c-describe-anything-bindings'
+;; [OBSOLETE] Describe `anything' bindings.
+;; `anything-for-files'
+;; Preconfigured `anything' for opening files.
+;; `anything-info-at-point'
+;; Preconfigured `anything' for searching info at point.
+;; `anything-show-kill-ring'
+;; Preconfigured `anything' for `kill-ring'. It is drop-in replacement of `yank-pop'.
+;; `anything-minibuffer-history'
+;; Preconfigured `anything' for `minibuffer-history'.
+;; `anything-gentoo'
+;; Preconfigured `anything' for gentoo linux.
+;; `anything-surfraw-only'
+;; Preconfigured `anything' for surfraw.
+;; `anything-imenu'
+;; Preconfigured `anything' for `imenu'.
+;; `anything-google-suggest'
+;; Preconfigured `anything' for google search with google suggest.
+;; `anything-yahoo-suggest'
+;; Preconfigured `anything' for Yahoo searching with Yahoo suggest.
+;; `anything-for-buffers'
+;; Preconfigured `anything' for buffer.
+;; `anything-bbdb'
+;; Preconfigured `anything' for BBDB.
+;; `anything-locate'
+;; Preconfigured `anything' for Locate.
+;; `anything-w3m-bookmarks'
+;; Preconfigured `anything' for w3m bookmark.
+;; `anything-colors'
+;; Preconfigured `anything' for color.
+;; `anything-bm-list'
+;; Preconfigured `anything' for visible bookmarks.
+;; `anything-timers'
+;; Preconfigured `anything' for timers.
+;; `anything-kill-buffers'
+;; Preconfigured `anything' to kill buffer you selected.
+;; `anything-query-replace-regexp'
+;; Preconfigured `anything' : Drop-in replacement of `query-replace-regexp' with building regexp visually.
+;; `anything-regexp'
+;; Preconfigured `anything' : It is like `re-builder'. It helps buliding regexp and replacement.
+;; `anything-insert-buffer-name'
+;; Insert buffer name.
+;; `anything-insert-symbol'
+;; Insert current symbol.
+;; `anything-insert-selection'
+;; Insert current selection.
+;; `anything-show-buffer-only'
+;; [OBSOLETE] Only show sources about buffer.
+;; `anything-show-bbdb-only'
+;; [OBSOLETE] Only show sources about BBDB.
+;; `anything-show-locate-only'
+;; [OBSOLETE] Only show sources about Locate.
+;; `anything-show-info-only'
+;; [OBSOLETE] Only show sources about Info.
+;; `anything-show-imenu-only'
+;; [OBSOLETE] Only show sources about Imenu.
+;; `anything-show-files-only'
+;; [OBSOLETE] Only show sources about File.
+;; `anything-show-w3m-bookmarks-only'
+;; [OBSOLETE] Only show source about w3m bookmark.
+;; `anything-show-colors-only'
+;; [OBSOLETE] Only show source about color.
+;; `anything-show-kill-ring-only'
+;; [OBSOLETE] Only show source about kill ring.
+;; `anything-show-this-source-only'
+;; Only show this source.
+;; `anything-test-sources'
+;; List all anything sources for test.
+;; `anything-select-source'
+;; Select source.
+;; `anything-find-files-down-one-level'
+;; Go down one level like unix command `cd ..'.
+;; `anything-find-files'
+;; Preconfigured `anything' for anything implementation of `find-file'.
+;; `anything-write-file'
+;; Preconfigured `anything' providing completion for `write-file'.
+;; `anything-insert-file'
+;; Preconfigured `anything' providing completion for `insert-file'.
+;; `anything-dired-rename-file'
+;; Preconfigured `anything' to rename files from dired.
+;; `anything-dired-copy-file'
+;; Preconfigured `anything' to copy files from dired.
+;; `anything-dired-symlink-file'
+;; Preconfigured `anything' to symlink files from dired.
+;; `anything-dired-hardlink-file'
+;; Preconfigured `anything' to hardlink files from dired.
+;; `anything-dired-bindings'
+;; Replace usual dired commands `C' and `R' by anything ones.
+;; `anything-bookmark-ext'
+;; Preconfigured `anything' for bookmark-extensions sources.
+;; `anything-simple-call-tree'
+;; Preconfigured `anything' for simple-call-tree. List function relationships.
+;; `anything-mark-ring'
+;; Preconfigured `anything' for `anything-c-source-mark-ring'.
+;; `anything-global-mark-ring'
+;; Preconfigured `anything' for `anything-c-source-global-mark-ring'.
+;; `anything-yaoddmuse-cache-pages'
+;; Fetch the list of files on emacswiki and create cache file.
+;; `anything-yaoddmuse-emacswiki-edit-or-view'
+;; Preconfigured `anything' to edit or view EmacsWiki page.
+;; `anything-yaoddmuse-emacswiki-post-library'
+;; Preconfigured `anything' to post library to EmacsWiki.
+;; `anything-emms-stream-edit-bookmark'
+;; Change the information of current emms-stream bookmark from anything.
+;; `anything-emms-stream-delete-bookmark'
+;; Delete an emms-stream bookmark from anything.
+;; `anything-call-source'
+;; Preconfigured `anything' to call anything source.
+;; `anything-call-source-from-anything'
+;; Call anything source within `anything' session.
+;; `anything-execute-anything-command'
+;; Preconfigured `anything' to execute preconfigured `anything'.
+;; `anything-occur'
+;; Preconfigured Anything for Occur source.
+;; `anything-create-from-anything'
+;; Run `anything-create' from `anything' as a fallback.
+;; `anything-create'
+;; Preconfigured `anything' to do many create actions from STRING.
+;; `anything-top'
+;; Preconfigured `anything' for top command.
+;; `anything-select-xfont'
+;; Preconfigured `anything' to select Xfont.
+;; `anything-apt'
+;; Preconfigured `anything' : frontend of APT package manager.
+;; `anything-c-shell-command-if-needed'
+;; Not documented.
+;; `anything-c-run-external-command'
+;; Run External PROGRAM asyncronously from Emacs.
+;; `anything-c-set-variable'
+;; Set value to VAR interactively.
+;; `anything-c-adaptive-save-history'
+;; Save history information to file given by `anything-c-adaptive-history-file'.
+
+;;  * User variables defined here:
+;; [EVAL] (autodoc-document-lisp-buffer :type 'user-variable :prefix "anything-" :var-value t)
+;; `anything-c-use-standard-keys'
+;; Default Value: nil
+;; `anything-c-adaptive-history-file'
+;; Default Value: "~/.emacs.d/anything-c-adaptive-history"
+;; `anything-c-adaptive-history-length'
+;; Default Value: 50
+;; `anything-c-google-suggest-url'
+;; Default Value: "http://google.com/complete/search?output=toolbar&q="
+;; `anything-c-google-suggest-search-url'
+;; Default Value: "http://www.google.com/search?ie=utf-8&oe=utf-8&q="
+;; `anything-google-suggest-use-curl-p'
+;; Default Value: nil
+;; `anything-c-yahoo-suggest-url'
+;; Default Value: "http://search.yahooapis.com/WebSearchService/V1/relatedSuggestion?appid=G [...]
+;; `anything-c-yahoo-suggest-search-url'
+;; Default Value: "http://search.yahoo.com/search?&ei=UTF-8&fr&h=c&p="
+;; `anything-c-boring-buffer-regexp'
+;; Default Value: "\\	(\\` \\)\\|\\*anything\\| \\*Echo Area\\| \\*Minibuf"
+;; `anything-c-boring-file-regexp'
+;; Default Value: "/\\	(?:\\(?:\\.\\(?:git\\|hg\\|svn\\)\\|CVS\\|_darcs\\)\\)\\(?:/\\|$\\)\\| [...]
+;; `anything-kill-ring-threshold'
+;; Default Value: 10
+;; `anything-su-or-sudo'
+;; Default Value: "su"
+;; `anything-for-files-prefered-list'
+;; Default Value:	(anything-c-source-ffap-line anything-c-source-ffap-guesser anything-c-sou [...]
+;; `anything-create--actions-private'
+;; Default Value: nil
+;; `anything-allow-skipping-current-buffer'
+;; Default Value: t
+;; `anything-c-enable-eval-defun-hack'
+;; Default Value: t
+;; `anything-tramp-verbose'
+;; Default Value: 0
+;; `anything-back-to-emacs-shell-command'
+;; Default Value: nil
+
+;;  * Anything sources defined here:
+;; [EVAL] (autodoc-document-lisp-buffer :type 'anything-source :prefix "anything-" :any-sname t)
+;; `anything-c-source-buffers'					(Buffers)
+;; `anything-c-source-buffer-not-found'				(Create buffer)
+;; `anything-c-source-buffers+'					(Buffers)
+;; `anything-c-source-file-name-history'			(File Name History)
+;; `anything-c-source-files-in-current-dir'			(Files from Current Directory)
+;; `anything-c-source-files-in-current-dir+'			(Files from Current Directory)
+;; `anything-c-source-find-files'				(Find Files (`C-.':Go to precedent level))
+;; `anything-c-source-write-file'				(Write File (`C-.':Go to precedent level))
+;; `anything-c-source-insert-file'				(Insert File (`C-.':Go to precedent level))
+;; `anything-c-source-copy-files'				(Copy Files (`C-.':Go to precedent level))
+;; `anything-c-source-symlink-files'				(Symlink Files (`C-.':Go to precedent level))
+;; `anything-c-source-hardlink-files'				(Hardlink Files (`C-.':Go to precedent level))
+;; `anything-c-source-file-cache-initialized'			()
+;; `anything-c-source-file-cache'				(File Cache)
+;; `anything-c-source-locate'					(Locate)
+;; `anything-c-source-recentf'					(Recentf)
+;; `anything-c-source-ffap-guesser'				(File at point)
+;; `anything-c-source-ffap-line'				(File/Lineno at point)
+;; `anything-c-source-files-in-all-dired'			(Files in all dired buffer.)
+;; `anything-c-source-info-pages'				(Info Pages)
+;; `anything-c-source-info-elisp'				(Info index: elisp)
+;; `anything-c-source-info-cl'					(Info index: cl)
+;; `anything-c-source-info-org'					(Info index: org)
+;; `anything-c-source-info-ratpoison'				(Info index: ratpoison)
+;; `anything-c-source-info-zsh'					(Info index: zsh)
+;; `anything-c-source-info-bash'				(Info index: bash)
+;; `anything-c-source-info-coreutils'				(Info index: coreutils)
+;; `anything-c-source-info-fileutils'				(Info index: fileutils)
+;; `anything-c-source-info-find'				(Info index: find)
+;; `anything-c-source-info-sh-utils'				(Info index: sh-utils)
+;; `anything-c-source-info-textutils'				(Info index: textutils)
+;; `anything-c-source-info-libc'				(Info index: libc)
+;; `anything-c-source-info-make'				(Info index: make)
+;; `anything-c-source-info-automake'				(Info index: automake)
+;; `anything-c-source-info-autoconf'				(Info index: autoconf)
+;; `anything-c-source-info-emacs-lisp-intro'			(Info index: emacs-lisp-intro)
+;; `anything-c-source-info-emacs'				(Info index: emacs)
+;; `anything-c-source-info-elib'				(Info index: elib)
+;; `anything-c-source-info-eieio'				(Info index: eieio)
+;; `anything-c-source-info-gauche-refe'				(Info index: gauche)
+;; `anything-c-source-info-guile'				(Info index: guile)
+;; `anything-c-source-info-guile-tut'				(Info index: guile-tut)
+;; `anything-c-source-info-goops'				(Info index: goops)
+;; `anything-c-source-info-screen'				(Info index: screen)
+;; `anything-c-source-info-latex'				(Info index: latex)
+;; `anything-c-source-info-gawk'				(Info index: gawk)
+;; `anything-c-source-info-sed'					(Info index: sed)
+;; `anything-c-source-info-m4'					(Info index: m4)
+;; `anything-c-source-info-wget'				(Info index: wget)
+;; `anything-c-source-info-binutils'				(Info index: binutils)
+;; `anything-c-source-info-as'					(Info index: as)
+;; `anything-c-source-info-bfd'					(Info index: bfd)
+;; `anything-c-source-info-gprof'				(Info index: gprof)
+;; `anything-c-source-info-ld'					(Info index: ld)
+;; `anything-c-source-info-diff'				(Info index: diff)
+;; `anything-c-source-info-flex'				(Info index: flex)
+;; `anything-c-source-info-grep'				(Info index: grep)
+;; `anything-c-source-info-gzip'				(Info index: gzip)
+;; `anything-c-source-info-libtool'				(Info index: libtool)
+;; `anything-c-source-info-texinfo'				(Info index: texinfo)
+;; `anything-c-source-info-info'				(Info index: info)
+;; `anything-c-source-info-gdb'					(Info index: gdb)
+;; `anything-c-source-info-stabs'				(Info index: stabs)
+;; `anything-c-source-info-cvsbook'				(Info index: cvsbook)
+;; `anything-c-source-info-cvs'					(Info index: cvs)
+;; `anything-c-source-info-bison'				(Info index: bison)
+;; `anything-c-source-info-id-utils'				(Info index: id-utils)
+;; `anything-c-source-info-global'				(Info index: global)
+;; `anything-c-source-man-pages'				(Manual Pages)
+;; `anything-c-source-complex-command-history'			(Complex Command History)
+;; `anything-c-source-extended-command-history'			(Emacs Commands History)
+;; `anything-c-source-emacs-commands'				(Emacs Commands)
+;; `anything-c-source-lacarte'					(Lacarte)
+;; `anything-c-source-emacs-functions'				(Emacs Functions)
+;; `anything-c-source-emacs-functions-with-abbrevs'		(Emacs Functions)
+;; `anything-c-source-emacs-variables'				(Emacs Variables)
+;; `anything-c-source-bookmarks'				(Bookmarks)
+;; `anything-c-source-bookmark-set'				(Set Bookmark)
+;; `anything-c-source-bm'					(Visible Bookmarks)
+;; `anything-c-source-bookmarks-ssh'				(Bookmarks-ssh)
+;; `anything-c-source-bookmarks-su'				(Bookmarks-root)
+;; `anything-c-source-bookmarks-local'				(Bookmarks-Local)
+;; `anything-c-source-bookmark-w3m'				(Bookmark W3m)
+;; `anything-c-source-bookmark-man'				(Bookmark Woman&Man)
+;; `anything-c-source-bookmark-gnus'				(Bookmark Gnus)
+;; `anything-c-source-bookmark-info'				(Bookmark Info)
+;; `anything-c-source-bookmark-files&dirs'			(Bookmark Files&Directories)
+;; `anything-c-source-bookmark-su-files&dirs'			(Bookmark Root-Files&Directories)
+;; `anything-c-source-bookmark-ssh-files&dirs'			(Bookmark Ssh-Files&Directories)
+;; `anything-c-source-firefox-bookmarks'			(Firefox Bookmarks)
+;; `anything-c-source-w3m-bookmarks'				(W3m Bookmarks)
+;; `anything-c-source-elisp-library-scan'			(Elisp libraries (Scan))
+;; `anything-c-source-imenu'					(Imenu)
+;; `anything-c-source-ctags'					(Exuberant ctags)
+;; `anything-c-source-semantic'					(Semantic Tags)
+;; `anything-c-source-simple-call-tree-functions-callers'	(Function is called by)
+;; `anything-c-source-simple-call-tree-callers-functions'	(Function calls)
+;; `anything-c-source-commands-and-options-in-file'		(Commands/Options in file)
+;; `anything-c-source-customize-face'				(Customize Face)
+;; `anything-c-source-colors'					(Colors)
+;; `anything-c-source-tracker-search'				(Tracker Search)
+;; `anything-c-source-mac-spotlight'				(mdfind)
+;; `anything-c-source-kill-ring'				(Kill Ring)
+;; `anything-c-source-mark-ring'				(mark-ring)
+;; `anything-c-source-global-mark-ring'				(global-mark-ring)
+;; `anything-c-source-register'					(Registers)
+;; `anything-c-source-fixme'					(TODO/FIXME/DRY comments)
+;; `anything-c-source-rd-headline'				(RD HeadLine)
+;; `anything-c-source-oddmuse-headline'				(Oddmuse HeadLine)
+;; `anything-c-source-emacs-source-defun'			(Emacs Source DEFUN)
+;; `anything-c-source-emacs-lisp-expectations'			(Emacs Lisp Expectations)
+;; `anything-c-source-emacs-lisp-toplevels'			(Emacs Lisp Toplevel / Level 4 Comment / Linkd Star)
+;; `anything-c-source-org-headline'				(Org HeadLine)
+;; `anything-c-source-yaoddmuse-emacswiki-edit-or-view'		(Yaoddmuse Edit or View (EmacsWiki))
+;; `anything-c-source-yaoddmuse-emacswiki-post-library'		(Yaoddmuse Post library (EmacsWiki))
+;; `anything-c-source-eev-anchor'				(Anchors)
+;; `anything-c-source-org-keywords'				(Org Keywords)
+;; `anything-c-source-picklist'					(Picklist)
+;; `anything-c-source-bbdb'					(BBDB)
+;; `anything-c-source-evaluation-result'			(Evaluation Result)
+;; `anything-c-source-calculation-result'			(Calculation Result)
+;; `anything-c-source-google-suggest'				(Google Suggest)
+;; `anything-c-source-yahoo-suggest'				(Yahoo Suggest)
+;; `anything-c-source-surfraw'					(Surfraw)
+;; `anything-c-source-emms-streams'				(Emms Streams)
+;; `anything-c-source-emms-dired'				(Music Directory)
+;; `anything-c-source-jabber-contacts'				(Jabber Contacts)
+;; `anything-c-source-call-source'				(Call anything source)
+;; `anything-c-source-anything-commands'			(Preconfigured Anything)
+;; `anything-c-source-occur'					(Occur)
+;; `anything-c-source-create'					(Create)
+;; `anything-c-source-minibuffer-history'			(Minibuffer History)
+;; `anything-c-source-elscreen'					(Elscreen)
+;; `anything-c-source-top'					(Top (Press C-c C-u to refresh))
+;; `anything-c-source-absolute-time-timers'			(Absolute Time Timers)
+;; `anything-c-source-idle-time-timers'				(Idle Time Timers)
+;; `anything-c-source-xrandr-change-resolution'			(Change Resolution)
+;; `anything-c-source-xfonts'					(X Fonts)
+;; `anything-c-source-apt'					(APT)
+;; `anything-c-source-gentoo'					(Portage sources)
+;; `anything-c-source-use-flags'				(Use Flags)
+;; `anything-c-source-emacs-process'				(Emacs Process)
+
+;;  *** END auto-documentation
+
 
 ;;; Change log:
 ;;
@@ -442,14 +422,13 @@
 
 ;;; For Maintainers:
 ;;
-;; Evaluate (anything-c-insert-summary) before commit. This function
-;; generates anything-c-source-* list.
+;; Evaluate (autodoc-update-all) before commit. This function
+;; generates anything-c-source-* / functions / options list.
 ;;
-;; Install also http://www.emacswiki.org/emacs/auto-document.el
+;; Install also developer-tools/autodoc.el
 ;; And eval it or run interactively.
 ;;
-;; [EVAL IT] (anything-c-insert-summary)
-;; [EVAL IT] (auto-document)
+;; [EVAL IT] (autodoc-update-all)
 ;;
 ;; Please write details documentation about function, then others will
 ;; read code more easier.   -- Andy Stewart
@@ -614,7 +593,7 @@ It is prepended to predefined pairs."
 (defcustom anything-c-enable-eval-defun-hack t
   "*If non-nil, execute `anything' using the source at point when C-M-x is pressed.
 This hack is invoked when pressing C-M-x in the form \
-(defvar anything-c-source-XXX ...) or (setq anything-c-source-XXX ...)."
+ (defvar anything-c-source-XXX ...) or (setq anything-c-source-XXX ...)."
   :type 'boolean
   :group 'anything-config)
 
@@ -664,12 +643,17 @@ With others windows manager you could use:
                 (string-match "^Preconfigured.+$"
                               (setq doc (or (documentation (setq sym (cdr entry)))
                                             ""))))
-        collect (format "\\[%s] : %s\n" sym (match-string 0 doc))))
+        collect (cons sym (match-string 0 doc))))
+
+(defun anything-c-format-preconfigured-anything ()
+  (mapcar (lambda (x) (format "\\[%s] : %s\n" (car x) (cdr x)))
+          (anything-c-list-preconfigured-anything)))
 
 (setq anything-help-message
-      (concat
-       "\\<anything-map>"
-       "`anything' is QuickSilver-like candidate-selection framework.
+      (lambda ()
+        (concat
+         "\\<anything-map>"
+         "`anything' is QuickSilver-like candidate-selection framework.
 
 Narrow the list by typing some pattern,
 Multiple patterns are allowed by splitting by space.
@@ -716,16 +700,16 @@ Visible marks store candidate. Some actions uses marked candidates.
 \\<global-map>\\[anything-resume] revives last `anything' session.
 It is very useful, so you should bind any key.
 
-Simgle source is executed by \\[anything-call-source].
+Single source is executed by \\[anything-call-source].
 
 == Preconfigured `anything' ==
 Preconfigured `anything' is commands that uses `anything' interface.
 You can use them without configuration.
 
 "
-       (apply 'concat (anything-c-list-preconfigured-anything))
-       "
-Enjoy!"))
+         (apply 'concat (anything-c-format-preconfigured-anything))
+         "
+Enjoy!")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Preconfigured Anything ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;###autoload
@@ -836,7 +820,9 @@ With two prefix args allow choosing in which symbol to search."
 
 ;;;###autoload
 (defun anything-locate ()
-  "Preconfigured `anything' for Locate."
+  "Preconfigured `anything' for Locate.
+Note you can add locate command after entering pattern.
+See man locate for more infos."
   (interactive)
   (anything-other-buffer 'anything-c-source-locate "*anything locate*"))
 
@@ -1461,6 +1447,7 @@ buffer that is not the current buffer."
                            ("Complete at point" . anything-c-insert-file-name-completion-at-point)
                            ("Delete File(s)" . anything-delete-marked-files)
                            ("Find file as root" . anything-find-file-as-root)
+                           ("Open file externally" . anything-c-open-file-externally)
                            ("Find file other window" . find-file-other-window)
                            ("Find file other frame" . find-file-other-frame))))))
 
@@ -1493,11 +1480,12 @@ If EXPAND is non--nil expand-file-name."
                   (t
                    (concat "/" result)))))))
 
-(defun anything-find-files-or-dired-p ()
+(defun anything-file-completion-source-p ()
   "Test if current source is a dired or find-files source."
   (let ((ff-sources '("Find Files" "Copy Files"
                       "Rename Files" "Symlink Files"
-                      "Hardlink Files" "Write File" "Insert File"))
+                      "Hardlink Files" "Write File"
+                      "Insert File" "Read file name"))
         (cur-source (cdr (assoc 'name (anything-get-current-source)))))
     (catch 'break
       (dolist (i ff-sources)
@@ -1508,7 +1496,7 @@ If EXPAND is non--nil expand-file-name."
   "Go down one level like unix command `cd ..'.
 If prefix numeric arg is given go ARG level down."
   (interactive "p")
-  (when (anything-find-files-or-dired-p)
+  (when (anything-file-completion-source-p)
     (let ((new-pattern (anything-reduce-file-name anything-pattern arg :unix-close t :expand t)))
       (with-selected-window (minibuffer-window)
         (delete-minibuffer-contents)
@@ -1626,7 +1614,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
   "Insert file name completion at point."
   (let* ((end         (point))
          (guess       (thing-at-point 'filename))
-         (full-path-p (string-match (concat "^" (getenv "HOME")) guess)))
+         (full-path-p (or (string-match (concat "^" (getenv "HOME")) guess)
+                          (string-match "^[^\~]" guess))))
     (set-text-properties 0 (length candidate) nil candidate)
     (when (and guess (not (string= guess "")))
       (search-backward guess (- (point) (length guess)))
@@ -1634,31 +1623,6 @@ If CANDIDATE is alone, open file CANDIDATE filename."
       (if full-path-p
           (insert (expand-file-name candidate))
           (insert (abbreviate-file-name candidate))))))
-
-;;; REGRESSION:
-;;; FIXME completing on regexps don't erase initial text.
-;;
-;; (defun anything-c-insert-file-name-completion-at-point (candidate)
-;;   "Insert filename completion at point."
-;;   (let* ((end         (point))
-;;          (guess       (anything-get-regexp-filename-at-point))
-;;          (full-path-p (string-match (concat "^" (getenv "HOME")) (cdr guess))))
-;;     (set-text-properties 0 (length candidate) nil candidate)
-;;     (delete-region (- (point) (car guess)) end)
-;;     (if full-path-p
-;;         (insert (expand-file-name candidate))
-;;         (insert (abbreviate-file-name candidate)))))
-
-
-;; (defun anything-get-regexp-filename-at-point ()
-;;   "Return filename at point even if filename contain regexps."
-;;   (let ((thing-at-point-file-name-chars "\\(^\\|~/\\|/\\)*[:alnum:]_.${}#%,:"))
-;;     (save-excursion
-;;       (loop with count = 0
-;;          for tap = (thing-at-point 'filename)
-;;          while (and (string= tap "") (not (looking-back "\"\\|\'\\|\n")))
-;;          do (progn (forward-char -1) (incf count))
-;;          finally return (cons (+ count (length tap)) tap)))))
 
 ;;;###autoload
 (defun anything-find-files ()
@@ -1679,6 +1643,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 ;;; Anything completion for `write-file'.==> C-x C-w
 (defvar anything-c-source-write-file
   `((name . ,(concat "Write File" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1699,6 +1665,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 ;;; Anything completion for `insert-file'.==> C-x i
 (defvar anything-c-source-insert-file
   `((name . ,(concat "Insert File" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1721,6 +1689,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 ;;; Anything completion for copy, rename and (rel)sym/hard/link files from dired.
 (defvar anything-c-source-copy-files
   `((name . ,(concat "Copy Files" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1737,6 +1707,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 
 (defvar  anything-c-source-rename-files
   `((name . ,(concat "Rename Files" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1752,6 +1724,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 
 (defvar anything-c-source-symlink-files
   `((name . ,(concat "Symlink Files" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1766,6 +1740,8 @@ If CANDIDATE is alone, open file CANDIDATE filename."
 
 (defvar anything-c-source-hardlink-files
   `((name . ,(concat "Hardlink Files" anything-c-find-files-doc-header))
+    ;; It is needed for filenames with capital letters
+    (disable-shortcuts)
     (candidates . anything-find-files-get-candidates)
     (candidate-transformer anything-c-highlight-ffiles)
     (persistent-action . anything-find-files-persistent-action)
@@ -1886,6 +1862,31 @@ You can put (anything-dired-binding 1) in init file to enable anything bindings.
       (define-key dired-mode-map (kbd "H") 'dired-do-hardlink)
       (setq anything-dired-bindings nil)))
 
+(defun* anything-c-read-file-name (prompt &key (initial-input default-directory)
+                                        (buffer "*Anything Completions*")
+                                        test)
+  "Anything `read-file-name' emulation.
+INITIAL-INPUT is a valid path, TEST is a predicate that take one arg."
+  (when (get-buffer anything-action-buffer)
+    (kill-buffer anything-action-buffer))
+  (or (anything
+       `((name . ,(concat "Read file name" anything-c-find-files-doc-header))
+         ;; It is needed for filenames with capital letters
+         (disable-shortcuts)
+         (candidates . (lambda ()
+                         (if test
+                             (loop with seq = (anything-find-files-get-candidates)
+                                for fname in seq when (funcall test fname)
+                                collect fname)
+                             (anything-find-files-get-candidates))))
+         (candidate-transformer anything-c-highlight-ffiles)
+         (persistent-action . anything-find-files-persistent-action)
+         (persistent-help . "Expand Candidate")
+         (volatile)
+         (action . (("candidate" . ,'identity))))
+         initial-input prompt 'noresume nil buffer)
+      (keyboard-quit)))
+
 ;;; File Cache
 (defvar anything-c-source-file-cache-initialized nil)
 
@@ -1911,25 +1912,33 @@ You can put (anything-dired-binding 1) in init file to enable anything bindings.
 ;; (anything 'anything-c-source-file-cache)
 
 ;;; Locate
-(defvar anything-c-locate-options
-  (cond
-   ((eq system-type 'darwin) '("locate"))
-   ((eq system-type 'berkeley-unix) '("locate" "-i"))
-   (t '("locate" "-i" "-r")))
-  "A list where the `car' is the name of the locat program followed by options.
-The search pattern will be appended, so the
-\"-r\" option should be the last option.")
+;; NOTE for WINDOZE users:
+;; You have to install Everything with his command line interface here:
+;; http://www.voidtools.com/download.php
+
+(defvar anything-c-locate-command
+  (case system-type
+    ('gnu/linux "locate -i -r %s")
+    ('berkeley-unix "locate -i %s")
+    ('windows-nt "es -i -r %s")
+    (t "locate %s"))
+  "A list of arguments for locate program.
+The \"-r\" option must be the last option.")
+
+(defun anything-c-locate-init ()
+  "Initialize async locate process for `anything-c-source-locate'."
+  (start-process-shell-command "locate-process" nil
+                               (format anything-c-locate-command
+                                       anything-pattern)))
 
 (defvar anything-c-source-locate
   '((name . "Locate")
-    (candidates . (lambda ()
-                    (apply 'start-process "locate-process" nil
-                           (append anything-c-locate-options
-                                   (list anything-pattern)))))
+    (candidates . anything-c-locate-init)
     (type . file)
     (requires-pattern . 3)
     (delayed))
-  "Source for retrieving files matching the current input pattern with locate.")
+  "Find files matching the current input pattern with locate.")
+
 ;; (anything 'anything-c-source-locate)
 
 ;;; Recentf files
@@ -2532,7 +2541,7 @@ http://www.nongnu.org/bm/")
                 (end (overlay-end bm))
                 (annotation (or (overlay-get bm 'annotation) "")))
             (unless (< (- end start) 1) ; org => (if (< (- end start) 2)
-              (let ((str (format "%7d: [%s]: %s\n"
+              (let ((str (format "%5d: [%s]: %s\n"
                                  (line-number-at-pos start)
                                  annotation
                                  (buffer-substring start (1- end)))))
@@ -4412,7 +4421,8 @@ A list of search engines."
                   (setq anything-candidate-number-limit 9999)
                   (anything candidate nil nil nil nil
                             anything-source-select-buffer)))
-               ("Describe variable" . describe-variable)))
+               ("Describe variable" . describe-variable)
+               ("Find variable" . find-variable)))
     (persistent-action . describe-variable)
     (persistent-help . "Show description of this source")))
 ;; (anything 'anything-c-source-call-source)
@@ -4430,6 +4440,24 @@ A list of search engines."
   (setq anything-input-idle-delay 0)
   (anything-set-sources '(anything-c-source-call-source)))
 
+;;; Execute Preconfigured anything.
+(defvar anything-c-source-anything-commands
+  '((name . "Preconfigured Anything")
+    (candidates . anything-c-anything-commands-candidates)
+    (type . command)))
+;; (anything 'anything-c-source-anything-commands)
+
+(defun anything-c-anything-commands-candidates ()
+  (loop for (cmd . desc) in (anything-c-list-preconfigured-anything)
+        collect (cons (substitute-command-keys (format "\\[%s] : %s" cmd desc))
+                      cmd)))
+
+;;;###autoload
+(defun anything-execute-anything-command ()
+  "Preconfigured `anything' to execute preconfigured `anything'."
+  (interactive)
+  (anything-other-buffer 'anything-c-source-anything-commands
+                         "*anything commands*"))
 
 ;; Occur
 
@@ -4969,17 +4997,19 @@ See `obarray'."
          (anything-comp-hash-get-items collection))
         (t collection)))
          
-(defun* anything-comp-read (prompt collection &key test initial-input)
+(defun* anything-comp-read (prompt collection &key test initial-input
+                                   (buffer "*Anything Completions*"))
   "Anything `completing-read' emulation.
 Collection can be a list, vector, obarray or hash-table."
+  (when (get-buffer anything-action-buffer)
+    (kill-buffer anything-action-buffer))
   (or (anything
        `((name . "Completions")
          (candidates
           . (lambda ()
               (anything-comp-read-get-candidates collection test)))
          (action . (("candidate" . ,'identity))))
-       initial-input
-       prompt)
+       initial-input prompt 'noresume nil buffer)
       (keyboard-quit)))
 
 (defun anything-c-get-pid-from-process-name (process-name)
@@ -5020,7 +5050,8 @@ You can set your own list of commands with
                (shell-command anything-back-to-emacs-shell-command)))))
       (setq anything-c-external-commands-list
             (push (pop (nthcdr (anything-c-position
-                                program anything-c-external-commands-list)
+                                program anything-c-external-commands-list
+                                :test 'equal)
                                anything-c-external-commands-list))
                   anything-c-external-commands-list))))
 
@@ -5097,11 +5128,16 @@ Ask to kill buffers associated with that file, too."
 
 (defun anything-c-open-file-externally (file)
   "Open FILE with an external tool. Query the user which tool to use."
-  (start-process "anything-c-open-file-externally"
-                 nil
-                 (completing-read "Program: "
-                                  (anything-c-external-commands-list-1))
-                 file))
+  (let* ((fname   (expand-file-name file))
+         (program (anything-comp-read
+                  "Program: " (anything-c-external-commands-list-1 'sort))))
+    (start-process "anything-c-open-file-externally"
+                   nil program fname)
+    (setq anything-c-external-commands-list
+          (push (pop (nthcdr (anything-c-position
+                              program anything-c-external-commands-list)
+                             anything-c-external-commands-list))
+                anything-c-external-commands-list))))
 
 ;;;###autoload
 (defun w32-shell-execute-open-file (file)
@@ -5111,6 +5147,7 @@ Ask to kill buffers associated with that file, too."
                                "/" "\\"
                                (replace-regexp-in-string ; strip cygdrive paths
                                 "/cygdrive/\\(.\\)" "\\1:" file nil nil) nil t))))
+
 (defun anything-c-open-file-with-default-tool (file)
   "Open FILE with the default tool on this platform."
   (if (eq system-type 'windows-nt)
@@ -5138,7 +5175,7 @@ directory, open this directory."
     (error "Line number not found")))
 
 (defun anything-c-action-line-goto (lineno-and-content)
-  (apply #'anything-goto-file-line (anything-attr 'target-file)
+  (apply #'anything-goto-file-line (anything-interpret-value (anything-attr 'target-file))
          (append lineno-and-content
                  (list (if (and (anything-attr-defined 'target-file)
                                 (not anything-in-persistent-action))
@@ -5163,12 +5200,10 @@ directory, open this directory."
                        content)
                (list (expand-file-name
                       filename
-                      (anything-aif (anything-attr 'default-directory)
-                          (if (functionp it) (funcall it) it)
-                        (and (anything-candidate-buffer)
-                             (buffer-local-value
-                              'default-directory
-                              (anything-candidate-buffer)))))
+                      (or (anything-interpret-value (anything-attr 'default-directory))
+                          (and (anything-candidate-buffer)
+                               (buffer-local-value
+                                'default-directory (anything-candidate-buffer)))))
                      (string-to-number lineno) content)))))
    candidates))
 
@@ -5623,7 +5658,7 @@ candidate can be in (DISPLAY . REAL) format."
     (action ("Goto node" . anything-c-info-goto))))
 
 (defun anything-compile-source--info-index (source)
-  (anything-aif (assoc-default 'info-index source)
+  (anything-aif (anything-interpret-value (assoc-default 'info-index source))
       (anything-c-make-info-source it)
     source))
 (add-to-list 'anything-compile-source-functions 'anything-compile-source--info-index)
@@ -5674,7 +5709,7 @@ If optional 2nd argument is non-nil, the file opened with `auto-revert-mode'.")
 (defun anything-compile-source--anything-headline (source)
   (if (assoc-default 'headline source)
       (append '((init . anything-headline-init)
-                (get-line-fn . buffer-substring)
+                (get-line . buffer-substring)
                 (type . line))
               source
               '((candidates-in-buffer)
@@ -5687,8 +5722,8 @@ If optional 2nd argument is non-nil, the file opened with `auto-revert-mode'.")
              (with-current-buffer anything-current-buffer
                (eval (or (anything-attr 'condition) t))))
     (anything-headline-make-candidate-buffer
-     (anything-attr 'headline)
-     (anything-attr 'subexp))))
+     (anything-interpret-value (anything-attr 'headline))
+     (anything-interpret-value (anything-attr 'subexp)))))
 
 (anything-document-attribute 'headline "Headline plug-in"
   "Regexp string for anything-headline to scan.")
@@ -5722,7 +5757,8 @@ If optional 2nd argument is non-nil, the file opened with `auto-revert-mode'.")
                       do (aset curhead hierarchy str)
                       collecting
                         (cons
-                         (mapconcat 'identity (vector-0-n curhead hierarchy) " / ")
+                         (format "H%d:%s" (1+ hierarchy)
+                                 (mapconcat 'identity (vector-0-n curhead hierarchy) " / "))
                          pt)))))
             (if (listp regexp)
               (arrange
@@ -5774,7 +5810,7 @@ If optional 2nd argument is non-nil, the file opened with `auto-revert-mode'.")
 (defun anything-persistent-help-string ()
   (substitute-command-keys
    (concat "\\<anything-map>\\[anything-execute-persistent-action]: "
-           (or (anything-attr 'persistent-help)
+           (or (anything-interpret-value (anything-attr 'persistent-help))
                (anything-aif (or (assoc-default 'persistent-action (anything-get-current-source))
                                  (assoc-default 'action (anything-get-current-source))
                                  )
@@ -5868,7 +5904,7 @@ Return nil if bmk is not a valid bookmark."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Type Attributes
+;;;; Type Attributes
 (define-anything-type-attribute 'buffer
   `((action
      ,@(if pop-up-frames
@@ -5919,7 +5955,8 @@ Return nil if bmk is not a valid bookmark."
             ("Add command to kill ring" . anything-c-kill-new)
             ("Go to command's definition" . anything-c-find-function))
     ;; Sort commands according to their usage count.
-    (filtered-candidate-transformer . anything-c-adaptive-sort))
+    (filtered-candidate-transformer . anything-c-adaptive-sort)
+    (persistent-action . anything-c-describe-function))
   "Command. (string or symbol)")
 
 (define-anything-type-attribute 'function
@@ -6020,6 +6057,14 @@ the center of window, otherwise at the top of window.
     (action ("Cancel Timer" . cancel-timer)))
   "Timer.")
 
+;;;; Default `anything-sources'
+;; Setting `anything-sources' is DEPRECATED, but it seems that newbies
+;; tend to invoke M-x anything directly. So I offer default setting.
+(setq anything-sources
+      '(anything-c-source-buffers+
+        anything-c-source-recentf
+        anything-c-source-files-in-current-dir+))
+
 ;;;; unit test
 ;; (install-elisp "http://www.emacswiki.org/cgi-bin/wiki/download/el-expectations.el")
 ;; (install-elisp "http://www.emacswiki.org/cgi-bin/wiki/download/el-mock.el")
@@ -6070,7 +6115,6 @@ the center of window, otherwise at the top of window.
              (anything-c-symbolify "sym1"))
      (expect 'sym2
              (anything-c-symbolify 'sym2)))))
-
 
 (provide 'anything-config)
 

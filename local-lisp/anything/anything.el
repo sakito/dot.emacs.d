@@ -85,6 +85,8 @@
 ;;    Select the current candidate by exiting the minibuffer.
 ;;  `anything-help'
 ;;    Help of `anything'.
+;;  `anything-debug-output'
+;;    Show all anything-related variables at this time.
 ;;  `anything-delete-current-selection'
 ;;    Delete the currently selected item.
 ;;  `anything-delete-minibuffer-content'
@@ -113,6 +115,8 @@
 ;;    Store current selection to kill ring.
 ;;  `anything-follow-mode'
 ;;    If this mode is on, persistent action is executed everytime the cursor is moved.
+;;  `anything-migrate-sources'
+;;    Help to migrate to new `anything' way.
 ;;  `anything-isearch'
 ;;    Start incremental search within results. (UNMAINTAINED)
 ;;  `anything-isearch-printing-char'
@@ -204,6 +208,11 @@
 ;;   defined.
 
 ;;; (@* "Tips")
+
+;;
+;; For `anything' users, setting `anything-sources' directly and
+;; invoke M-x anything is obsolete way for now. Try M-x
+;; `anything-migrate-sources'!
 
 ;;
 ;; If you want to create anything sources, yasnippet would help you.
@@ -1295,6 +1304,7 @@
 (defvar anything-version nil)
 (setq anything-version "$Id: anything.el,v 1.280 2010-04-01 02:22:22 rubikitch Exp $")
 (require 'cl)
+;; (require 'anything-match-plugin nil t)
 
 ;; (@* "User Configuration")
 
@@ -1490,6 +1500,8 @@ See also `anything-set-source-filter'.")
     (define-key map (kbd "C-c C-f") 'anything-follow-mode)
     (define-key map (kbd "C-c C-u") 'anything-force-update)
 
+    ;; Debugging command
+    (define-key map "\C-c\C-x\C-d" 'anything-debug-output)
     ;; Use `describe-mode' key in `global-map'
     (dolist (k (where-is-internal 'describe-mode global-map))
       (define-key map k 'anything-help))
@@ -1616,7 +1628,9 @@ But the anything buffer has no contents. ")
 
 (defvar anything-restored-variables
   '( anything-candidate-number-limit
-     anything-source-filter)
+     anything-source-filter
+     anything-source-in-each-line-flag
+     anything-sources)
   "Variables which are restored after `anything' invocation.")
 ;; `anything-saved-sources' is removed
 
@@ -1635,10 +1649,6 @@ But the anything buffer has no contents. ")
 
 (defvar anything-buffer-file-name nil
   "`buffer-file-name' when `anything' is invoked.")
-
-(defvar anything-current-position nil
-  "Cons of (point) and (window-start) when `anything' is invoked.
-It is needed because restoring position when `anything' is keyboard-quitted.")
 
 (defvar anything-saved-action nil
   "Saved value of the currently selected action by key.")
@@ -1698,14 +1708,15 @@ It is `anything-default-display-buffer' by default, which affects `anything-same
 
 (defvar anything-delayed-init-executed nil)
 
-(defvar anything-mode-line-string "(\\<anything-map>\\[anything-help]:help \\[anything-select-action]:ActionList \\[anything-exit-minibuffer]/\\[anything-select-2nd-action-or-end-of-line]/\\[anything-select-3rd-action]:NthAction"
+(defvar anything-mode-line-string "\\<anything-map>\\[anything-help]:help \\[anything-select-action]:ActionList \\[anything-exit-minibuffer]/\\[anything-select-2nd-action-or-end-of-line]/\\[anything-select-3rd-action]:NthAction"
   "Help string displayed in mode-line in `anything'.
 If nil, use default `mode-line-format'.")
 
 (defvar anything-help-message
   "\\<anything-map>The keys that are defined for `anything' are:
        \\{anything-map}"
-  "Detailed help message string for `anything'.")
+  "Detailed help message string for `anything'.
+It also accepts function or variable symbol.")
 
 (put 'anything 'timid-completion 'disabled)
 
@@ -1720,6 +1731,12 @@ To enable fitting, set both `anything-inhibit-fit-frame-flag' and
   "If non-nil, add anything-source text-property in each candidate.
 experimental feature.")
 
+(defvar anything-debug-forms nil
+  "Forms to show in `anything-debug-output'.
+Otherwise all variables started with `anything-' are shown.
+It is useful for debug.")
+(defvaralias 'anything-debug-variables 'anything-debug-forms)
+
 ;; (@* "Internal Variables")
 (defvar anything-test-candidate-list nil)
 (defvar anything-test-mode nil)
@@ -1732,6 +1749,7 @@ experimental feature.")
 (defvar anything-issued-errors nil)
 (defvar anything-shortcut-keys nil)
 (defvar anything-once-called-functions nil)
+(defvar anything-follow-mode nil)
 
 ;; (@* "Programming Tools")
 (defmacro anything-aif (test-form then-form &rest else-forms)
@@ -1889,9 +1907,13 @@ If FORCE-DISPLAY-PART is non-nil, return the display string."
                       (get-text-property (overlay-start
                                           anything-selection-overlay)
                                          'anything-realvalue))
-                 (buffer-substring-no-properties
-                  (overlay-start anything-selection-overlay)
-                  (1- (overlay-end anything-selection-overlay))))))
+                 (let ((disp (buffer-substring-no-properties
+                              (overlay-start anything-selection-overlay)
+                              (1- (overlay-end anything-selection-overlay))))
+                       (source (anything-get-current-source)))
+                   (anything-aif (assoc-default 'display-to-real source)
+                       (anything-funcall-with-source source it disp)
+                     disp)))))
         (unless (equal selection "")
           selection)))))
 
@@ -1920,7 +1942,8 @@ If FORCE-DISPLAY-PART is non-nil, return the display string."
          ;; This goto-char shouldn't be necessary, but point is moved to
          ;; point-min somewhere else which shouldn't happen.
          (goto-char (overlay-start anything-selection-overlay))
-         (let* ((header-pos (anything-get-previous-header-pos))
+         (let* ((header-pos (or (anything-get-previous-header-pos)
+                                (anything-get-next-header-pos)))
                 (source-name
                  (save-excursion
                    (unless header-pos
@@ -2024,12 +2047,6 @@ Otherwise, return VALUE itself."
       (push spec anything-once-called-functions))))
 
 ;; (@* "Core: tools")
-(defun anything-current-frame/window-configuration ()
-  (funcall (cdr anything-save-configuration-functions)))
-
-(defun anything-set-frame/window-configuration (conf)
-  (funcall (car anything-save-configuration-functions) conf))
-
 (defun anything-funcall-with-source (source func &rest args)
   (let ((anything-source-name (assoc-default 'name source)))
     (apply func args)))
@@ -2140,43 +2157,47 @@ already-bound variables. Yuck!
   (interactive)
   (condition-case v
       (with-anything-restore-variables
-        (let ((frameconfig (anything-current-frame/window-configuration))
-              ;; It is needed because `anything-source-name' is non-nil
+        (let (;; It is needed because `anything-source-name' is non-nil
               ;; when `anything' is invoked by action. Awful global scope.
               anything-source-name anything-in-persistent-action
-              anything-quit anything-follow-mode
+              anything-quit
               (case-fold-search t)
               (anything-buffer (or any-buffer anything-buffer))
-              (anything-sources (anything-normalize-sources any-sources))
               (anything-map (or any-keymap anything-map)))
+          (anything-frame/window-configuration 'save)
+          (setq anything-sources (anything-normalize-sources any-sources))
           (anything-initialize-1 any-resume any-input)
           (anything-hooks 'setup)
           (if (eq any-resume t)
               (condition-case x
-                  (anything-window-configuration 'set)
+                  (anything-window-configuration 'restore)
                 (error (anything-display-buffer anything-buffer)))
             (anything-display-buffer anything-buffer))
           (unwind-protect
               (anything-read-pattern-maybe any-prompt any-input any-preselect any-resume)
             (anything-cleanup)
             (anything-hooks 'cleanup)
-            (anything-set-frame/window-configuration frameconfig))
+            (anything-frame/window-configuration 'restore))
           (unless anything-quit
             (anything-execute-selection-action-1))))
     (quit
      (anything-on-quit)
      nil)))
 
+(defun anything-resume-p (any-resume)
+  "Whethre current anything session is resumed or not."
+  (memq any-resume '(t window-only)))
+
 (defun anything-initialize-1 (any-resume any-input)
-  (setq anything-current-position (cons (point) (window-start)))
-  (if (eq any-resume t)
+  (anything-current-position 'save)
+  (if (anything-resume-p any-resume)
       (anything-initialize-overlays (anything-buffer-get))
     (anything-initialize))
   (unless (eq any-resume 'noresume)
     (anything-recent-push anything-buffer 'anything-buffers)
     (setq anything-last-buffer anything-buffer))
   (when any-input (setq anything-input any-input anything-pattern any-input))
-  (and (eq any-resume t) (anything-funcall-foreach 'resume)))
+  (and (anything-resume-p any-resume) (anything-funcall-foreach 'resume)))
 
 (defun anything-execute-selection-action-1 ()
   (unwind-protect
@@ -2187,8 +2208,7 @@ already-bound variables. Yuck!
 
 (defun anything-on-quit ()
   (setq minibuffer-history (cons anything-input minibuffer-history))
-  (goto-char (car anything-current-position))
-  (set-window-start (selected-window) (cdr anything-current-position)))
+  (anything-current-position 'restore))
 
 (defun anything-resume-select-buffer (input)
   (anything '(((name . "Resume anything buffer")
@@ -2196,7 +2216,7 @@ already-bound variables. Yuck!
                (action . identity)))
             input nil 'noresume nil "*anything resume*"))
 
-(defun* anything-resume (&optional (any-buffer anything-last-buffer) buffer-pattern)
+(defun* anything-resume (&optional (any-buffer anything-last-buffer) buffer-pattern (any-resume t))
   "Resurrect previously invoked `anything'."
   (interactive)
   (when (or current-prefix-arg buffer-pattern)
@@ -2205,26 +2225,60 @@ already-bound variables. Yuck!
   (anything
    (or (buffer-local-value 'anything-last-sources-local (get-buffer any-buffer))
        anything-last-sources anything-sources)
-   (buffer-local-value 'anything-input-local (get-buffer any-buffer)) nil t nil any-buffer))
+   (buffer-local-value 'anything-input-local (get-buffer any-buffer)) nil any-resume nil any-buffer))
 
-(defvar anything-window-configuration nil)
-;;; (set-window-configuration (buffer-local-value 'anything-window-configuration (get-buffer "*anything buffers*")))
-(defun anything-window-configuration (store-or-set)
-  (case store-or-set
-    ('store
-     (with-current-buffer anything-buffer
-       (set (make-local-variable 'anything-window-configuration)
-            (current-window-configuration))))
-    ('set
-     (with-current-buffer anything-buffer
-       (set-window-configuration anything-window-configuration))
-     (select-window (anything-window)))))
+;;; rubikitch: experimental
+;;; I use this and check it whether I am convenient.
+;;; I may introduce an option to control the behavior.
+(defun* anything-resume-window-only (&optional (any-buffer anything-last-buffer) buffer-pattern)
+  (interactive)
+  (anything-resume any-buffer buffer-pattern 'window-only))
 
 (defun anything-recent-push (elt list-var)
   "Add ELT to the value of LIST-VAR as most recently used value."
   (let ((m (member elt (symbol-value list-var))))
     (and m (set list-var (delq (car m) (symbol-value list-var))))
     (push elt (symbol-value list-var))))
+
+;;; (@* "Core: Accessors")
+(defvar anything-window-configuration nil)
+;;; (set-window-configuration (buffer-local-value 'anything-window-configuration (get-buffer "*anything buffers*")))
+(defun anything-window-configuration (save-or-restore)
+  (case save-or-restore
+    ((save store)
+     (with-current-buffer anything-buffer
+       (set (make-local-variable 'anything-window-configuration)
+            (current-window-configuration))))
+    ((restore set)
+     (with-current-buffer anything-buffer
+       (set-window-configuration anything-window-configuration))
+     (select-window (anything-window)))))
+
+(defvar anything-current-position nil
+  "Cons of (point) and (window-start) when `anything' is invoked.
+It is needed because restoring position when `anything' is keyboard-quitted.")
+(defun anything-current-position (save-or-restore)
+  (case save-or-restore
+    (save
+     (setq anything-current-position (cons (point) (window-start))))
+    (restore
+     (goto-char (car anything-current-position))
+     (set-window-start (selected-window) (cdr anything-current-position)))))
+
+;;; FIXME I want to remove them. But anything-iswitchb uses them.
+(defun anything-current-frame/window-configuration ()
+  (funcall (cdr anything-save-configuration-functions)))
+(defun anything-set-frame/window-configuration (conf)
+  (funcall (car anything-save-configuration-functions) conf))
+
+(declare-function 'anything-frame/window-configuration "anything")
+(lexical-let (conf)
+  (defun anything-frame/window-configuration (save-or-restore)
+    (case save-or-restore
+      (save    (setq conf (funcall (cdr anything-save-configuration-functions))))
+      (restore (funcall (car anything-save-configuration-functions) conf)))))
+
+
 
 ;;;###autoload
 (defun anything-at-point (&optional any-sources any-input any-prompt any-resume any-preselect any-buffer)
@@ -2272,7 +2326,7 @@ already-bound variables. Yuck!
   (run-hooks 'anything-after-initialize-hook))
 
 (defun anything-read-pattern-maybe (any-prompt any-input any-preselect any-resume)
-  (if (eq any-resume t) (anything-mark-current-line) (anything-update))
+  (if (anything-resume-p any-resume) (anything-mark-current-line) (anything-update))
   (select-frame-set-input-focus (window-frame (minibuffer-window)))
   (anything-preselect any-preselect)
   (let ((ncandidate (anything-approximate-candidate-number))
@@ -2297,6 +2351,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
     (erase-buffer)
     (set (make-local-variable 'inhibit-read-only) t)
     (set (make-local-variable 'anything-last-sources-local) anything-sources)
+    (set (make-local-variable 'anything-follow-mode) nil)
     
     (setq cursor-type nil)
     (setq mode-name "Anything"))
@@ -2334,7 +2389,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
 (defun anything-hooks (setup-or-cleanup)
   (let ((hooks '((post-command-hook anything-check-minibuffer-input)
                  (minibuffer-setup-hook anything-print-error-messages)
-                 (minibuffer-exit-hook (lambda () (anything-window-configuration 'store))))))
+                 (minibuffer-exit-hook (lambda () (anything-window-configuration 'save))))))
     (if (eq setup-or-cleanup 'setup)
         (dolist (args hooks) (apply 'add-hook args))
       (dolist (args (reverse hooks)) (apply 'remove-hook args)))))
@@ -2414,7 +2469,7 @@ SOURCE."
     (unless (member name anything-delayed-init-executed)
       (anything-aif (assoc-default 'delayed-init source)
           (when (functionp it)
-            (funcall it)
+            (with-current-buffer anything-current-buffer (funcall it))
             (add-to-list 'anything-delayed-init-executed name)))))
   (let* ((candidate-source (assoc-default 'candidates source))
          (candidates (anything-interpret-value candidate-source source)))
@@ -2679,15 +2734,16 @@ insert the string inteneded to appear on the display and store
 the real value in a text property."
   (let ((start (line-beginning-position (point)))
         (string (if (listp match) (car match) match))
-        (realvalue (if (listp match) (cdr match) match)))
+        (realvalue (if (listp match) (cdr match))))
     (when (symbolp string) (setq string (symbol-name string)))
     (when (stringp string)
       (funcall insert-function string)
       ;; Some sources with candidates-in-buffer have already added
       ;; 'anything-realvalue property when creating candidate buffer.
       (unless (get-text-property start 'anything-realvalue)
-        (put-text-property start (line-end-position)
-                           'anything-realvalue realvalue))
+        (and realvalue
+             (put-text-property start (line-end-position)
+                                'anything-realvalue realvalue)))
       (when anything-source-in-each-line-flag
         (put-text-property start (line-end-position)
                            'anything-source source))
@@ -2809,7 +2865,7 @@ the real value in a text property."
   
 
 ;; (@* "Core: action")
-(defun anything-execute-selection-action (&optional selection action clear-saved-action display-to-real)
+(defun anything-execute-selection-action (&optional selection action clear-saved-action)
   "If a candidate was selected then perform the associated
 action."
   (setq selection (or selection (anything-get-selection)))
@@ -2821,18 +2877,13 @@ action."
   (let ((source (or anything-saved-current-source (anything-get-current-source))))
     (if (and (not selection) (assoc 'accept-empty source))
         (setq selection ""))
-    (setq display-to-real
-          (or display-to-real (assoc-default 'display-to-real source)
-              #'identity))
     (if (and (listp action)
              (not (functionp action)))  ; lambda
         ;;select the default action
         (setq action (cdar action)))
     (unless clear-saved-action (setq anything-saved-action nil))
     (if (and selection action)
-        (anything-funcall-with-source
-         source  action
-         (anything-funcall-with-source source display-to-real selection)))))
+        (anything-funcall-with-source source  action selection))))
 
 (defun anything-select-action ()
   "Select an action for the currently selected candidate.
@@ -2903,7 +2954,8 @@ UNIT and DIRECTION."
   (if anything-mode-line-string
       (setq mode-line-format
             '(" " mode-line-buffer-identification " "
-              (line-number-mode "%l") " " anything-mode-line-string-real "-%-")
+              (line-number-mode "%l") " " (anything-follow-mode "(F)")
+              " " anything-mode-line-string-real "-%-")
             anything-mode-line-string-real
             (substitute-command-keys anything-mode-line-string))
     (setq mode-line-format
@@ -3101,17 +3153,16 @@ UNIT and DIRECTION."
 
 
 ;; (@* "Core: help")
-(defun anything-help ()
-  "Help of `anything'."
-  (interactive)
+(defun anything-help-internal (bufname insert-content-fn)
+  "Show long message during `anything' session."
   (save-window-excursion
     (select-window (anything-window))
     (delete-other-windows)
-    (switch-to-buffer (get-buffer-create " *Anything Help*"))
+    (switch-to-buffer (get-buffer-create bufname))
     (setq mode-line-format "%b (SPC,C-v:NextPage  b,M-v:PrevPage  other:Exit)")
     (setq cursor-type nil)
     (erase-buffer)
-    (insert (substitute-command-keys anything-help-message))
+    (funcall insert-content-fn)
     (goto-char 1)
     (ignore-errors
       (loop for event = (read-event) do
@@ -3119,6 +3170,34 @@ UNIT and DIRECTION."
               ((?\C-v ? )  (scroll-up))
               ((?\M-v ?b) (scroll-down))
               (t (return)))))))
+
+(defun anything-help ()
+  "Help of `anything'."
+  (interactive)
+  (anything-help-internal
+   " *Anything Help*"
+   (lambda ()
+     (insert (substitute-command-keys
+              (anything-interpret-value anything-help-message)))
+     (org-mode))))
+
+(defun anything-debug-output ()
+  "Show all anything-related variables at this time."
+  (interactive)
+  (anything-help-internal " *Anything Debug*" 'anything-debug-output-function))
+
+(defun anything-debug-output-function (&optional vars)
+  (message "Calculating all anything-related values...")
+  (insert "If you debug some variables or forms, set `anything-debug-forms'
+to a list of forms.\n\n")
+  (dolist (v (or vars
+                 anything-debug-forms
+                 (apropos-internal "^anything-" 'boundp)))
+    (insert "** "
+            (pp-to-string v) "\n"
+            (pp-to-string (eval v)) "\n"))
+    (message "Calculating all anything-related values...Done")
+)
 
 ;; (@* "Core: misc")
 (defun anything-kill-buffer-hook ()
@@ -3695,18 +3774,58 @@ You can paste it by typing C-y."
 
 
 ;; (@* "Utility: Automatical execution of persistent-action")
-(define-minor-mode anything-follow-mode
+(add-to-list 'minor-mode-alist '(anything-follow-mode " AFollow"))
+(defun anything-follow-mode ()
   "If this mode is on, persistent action is executed everytime the cursor is moved."
-  nil " AFollow" :global t)
+  (interactive)
+  (with-current-buffer anything-buffer
+    (setq anything-follow-mode (not anything-follow-mode))
+    (message "anything-follow-mode is %s"
+             (if anything-follow-mode "enabled" "disabled"))))
 
 (defun anything-follow-execute-persistent-action-maybe ()
   "Execute persistent action after `anything-input-idle-delay' secs when `anything-follow-mode' is enabled."
-  (and anything-follow-mode
+  (and (buffer-local-value 'anything-follow-mode
+                           (get-buffer-create anything-buffer))
        (sit-for anything-input-idle-delay)
        (anything-window)
        (anything-get-selection)
        (save-excursion
          (anything-execute-persistent-action))))
+
+;; (@* "Utility: Migrate `anything-sources' to my-anything command")
+(defun anything-migrate-sources ()
+  "Help to migrate to new `anything' way."
+  (interactive)
+  (with-current-buffer (get-buffer-create "*anything migrate*")
+    (erase-buffer)
+    (insert (format "\
+Setting `anything-sources' directly is not good because
+`anything' is not for one command.  For now, interactive use of
+`anything' (M-x anything) is only for demonstration purpose.
+So you should define commands calling `anything'.
+I help you to migrate to the new way.
+
+The code below is automatically generated from current
+`anything-sources' value. You can use the `my-anything' command
+now!
+
+Copy and paste it to your .emacs. Then substitute `my-anything'
+for `anything' bindings in all `define-key', `local-set-key' and
+`global-set-key' calls.
+
+\(defun my-anything ()
+  \"Anything command for you.
+
+It is automatically generated by `anything-migrate-sources'.\"
+  (interactive)
+  (anything-other-buffer
+    '%S
+    \"*my-anything*\"))
+" anything-sources))
+    (eval-last-sexp nil)
+    (substitute-key-definition 'anything 'my-anything global-map)
+    (pop-to-buffer (current-buffer))))
 
 ;; (@* "Utility: Incremental search within results (unmaintained)")
 
@@ -5093,18 +5212,11 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
       (desc "anything-execute-selection-action")
       (expect "FOO"
         (anything-execute-selection-action
-         "foo" '(("upcase" . upcase))  nil #'identity))
+         "foo" '(("upcase" . upcase))  nil))
       (expect "FOO"
         (anything-execute-selection-action
-         "foo" '(("upcase" . (lambda (c) (upcase c)))) nil #'identity))
+         "foo" '(("upcase" . (lambda (c) (upcase c)))) nil))
       (desc "display-to-real attribute")
-      (expect "FOO"
-        (anything-execute-selection-action
-         "foo"
-         '(("identity" . identity))
-         nil
-         #'upcase
-         ))
       (expect "FOO"
         (anything-test-candidates
          '(((name . "TEST")
@@ -5920,6 +6032,17 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
                                        (requires-pattern . 2)))
                                     "abc")
           value))
+      (expect t
+        (let (value)
+          (with-temp-buffer
+            (anything-test-candidates '(((name . "test")
+                                         (delayed-init
+                                          . (lambda () (setq value
+                                                             (eq anything-current-buffer (current-buffer)))))
+                                         (candiates "abc")
+                                         (requires-pattern . 2)))
+                                      "abc")
+            value)))
       (desc "pattern-transformer attribute")
       (expect '(("test2" ("foo")) ("test3" ("bar")))
         (anything-test-candidates '(((name . "test1")
