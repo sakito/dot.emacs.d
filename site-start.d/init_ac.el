@@ -90,6 +90,7 @@
 (setq ac-modes (append ac-modes '(objc-mode)))
 (setq ac-modes (append ac-modes '(tuareg-mode)))
 (setq ac-modes (append ac-modes '(haskell-mode)))
+(setq ac-modes (append ac-modes '(scala-mode)))
 
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
@@ -113,10 +114,19 @@
 (add-to-list  'etags-table-alist
               '("\\.ml$" "~/.emacs.d/share/tags/ocaml.TAGS"))
 ;; etags 補完候補
+;; @see http://www.emacswiki.org/emacs/auto-complete-etags.el
+;; @see http://d.hatena.ne.jp/whitypig/20100325/1269490524
+(defun ac-etags-candidate ()
+  (when tags-file-name
+    (ignore-errors
+      (let ((tags-completion-table nil))
+        (all-completions ac-target (tags-completion-table))))))
+
 (defvar ac-source-etags
   '((candidates . (lambda ()
                     (all-completions ac-target (tags-lazy-completion-table))))
-    ;; (all-completions ac-target (tags-completion-table))))
+                 ;; (all-completions ac-target (tags-completion-table))))
+  ;; '((candidates . ac-etags-candidate)
     (candidate-face . ac-candidate-face)
     (selection-face . ac-selection-face)
     (symbol . "e")

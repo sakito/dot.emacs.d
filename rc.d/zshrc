@@ -80,6 +80,8 @@ export PATH=${HOME}/bin:${PATH}
 export PATH=${HOME}/bin/air/bin:${PATH}
 
 # Java
+export JAVA_OPTS="-Dfile.encoding=UTF-8"
+
 ### Java
 # Jakarta Maven
 # export MAVEN_HOME=${HOME}/bin/maven

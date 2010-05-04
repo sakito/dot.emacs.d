@@ -30,7 +30,9 @@
   (progn
     ;; キー
     (local-set-key (kbd "C-c !") 'scala-run-scala)
+    (local-set-key (kbd "C-c C-e") 'scala-eval-definition)
     (local-set-key (kbd "C-c C-c") 'scala-eval-buffer)
+    (local-set-key (kbd "<C-tab>") 'other-window-or-split)
 ;;    (local-set-key (kbd "RET") 'reindent-then-newline-and-indent)
     ))
 

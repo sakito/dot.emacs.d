@@ -52,6 +52,16 @@
   (local-set-key (kbd "@") (smartchr '("@\"`!!'\"" "@")))
   )
 
+(defun smartchr-custom-keybindings-scala ()
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+  (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
+  (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+  (local-set-key (kbd ">") (smartchr '(">" " => " " -> " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd "<") (smartchr '("<" " <- ")))
+  )
+
 (defun smartchr-custom-keybindings-ocaml ()
   (local-set-key (kbd "(") (smartchr '("(`!!')" "(* `!!' *)" "(")))
   (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
@@ -90,18 +100,11 @@
               ))
   (add-hook hook 'skelton-custom-keybindigs))
 
+;; モードオリジナル追加設定
 (add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
 (add-hook 'rst-mode-hook 'smartchr-custom-keybindings-rst)
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
-
-;; (add-hook 'c-mode-common-hook 'smartchr-custom-keybindings)
-;; (add-hook 'css-mode-hook 'smartchr-custom-keybindings)
-;; (add-hook 'nxml-mode-hook 'smartchr-custom-keybindings)
-;; (add-hook 'emacs-lisp-mode-hook 'skelton-custom-keybindigs)
-;; (add-hook 'python-mode-hook 'skelton-custom-keybindigs)
-;; (add-hook 'makefile-mode-hook 'skelton-custom-keybindigs)
-
-
+(add-hook 'scala-mode-hook 'smartchr-custom-keybindings-scala)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here
