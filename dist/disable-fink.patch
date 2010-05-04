@@ -1,7 +1,9 @@
+# HG changeset patch
+# Parent af8367415ee49445d576ea5aee9eb7b64ee8ac28
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -2737,12 +2737,6 @@
+@@ -2758,12 +2758,6 @@
      opsys=darwin
      # Define CPP as follows to make autoconf work correctly.
      CPP="${CC-cc} -E -no-cpp-precomp"
@@ -17,7 +19,7 @@ diff --git a/configure b/configure
 diff --git a/configure.in b/configure.in
 --- a/configure.in
 +++ b/configure.in
-@@ -470,12 +470,6 @@
+@@ -477,12 +477,6 @@
      opsys=darwin
      # Define CPP as follows to make autoconf work correctly.
      CPP="${CC-cc} -E -no-cpp-precomp"

@@ -5,7 +5,7 @@ TAR = tar xvzf
 CURL = curl -O
 
 ## Emacs Variables
-EMACS_VERSION=23.1.92
+EMACS_VERSION=23.1.97
 EMACS_SRC = emacs-${EMACS_VERSION}
 USER-EMACS-DIRECTORY=${HOME}/.emacs.d
 LISPDIR=${USER-EMACS-DIRECTORY}/lisp
@@ -13,6 +13,10 @@ VERSION_SPECIFIC_LISPDIR=${USER-EMACS-DIRECTORY}/lisp
 BINDIR=${USER-EMACS-DIRECTORY}/bin
 SHAREDIR=${USER-EMACS-DIRECTORY}/share
 INFODIR=${USER-EMACS-DIRECTORY}/share/info
+
+##
+INLINE_PATCH=inline_patch-${EMACS_VERSION}-b2
+MAC_PORT=${EMACS_SRC}-mac-1.992
 
 ##
 APEL_SRC=apel-10.7
@@ -31,24 +35,28 @@ all:
 
 # ソース類の取得
 src:
-	$(CURL) ftp://alpha.gnu.org/gnu/emacs/pretest/${EMACS_SRC}.tar.gz ; \
+	${CURL} ftp://alpha.gnu.org/gnu/emacs/pretest/${EMACS_SRC}.tar.gz ; \
 	${TAR} ${EMACS_SRC}.tar.gz
 
 # パッチの取得
 patch: src
-	$(CURL) http://jaist.dl.sourceforge.jp/macemacsjp/45818/inline_patch-${EMACS_VERSION}-b1.tar.gz ;\
-	${TAR} inline_patch-${EMACS_VERSION}-b1.tar.gz ; \
-	$(CURL) http://sakito.jp/shared/emacspatches/${EMACS_SRC}-mac-1.97.tar.gz ; \
-	${TAR} ${EMACS_SRC}-mac-1.97.tar.gz ; \
+	${CURL} http://jaist.dl.sourceforge.jp/macemacsjp/47194/${INLINE_PATCH}.tar.gz ;\
+	${TAR} ${INLINE_PATCH}.tar.gz ; \
+	${CURL} http://sakito.jp/shared/emacspatches/${MAC_PORT}.tar.gz ; \
+	${TAR} ${MAC_PORT}.tar.gz ; \
 	cd ${EMACS_SRC} ; \
-	patch -p 0 < ../${EMACS_SRC}-mac-1.97/patch-mac ; \
-	cp -r ../${EMACS_SRC}-mac-1.97/mac mac ; \
-	cp ../${EMACS_SRC}-mac-1.97/src/* src ; \
-	cp ../${EMACS_SRC}-mac-1.97/lisp/term/mac-win.el lisp/term ; \
+	patch -p 0 < ../${MAC_PORT}/patch-mac ; \
+	cp -r ../${MAC_PORT}/mac mac ; \
+	cp ../${MAC_PORT}/src/* src ; \
+	cp ../${MAC_PORT}/lisp/term/mac-win.el lisp/term ; \
 	cp nextstep/Cocoa/Emacs.base/Contents/Resources/Emacs.icns mac/Emacs.app/Contents/Resources/Emacs.icns ; \
-	patch -p 0 < ../inline_patch-${EMACS_VERSION}-b1/emacs-inline.patch ; \
+	patch -p 0 < ../${INLINE_PATCH}/emacs-inline.patch ; \
 	patch -p 1 < ../disable-fink.patch ; \
 	patch -p 1 < ../disable-ns-self-contained.patch
+
+# パスワード付き zip 作成
+package: patch
+	zip -r -e patches-emacs-${EMACS_VERSION}-alpha.zip emacs-${EMACS_VERSION}
 
 #  コンパイル
 compile: patch
