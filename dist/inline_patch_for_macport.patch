@@ -1,10 +1,9 @@
 # HG changeset patch
-# Parent d4429840ca567c6efad5e7e42ccf35c955b73050
-
+# Parent b532542601147dad776ba1e29ac70686ef246d63
 diff --git a/lisp/term/mac-win.el b/lisp/term/mac-win.el
 --- a/lisp/term/mac-win.el
 +++ b/lisp/term/mac-win.el
-@@ -1570,6 +1570,387 @@
+@@ -1892,6 +1892,387 @@
  ;; Initiate drag and drop
  (define-key special-event-map [drag-n-drop] 'mac-dnd-handle-drag-n-drop-event)
  
@@ -955,7 +954,7 @@ diff --git a/src/keyboard.c b/src/keyboard.c
  	  kbd_fetch_ptr = event + 1;
            if (used_mouse_menu)
              *used_mouse_menu = 1;
-@@ -12621,6 +12623,8 @@
+@@ -12628,6 +12630,8 @@
  			    "ns-put-working-text");
    initial_define_lispy_key (Vspecial_event_map, "ns-unput-working-text",
  			    "ns-unput-working-text");

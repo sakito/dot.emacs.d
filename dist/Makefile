@@ -5,7 +5,7 @@ TAR = tar xvzf
 CURL = curl -O
 
 ## Emacs Variables
-EMACS_VERSION=23.1.97
+EMACS_VERSION=23.2
 EMACS_SRC = emacs-${EMACS_VERSION}
 USER-EMACS-DIRECTORY=${HOME}/.emacs.d
 LISPDIR=${USER-EMACS-DIRECTORY}/lisp
@@ -16,7 +16,7 @@ INFODIR=${USER-EMACS-DIRECTORY}/share/info
 
 ##
 INLINE_PATCH=inline_patch-${EMACS_VERSION}-b2
-MAC_PORT=${EMACS_SRC}-mac-1.992
+MAC_PORT=${EMACS_SRC}-mac-1.993
 
 ##
 APEL_SRC=apel-10.7
@@ -35,7 +35,7 @@ all:
 
 # ソース類の取得
 src:
-	${CURL} ftp://alpha.gnu.org/gnu/emacs/pretest/${EMACS_SRC}.tar.gz ; \
+	${CURL} http://ftp.gnu.org/pub/gnu/emacs//${EMACS_SRC}.tar.gz ; \
 	${TAR} ${EMACS_SRC}.tar.gz
 
 # パッチの取得
