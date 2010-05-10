@@ -49,8 +49,8 @@
 
 (add-hook 'js2-mode-hook
           (lambda ()
-            (setq indent-tabs-mode t)
             (setq tab-width 2)
+            (setq js2-basic-offset tab-width)
             (local-set-key (kbd "C-x C-e") 'js-send-last-sexp)
             (local-set-key (kbd "C-M-x") 'js-send-last-sexp-and-go)
             (local-set-key (kbd "C-c b") 'js-send-buffer)

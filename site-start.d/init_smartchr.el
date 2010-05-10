@@ -90,6 +90,7 @@
               'c-mode-common-hook
               'css-mode-hook
               'nxml-mode-hook
+              'js2-mode-hook
               ))
   (add-hook hook 'smartchr-custom-keybindings))
 
