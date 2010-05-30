@@ -85,13 +85,9 @@
 
 ;; 補完対象のモードを追加
 (setq ac-modes (append ac-modes '(rst-mode)))
-(setq ac-modes (append ac-modes '(css-mode)))
 (setq ac-modes (append ac-modes '(nxml-mode)))
 (setq ac-modes (append ac-modes '(objc-mode)))
-(setq ac-modes (append ac-modes '(tuareg-mode)))
 (setq ac-modes (append ac-modes '(haskell-mode)))
-(setq ac-modes (append ac-modes '(scala-mode)))
-(setq ac-modes (append ac-modes '(js2-mode)))
 
 ;; etags ファイルの候補を設定
 ;;(setq tags-table-list '("~/.emacs.d/share/tags/objc.TAGS" "TAGS"))
