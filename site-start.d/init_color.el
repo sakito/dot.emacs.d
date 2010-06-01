@@ -57,7 +57,8 @@
 (add-to-list 'default-frame-alist '(vertical-scroll-bars . nil))
 
 ;; 背景の透過
-(add-to-list 'default-frame-alist '(alpha . (85 20)))
+;; (add-to-list 'default-frame-alist '(alpha . (85 20)))
+(add-to-list 'default-frame-alist '(alpha . (92 70)))
 
 ;;; フォントの設定
 ;; システム依存を排除するために一旦デフォルトフォントセットを上書き
@@ -180,7 +181,7 @@
 ;; @see http://www.emacswiki.org/cgi-bin/wiki/vline.el
 ;;(require 'crosshairs)
 
-;; color-thema
+;; color-theme
 (setq color-theme-load-all-themes nil)
 (setq color-theme-libraries nil)
 (require 'color-theme)
@@ -189,8 +190,9 @@
      (color-theme-initialize)
      (cond
       (mac-p
-       (require 'color-theme-sakito)
-       (color-theme-sakito))
+       (require 'color-theme-dark)
+       (color-theme-dark)
+       )
       (windows-p
        (require 'color-theme-ntemacs)
        (color-theme-ntemacs))
