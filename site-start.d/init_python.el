@@ -2,7 +2,7 @@
 
 ;;; init_python.el --- Python Setting
 
-;; Copyright (C) 2004  sakito
+;; Copyright (C) 2004-2010  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 
@@ -77,21 +77,33 @@
 (setq ipython-command "/usr/local/bin/ipython")
 ;; ipython の起動オプションを設定
 ;; デフォルトは (-i -colors LightBG)
-(setq py-python-command-args '("-cl" "-i" "-colors" "Linux"))
+;;(setq py-python-command-args '("-cl" "-i" "-colors" "Linux"))
+(setq py-python-command-args '("-i" "-colors" "Linux"))
 
 ;; http://www.emacswiki.org/emacs/anything-ipython.el
 (require 'anything-ipython)
 (add-to-list 'anything-sources 'anything-source-ipython)
-(add-hook 'python-mode-hook #'(lambda ()
-                                (define-key py-mode-map (kbd "M-<tab>") 'anything-ipython-complete)))
-(add-hook 'python-mode-hook #'(lambda ()
-                                (define-key py-mode-map (kbd "C-c e") 'anything-ipython-complete)))
-(add-hook 'ipython-shell-hook #'(lambda ()
-                                  (define-key py-mode-map (kbd "M-<tab>") 'anything-ipython-complete)))
-
 (when (require 'anything-show-completion nil t)
   (use-anything-show-completion 'anything-ipython-complete
                                 '(length initial-pattern)))
+
+(defun skt:python-mode-hook ()
+  (progn
+    ;; キー
+    (local-set-key (kbd "C-c C-l") 'anything-ipython-complete) ;; py-shift-region-left を上書きしている
+    (local-set-key (kbd "C-c e") 'anything-ipython-complete)
+    (local-set-key (kbd "C-c C-r") 'py-execute-region)  ;; py-shift-region-right を上書きしている
+    (local-set-key (kbd "C-c ;") 'comment-dwim)
+    (local-set-key (kbd "C-c :") 'comment-dwim)
+    ))
+(add-hook 'python-mode-hook 'skt:python-mode-hook)
+
+(defun skt:ipython-shell-hook ()
+  (progn
+    ;; キー
+    (local-set-key (kbd "C-c C-l") 'anything-ipython-complete)
+    ))
+(add-hook 'ipython-shell-hook 'skt:ipython-shell-hook)
 
 ;; anything で info 参照
 ;; もっと効率的に記述できることはわかっているが、都合により現在はこの記述にしておく

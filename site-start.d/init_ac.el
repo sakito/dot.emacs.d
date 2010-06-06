@@ -100,8 +100,8 @@
 (add-to-list  'etags-table-alist
               '("\\.scm$" "~/.emacs.d/share/tags/gauche.TAGS"))
 ;; find /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/ -name "*.py" | xargs etags -f python.TAGS -l python
-(add-to-list  'etags-table-alist
-              '("\\.py$" "~/.emacs.d/share/tags/python.TAGS"))
+;;(add-to-list  'etags-table-alist
+;;              '("\\.py$" "~/.emacs.d/share/tags/python.TAGS"))
 (add-to-list  'etags-table-alist
               '("\\.p[lm]$" "~/.emacs.d/share/tags/perl.TAGS"))
 ;; Haskell
@@ -145,7 +145,8 @@
           (lambda ()
             (make-local-variable 'ac-sources)
             ;; 末尾に追加
-            (setq ac-sources (append ac-sources '(ac-source-etags)))))
+            ;;(setq ac-sources (append ac-sources '(ac-source-etags)))
+            ))
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (make-local-variable 'ac-sources)

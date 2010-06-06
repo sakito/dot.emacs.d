@@ -9,7 +9,7 @@
 ;; Created:    Feb 1992
 ;; Keywords:   python languages oop
 
-(defconst py-version "5.1.0"
+(defconst py-version "5.1.0+"
   "`python-mode' version number.")
 
 ;; This file is part of python-mode.el.
@@ -54,15 +54,22 @@
 
 ;; To install, just drop this file into a directory on your load-path and
 ;; byte-compile it.  To set up Emacs to automatically edit files ending in
-;; ".py" using python-mode add the following to your ~/.emacs file (GNU
-;; Emacs) or ~/.xemacs/init.el file (XEmacs):
+;; ".py" using python-mode, add to your emacs init file
+;;
+;; GNU Emacs: ~/.emacs, ~/.emacs.el, or ~/.emacs.d/init.el
+;;
+;; XEmacs: ~/.xemacs/init.el
+;;
+;; the following code:
+;;
 ;;    (setq auto-mode-alist (cons '("\\.py$" . python-mode) auto-mode-alist))
 ;;    (setq interpreter-mode-alist (cons '("python" . python-mode)
 ;;                                       interpreter-mode-alist))
 ;;    (autoload 'python-mode "python-mode" "Python editing mode." t)
 ;;
 ;; In XEmacs syntax highlighting should be enabled automatically.  In GNU
-;; Emacs you may have to add these lines to your ~/.emacs file:
+;; Emacs you may have to add these lines to your init file:
+;;
 ;;    (global-font-lock-mode t)
 ;;    (setq font-lock-maximum-decoration t)
 
@@ -375,6 +382,22 @@ to select the appropriate python interpreter mode for a file.")
   :type 'boolean
   :group 'python)
 
+(defcustom py-hide-show-keywords
+  '(
+    "class"    "def"    "elif"    "else"    "except"
+    "for"      "if"     "while"   "finally" "try"
+    "with"
+    )
+  "*Keywords that can be hidden by hide-show"
+  :type '(repeat string)
+  :group 'python)
+
+(defcustom py-hide-show-hide-docstrings t
+  "*Controls if doc strings can be hidden by hide-show"
+  :type 'boolean
+  :group 'python)
+
+
 
 ;; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;; NO USER DEFINABLE VARIABLES BEYOND THIS POINT
@@ -673,7 +696,7 @@ Currently-active file is at the head of the list.")
   (define-key py-mode-map "\C-c\C-u"  'py-goto-block-up)
   (define-key py-mode-map "\C-c#"     'py-comment-region)
   (define-key py-mode-map "\C-c?"     'py-describe-mode)
-  (define-key py-mode-map "\C-c\C-h"  'py-help-at-point)
+  (define-key py-mode-map "\C-c\C-e"  'py-help-at-point)
   (define-key py-mode-map "\e\C-a"    'py-beginning-of-def-or-class)
   (define-key py-mode-map "\e\C-e"    'py-end-of-def-or-class)
   (define-key py-mode-map "\C-c-"     'py-up-exception)
@@ -1225,6 +1248,15 @@ py-beep-if-tab-change\t\tring the bell if `tab-width' is changed"
     (if (fboundp 'imenu-add-to-menubar)
         (imenu-add-to-menubar (format "%s-%s" "IM" mode-name)))
     )
+
+  ;; Add support for HideShow
+  (add-to-list 'hs-special-modes-alist (list
+               'python-mode (concat (if py-hide-show-hide-docstrings "^\\s-*\"\"\"\\|" "") (mapconcat 'identity (mapcar #'(lambda (x) (concat "^\\s-*" x "\\>")) py-hide-show-keywords ) "\\|")) nil "#"
+               (lambda (arg)
+                 (py-goto-beyond-block)
+                 (skip-chars-backward " \t\n"))
+               nil))
+  
   ;; Run the mode hook.  Note that py-mode-hook is deprecated.
   (if python-mode-hook
       (run-hooks 'python-mode-hook)
@@ -2403,7 +2435,8 @@ Optional CLASS is passed directly to `py-beginning-of-def-or-class'."
     (goto-char start)
     (beginning-of-line)
     (setq start (point))
-    (indent-rigidly start end count)))
+    (let (deactivate-mark)
+      (indent-rigidly start end count))))
 
 (defun py-shift-region-left (start end &optional count)
   "Shift region of Python code to the left.
@@ -2416,7 +2449,7 @@ many columns.  With no active region, dedent only the current line.
 You cannot dedent the region if any line is already at column zero."
   (interactive
    (let ((p (point))
-         (m (mark))
+         (m (condition-case nil (mark) (mark-inactive nil)))
          (arg current-prefix-arg))
      (if m
          (list (min p m) (max p m) arg)
@@ -2444,7 +2477,7 @@ If a prefix argument is given, the region is instead shifted by that
 many columns.  With no active region, indent only the current line."
   (interactive
    (let ((p (point))
-         (m (mark))
+         (m (condition-case nil (mark) (mark-inactive nil)))
          (arg current-prefix-arg))
      (if m
          (list (min p m) (max p m) arg)
@@ -2620,8 +2653,9 @@ do not include blank, comment, or continuation lines."
       (if (> count 0) (goto-char start)))
     count))
 
-(defun py-goto-block-up (&optional nomark)
-  "Move up to start of current block.
+(defalias 'py-goto-block-up 'py-beginning-of-block)
+(defun py-beginning-of-block (&optional nomark)
+  "Move to start of current block.
 Go to the statement that starts the smallest enclosing block; roughly
 speaking, this will be the closest preceding statement that ends with a
 colon and is indented less than the statement you started on.  If
@@ -2688,26 +2722,23 @@ start of the buffer each time.
 
 To mark the current `def', see `\\[py-mark-def-or-class]'."
   (interactive "P")                     ; raw prefix arg
-  (setq count (or count 1))
-  (let ((at-or-before-p (<= (current-column) (current-indentation)))
-        (start-of-line (goto-char (py-point 'bol)))
-        (start-of-stmt (goto-char (py-point 'bos)))
-        (start-re (cond ((eq class 'either) "^[ \t]*\\(class\\|def\\)\\>")
-                        (class "^[ \t]*class\\>")
-                        (t "^[ \t]*def\\>")))
-        )
-    ;; searching backward
-    (if (and (< 0 count)
-             (or (/= start-of-stmt start-of-line)
-                 (not at-or-before-p)))
+  (lexical-let* ((count (or count 1))
+                 (step (if (< 0 count) -1 1))
+                 (start-re (cond ((eq class 'either) "^[ \t]*\\(class\\|def\\)\\>")
+                                 (class "^[ \t]*class\\>")
+                                 (t "^[ \t]*def\\>"))))
+    (while (/= 0 count)
+      (if (< 0 count)
+          (unless (looking-at start-re) (end-of-line))
         (end-of-line))
-    ;; search forward
-    (if (and (> 0 count)
-             (zerop (current-column))
-             (looking-at start-re))
-        (end-of-line))
-    (if (re-search-backward start-re nil 'move count)
-        (goto-char (match-beginning 0)))))
+      (if 
+          (re-search-backward start-re nil 'move (- step))
+          (unless
+              ;; if inside a string
+              (nth 3 (parse-partial-sexp (point-min) (point)))
+            (goto-char (match-beginning 0))
+            (setq count (+ count step)))
+        (setq count 0)))))
 
 ;; Backwards compatibility
 (defalias 'beginning-of-python-def-or-class 'py-beginning-of-def-or-class)
