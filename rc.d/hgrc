@@ -4,9 +4,9 @@ ignore=~/.hgignore
 style=compact
 ssh = ssh -C
 [extensions]
-hgext.convert=
-hgext.graphlog=
-hgext.bookmarks=
+convert=
+graphlog=
+bookmarks=
 color=
 hggit=
 hgk=
@@ -14,6 +14,7 @@ mq=
 purge=
 extdiff=
 progress=
+hgsubversion=
 [diff]
 git = True
 [extdiff]
@@ -23,11 +24,9 @@ opts.ediff = -c 'if [ -d $0 ]; then emacsclient --eval "(ediff-directories \"$0\
 emacsclient.args = --eval "(progn (raise-frame (selected-frame))(x-focus-frame (selected-frame))(ediff-merge-with-ancestor \"$local\" \"$other\" \"$base\" nil \"$output\"))"
 [color]
 status.modified = white bold red_background
-#status.modified = white bold underline red_background
+# status.modified = white bold underline red_background
 status.added = green bold
 status.removed = red bold blue_background
 status.deleted = cyan bold underline
 status.unknown = green bold underline
 status.ignored = black bold
-[hgk]
-path="/Users/sakito/bin/hgk"

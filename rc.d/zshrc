@@ -227,7 +227,7 @@ fi
 # color setup for ls on OS X:
 isdarwin && export CLICOLOR=1
 #               1234567890123456789012
-export LSCOLORS=GxFxCxdxBxegedabagacad
+export LSCOLORS=GxhFCxdxHbegedabagacad
 #export LSCOLORS=GxDxcxdxbhededabagacad
 #export LSCOLORS=''"gxfxcxdxbxegedabagacad"
 #export LSCOLORS=ExFxCxdxBxegedabagacad
