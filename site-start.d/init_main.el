@@ -133,6 +133,8 @@
 ;; irc
 ;; (require 'init_irc)
 
+(require 'init_speedbar)
+
 ;;; private 設定
 (require 'init_private)
 
