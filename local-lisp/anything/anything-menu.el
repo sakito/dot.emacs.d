@@ -120,7 +120,7 @@
                                 activate
                              end")))
 (defun am/write-result (line)
-  (write-region (or line "") nil am/tmp-file))
+  (write-region (or line "") nil am/tmp-file nil 'silent))
 
 (defun anything-menu (&optional any-sources any-input any-prompt any-resume any-preselect any-buffer any-keymap)
   "Call `anything' outside Emacs.
@@ -130,7 +130,8 @@ Pop up anything frame and close it after session."
   (am/set-frame)
   (unwind-protect
       (let ((anything-samewindow t)
-            (anything-display-function 'anything-default-display-buffer))
+            (anything-display-function 'anything-default-display-buffer)
+            (anything-after-action-hook (lambda () (am/write-result (anything-get-selection)))))
         (anything any-sources any-input any-prompt any-resume any-preselect any-buffer any-keymap))
     (am/close-frame)))
 
