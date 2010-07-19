@@ -1,5 +1,4 @@
 ;;;; anything.el --- open anything / QuickSilver-like candidate-selection framework
-;; $Id: anything.el,v 1.282 2010-04-01 02:22:22 rubikitch Exp $
 
 ;; Copyright (C) 2007              Tamas Patrovics
 ;;               2008, 2009, 2010  rubikitch <rubikitch@ruby-lang.org>
@@ -9,6 +8,8 @@
 ;; Keywords: files, frames, help, matching, outlines, processes, tools, convenience, anything
 ;; URL: http://www.emacswiki.org/cgi-bin/wiki/download/anything.el
 ;; Site: http://www.emacswiki.org/cgi-bin/emacs/Anything
+(defvar anything-version nil)
+(setq anything-version "1.285")
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -241,6 +242,10 @@
 
 ;;; (@* "Tips")
 
+;;
+;; `anything' accepts keyword arguments. See docstring.
+;; [EVAL IT] (describe-function 'anything)
+
 ;; 
 ;; `anything-enable-shortcuts' enables us to select candidate easily.
 ;; If 'prefix then they can be selected using <prefix-key> <alnum>. 
@@ -432,926 +437,13 @@
 ;;   - anything-candidate-number-limit can't be nil everywhere
 
 ;; (@* "HISTORY")
-;; $Log: anything.el,v $
-;; Revision 1.280  2010-04-01 02:22:22  rubikitch
-;; `anything': new argument ANY-KEYMAP
 ;;
-;; Revision 1.279  2010/03/31 09:22:58  rubikitch
-;; Add tips of yasnippet for source creators (no code change)
+;;  Change log of this file is found at
+;;  http://repo.or.cz/w/anything-config.git/history/master:/anything.el
 ;;
-;; Revision 1.278  2010/03/31 09:01:08  rubikitch
-;; Added info to INCOMPATIBLE CHANGES
-;;
-;; Revision 1.277  2010/03/31 08:56:53  rubikitch
-;; Anything saves/restores window configuration instead of frame configuration now.
-;; The default is changed because flickering is occurred in some environment.
-;;
-;; If you want to save and restore frame configuration, set this variable to
-;;  '(set-frame-configuration . current-frame-configuration)
-;;
-;; Revision 1.276  2010/03/31 08:52:50  rubikitch
-;; Fitting frame is disabled by default, because some flickering occurred
-;; in some environment.  To enable fitting, set both
-;; `anything-inhibit-fit-frame-flag' and `fit-frame-inhibit-fitting' to
-;; nil.
-;;
-;; Revision 1.275  2010/03/31 02:46:09  rubikitch
-;; (defvaralias 'anything-attributes 'anything-additional-attributes)
-;;
-;; Revision 1.274  2010/03/31 02:43:35  rubikitch
-;; New command: `anything-describe-anything-attribute'
-;;
-;; Revision 1.273  2010/03/31 02:37:18  rubikitch
-;; Document all attributes by `anything-document-attribute' instead of `anything-sources' docstring
-;;
-;; Revision 1.272  2010/03/29 21:05:47  rubikitch
-;; `anything-mode-line-string': use `make-local-variable' instead
-;;
-;; Revision 1.271  2010/03/29 09:59:17  rubikitch
-;; stupid bug
-;;
-;; Revision 1.270  2010/03/29 09:56:12  rubikitch
-;; Call `filtered-candidate-transformer' functions even if process sources
-;;
-;; Revision 1.269  2010/03/29 08:42:23  rubikitch
-;; * New attribute `resume'
-;; * Fix a bug of `disable-shortcuts' plug-in
-;;
-;; Revision 1.268  2010/03/28 21:42:01  rubikitch
-;; Add some keys in `anything-help'
-;;
-;; Revision 1.267  2010/03/28 20:11:30  rubikitch
-;; Modify `anything-mode-line-string'
-;;
-;; Revision 1.266  2010/03/28 06:12:43  rubikitch
-;; process source and multiline: in the making (not usable)
-;;
-;; Revision 1.265  2010/03/28 05:07:00  rubikitch
-;; Change default `anything-sources'. It is only a sample, no problem.
-;;
-;; Revision 1.264  2010/03/27 19:02:52  rubikitch
-;; New attributes: `mode-line' and `header-line'
-;;
-;; Revision 1.263  2010/03/27 02:34:40  rubikitch
-;; doc
-;;
-;; Revision 1.262  2010/03/27 02:31:55  rubikitch
-;; New command: `anything-force-update' C-c C-u
-;;
-;; Revision 1.261  2010/03/27 02:29:39  rubikitch
-;; New function `anything-goto-source'
-;;
-;; Revision 1.260  2010/03/27 02:01:28  rubikitch
-;; reimplement move selection commands
-;;
-;; Revision 1.259  2010/03/26 22:52:15  rubikitch
-;; `anything-quit-and-find-file':
-;;   If current selection is a buffer or a file, `find-file' from its directory.
-;;   Idea from http://i-yt.info/?date=20090826#p01 with some modification. Thanks.
-;;
-;; Revision 1.258  2010/03/26 12:10:55  rubikitch
-;; * modify `anything-mode-line-string'
-;; * New command `anything-help'
-;;
-;; Revision 1.257  2010/03/24 11:08:19  rubikitch
-;; revert to 1.255
-;;
-;; Revision 1.256  2010/03/24 08:29:43  rubikitch
-;; `anything-check-minibuffer-input' set repeat timer.
-;;
-;; Revision 1.255  2010/03/24 02:35:47  rubikitch
-;; `anything-candidate-number-limit':
-;; When (candidate-number-limit) is specified in SOURCE,
-;; cancel the effect of `anything-candidate-number-limit'.
-;;
-;; Revision 1.254  2010/03/23 00:33:18  rubikitch
-;; New API: `anything-interpret-value'
-;;
-;; Revision 1.253  2010/03/22 07:04:03  rubikitch
-;; `anything-get-current-source': return nil when no candidates rather than error
-;;
-;; Revision 1.252  2010/03/21 06:08:44  rubikitch
-;; Mark bug fix. thx hchbaw!
-;; http://d.hatena.ne.jp/hchbaw/20100226/1267200447
-;;
-;; Revision 1.251  2010/03/21 02:39:34  rubikitch
-;; Fix a wrong usage of `delq'. thx hchbaw.
-;; http://d.hatena.ne.jp/hchbaw/20100226/1267200447
-;;
-;; Revision 1.250  2010/03/21 02:32:29  rubikitch
-;; Fix `select deleted buffer' error message when calling `anything-resume'.
-;;
-;; It was occurred when killing `anything-current-buffer' and calling `anything-resume'.
-;;
-;; Revision 1.249  2010/02/23 20:43:35  rubikitch
-;; `anything-update': Ensure to call `anything-next-line'
-;;
-;; Revision 1.248  2010/02/20 12:34:38  rubikitch
-;; Mode-line help!! `anything-mode-line-string' is help string.
-;;
-;; Revision 1.247  2010/02/20 10:41:39  rubikitch
-;; Automatically update `anything-version' when upgrading
-;;
-;; Revision 1.246  2010/02/20 10:38:58  rubikitch
-;; update copyright
-;;
-;; Revision 1.245  2010/02/20 10:36:01  rubikitch
-;; New API: `anything-require-at-least-version'
-;;
-;; Revision 1.244  2010/02/20 10:06:54  rubikitch
-;; * New plug-in: `disable-shortcuts'
-;; * `dummy' plug-in implies `disable-shortcuts' because it enables us to input capital letters.
-;;
-;; Revision 1.243  2010/02/20 09:54:16  rubikitch
-;; `anything-compile-source--dummy': swap arguments of `append'
-;;
-;; Revision 1.242  2010/02/19 17:37:12  rubikitch
-;; error check in `anything-set-source-filter'
-;;
-;; Revision 1.241  2010/01/29 18:53:17  rubikitch
-;; Fix a bug of `candidate-number-limit' in process sources.
-;;
-;; Revision 1.240  2010/01/23 04:21:31  rubikitch
-;; * `anything': Use `anything-display-buffer' as fallback
-;; * `anything-select-with-digit-shortcut': `self-insert-command' if disabled
-;;
-;; Revision 1.239  2009/12/28 07:33:28  rubikitch
-;; New command: `anything-toggle-resplit-window'  (C-t)
-;;
-;; Revision 1.238  2009/12/28 07:19:37  rubikitch
-;; bugfix
-;;
-;; Revision 1.237  2009/12/28 07:15:30  rubikitch
-;; `anything-window-configuration' stores window configuration only.
-;;
-;; Revision 1.236  2009/12/28 07:07:09  rubikitch
-;; `anything-resume' resumes window configuration now.
-;;
-;; Revision 1.235  2009/12/28 04:12:33  rubikitch
-;; Fix tiny bug
-;;
-;; Revision 1.234  2009/12/28 03:57:33  rubikitch
-;; `anything-resume': New optional argument
-;;
-;; Revision 1.233  2009/12/28 03:43:12  rubikitch
-;; remove warnings
-;;
-;; Revision 1.232  2009/12/28 03:37:25  rubikitch
-;; refactoring
-;;
-;; Revision 1.231  2009/12/28 02:33:41  rubikitch
-;; refactoring
-;;
-;; Revision 1.230  2009/12/27 09:28:06  rubikitch
-;; `anything-window-configuration' save/restore anything window configuration (NOT YET)
-;;
-;; Revision 1.229  2009/12/26 21:41:33  rubikitch
-;; revive `anything-input' when resuming
-;;
-;; Revision 1.228  2009/12/25 01:34:35  rubikitch
-;; * `anything-resume' use anything interface to select anything buffers.
-;; * Its candidates are sorted by most recently used order.
-;; * 4th arg of `anything' accepts 'noresume not to resume this session.
-;;
-;; Revision 1.227  2009/12/19 20:30:12  rubikitch
-;; add `pattern-transformer' doc
-;;
-;; Revision 1.226  2009/12/19 20:15:47  rubikitch
-;; pattern-transformer can have multiple functions now
-;;
-;; Revision 1.225  2009/12/19 20:11:16  rubikitch
-;; add `delayed-init' doc
-;;
-;; Revision 1.224  2009/12/19 12:26:00  rubikitch
-;; New attribute `pattern-transformer'
-;;
-;; Revision 1.223  2009/12/19 11:57:41  rubikitch
-;; New attribute `delayed-init'
-;;
-;; Revision 1.222  2009/12/14 20:55:23  rubikitch
-;; Fix display bug: `anything-enable-digit-shortcuts' / multiline
-;;
-;; Revision 1.221  2009/12/14 20:29:49  rubikitch
-;; fix an error when executing `anything-prev-visible-mark' with no visible marks.
-;;
-;; Revision 1.220  2009/12/14 20:19:05  rubikitch
-;; Bugfix about anything-execute-action-at-once-if-one and multiline
-;;
-;; Revision 1.219  2009/12/14 03:21:11  rubikitch
-;; Extend alphabet shortcuts to A-Z
-;;
-;; Revision 1.218  2009/12/13 01:03:34  rubikitch
-;; Changed data structure of `anything-shortcut-keys-alist'
-;;
-;; Revision 1.217  2009/12/03 23:16:17  rubikitch
-;; silence warning
-;;
-;; Revision 1.216  2009/12/03 20:43:51  rubikitch
-;; Add keybindings for alphabet shortcuts
-;;
-;; Revision 1.215  2009/12/03 20:37:13  rubikitch
-;; `anything-enable-shortcuts' is an alias of `anything-enable-digit-shortcuts'.
-;; Alphabet shortcuts can be used now.
-;;
-;; Revision 1.214  2009/12/03 20:23:40  rubikitch
-;; `anything-enable-digit-shortcuts' also accepts 'alphabet.
-;;
-;; Now alphabet shortcuts are usable.
-;;
-;; Revision 1.213  2009/12/03 09:59:58  rubikitch
-;; refactoring
-;;
-;; Revision 1.212  2009/11/15 09:42:15  rubikitch
-;; refactoring
-;;
-;; Revision 1.211  2009/11/06 21:42:58  rubikitch
-;; New command: `anything-beginning-of-buffer', `anything-end-of-buffer'
-;;
-;; Revision 1.210  2009/10/22 13:30:06  rubikitch
-;; `real-to-display' function is evaluated just after `candidate-transformer' function now.
-;; This enables us to narrow candidates by display string by `real-to-display'.
-;;
-;; Revision 1.209  2009/10/21 20:25:10  rubikitch
-;; Add a document. (no code change)
-;;
-;; Revision 1.208  2009/10/21 11:31:15  rubikitch
-;; `anything': accept one source alist
-;;
-;; Revision 1.207  2009/10/16 19:47:39  rubikitch
-;; Link to Japanese translation of `anything-sources' attributes. (No code change)
-;;
-;; Revision 1.206  2009/10/10 09:28:54  rubikitch
-;; Remove an unnecessary test
-;;
-;; Revision 1.205  2009/10/10 06:21:28  rubikitch
-;; obsolete: `anything-c-marked-candidate-list'
-;; New function: `anything-marked-candidates'
-;;
-;; Revision 1.204  2009/10/06 21:01:12  rubikitch
-;; Call `anything-process-delayed-sources' only if delayed-sources is available.
-;;
-;; Revision 1.203  2009/10/02 10:04:07  rubikitch
-;; Tested on Emacs23 too. (no code change)
-;;
-;; Revision 1.202  2009/10/02 10:03:34  rubikitch
-;; * Display "no candidates" rather than assertion
-;; * Ensure to call `remove-hook' in `anything-current-buffer'
-;;
-;; Revision 1.201  2009/08/08 13:25:30  rubikitch
-;; `anything-toggle-visible-mark': move next line after unmarking
-;;
-;; Revision 1.200  2009/08/08 13:23:46  rubikitch
-;; `anything-toggle-visible-mark': Applied ThierryVolpiatto's patch. thx.
-;;
-;; Revision 1.199  2009/07/19 13:22:29  rubikitch
-;; `anything-follow-execute-persistent-action-maybe': execute persistent action after `anything-input-idle-delay'
-;;
-;; Revision 1.198  2009/07/06 15:22:48  rubikitch
-;; header modified (no code change)
-;;
-;; Revision 1.197  2009/06/29 15:10:13  rubikitch
-;; OOPS! remove debug code
-;;
-;; Revision 1.196  2009/06/29 13:29:25  rubikitch
-;; anything-follow-mode: automatical execution of persistent-action (C-c C-f)
-;;
-;; Revision 1.195  2009/06/19 14:42:57  rubikitch
-;; silence byte compiler
-;;
-;; Revision 1.194  2009/06/14 15:12:34  rubikitch
-;; typo
-;;
-;; Revision 1.193  2009/06/08 19:37:12  rubikitch
-;; typo!
-;;
-;; Revision 1.192  2009/06/08 19:36:39  rubikitch
-;; New keybind: C-e, C-j, C-k
-;;
-;; Revision 1.191  2009/06/08 19:30:27  rubikitch
-;; New command: `anything-select-2nd-action-or-end-of-line'
-;;
-;; Revision 1.190  2009/06/07 17:09:50  rubikitch
-;; add M-<next>, C-M-S-v, M-<prior> to `anything-map'.
-;;
-;; Revision 1.189  2009/06/01 21:36:31  rubikitch
-;; New function: `anything-other-buffer'
-;;
-;; Revision 1.188  2009/05/29 18:33:07  rubikitch
-;; avoid error when executing (anything-mark-current-line) in async process.
-;;
-;; Revision 1.187  2009/05/29 06:49:05  rubikitch
-;; small refactoring
-;;
-;; Revision 1.186  2009/05/29 06:46:34  rubikitch
-;; Prevent `anything-isearch-map' from overwriting `global-map'. With
-;; `copy-keymap', the prefix command "M-s" in `global-map' ends up
-;; getting clobbered by `anything-isearch-again', preventing `occur'
-;; (among other things) from running. This change replaces overwriting a
-;; copied map with writing to a sparse map whose parent is `global-map'.
-;;
-;; patched by DanielHackney. thanks!
-;;
-;; Revision 1.185  2009/05/25 19:07:42  rubikitch
-;; `anything': set `case-fold-search' to t
-;; Because users can assign commands to capital letter keys.
-;;
-;; Revision 1.184  2009/05/25 19:05:04  rubikitch
-;; Added auto-document
-;;
-;; Revision 1.183  2009/05/15 01:50:46  rubikitch
-;; typo
-;;
-;; Revision 1.182  2009/05/08 18:28:18  rubikitch
-;; Bug fix: `anything-attr' is usable in `header-name' function.
-;;
-;; Revision 1.181  2009/05/04 19:05:03  rubikitch
-;; * `anything-yank-selection' and `anything-kill-selection-and-quit' handles display string now.
-;; * `anything-get-selection': Added optional arguments.
-;;
-;; Revision 1.180  2009/05/03 19:03:34  rubikitch
-;; Add `anything-input' to `minibuffer-history' even if `anything' is quit.
-;;
-;; Revision 1.179  2009/04/20 16:35:44  rubikitch
-;; New keybindings in anything-map:
-;;   C-c C-d: `anything-delete-current-selection'
-;;   C-c C-y: `anything-yank-selection'
-;;   C-c C-k: `anything-kill-selection-and-quit'
-;;
-;; Revision 1.178  2009/04/20 16:18:58  rubikitch
-;; New variable: `anything-display-function'
-;;
-;; Revision 1.177  2009/04/20 02:17:16  rubikitch
-;; New commands: `anything-yank-selection', `anything-kill-selection-and-quit'
-;;
-;; Revision 1.176  2009/04/08 14:48:15  rubikitch
-;; bug fix in `anything-candidate-buffer'
-;;
-;; Revision 1.175  2009/03/22 19:10:37  rubikitch
-;; New Variable: `anything-scroll-amount' (thx. ThierryVolpiatto)
-;;
-;; Revision 1.174  2009/03/12 19:12:24  rubikitch
-;; New API: `define-anything-type-attribute'
-;;
-;; Revision 1.173  2009/03/11 08:10:32  rubikitch
-;; Update doc
-;;
-;; Revision 1.172  2009/03/10 17:11:58  rubikitch
-;; `candidate-transformer', `filtered-candidate-transformer',
-;; `action-transformer' attributes: accept a list of functions
-;;
-;; Revision 1.171  2009/03/09 18:49:44  rubikitch
-;; New command: `anything-quit-and-find-file'
-;;
-;; Revision 1.170  2009/03/09 18:46:11  rubikitch
-;; New API: `anything-run-after-quit'
-;;
-;; Revision 1.169  2009/03/09 10:02:49  rubikitch
-;; Set candidate-number-limit attribute for actions.
-;;
-;; Revision 1.168  2009/03/07 21:01:10  rubikitch
-;; Bug workaround
-;;
-;; Revision 1.167  2009/03/06 04:13:42  rubikitch
-;; Fix doc
-;;
-;; Revision 1.166  2009/03/03 10:35:57  rubikitch
-;; Set default `anything-input-idle-delay' to 0.1
-;;
-;; Revision 1.165  2009/03/03 07:14:42  rubikitch
-;; Make sure to run `anything-update-hook' after processing delayed sources.
-;;
-;; Revision 1.164  2009/03/02 01:51:40  rubikitch
-;; better error handling.
-;;
-;; Revision 1.163  2009/03/01 05:15:00  rubikitch
-;; anything-iswitchb and anything-isearch are marked as unmaintained.
-;; (document change only)
-;;
-;; Revision 1.162  2009/02/28 01:24:13  rubikitch
-;; Symbols are now acceptable as candidate.
-;;
-;; Revision 1.161  2009/02/27 07:18:46  rubikitch
-;; Fix bug of `anything-scroll-other-window' and `anything-scroll-other-window-down'.
-;;
-;; Revision 1.160  2009/02/27 01:05:06  rubikitch
-;; * Make sure to restore point after running `anything-update-hook'.
-;; * Make `anything-compute-matches' easy to find error.
-;;
-;; Revision 1.159  2009/02/26 23:45:48  rubikitch
-;; * Check whether candidate is a string, otherwise ignore.
-;;
-;; Revision 1.158  2009/02/24 06:39:20  rubikitch
-;; suppress compile warnings.
-;;
-;; Revision 1.157  2009/02/23 22:51:43  rubikitch
-;; New function: `anything-document-attribute'
-;;
-;; Revision 1.156  2009/02/23 21:36:09  rubikitch
-;; New Variable: `anything-display-source-at-screen-top'
-;;
-;; Revision 1.155  2009/02/23 21:30:52  rubikitch
-;; New command: `anything-at-point'
-;;
-;; Revision 1.154  2009/02/23 08:57:54  rubikitch
-;; Visible Mark
-;;
-;; Revision 1.153  2009/02/23 08:38:57  rubikitch
-;; update doc
-;;
-;; Revision 1.152  2009/02/23 08:32:17  rubikitch
-;; More key bindings.
-;;
-;; Revision 1.151  2009/02/23 08:21:24  rubikitch
-;; `anything-map' is now Emacs-standard key bindings by default.
-;; After evaluating `anything-iswitchb-setup'. some key bindings are adjusted to iswitchb.
-;;
-;; Revision 1.150  2009/02/20 22:58:18  rubikitch
-;; Cancel timer in `anything-cleanup'.
-;;
-;; Revision 1.149  2009/02/20 12:23:44  rubikitch
-;; `anything-header' face now inherits header-line (not a copy).
-;;
-;; Revision 1.148  2009/02/16 23:40:22  rubikitch
-;; `real-to-display' attribute bug fix.
-;;
-;; Revision 1.147  2009/02/02 20:51:41  rubikitch
-;; New `anything-sources' attribute: real-to-display
-;;
-;; Revision 1.146  2009/02/01 20:01:00  rubikitch
-;; Update Tips
-;;
-;; Revision 1.145  2009/02/01 19:45:53  rubikitch
-;; New variable: `anything-quit-if-no-candidate'
-;;
-;; Revision 1.144  2009/02/01 19:31:47  rubikitch
-;; fixed a typo
-;;
-;; Revision 1.143  2009/02/01 19:23:32  rubikitch
-;; New variable: `anything-execute-action-at-once-if-one'
-;;
-;; Revision 1.142  2009/02/01 19:12:34  rubikitch
-;; `anything-persistent-action-display-buffer': bug fix
-;;
-;; Revision 1.141  2009/02/01 18:25:25  rubikitch
-;; * fix docstring
-;; * New variable: `anything-selection-face'
-;;
-;; Revision 1.140  2009/01/16 16:36:25  rubikitch
-;; New variable: `anything-persistent-action-use-special-display'.
-;;
-;; Revision 1.139  2009/01/05 20:15:53  rubikitch
-;; Fixed a bug of anything action buffer.
-;; The action source should not be cached.
-;;
-;; Revision 1.138  2008/12/21 16:56:05  rubikitch
-;; Fixed an error when action attribute is a function symbol and press TAB,
-;;
-;; Revision 1.137  2008/12/20 19:38:47  rubikitch
-;; `anything-check-minibuffer-input-1': proper quit handling
-;; `anything-process-delayed-sources': ditto
-;;
-;; Revision 1.136  2008/10/27 17:41:27  rubikitch
-;; `anything-process-delayed-sources', `anything-check-minibuffer-input-1': quittable
-;;
-;; Revision 1.135  2008/10/27 17:04:25  rubikitch
-;; arranged source, added more linkd tags (no code change)
-;;
-;; Revision 1.134  2008/10/27 15:02:25  rubikitch
-;; New variable: `anything-save-configuration-functions'
-;; Delete variable: `anything-save-configuration-type'
-;;
-;; Revision 1.133  2008/10/27 11:16:13  rubikitch
-;; New variable: `anything-save-configuration-type'
-;;
-;; Revision 1.132  2008/10/26 22:34:59  rubikitch
-;; `anything-delete-current-selection' with multiline
-;;
-;; Revision 1.131  2008/10/26 21:44:43  rubikitch
-;; New command: `anything-delete-current-selection'
-;;
-;; Revision 1.130  2008/10/22 10:41:09  rubikitch
-;; `anything-insert-match': do not override 'anything-realvalue property
-;;
-;; Revision 1.129  2008/10/21 17:01:37  rubikitch
-;; `anything-resume' per buffer.
-;; `anything-last-sources': obsolete
-;;
-;; Revision 1.128  2008/10/20 06:27:54  rubikitch
-;; `anything-quick-update': new user option
-;;
-;; Revision 1.127  2008/10/20 05:47:49  rubikitch
-;; refactoring
-;;
-;; Revision 1.126  2008/10/20 03:47:58  rubikitch
-;; `anything-update': reversed order of delayed sources
-;;
-;; Revision 1.125  2008/10/19 00:29:54  rubikitch
-;; kill buffer-local candidate buffers when creating global candidate buffers.
-;;
-;; Revision 1.124  2008/10/18 13:04:20  rubikitch
-;; Remove tick entry from `anything-tick-hash' when killing a buffer.
-;;
-;; Revision 1.123  2008/10/18 10:23:36  rubikitch
-;; multiline patch by Tomohiro MATSUYAMA.
-;;
-;; Revision 1.122  2008/10/13 03:10:07  rubikitch
-;; `anything': do `anything-mark-current-line' when resuming
-;;
-;; Revision 1.121  2008/10/13 03:08:08  rubikitch
-;; always set `anything-current-position'
-;;
-;; Revision 1.120  2008/10/07 14:12:02  rubikitch
-;; `anything-execute-persistent-action': optional arg
-;;
-;; Revision 1.119  2008/10/06 06:43:29  rubikitch
-;; `anything-candidate-buffer': return nil when the buffer is dead
-;;
-;; Revision 1.118  2008/09/30 22:21:28  rubikitch
-;; New `anything-sources' attribute: accept-empty
-;; dummy: include accept-empty
-;;
-;; Revision 1.117  2008/09/30 21:59:10  rubikitch
-;; New function: `anything-buffer-is-modified'
-;;
-;; Revision 1.116  2008/09/22 11:27:29  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.115  2008/09/20 20:21:11  rubikitch
-;; added linkd index. (no code change)
-;;
-;; Revision 1.114  2008/09/20 20:09:57  rubikitch
-;; INCOMPATIBLE CHANGES: `anything-attr'
-;; New functions: `anything-attrset', `anything-attr-defined'
-;;
-;; Revision 1.113  2008/09/14 15:15:32  rubikitch
-;; bugfix: volatile and match attribute / process and match attribute
-;;
-;; Revision 1.112  2008/09/12 01:57:17  rubikitch
-;; When resuming anything, reinitialize overlays.
-;;
-;; Revision 1.111  2008/09/10 22:53:11  rubikitch
-;; anything: bug fix of `anything-buffer'
-;; New macro: `anything-test-update'
-;;
-;; Revision 1.110  2008/09/10 22:17:11  rubikitch
-;; New `anything-sources' attribute: header-name
-;;
-;; Revision 1.109  2008/09/10 21:12:26  rubikitch
-;; New hook: `anything-after-action-hook'
-;;
-;; Revision 1.108  2008/09/06 06:07:56  rubikitch
-;; Extended `anything-set-sources' optional arguments.
-;;
-;; Revision 1.107  2008/09/05 03:14:35  rubikitch
-;; reimplement `anything-current-buffer-is-modified' in the right way
-;;
-;; Revision 1.106  2008/09/05 00:11:05  rubikitch
-;; Moved `anything-read-string-mode' and read functions to anything-complete.el.
-;;
-;; Revision 1.105  2008/09/04 12:45:06  rubikitch
-;; New hook: `anything-after-persistent-action-hook'
-;;
-;; Revision 1.104  2008/09/04 12:27:05  rubikitch
-;; `anything': prefixed optional arguments
-;;
-;; Revision 1.103  2008/09/04 09:16:28  rubikitch
-;; fixed a bug of `anything-read-file-name'.
-;;
-;; Revision 1.102  2008/09/03 11:25:19  rubikitch
-;; Extended `anything' optional arguments: buffer
-;;
-;; Revision 1.101  2008/09/03 11:15:13  rubikitch
-;; `anything': return nil when keybord-quitted
-;;
-;; Revision 1.100  2008/09/01 23:11:02  rubikitch
-;; bug fix of search-from-end
-;;
-;; Revision 1.99  2008/09/01 13:45:55  rubikitch
-;; bug fix of search-from-end
-;;
-;; Revision 1.98  2008/09/01 11:23:38  rubikitch
-;; New `anything-sources' attribute: search-from-end
-;;
-;; Revision 1.97  2008/09/01 00:44:34  rubikitch
-;; Make sure to display the other window when persistent action.
-;;
-;; Revision 1.96  2008/08/31 20:55:20  rubikitch
-;; define `buffer-modified-tick' for older emacs.
-;;
-;; Revision 1.95  2008/08/30 04:55:51  rubikitch
-;; fixed a bug of `anything-completing-read'
-;;
-;; Revision 1.94  2008/08/28 20:18:03  rubikitch
-;; added some tests
-;;
-;; Revision 1.93  2008/08/25 20:18:46  rubikitch
-;; `anything': set `anything-input' and `anything-pattern' before `anything-update'
-;;
-;; Revision 1.92  2008/08/24 22:38:46  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.91  2008/08/24 21:34:35  rubikitch
-;; rewrite `with-anything-restore-variables'
-;;
-;; Revision 1.90  2008/08/24 20:33:02  rubikitch
-;; prevent the unit test from byte-compiled.
-;; macro bug fix.
-;;
-;; Revision 1.89  2008/08/24 08:35:27  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.88  2008/08/24 08:22:19  rubikitch
-;; Rename `anything-candidates-buffer' -> `anything-candidate-buffer'
-;;
-;; Revision 1.87  2008/08/23 22:27:04  rubikitch
-;; New hook: `anything-cleanup-hook'
-;;
-;; Revision 1.86  2008/08/23 22:05:42  rubikitch
-;; `anything-original-source-filter' is removed.
-;; Now use `anything-restored-variables' and `with-anything-restore-variables'.
-;;
-;; Revision 1.85  2008/08/23 21:23:21  rubikitch
-;; inhibit-read-only = t in anything-buffer
-;;
-;; Revision 1.84  2008/08/23 21:18:33  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.83  2008/08/23 20:44:20  rubikitch
-;; `anything-execute-persistent-action': display-to-real bug fix
-;;
-;; Revision 1.82  2008/08/23 20:19:12  rubikitch
-;; New `anything-sources' attribute: get-line
-;;
-;; Revision 1.81  2008/08/23 19:32:14  rubikitch
-;; `anything-attr': Return t in (attribute-name) case.
-;;
-;; Revision 1.80  2008/08/22 21:25:05  rubikitch
-;; anything-candidates-in-buffer-1:
-;; Open a line at the BOB to make use of `search-forward' for faster exact/prefix match.
-;; Of course, restore the buffer contents after search.
-;;
-;; Revision 1.79  2008/08/22 17:11:00  rubikitch
-;; New hook: `anything-before-initialize-hook', `anything-after-initialize-hook'
-;;
-;; Revision 1.78  2008/08/21 18:37:03  rubikitch
-;; Implemented dummy sources as plug-in.
-;;
-;; Revision 1.77  2008/08/21 17:40:40  rubikitch
-;; New function: `anything-set-sources'
-;;
-;; Revision 1.76  2008/08/21 12:25:02  rubikitch
-;; New variable: `anything-version'
-;;
-;; Revision 1.75  2008/08/21 12:13:46  rubikitch
-;; New variable: `anything-in-persistent-action'
-;;
-;; Revision 1.74  2008/08/21 10:34:22  rubikitch
-;; New function `anything-mklist'
-;;
-;; Revision 1.73  2008/08/21 09:41:38  rubikitch
-;; accept multiple init/cleanup functions so that plug-ins can add new function.
-;;
-;; Revision 1.72  2008/08/20 22:51:53  rubikitch
-;; New `anything-sources' attribute: candidate-number-limit
-;;
-;; Revision 1.71  2008/08/20 21:45:42  rubikitch
-;; added many tests.
-;;
-;; Revision 1.70  2008/08/20 18:51:45  rubikitch
-;; `anything-preselect' bug fix.
-;; refactoring.
-;;
-;; Revision 1.69  2008/08/20 17:57:51  rubikitch
-;; Extended `anything' optional arguments: preselect
-;;
-;; Revision 1.68  2008/08/20 16:39:07  rubikitch
-;; Nested `anything' invocation support, ie. `anything' can be invoked by anything action.
-;;
-;; (anything '(((name . "nested anything invocation test")
-;;              (candidates "anything-c-source-buffers" "anything-c-source-man-pages")
-;;              (display-to-real . intern)
-;;              (action . anything))))
-;;
-;; Revision 1.67  2008/08/20 00:08:28  rubikitch
-;; `anything-candidates-in-buffer-1': add code when pattern == ""
-;;
-;; Revision 1.66  2008/08/19 23:31:52  rubikitch
-;; Removed `anything-show-exact-match-first' because it should be provided as a plug-in.
-;;
-;; Revision 1.65  2008/08/19 23:18:47  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.64  2008/08/19 23:15:43  rubikitch
-;; `anything-compute-matches': short-cut when match == '(identity)
-;;
-;; Revision 1.63  2008/08/19 23:06:42  rubikitch
-;; Use hash table to speed uniquify candidates.
-;;
-;; Revision 1.62  2008/08/19 22:40:57  rubikitch
-;; `anything-test-candidates': additional optonal argument
-;;
-;; Revision 1.61  2008/08/19 18:13:39  rubikitch
-;; search attribute: multiple search functions
-;;
-;; Revision 1.60  2008/08/19 15:07:39  rubikitch
-;; New function: `anything-attr'
-;;
-;; Revision 1.59  2008/08/19 15:01:59  rubikitch
-;; arranged code
-;; added unit tests
-;; update doc
-;;
-;; Revision 1.58  2008/08/19 13:40:52  rubikitch
-;; `anything-get-current-source': This function can be used in
-;;  init/candidates/action/candidate-transformer/filtered-candidate-transformer
-;;  display-to-real/cleanup function.
-;;
-;; Revision 1.57  2008/08/19 03:43:57  rubikitch
-;; `anything-process-delayed-sources': delay = anything-idle-delay - anything-input-idle-delay
-;;
-;; Revision 1.56  2008/08/18 06:37:51  rubikitch
-;; Make `anything-input-idle-delay' ineffective when the action list is shown.
-;;
-;; Revision 1.55  2008/08/18 06:35:00  rubikitch
-;; New variable: `anything-show-exact-match-first'
-;;
-;; Revision 1.54  2008/08/17 23:22:24  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.53  2008/08/17 23:15:38  rubikitch
-;; bind `anything-source-name' when executing action to enable to use `anything-candidate-buffer' in action.
-;;
-;; Revision 1.52  2008/08/17 15:21:27  rubikitch
-;; `anything-test-candidates': accept a symbol for source
-;; New variable: `anything-input-idle-delay'
-;;
-;; Revision 1.51  2008/08/17 12:45:30  rubikitch
-;; (buffer-disable-undo) in anything-buffer
-;;
-;; Revision 1.50  2008/08/16 22:21:37  rubikitch
-;; `anything-saved-sources': removed
-;; `anything-action-buffer': action selection buffer
-;; `anything-select-action': toggle actions <=> candidates
-;;
-;; Revision 1.49  2008/08/16 19:46:11  rubikitch
-;; New function: `anything-action-list-is-shown'
-;;
-;; Revision 1.48  2008/08/16 17:03:02  rubikitch
-;; bugfix: cleanup
-;;
-;; Revision 1.47  2008/08/16 16:35:24  rubikitch
-;; silence byte compiler
-;;
-;; Revision 1.46  2008/08/16 14:51:27  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.45  2008/08/16 11:27:59  rubikitch
-;; refactoring
-;;  `anything-aif': Anaphoric if.
-;;  `anything-compile-source-functions': make `anything-get-sources' customizable.
-;;
-;; Revision 1.44  2008/08/16 09:38:15  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.43  2008/08/15 11:44:28  rubikitch
-;; `anything-read-string-mode': minor mode for `anything' version of read functions. (experimental)
-;;
-;; Revision 1.42  2008/08/15 11:03:20  rubikitch
-;; update docs
-;;
-;; Revision 1.41  2008/08/14 20:51:28  rubikitch
-;; New `anything-sources' attribute: cleanup
-;;
-;; Revision 1.40  2008/08/14 10:34:04  rubikitch
-;; `anything': SOURCES: accept symbols
-;;
-;; Revision 1.39  2008/08/10 22:46:01  rubikitch
-;; `anything-move-selection': avoid infinite loop
-;;
-;; Revision 1.38  2008/08/09 21:38:25  rubikitch
-;; `anything-read-file-name': experimental implementation.
-;;
-;; Revision 1.37  2008/08/09 17:54:25  rubikitch
-;; action test
-;;
-;; Revision 1.36  2008/08/09 17:13:00  rubikitch
-;; fixed test
-;;
-;; Revision 1.35  2008/08/09 10:43:08  rubikitch
-;; New `anything-sources' attribute: display-to-real
-;;
-;; Revision 1.34  2008/08/07 13:15:44  rubikitch
-;; New `anything-sources' attribute: search
-;;
-;; Revision 1.33  2008/08/05 23:14:20  rubikitch
-;; `anything-candidate-buffer': bugfix
-;;
-;; Revision 1.32  2008/08/05 21:42:15  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.31  2008/08/05 21:06:23  rubikitch
-;; `anything-candidate-buffer': candidates buffer registration
-;;
-;; Revision 1.30  2008/08/05 19:46:36  rubikitch
-;; New `anything-sources' attribute: candidates-in-buffer
-;;
-;; Revision 1.29  2008/08/05 17:58:31  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.28  2008/08/05 17:46:04  rubikitch
-;; memoized `anything-get-sources'
-;;
-;; Revision 1.27  2008/08/05 17:29:40  rubikitch
-;; update doc
-;;
-;; Revision 1.26  2008/08/05 08:35:45  rubikitch
-;; `anything-completing-read': accept obarray
-;;
-;; Revision 1.25  2008/08/05 07:26:17  rubikitch
-;; `anything-completing-read': guard from non-string return value
-;;
-;; Revision 1.24  2008/08/04 12:05:41  rubikitch
-;; Wrote Tips and some docstrings.
-;; `anything-candidate-buffer': buffer-local by default
-;;
-;; Revision 1.23  2008/08/04 05:29:46  rubikitch
-;; `anything-buffer-file-name': `buffer-file-name' when `anything' is invoked.
-;;
-;; Revision 1.22  2008/08/04 00:10:13  rubikitch
-;; `anything-candidate-buffer': new API
-;;
-;; Revision 1.21  2008/08/03 22:05:08  rubikitch
-;; `anything-candidate-buffer': Return a buffer containing candidates of current source.
-;;
-;; Revision 1.20  2008/08/03 20:47:56  rubikitch
-;; `anything-current-buffer-is-modified': modify checker
-;;
-;; Revision 1.19  2008/08/03 19:06:18  rubikitch
-;; `anything-candidates-in-buffer': use `with-current-buffer' instead.
-;;
-;; Revision 1.18  2008/08/03 05:55:01  rubikitch
-;; `anything-candidates-in-buffer': extract candidates in a buffer for speed.
-;;
-;; Revision 1.17  2008/08/02 21:31:29  rubikitch
-;; Extended `anything' optional arguments.
-;; `anything-completing-read': experimental implementation.
-;;
-;; Revision 1.16  2008/08/02 20:32:54  rubikitch
-;; Extended `anything' optional arguments.
-;;
-;; Revision 1.15  2008/08/02 16:53:40  rubikitch
-;; Fixed a small bug of `anything-test-candidates'.
-;;
-;; Revision 1.14  2008/08/02 16:48:29  rubikitch
-;; Refactored to testable code.
-;; Added many candidate tests with `anything-test-candidates'.
-;;
-;; Revision 1.13  2008/08/02 15:08:14  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.12  2008/08/02 14:29:31  rubikitch
-;; `anything-sources' accepts symbols. (patched by Sugawara)
-;;
-;; Revision 1.11  2008/08/02 10:20:36  rubikitch
-;; `anything-resume' is usable with other (let-binded) `anything-sources'.
-;;
-;; Revision 1.10  2008/08/01 19:44:01  rubikitch
-;; `anything-resume': resurrect previously invoked `anything'.
-;;
-;; Revision 1.9  2008/07/30 15:44:49  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.8  2008/07/30 15:38:51  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.7  2008/07/30 15:21:48  rubikitch
-;; `anything-scroll-other-window', `anything-scroll-other-window-down':
-;; Scroll other window (for persistent action).
-;;
-;; Revision 1.6  2008/07/30 15:12:36  rubikitch
-;; *** empty log message ***
-;;
-;; Revision 1.5  2008/07/30 15:06:32  rubikitch
-;; `anything-select-2nd-action', `anything-select-3rd-action', `anything-select-4th-action':
-;; Select other than default action without pressing Tab.
-;;
-;; Revision 1.4  2008/07/30 14:58:27  rubikitch
-;; `anything-current-buffer': Store current buffer when `anything' is invoked.
-;; `anything-current-position': Restore position when keyboard-quitted.
-;;
-;; Revision 1.3  2008/07/30 14:38:04  rubikitch
-;; Implemented persistent action.
-;;
-;; Revision 1.2  2008/07/30 13:37:16  rubikitch
-;; Update doc.
-;;
-;; Revision 1.1  2008/07/30 13:22:06  rubikitch
-;; New maintainer.
-;;
+;;  Change log of this project is found at
+;;  http://repo.or.cz/w/anything-config.git?a=shortlog
 
-;; ugly hack to auto-update version
-(defvar anything-version nil)
-(setq anything-version "$Id: anything.el,v 1.280 2010-04-01 02:22:22 rubikitch Exp $")
 (require 'cl)
 ;; (require 'anything-match-plugin nil t)
 
@@ -1440,6 +532,9 @@ Attributes:
   common attributes with a `file' type.")
 
 
+(defvaralias 'anything-enable-digit-shortcuts 'anything-enable-shortcuts
+  "Alphabet shortcuts are usable now. Then `anything-enable-digit-shortcuts' should be renamed.
+`anything-enable-digit-shortcuts' is retained for compatibility.")
 (defvar anything-enable-shortcuts nil
   "*Whether to use digit/alphabet shortcut to select the first nine matches.
 If t then they can be selected using Ctrl+<number>.
@@ -1455,10 +550,6 @@ If 'alphabet then they can be selected using Shift+<alphabet> (deprecated).
 It is not recommended because you cannot input capital letters in pattern.
 
 Keys (digit/alphabet) are listed in `anything-shortcut-keys-alist'.")
-
-(defvaralias 'anything-enable-digit-shortcuts 'anything-enable-shortcuts
-  "Alphabet shortcuts are usable now. Then `anything-enable-digit-shortcuts' should be renamed.
-`anything-enable-digit-shortcuts' is retained for compatibility.")
 
 (defvar anything-shortcut-keys-alist
   '((alphabet . "asdfghjklzxcvbnmqwertyuiop")
@@ -1801,11 +892,16 @@ To enable fitting, set both `anything-inhibit-fit-frame-flag' and
   "If non-nil, add anything-source text-property in each candidate.
 experimental feature.")
 
+(defvaralias 'anything-debug-variables 'anything-debug-forms)
 (defvar anything-debug-forms nil
   "Forms to show in `anything-debug-output'.
 Otherwise all variables started with `anything-' are shown.
 It is useful for debug.")
-(defvaralias 'anything-debug-variables 'anything-debug-forms)
+
+(defvar anything-debug nil
+  "If non-nil, write log message into *Anything Log* buffer.
+If `debug-on-error' is non-nil, write log message regardless of this variable.
+It is disabled by default because *Anything Log* grows quickly.")
 
 ;; (@* "Internal Variables")
 (defvar anything-test-candidate-list nil)
@@ -1822,6 +918,47 @@ It is useful for debug.")
 (defvar anything-follow-mode nil)
 (defvar anything-let-variables nil)
 
+;; (@* "Utility: logging")
+(defun anything-log (format-string &rest args)
+  "Log message if `debug-on-error' or `anything-debug' is non-nil.
+Messages are written to the *Anythingn Log* buffer.
+Arguments are same as `format'."
+  (when (or debug-on-error anything-debug)
+    (with-current-buffer (get-buffer-create "*Anything Log*")
+      (buffer-disable-undo)
+      (set (make-local-variable 'inhibit-read-only) t)
+      (goto-char (point-max))
+      (insert (let ((tm (current-time)))
+                (format "%s.%06d (%s) %s\n"
+                        (format-time-string "%H:%M:%S" tm)
+                        (nth 2 tm)
+                        (anything-log-get-current-function)
+                        (apply #'format (cons format-string args))))))))
+(defmacro anything-log-eval (&rest exprs)
+  "Write each EXPR evaluation result to the *Anything Log* buffer."
+  `(anything-log-eval-internal ',exprs))
+(defun anything-log-run-hook (hook)
+  (anything-log "executing %s" hook)
+  (when (boundp hook)
+    (anything-log-eval (symbol-value hook))
+    (anything-log-eval (default-value hook)))
+  (run-hooks hook)
+  (anything-log "executed %s" hook))
+(defun anything-log-eval-internal (exprs)
+  (mapc (lambda (expr) (anything-log "%S = %S" expr (eval expr))) exprs))
+(defun anything-log-get-current-function ()
+  "Get function name calling `anything-log'.
+The original idea is from `tramp-debug-message'."
+  (loop for btn from 1 to 40            ;avoid inf-loop
+        for btf = (second (backtrace-frame btn))
+        for fn  = (if (symbolp btf) (symbol-name btf) "")
+        do (when (and (string-match "^anything" fn)
+                      (not (string-match "^anything-\\(?:interpret\\|log\\|.*funcall\\)" fn)))
+             (return fn))))
+
+;; (anything-log "test")
+;; (switch-to-buffer-other-window "*Anything Log*")
+
 ;; (@* "Programming Tools")
 (defmacro anything-aif (test-form then-form &rest else-forms)
   "Anaphoric if. Temporary variable `it' is the result of test-form."
@@ -1837,19 +974,15 @@ It is useful for debug.")
 
 ;; (@* "Anything API")
 (defmacro anything-let (varlist &rest body)
-  "Like `let'. Bind anything buffer local variables according to VARLIST then eval BODY."
-  `(progn (setq anything-let-variables (anything-let-eval-varlist ',varlist))
-          (unwind-protect
-              (progn ,@body)
-            (setq anything-let-variables nil))))
+  "[OBSOLETE] Like `let'. Bind anything buffer local variables according to VARLIST then eval BODY."
+  `(anything-let-internal (anything-let-eval-varlist ',varlist)
+                          (lambda () ,@body)))
 (put 'anything-let 'lisp-indent-function 1)
 
 (defmacro anything-let* (varlist &rest body)
-  "Like `let*'. Bind anything buffer local variables according to VARLIST then eval BODY."
-  `(progn (setq anything-let-variables (anything-let*-eval-varlist ',varlist))
-          (unwind-protect
-              (progn ,@body)
-            (setq anything-let-variables nil))))
+  "[OBSOLETE] Like `let*'. Bind anything buffer local variables according to VARLIST then eval BODY."
+  `(anything-let-internal (anything-let*-eval-varlist ',varlist)
+                          (lambda () ,@body)))
 (put 'anything-let* 'lisp-indent-function 1)
 
 (defun anything-buffer-get ()
@@ -1883,9 +1016,11 @@ It is useful for debug.")
          (deferred-action-function 'anything-deferred-action-function)
          (--pre-command-hook-pair (cons pre-command-hook
                                         (default-value 'pre-command-hook))))
+     (anything-log "save variables: %S" --orig-vars)
      (unwind-protect (progn ,@body)
        (loop for (var . value) in --orig-vars
-             do (set var value)))))
+             do (set var value))
+       (anything-log "restore variables"))))
 (put 'with-anything-restore-variables 'lisp-indent-function 0)
 
 (defun* anything-attr (attribute-name &optional (src (anything-get-current-source)))
@@ -1894,6 +1029,12 @@ if SRC is omitted, use current source.
 It is useful to write your sources."
   (anything-aif (assq attribute-name src)
       (cdr it)))
+
+(defun* anything-attr* (attribute-name &optional (src (anything-get-current-source)))
+  "Get the value of ATTRIBUTE-NAME of SRC (source) and pass to `anything-interpret-value'.
+if SRC is omitted, use current source.
+It is useful to write your sources."
+  (anything-interpret-value (anything-attr attribute-name src)))
 
 (defun* anything-attr-defined (attribute-name &optional (src (anything-get-current-source)))
   "Return non-nil if ATTRIBUTE-NAME of SRC (source)  is defined.
@@ -1948,6 +1089,7 @@ It is useful to write your sources."
                (loop for name in sources always (stringp name)))
     (error "invalid data in `anything-set-source-filter': %S" sources))
   (setq anything-source-filter sources)
+  (anything-log-eval anything-source-filter)
   (anything-update))
 
 (defun anything-set-sources (sources &optional no-init no-update)
@@ -1957,7 +1099,8 @@ If NO-UPDATE is non-nil, skip executing `anything-update'."
   (with-current-buffer anything-buffer
     (setq anything-compiled-sources nil
           anything-sources sources
-          anything-last-sources-local sources))
+          anything-last-sources-local sources)
+    (anything-log-eval anything-compiled-sources anything-sources))
   (unless no-init (anything-funcall-foreach 'init))
   (unless no-update (anything-update)))
 
@@ -1986,8 +1129,10 @@ Attributes:
    (anything-compiled-sources)
    ;; first time
    (t
-    (setq anything-compiled-sources
-          (anything-compile-sources anything-sources anything-compile-source-functions)))))
+    (prog1
+        (setq anything-compiled-sources
+              (anything-compile-sources anything-sources anything-compile-source-functions))
+      (anything-log-eval anything-compiled-sources)))))
 
 (defun* anything-get-selection (&optional (buffer nil buffer-s) (force-display-part))
   "Return the currently selected item or nil.
@@ -2010,6 +1155,7 @@ If FORCE-DISPLAY-PART is non-nil, return the display string."
                        (anything-funcall-with-source source it disp)
                      disp)))))
         (unless (equal selection "")
+          (anything-log-eval selection)
           selection)))))
 
 (defun anything-get-action ()
@@ -2060,9 +1206,11 @@ If FORCE-DISPLAY-PART is non-nil, return the display string."
                      "/"
                      (anything-attr 'name)))
          (source-tick (or (gethash key anything-tick-hash) 0))
-         (buffer-tick (buffer-chars-modified-tick b)))
-    (prog1 (/= source-tick buffer-tick)
-      (puthash key buffer-tick anything-tick-hash))))
+         (buffer-tick (buffer-chars-modified-tick b))
+         (modifiedp (/= source-tick buffer-tick)))
+    (puthash key buffer-tick anything-tick-hash)
+    (anything-log-eval buffer modifiedp)
+    modifiedp))
 (defun anything-current-buffer-is-modified ()
   "Return non-nil when `anything-current-buffer' is modified since `anything' was invoked."
   (anything-buffer-is-modified anything-current-buffer))
@@ -2072,6 +1220,7 @@ If FORCE-DISPLAY-PART is non-nil, return the display string."
   "Perform an action after quitting `anything'.
 The action is to call FUNCTION with arguments ARGS."
   (setq anything-quit t)
+  (anything-log-eval function args)
   (apply 'run-with-idle-timer 0 nil function args)
   (anything-exit-minibuffer))
 
@@ -2084,9 +1233,9 @@ Use this function is better than setting `anything-type-attributes' directly."
   (and doc (anything-document-type-attribute type doc))
   nil)
 
+(defvaralias 'anything-attributes 'anything-additional-attributes)
 (defvar anything-additional-attributes nil
   "List of all `anything' attributes.")
-(defvaralias 'anything-attributes 'anything-additional-attributes)
 (defun anything-document-attribute (attribute short-doc &optional long-doc)
   "Register ATTRIBUTE documentation introduced by plug-in.
 SHORT-DOC is displayed beside attribute name.
@@ -2109,9 +1258,11 @@ This is suitable for anything applications."
                 (string-to-number (substring version 2))))
     (error "Please update anything.el!!
 
-http://www.emacswiki.org/cgi-bin/wiki/download/anything.el
+M-x auto-install-batch anything
 
-or  M-x install-elisp-from-emacswiki anything.el")))
+You must have auto-install.el too.
+http://www.emacswiki.org/cgi-bin/wiki/download/auto-install.el
+")))
 
 (defun anything-interpret-value (value &optional source)
   "interpret VALUE as variable, function or literal.
@@ -2157,6 +1308,12 @@ Otherwise, return VALUE itself."
                            `(setq ,pair nil)))
                        varlist)
              (mapcar (lambda (v) (cons v (symbol-value v))) ',vars)))))
+(defun anything-let-internal (binding bodyfunc)
+  (setq anything-let-variables binding)
+  (unwind-protect
+      (funcall bodyfunc)
+    (setq anything-let-variables nil)))
+
 
 ;; (@* "Core: tools")
 (defun anything-funcall-with-source (source func &rest args)
@@ -2164,6 +1321,7 @@ Otherwise, return VALUE itself."
 FUNC can be function list. Return the result of last function call."
   (let ((anything-source-name (assoc-default 'name source))
         result)
+    (anything-log-eval anything-source-name func args)
     (dolist (func (if (functionp func) (list func) func) result)
       (setq result (apply func args)))))
 
@@ -2226,50 +1384,10 @@ This function allows easy sequencing of transformer functions."
 (defvar anything-buffers nil
   "All of `anything-buffer' in most recently used order.")
 
-;;;###autoload
-(defun anything (&optional any-sources any-input any-prompt any-resume any-preselect any-buffer any-keymap)
-  "Select anything. In Lisp program, some optional arguments can be used.
-
-Note that all the optional arguments are prefixed because of
-dynamic scope problem, IOW argument variables may eat
-already-bound variables. Yuck!
-
-- ANY-SOURCES
-
-  Temporary value of `anything-sources'.  It also accepts a
-  symbol, interpreted as a variable of an anything source.  It
-  also accepts an alist representing an anything source, which is
-  detected by (assq 'name ANY-SOURCES)
-
-
-- ANY-INPUT
-
-  Temporary value of `anything-pattern', ie. initial input of minibuffer.
-
-- ANY-PROMPT
-
-  Prompt other than \"pattern: \".
-
-- ANY-RESUME
-
-  If t, Resurrect previously instance of `anything'. Skip the initialization.
-  If 'noresume, this instance of `anything' cannot be resumed.
-
-- ANY-PRESELECT
-
-  Initially selected candidate. Specified by exact candidate or a regexp.
-  Note that it is not working with delayed sources.
-
-- ANY-BUFFER
-
-  `anything-buffer' instead of *anything*.
-
-- ANY-KEYMAP
-
-  `anything-map' for current `anything' session.
-"
-  ;; TODO more document
-  (interactive)
+(defun anything-internal (&optional any-sources any-input any-prompt any-resume any-preselect any-buffer any-keymap)
+  "Older interface of `anything'. It is called by `anything'."
+  (anything-log "++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  (anything-log-eval any-prompt any-preselect any-buffer any-keymap)
   (condition-case v
       (let ( ;; It is needed because `anything-source-name' is non-nil
             ;; when `anything' is invoked by action. Awful global scope.
@@ -2280,27 +1398,112 @@ already-bound variables. Yuck!
                                  ;; cua-mode ; avoid error when region is selected
                                  )
         (with-anything-restore-variables
-          (anything-frame/window-configuration 'save)
-          (setq anything-sources (anything-normalize-sources any-sources))
-          (anything-initialize-1 any-resume any-input)
-          (anything-hooks 'setup)
+          (anything-initialize-1 any-resume any-input any-sources)
           (anything-display-buffer anything-buffer)
+          (anything-log "show prompt")
           (unwind-protect
               (anything-read-pattern-maybe any-prompt any-input any-preselect any-resume any-keymap)
-            (anything-cleanup)
-            (anything-hooks 'cleanup)
-            (anything-frame/window-configuration 'restore)))
-        (unless anything-quit
-          (anything-execute-selection-action-1)))
+            (anything-cleanup)))
+        (prog1 (unless anything-quit (anything-execute-selection-action-1))
+          (anything-log "end session --------------------------------------------")))
     (quit
      (anything-on-quit)
+     (anything-log "end session (quit) -------------------------------------")
      nil)))
+
+(defconst anything-argument-keys '(:sources :input :prompt :resume :preselect :buffer :keymap))
+;;;###autoload
+(defun anything (&rest plist)
+  "Select anything. In Lisp program, some optional arguments can be used.
+
+PLIST is a list like (:key1 val1 :key2 val2 ...) or
+ (&optional sources input prompt resume preselect buffer keymap).
+
+Basic keywords are the following:
+
+- :sources
+
+  Temporary value of `anything-sources'.  It also accepts a
+  symbol, interpreted as a variable of an anything source.  It
+  also accepts an alist representing an anything source, which is
+  detected by (assq 'name ANY-SOURCES)
+
+- :input
+
+  Temporary value of `anything-pattern', ie. initial input of minibuffer.
+
+- :prompt
+
+  Prompt other than \"pattern: \".
+
+- :resume
+
+  If t, Resurrect previously instance of `anything'. Skip the initialization.
+  If 'noresume, this instance of `anything' cannot be resumed.
+
+- :preselect
+
+  Initially selected candidate. Specified by exact candidate or a regexp.
+  Note that it is not working with delayed sources.
+
+- :buffer
+
+  `anything-buffer' instead of *anything*.
+
+- :keymap
+
+  `anything-map' for current `anything' session.
+
+
+Of course, conventional arguments are supported, the two are same.
+
+ (anything :sources sources :input input :prompt prompt :resume resume
+           :preselect preselect :buffer buffer :keymap keymap)
+ (anything sources input prompt resume preselect buffer keymap)
+           
+
+Other keywords are interpreted as local variables of this anything session.
+The `anything-' prefix can be omitted. For example,
+
+ (anything :sources 'anything-c-source-buffers
+           :buffer \"*buffers*\" :candidate-number-limit 10)
+
+means starting anything session with `anything-c-source-buffers'
+source in *buffers* buffer and set
+`anything-candidate-number-limit' to 10 as session local variable. "
+  (interactive)
+  (if (keywordp (car plist))
+      (anything-let-internal
+       (anything-parse-keys plist)
+       (lambda ()
+         (apply 'anything
+                (mapcar (lambda (key) (plist-get plist key))
+                        anything-argument-keys))))
+    (apply 'anything-internal plist)))
+
+(defun anything-parse-keys (keys)
+  (loop for (key value &rest _) on keys by #'cddr
+        for symname = (substring (symbol-name key) 1)
+        for sym = (intern (if (string-match "^anything-" symname)
+                              symname
+                            (concat "anything-" symname)))
+        unless (memq key anything-argument-keys)
+        collect (cons sym value)))
 
 (defun anything-resume-p (any-resume)
   "Whethre current anything session is resumed or not."
   (memq any-resume '(t window-only)))
 
-(defun anything-initialize-1 (any-resume any-input)
+(defun anything-initialize-1 (any-resume any-input any-sources)
+  "The real initialization of `anything'.
+
+This function name should be `anything-initialize', but anything
+extensions may advice `anything-initalize'. I cannot rename, sigh."
+  (anything-log "start initialization: any-resume=%S any-input=%S" any-resume any-input)
+  (anything-frame/window-configuration 'save)
+  (setq anything-sources (anything-normalize-sources any-sources))
+  (anything-log "sources = %S" anything-sources)
+  (anything-hooks 'setup)
   (anything-current-position 'save)
   (if (anything-resume-p any-resume)
       (anything-initialize-overlays (anything-buffer-get))
@@ -2309,14 +1512,15 @@ already-bound variables. Yuck!
     (anything-recent-push anything-buffer 'anything-buffers)
     (setq anything-last-buffer anything-buffer))
   (when any-input (setq anything-input any-input anything-pattern any-input))
-  (and (anything-resume-p any-resume) (anything-funcall-foreach 'resume)))
+  (and (anything-resume-p any-resume) (anything-funcall-foreach 'resume))
+  (anything-log "end initialization"))
 
 (defun anything-execute-selection-action-1 ()
   (unwind-protect
       (anything-execute-selection-action)
     (anything-aif (get-buffer anything-action-buffer)
         (kill-buffer it))
-    (run-hooks 'anything-after-action-hook)))
+    (anything-log-run-hook 'anything-after-action-hook)))
 
 (defun anything-on-quit ()
   (setq minibuffer-history (cons anything-input minibuffer-history))
@@ -2373,6 +1577,7 @@ It is needed because restoring position when `anything' is keyboard-quitted.")
 (declare-function 'anything-frame/window-configuration "anything")
 (lexical-let (conf)
   (defun anything-frame/window-configuration (save-or-restore)
+    (anything-log-eval anything-save-configuration-functions)
     (case save-or-restore
       (save    (setq conf (funcall (cdr anything-save-configuration-functions))))
       (restore (funcall (car anything-save-configuration-functions) conf)))))
@@ -2405,7 +1610,7 @@ It is needed because restoring position when `anything' is keyboard-quitted.")
 ;; (@* "Core: initialize")
 (defun anything-initialize ()
   "Initialize anything settings and set up the anything buffer."
-  (run-hooks 'anything-before-initialize-hook)
+  (anything-log-run-hook 'anything-before-initialize-hook)
   (setq anything-once-called-functions nil)
   (setq anything-delayed-init-executed nil)
   (setq anything-current-buffer (current-buffer))
@@ -2422,7 +1627,7 @@ It is needed because restoring position when `anything' is keyboard-quitted.")
   (setq anything-last-sources anything-sources)
 
   (anything-create-anything-buffer)
-  (run-hooks 'anything-after-initialize-hook))
+  (anything-log-run-hook 'anything-after-initialize-hook))
 
 (defun anything-read-pattern-maybe (any-prompt any-input any-preselect any-resume any-keymap)
   (if (anything-resume-p any-resume) (anything-mark-current-line) (anything-update))
@@ -2434,6 +1639,8 @@ It is needed because restoring position when `anything' is keyboard-quitted.")
            (and any-keymap (set (make-local-variable 'anything-map) any-keymap))
 
            anything-map)))
+    (anything-log-eval ncandidate anything-execute-action-at-once-if-one
+                       anything-quit-if-no-candidate)
     (cond ((and anything-execute-action-at-once-if-one
                 (= ncandidate 1))
            (ignore))
@@ -2450,6 +1657,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
   (when test-mode
     (setq anything-candidate-cache nil))
   (with-current-buffer (get-buffer-create anything-buffer)
+    (anything-log "kill local variables: %S" (buffer-local-variables))
     (kill-all-local-variables)
     (buffer-disable-undo)
     (erase-buffer)
@@ -2457,6 +1665,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
     (set (make-local-variable 'anything-last-sources-local) anything-sources)
     (set (make-local-variable 'anything-follow-mode) nil)
     (set (make-local-variable 'anything-display-function) anything-display-function)
+    (anything-log-eval anything-display-function anything-let-variables)
     (loop for (var . val) in anything-let-variables
           do (set (make-local-variable var) val))
     
@@ -2466,6 +1675,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
   (get-buffer anything-buffer))
 
 (defun anything-initialize-overlays (buffer)
+  (anything-log "overlay setup")
   (if anything-selection-overlay
       ;; make sure the overlay belongs to the anything buffer if
       ;; it's newly created
@@ -2503,6 +1713,7 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
 ;; (@* "Core: clean up")
 (defun anything-cleanup ()
   "Clean up the mess."
+  (anything-log "start cleanup")
   (with-current-buffer anything-buffer
     (setq cursor-type t))
   (bury-buffer anything-buffer)
@@ -2510,7 +1721,9 @@ If TEST-MODE is non-nil, clear `anything-candidate-cache'."
   (if anything-check-minibuffer-input-timer
       (cancel-timer anything-check-minibuffer-input-timer))
   (anything-kill-async-processes)
-  (run-hooks 'anything-cleanup-hook))
+  (anything-log-run-hook 'anything-cleanup-hook)
+  (anything-hooks 'cleanup)
+  (anything-frame/window-configuration 'restore))
 
 ;; (@* "Core: input handling")
 (defun anything-check-minibuffer-input ()
@@ -2536,6 +1749,7 @@ necessary."
     (setq anything-pattern input)
     (unless (anything-action-window)
       (setq anything-input anything-pattern))
+    (anything-log-eval anything-pattern anything-input)
     (anything-update)))
 
 ;; (@* "Core: source compiler")
@@ -2568,16 +1782,19 @@ Anything plug-ins are realized by this function."
 ;; (progn (ad-disable-advice 'documentation-property 'after 'anything-document-attribute) (ad-update 'documentation-property)) 
 
 ;; (@* "Core: all candidates")
-(defun anything-get-candidates (source)
-  "Retrieve and return the list of candidates from
-SOURCE."
+(defun anything-process-delayed-init (source)
   (let ((name (assoc-default 'name source)))
     (unless (member name anything-delayed-init-executed)
       (anything-aif (assoc-default 'delayed-init source)
           (with-current-buffer anything-current-buffer
             (anything-funcall-with-source source it)
             (dolist (f (if (functionp it) (list it) it))
-              (add-to-list 'anything-delayed-init-executed name))))))
+              (add-to-list 'anything-delayed-init-executed name)))))))
+
+(defun anything-get-candidates (source)
+  "Retrieve and return the list of candidates from
+SOURCE."
+  (anything-process-delayed-init source)
   (let* ((candidate-source (assoc-default 'candidates source))
          (type-error (lambda ()
                        (error (concat "Candidates must either be a function, "
@@ -2615,24 +1832,26 @@ Cache the candidates if there is not yet a cached value."
   (let* ((name (assoc-default 'name source))
          (candidate-cache (assoc name anything-candidate-cache))
          candidates)
-    (if candidate-cache
-        (setq candidates (cdr candidate-cache))
+    (cond (candidate-cache
+           (anything-log "use cached candidates")
+           (setq candidates (cdr candidate-cache)))
 
-      (setq candidates (anything-get-candidates source))
+          (t
+           (anything-log "calculate candidates")
+           (setq candidates (anything-get-candidates source))
+           (if (processp candidates)
+               (progn
+                 (push (cons candidates
+                             (append source 
+                                     (list (cons 'item-count 0)
+                                           (cons 'incomplete-line ""))))
+                       anything-async-processes)
+                 (set-process-filter candidates 'anything-output-filter)
+                 (setq candidates nil))
 
-      (if (processp candidates)
-          (progn
-            (push (cons candidates
-                        (append source 
-                                (list (cons 'item-count 0)
-                                      (cons 'incomplete-line ""))))
-                  anything-async-processes)
-            (set-process-filter candidates 'anything-output-filter)
-            (setq candidates nil))
-
-        (unless (assoc 'volatile source)
-          (setq candidate-cache (cons name candidates))
-          (push candidate-cache anything-candidate-cache))))
+             (unless (assoc 'volatile source)
+               (setq candidate-cache (cons name candidates))
+               (push candidate-cache anything-candidate-cache)))))
 
     candidates))
 
@@ -2716,6 +1935,7 @@ ie. cancel the effect of `anything-candidate-number-limit'."
 
 (defun anything-process-source (source)
   "Display matches from SOURCE according to its settings."
+  (anything-log-eval (assoc-default 'name source))
   (if (assq 'direct-insert-match source) ;experimental
       (anything-process-source--direct-insert-match source)
     (let ((matches (anything-compute-matches source)))
@@ -2749,6 +1969,7 @@ ie. cancel the effect of `anything-candidate-number-limit'."
 
 (defun anything-process-source--direct-insert-match (source)
   "[EXPERIMENTAL] Insert candidates from `anything-candidate-buffer'"
+  (anything-log-eval (assoc-default 'name source))
   (let ((anything-source-name (assoc-default 'name source))
         content-buf)
     (funcall (assoc-default 'candidates source))
@@ -2761,6 +1982,7 @@ ie. cancel the effect of `anything-candidate-number-limit'."
   "Process delayed sources if the user is idle for
 `anything-idle-delay' seconds."
   (with-anything-quittable
+    (anything-log-eval (ignore-errors (mapcar (lambda (s) (assoc-default 'name s)) delayed-sources)))
     (if (sit-for (if anything-input-idle-delay
                      (max 0 (- anything-idle-delay anything-input-idle-delay))
                    anything-idle-delay))
@@ -2778,7 +2000,7 @@ ie. cancel the effect of `anything-candidate-number-limit'."
               (anything-next-line)))
           (save-excursion
             (goto-char (point-min))
-            (run-hooks 'anything-update-hook))
+            (anything-log-run-hook 'anything-update-hook))
           (anything-maybe-fit-frame)))))
 
 ;; (@* "Core: *anything* buffer contents")
@@ -2786,6 +2008,7 @@ ie. cancel the effect of `anything-candidate-number-limit'."
 (defun anything-update ()
   "Update the list of matches in the anything buffer according to
 the current pattern."
+  (anything-log "start update")
   (setq anything-digit-shortcut-count 0)
   (anything-kill-async-processes)
   (with-current-buffer (anything-buffer-get)
@@ -2813,7 +2036,7 @@ the current pattern."
                 (anything-process-source source))))
 
         (goto-char (point-min))
-        (save-excursion (run-hooks 'anything-update-hook))
+        (save-excursion (anything-log-run-hook 'anything-update-hook))
         (anything-next-line)
         (setq delayed-sources (nreverse delayed-sources))
         (if anything-test-mode
@@ -2829,7 +2052,8 @@ the current pattern."
                                  delayed-sources))
           ;; FIXME I want to execute anything-after-update-hook
           ;; AFTER processing delayed sources
-          (run-hooks 'anything-after-update-hook))))))
+          (anything-log-run-hook 'anything-after-update-hook))
+        (anything-log "end update")))))
 
 (defun anything-force-update ()
   "Recalculate and update candidates.
@@ -2922,7 +2146,7 @@ the real value in a text property."
          (incomplete-line-info (assoc 'incomplete-line process-info))
          (item-count-info (assoc 'item-count process-info))
          (limit (anything-candidate-number-limit process-info)))
-
+    (anything-log-eval string (cdr incomplete-line-info))
     (with-current-buffer anything-buffer
       (save-excursion
         (if insertion-marker
@@ -2969,7 +2193,7 @@ the real value in a text property."
 
       (anything-maybe-fit-frame)
 
-      (run-hooks 'anything-update-hook)
+      (anything-log-run-hook 'anything-update-hook)
 
       (if (bobp)
           (anything-next-line)
@@ -2998,6 +2222,7 @@ the real value in a text property."
 (defun anything-execute-selection-action (&optional selection action clear-saved-action)
   "If a candidate was selected then perform the associated
 action."
+  (anything-log "executing action")
   (setq selection (or selection (anything-get-selection)))
   (setq action (or action
                    anything-saved-action
@@ -3735,11 +2960,13 @@ Otherwise goto the end of minibuffer."
 (defun* anything-execute-persistent-action (&optional (attr 'persistent-action))
   "If a candidate is selected then perform the associated action without quitting anything."
   (interactive)
+  (anything-log "executing persistent-action")
   (save-selected-window
     (select-window (get-buffer-window (anything-buffer-get)))
     (select-window (setq minibuffer-scroll-window
                          (if (one-window-p t) (split-window)
                            (next-window (selected-window) 1))))
+    (anything-log-eval (current-buffer))
     (let ((anything-in-persistent-action t))
       (with-anything-display-same-window
         (anything-execute-selection-action
@@ -3747,7 +2974,7 @@ Otherwise goto the end of minibuffer."
          (or (assoc-default attr (anything-get-current-source))
              (anything-get-action))
          t)
-        (run-hooks 'anything-after-persistent-action-hook)))))
+        (anything-log-run-hook 'anything-after-persistent-action-hook)))))
 
 (defun anything-persistent-action-display-buffer (buf &optional not-this-window)
   "Make `pop-to-buffer' and `display-buffer' display in the same window in persistent action.
@@ -3855,12 +3082,14 @@ otherwise 1-element list of current selection.
 
 It is analogous to `dired-get-marked-files'."
   (with-current-buffer (anything-buffer-get)
-    (if anything-marked-candidates
-        (loop with current-src = (anything-get-current-source)
-              for (source . real) in (reverse anything-marked-candidates)
-              when (equal current-src source)
-              collect real)
-      (list (anything-get-selection)))))
+    (let ((cands (if anything-marked-candidates
+                     (loop with current-src = (anything-get-current-source)
+                           for (source . real) in (reverse anything-marked-candidates)
+                           when (equal current-src source)
+                           collect real)
+                   (list (anything-get-selection)))))
+      (anything-log-eval cands)
+      cands)))
 
 (defun anything-reset-marked-candidates ()
   (with-current-buffer (anything-buffer-get)
@@ -4815,7 +4044,6 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
   (let ((anything-test-mode t)
         anything-enable-shortcuts
         anything-candidate-cache
-        (anything-sources (anything-normalize-sources sources))
         (anything-compile-source-functions compile-source-functions)
         anything-before-initialize-hook
         anything-after-initialize-hook
@@ -4823,8 +4051,7 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
         anything-test-candidate-list)
     (get-buffer-create anything-buffer)
 
-    (anything-initialize)
-    (setq anything-input input anything-pattern input)
+    (anything-initialize-1 nil input sources)
     (anything-update)
     ;; test-mode spec: select 1st candidate!
     (with-current-buffer anything-buffer
@@ -4837,7 +4064,7 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
 (defmacro anything-test-update (sources pattern)
   "Test helper macro for anything. It is meant for testing *anything* buffer contents."
   `(progn (stub anything-get-sources => ,sources)
-          (stub run-hooks => nil)
+          (stub anything-log-run-hook => nil)
           (stub anything-maybe-fit-frame => nil)
           (stub run-with-idle-timer => nil)
           (let (anything-test-mode (anything-pattern ,pattern))
@@ -5584,6 +4811,14 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
               (init . (lambda () (setq v (anything-attr 'hoge))))
               (candidates "a"))))
           v))
+      (desc "anything-attr*")
+      (expect "generic"
+        (let (v (value1 "generic"))
+          (anything-test-candidates
+           '(((name . "FOO")
+              (hoge . value1)
+              (init . (lambda () (setq v (anything-attr* 'hoge)))))))
+          v))
       (desc "anything-attr-defined")
       (expect (non-nil)
         (let (v)
@@ -5681,7 +4916,7 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
       ;; TODO el-mock.el should express 2nd call of function.
       ;;     (expect (mock (anything-process-source '((name . "2"))))
       ;;       (stub anything-get-sources => '(((name . "1")) ((name . "2"))))
-      ;;       (stub run-hooks)
+      ;;       (stub anything-log-run-hook)
       ;;       (stub anything-maybe-fit-frame)
       ;;       (stub run-with-idle-timer)
       ;;       (anything-update))
@@ -5689,7 +4924,7 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
                                          '(((name . "2") (delayed)))))
         (stub anything-get-sources => '(((name . "1"))
                                         ((name . "2") (delayed))))
-        (stub run-hooks)
+        (stub anything-log-run-hook)
         (stub anything-maybe-fit-frame)
         (let ((anything-pattern "") anything-test-mode)
           (anything-update)))
@@ -6417,6 +5652,15 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
             (and (assq 'a (buffer-local-variables))
                  (assq 'b (buffer-local-variables))
                  (assq 'c (buffer-local-variables))))))
+      (expect 'retval
+        (let ((a 9999)
+              (b 8)
+              (c)
+              (anything-buffer (exps-tmpbuf)))
+          (anything-let ((a 1)
+                         (b (1+ a))
+                         c)
+            'retval)))
       (desc "anything-let*")
       (expect '(1 2 nil)
         (let ((a 9999)
@@ -6442,6 +5686,30 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
             (and (assq 'a (buffer-local-variables))
                  (assq 'b (buffer-local-variables))
                  (assq 'c (buffer-local-variables))))))
+      (expect 'retval*
+        (let ((a 9999)
+              (b 8)
+              (c)
+              (anything-buffer (exps-tmpbuf)))
+          (anything-let* ((a 1)
+                         (b (1+ a))
+                         c)
+            'retval*)))
+      (desc "anything with keyw")
+      (expect (mock (anything-internal 'test-source "input" "prompt: " nil "preselect" "*test*" nil))
+        (anything :sources   'test-source
+                   :input     "input"
+                   :prompt    "prompt: "
+                   :resume    nil
+                   :preselect "preselect"
+                   :buffer    "*test*"
+                   :keymap    nil))
+      (expect (mock (anything-internal 'test-source nil nil nil nil "*test*" nil))
+        (anything :sources                'test-source
+                   :buffer                 "*test*"
+                   :candidate-number-limit 20))
+      (expect (mock (anything-internal 'test-source nil nil nil nil "*test*" nil))
+        (anything 'test-source nil nil nil nil "*test*" nil))
       )))
 
 

@@ -113,6 +113,8 @@
 ;; Preconfigured `anything' for Locate.
 ;; `anything-w3m-bookmarks'
 ;; Preconfigured `anything' for w3m bookmark.
+;; `anything-firefox-bookmarks'
+;; Preconfigured `anything' for firefox bookmark.
 ;; `anything-colors'
 ;; Preconfigured `anything' for color.
 ;; `anything-bookmarks'
@@ -276,6 +278,8 @@
 ;; Default Value: 0
 ;; `anything-raise-command'
 ;; Default Value: nil
+;; `anything-command-map-prefix-key'
+;; Default Value: "<f5> a"
 
 ;;  * Anything sources defined here:
 ;; [EVAL] (autodoc-document-lisp-buffer :type 'anything-source :prefix "anything-" :any-sname t)
@@ -364,6 +368,7 @@
 ;; `anything-c-source-bookmarks-local'				(Bookmarks-Local)
 ;; `anything-c-source-bmkext-addressbook'			(Bookmark Addressbook)
 ;; `anything-c-source-bookmark-w3m'				(Bookmark W3m)
+;; `anything-c-source-bookmark-images'				(Bookmark Images)
 ;; `anything-c-source-bookmark-man'				(Bookmark Woman&Man)
 ;; `anything-c-source-bookmark-gnus'				(Bookmark Gnus)
 ;; `anything-c-source-bookmark-info'				(Bookmark Info)
@@ -431,6 +436,9 @@
 ;;; Change log:
 ;;
 ;;  Change log of this file is found at
+;;  http://repo.or.cz/w/anything-config.git/history/master:/anything-config.el
+;;
+;;  Change log of this project is found at
 ;;  http://repo.or.cz/w/anything-config.git?a=shortlog
 
 ;;; Contributors:
@@ -643,7 +651,25 @@ Though wmctrl work also with stumpwm."
   :type 'string
   :group 'anything-config)
 
+(defun anything-set-anything-command-map-prefix-key (var key)
+  (when (boundp 'anything-command-map-prefix-key)
+    (global-unset-key (read-kbd-macro anything-command-map-prefix-key)))
+  (setq anything-command-map-prefix-key key)
+  (global-set-key (read-kbd-macro anything-command-map-prefix-key)
+                  'anything-command-map))
+
+(defcustom anything-command-map-prefix-key "<f5> a"
+  "*The prefix key for all `anything-command-map' commands.
+
+!!WARNING!!
+This default value is very likely to be changed, because it is under discussion."
+  :type 'string
+  :set 'anything-set-anything-command-map-prefix-key
+  :group 'anything-config)
+
+;;;###autoload
 (defun anything-configuration ()
+  "Customize `anything'."
   (interactive)
   (customize-group "anything-config"))
 
@@ -651,12 +677,10 @@ Though wmctrl work also with stumpwm."
 ;;;###autoload
 (defvar anything-command-map)
 (define-prefix-command 'anything-command-map)
-(define-key global-map (kbd "<f5> a") 'anything-command-map)
-(define-key anything-command-map (kbd "d") 'anything-delicious)
+
+;; rubikitch: Please change it freely because it is in discussion. I'll track from git.
+(define-key anything-command-map (kbd "<SPC>") 'anything-execute-anything-command)
 (define-key anything-command-map (kbd "e") 'anything-etags-maybe-at-point)
-(define-key anything-command-map (kbd "g") 'anything-gentoo)
-(define-key anything-command-map (kbd "a g") 'anything-apt)
-(define-key anything-command-map (kbd "q") 'anything-qpatchs-only)
 (define-key anything-command-map (kbd "l") 'anything-locate)
 (define-key anything-command-map (kbd "s") 'anything-surfraw)
 (define-key anything-command-map (kbd "r") 'anything-regexp)
@@ -666,9 +690,11 @@ Though wmctrl work also with stumpwm."
 (define-key anything-command-map (kbd "m") 'anything-man-woman)
 (define-key anything-command-map (kbd "t") 'anything-top)
 (define-key anything-command-map (kbd "i") 'anything-imenu)
-(define-key anything-command-map (kbd "C-x r l") 'anything-c-pp-bookmarks)
+(define-key anything-command-map (kbd "C-x r b") 'anything-c-pp-bookmarks)
 (define-key anything-command-map (kbd "M-y") 'anything-show-kill-ring)
+(define-key anything-command-map (kbd "C-c <SPC>") 'anything-all-mark-rings)
 (define-key anything-command-map (kbd "C-x C-f") 'anything-find-files)
+(define-key anything-command-map (kbd "f") 'anything-for-files)
 (define-key anything-command-map (kbd "C-:") 'anything-eval-expression-with-eldoc)
 (define-key anything-command-map (kbd "C-,") 'anything-calcul-expression)
 (define-key anything-command-map (kbd "M-x") 'anything-M-x)
@@ -676,7 +702,7 @@ Though wmctrl work also with stumpwm."
 (define-key anything-command-map (kbd "C-x i") 'anything-insert-file)
 (define-key anything-command-map (kbd "M-s o") 'anything-occur)
 (define-key anything-command-map (kbd "c") 'anything-colors)
-(define-key anything-command-map (kbd "f") 'anything-select-xfont)
+(define-key anything-command-map (kbd "F") 'anything-select-xfont)
 (define-key anything-command-map (kbd "C-c f") 'anything-recentf)
 (define-key anything-command-map (kbd "C-c g") 'anything-google-suggest)
 (define-key anything-command-map (kbd "h i") 'anything-info-at-point)
@@ -688,37 +714,34 @@ Though wmctrl work also with stumpwm."
 (easy-menu-define nil global-map
   "`anything' menu"
   '("Anything"
-    "Anything Menu"
+    ["All anything commands" anything-execute-anything-command t]
+    ["Find any Files/Buffers" anything-for-files t]
     "----"
-    "----"
-    "Files:"
-    ["Find files" anything-find-files t]
-    ["Recent Files" anything-recentf t]
-    ["Locate" anything-locate t]
-    ["Bookmarks" anything-c-pp-bookmarks t]
-    "----"
-    "Buffers:"
-    ["Find buffers" anything-buffers+ t]
-    "----"
-    "Commands:"
-    ["Emacs Commands" anything-M-x t]
-    ["Externals Commands" anything-c-run-external-command t]
-    "----"
-    "Info:"
-    ["Info at point" anything-info-at-point t]
-    "----"
-    "Tools:"
-    ["Occur" anything-occur t]
-    ["Browse Kill ring" anything-show-kill-ring t]
-    ["Browse register" anything-register t]
-    ["Mark Ring" anything-all-mark-rings t]
-    ["Colors & Faces" anything-colors t]
-    ["Show xfonts" anything-select-xfont t]
-    ["Imenu" anything-imenu t]
-    ["Google Suggest" anything-google-suggest t]
-    ["Eval expression" anything-eval-expression-with-eldoc t]
-    ["Calcul expression" anything-calcul-expression t]
-    ["Top externals process" anything-top t]
+    ("Files:"
+     ["Find files" anything-find-files t]
+     ["Recent Files" anything-recentf t]
+     ["Locate" anything-locate t]
+     ["Bookmarks" anything-c-pp-bookmarks t])
+    ("Buffers:"
+     ["Find buffers" anything-buffers+ t])
+    ("Commands:"
+     ["Emacs Commands" anything-M-x t]
+     ["Externals Commands" anything-c-run-external-command t])
+    ("Info:"
+     ["Info at point" anything-info-at-point t])
+    ("Tools:"
+     ["Occur" anything-occur t]
+     ["Browse Kill ring" anything-show-kill-ring t]
+     ["Browse register" anything-register t]
+     ["Mark Ring" anything-all-mark-rings t]
+     ["Colors & Faces" anything-colors t]
+     ["Show xfonts" anything-select-xfont t]
+     ["Imenu" anything-imenu t]
+     ["Google Suggest" anything-google-suggest t]
+     ["Eval expression" anything-eval-expression-with-eldoc t]
+     ["Calcul expression" anything-calcul-expression t]
+     ["Man pages" anything-man-woman t]
+     ["Top externals process" anything-top t])
     "----"
     ["Prefered Options" anything-configuration t]))
 
@@ -925,7 +948,11 @@ You may bind this command to M-y."
 
 ;;;###autoload
 (defun anything-bbdb ()
-  "Preconfigured `anything' for BBDB."
+  "Preconfigured `anything' for BBDB.
+
+Needs BBDB.
+
+http://bbdb.sourceforge.net/"
   (interactive)
   (anything-other-buffer 'anything-c-source-bbdb "*anything bbdb*"))
 
@@ -939,7 +966,12 @@ See man locate for more infos."
 
 ;;;###autoload
 (defun anything-w3m-bookmarks ()
-  "Preconfigured `anything' for w3m bookmark."
+  "Preconfigured `anything' for w3m bookmark.
+
+Needs w3m and emacs-w3m.
+
+http://w3m.sourceforge.net/
+http://emacs-w3m.namazu.org/"
   (interactive)
   (anything-other-buffer 'anything-c-source-w3m-bookmarks
                          "*anything w3m bookmarks*"))
@@ -972,11 +1004,13 @@ After closing firefox, you will be able to browse you bookmarks.
 
 ;;;###autoload
 (defun anything-bookmarks ()
+  "Preconfigured `anything' for bookmarks."
   (interactive)
   (anything-other-buffer 'anything-c-source-bookmarks "*anything bookmarks*"))
 
 ;;;###autoload
 (defun anything-c-pp-bookmarks ()
+  "Preconfigured `anything' for bookmarks (pretty-printed)."
   (interactive)
   (anything-other-buffer '(anything-c-source-bookmarks-local
                            anything-c-source-bookmarks-su
@@ -985,12 +1019,17 @@ After closing firefox, you will be able to browse you bookmarks.
 
 ;;;###autoload
 (defun anything-register ()
+  "Preconfigured `anything' for Emacs registers."
   (interactive)
   (anything-other-buffer 'anything-c-source-register "*anything register*"))
 
 ;;;###autoload
 (defun anything-bm-list ()
-  "Preconfigured `anything' for visible bookmarks."
+  "Preconfigured `anything' for visible bookmarks.
+
+Needs bm.el
+
+http://cvs.savannah.gnu.org/viewvc/*checkout*/bm/bm/bm.el"
   (interactive)
   (let ((anything-outline-using t))
     (anything-other-buffer 'anything-c-source-bm "*anything bm list*")))
@@ -1604,8 +1643,8 @@ buffer that is not the current buffer."
            ("Find file as root" . anything-find-file-as-root)
            ("Open file externally (C-u to choose)"
             . anything-c-open-file-externally)
-           ("Create dired buffer on marked"
-            . anything-c-create-dired-on-marked)
+           ;; ("Create dired buffer on marked"
+           ;;  . anything-c-create-dired-on-marked)
            ("Find file other window" . find-file-other-window)
            ("Find file other frame" . find-file-other-frame))))))
 
@@ -2604,8 +2643,10 @@ To get non-interactive functions listed, use
 ;; Another replacement of `M-x' that act exactly like the
 ;; vanilla Emacs one, no problem of windows configuration, prefix args
 ;; are passed before calling `M-x' (e.g C-u M-x..).
+;;;###autoload
 (defun anything-M-x ()
-  "Anything replacement of regular `M-x' `execute-extended-command'."
+  "Preconfigured `anything' for Emacs commands.
+It is `anything' replacement of regular `M-x' `execute-extended-command'."
   (interactive)
   (let ((command (anything-comp-read "M-x " obarray
                                      :test 'commandp
@@ -3044,6 +3085,23 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
   "Specialized filter function for bookmarks w3m."
   (anything-c-bmkext-filter-setup-alist 'bmkext-w3m-alist-only))
 
+;; Images
+(defvar anything-c-source-bookmark-images
+  '((name . "Bookmark Images")
+    (init . (lambda ()
+              (require 'bookmark-extensions)
+              (bookmark-maybe-load-default-file)))
+    (candidates . anything-c-bookmark-images-setup-alist)
+    (filtered-candidate-transformer
+     anything-c-adaptive-sort
+     anything-c-highlight-bookmark)
+    (type . bookmark)))
+;; (anything 'anything-c-source-bookmark-images)
+
+(defun anything-c-bookmark-images-setup-alist ()
+  "Specialized filter function for images bookmarks."
+  (anything-c-bmkext-filter-setup-alist 'bmkext-image-file-alist-only))
+
 ;; Woman Man
 (defvar anything-c-source-bookmark-man
   '((name . "Bookmark Woman&Man")
@@ -3170,7 +3228,9 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
 ;;;###autoload
 (defun anything-bookmark-ext ()
   "Preconfigured `anything' for bookmark-extensions sources.
-See: <http://mercurial.intuxication.org/hg/emacs-bookmark-extension>."
+Needs bookmark-ext.el
+
+http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
   (interactive)
   (anything '(anything-c-source-bookmark-files&dirs
               anything-c-source-bookmark-w3m
@@ -3178,6 +3238,7 @@ See: <http://mercurial.intuxication.org/hg/emacs-bookmark-extension>."
               anything-c-source-bookmark-gnus
               anything-c-source-bookmark-info
               anything-c-source-bookmark-man
+              anything-c-source-bookmark-images
               anything-c-source-bookmark-su-files&dirs
               anything-c-source-bookmark-ssh-files&dirs)
             nil "SearchBookmark: " nil nil "*anything bmkext*"))
@@ -3306,7 +3367,11 @@ See: <http://mercurial.intuxication.org/hg/emacs-bookmark-extension>."
                                (anything-c-w3m-browse-bookmark candidate t)
                                (anything-c-w3m-browse-bookmark candidate nil t))))
     (persistent-help . "Open URL with emacs-w3m in new tab / \
-C-u \\[anything-execute-persistent-action]: Open URL with Firefox")))
+C-u \\[anything-execute-persistent-action]: Open URL with Firefox"))
+  "Needs w3m and emacs-w3m.
+
+http://w3m.sourceforge.net/
+http://emacs-w3m.namazu.org/")
 
 ;; (anything 'anything-c-source-w3m-bookmarks)
 
@@ -3455,15 +3520,14 @@ STRING is string to match."
         (setq imenu--index-alist nil)
         (setq anything-c-cached-imenu-tick tick
               anything-c-cached-imenu-candidates
-              (condition-case nil
-                  (mapcan
-                   'anything-imenu-create-candidates
-                   (setq anything-c-cached-imenu-alist
-                         (let ((index (imenu--make-index-alist)))
-                           (if anything-c-imenu-index-filter
-                               (funcall anything-c-imenu-index-filter index)
-                             index))))
-                (error nil)))
+              (ignore-errors
+                (mapcan
+                 'anything-imenu-create-candidates
+                 (setq anything-c-cached-imenu-alist
+                       (let ((index (imenu--make-index-alist)))
+                         (if anything-c-imenu-index-filter
+                             (funcall anything-c-imenu-index-filter index)
+                           index))))))
         (setq anything-c-cached-imenu-candidates
               (mapcar #'(lambda (x)
                           (if (stringp x)
@@ -3524,8 +3588,12 @@ http://ctags.sourceforge.net/")
 ;; (anything 'anything-c-source-ctags)
 
 ;; Semantic
-(defvar anything-semantic-candidates nil)
 (eval-when-compile (require 'semantic nil t))
+(declare-function semantic-format-tag-summarize "ext:format.el" (tag &optional parent color) t)
+(declare-function semantic-tag-components "ext:tag.el" (tag) t)
+(declare-function semantic-go-to-tag "ext:tag-file.el" (tag) t)
+(defvar anything-semantic-candidates nil)
+
 (defun anything-semantic-construct-candidates (tags depth)
   (when (require 'semantic nil t)
     (apply 'append
@@ -3552,9 +3620,7 @@ http://ctags.sourceforge.net/")
   '((name . "Semantic Tags")
     (init . (lambda ()
               (setq anything-semantic-candidates
-                    (condition-case nil
-                        (anything-semantic-construct-candidates (semantic-fetch-tags) 0)
-                      (error nil)))))
+                    (ignore-errors (anything-semantic-construct-candidates (semantic-fetch-tags) 0)))))
     (candidates . (lambda ()
                     (if anything-semantic-candidates
                         (mapcar 'car anything-semantic-candidates))))
@@ -3573,7 +3639,10 @@ http://cedet.sourceforge.net/"))
 ;;; Function is called by
 ;;;###autoload
 (defun anything-simple-call-tree ()
-  "Preconfigured `anything' for simple-call-tree. List function relationships."
+  "Preconfigured `anything' for simple-call-tree. List function relationships.
+
+Needs simple-call-tree.el.
+http://www.emacswiki.org/cgi-bin/wiki/download/simple-call-tree.el"
   (interactive)
   (anything-other-buffer
    '(anything-c-source-simple-call-tree-functions-callers
@@ -3752,7 +3821,7 @@ http://www.emacswiki.org/cgi-bin/wiki/download/auto-document.el")
      (insert (capitalize candidate))
      (goto-char (point-min))
      (search-forward-regexp "\\s-\\{2,\\}")
-     (kill-line)
+     (delete-region (point) (point-max))
      (buffer-string))))
 
 (defun anything-c-colors-get-rgb (candidate)
@@ -3763,7 +3832,7 @@ http://www.emacswiki.org/cgi-bin/wiki/download/auto-document.el")
      (insert (capitalize candidate))
      (goto-char (point-max))
      (search-backward-regexp "\\s-\\{2,\\}")
-     (kill-region (point) (point-min))
+     (delete-region (point) (point-min))
      (buffer-string))))
 
 ;;;; <Search Engine>
@@ -3869,9 +3938,7 @@ If this action is executed just after `yank', replace with STR as yanked string.
   '((name . "mark-ring")
     (init . (lambda ()
               (setq anything-mark-ring-cache
-                    (condition-case nil
-                        (anything-c-source-mark-ring-candidates)
-                    (error nil)))))
+                    (ignore-errors (anything-c-source-mark-ring-candidates)))))
     (candidates . (lambda ()
                     (anything-aif anything-mark-ring-cache
                         it)))
@@ -4139,16 +4206,14 @@ See http://orgmode.org for the latest version.")
   '((name . "Yaoddmuse Edit or View (EmacsWiki)")
     (candidates . (lambda ()
                     (if anything-yaoddmuse-use-cache-file
-                        (condition-case nil
-                            (progn
-                              (unless anything-c-yaoddmuse-ew-cache
-                                (load anything-c-yaoddmuse-cache-file)
-                                (setq anything-c-yaoddmuse-ew-cache
-                                      (gethash "EmacsWiki" yaoddmuse-pages-hash)))
-                              anything-c-yaoddmuse-ew-cache)
-                          (error nil))
-                        (yaoddmuse-update-pagename t)
-                        (gethash "EmacsWiki" yaoddmuse-pages-hash))))
+                        (ignore-errors
+                          (unless anything-c-yaoddmuse-ew-cache
+                            (load anything-c-yaoddmuse-cache-file)
+                            (setq anything-c-yaoddmuse-ew-cache
+                                  (gethash "EmacsWiki" yaoddmuse-pages-hash)))
+                          anything-c-yaoddmuse-ew-cache)
+                      (yaoddmuse-update-pagename t)
+                      (gethash "EmacsWiki" yaoddmuse-pages-hash))))
     (action . (("Edit page" . (lambda (candidate)
                                 (yaoddmuse-edit "EmacsWiki" candidate)))
                ("Browse page" . (lambda (candidate)
@@ -4170,8 +4235,11 @@ See http://orgmode.org for the latest version.")
                                          (anything-yaoddmuse-cache-pages t)
                                          (setq anything-c-yaoddmuse-ew-cache
                                                (gethash "EmacsWiki" yaoddmuse-pages-hash)))
-                                       (yaoddmuse-update-pagename))))))
-    (action-transformer anything-c-yaoddmuse-action-transformer)))
+                                     (yaoddmuse-update-pagename))))))
+    (action-transformer anything-c-yaoddmuse-action-transformer))
+  "Needs yaoddmuse.el.
+
+http://www.emacswiki.org/emacs/download/yaoddmuse.el")
 
 ;; (anything 'anything-c-source-yaoddmuse-emacswiki-edit-or-view)
 
@@ -4187,7 +4255,10 @@ See http://orgmode.org for the latest version.")
                ("Post library" . (lambda (candidate)
                                    (yaoddmuse-post-file (find-library-name candidate)
                                                         "EmacsWiki"
-                                                        (file-name-nondirectory (find-library-name candidate)))))))))
+                                                        (file-name-nondirectory (find-library-name candidate))))))))
+  "Needs yaoddmuse.el.
+
+http://www.emacswiki.org/emacs/download/yaoddmuse.el")
 
 ;; (anything 'anything-c-source-yaoddmuse-emacswiki-post-library)
 
@@ -4220,13 +4291,21 @@ If load is non--nil load the file and feed `yaoddmuse-pages-hash'."
 
 ;;;###autoload
 (defun anything-yaoddmuse-emacswiki-edit-or-view ()
-  "Preconfigured `anything' to edit or view EmacsWiki page."
+  "Preconfigured `anything' to edit or view EmacsWiki page.
+
+Needs yaoddmuse.el.
+
+http://www.emacswiki.org/emacs/download/yaoddmuse.el"
   (interactive)
   (anything 'anything-c-source-yaoddmuse-emacswiki-edit-or-view))
 
 ;;;###autoload
 (defun anything-yaoddmuse-emacswiki-post-library ()
-  "Preconfigured `anything' to post library to EmacsWiki."
+  "Preconfigured `anything' to post library to EmacsWiki.
+
+Needs yaoddmuse.el.
+
+http://www.emacswiki.org/emacs/download/yaoddmuse.el"
   (interactive)
   (anything 'anything-c-source-yaoddmuse-emacswiki-post-library))
 
@@ -4347,6 +4426,17 @@ If load is non--nil load the file and feed `yaoddmuse-pages-hash'."
 ;; (anything 'anything-c-source-picklist)
 
 ;;; BBDB
+(defvar bbdb-records)
+(defvar bbdb-buffer-name)
+(declare-function bbdb "ext:bbdb-com")
+(declare-function bbdb-current-record "ext:bbdb-com")
+(declare-function bbdb-redisplay-one-record "ext:bbdb-com")
+(declare-function bbdb-record-net "ext:bbdb-com" (string) t)
+(declare-function bbdb-current-record "ext:bbdb-com")
+(declare-function bbdb-dwim-net-address "ext:bbdb-com")
+(declare-function bbdb-records "ext:bbdb-com"
+                  (&optional dont-check-disk already-in-db-buffer))
+
 (defun anything-c-bbdb-candidates ()
   "Return a list of all names in the bbdb database.  The format
 is \"Firstname Lastname\"."
@@ -4391,7 +4481,10 @@ removed."
                                             (list "*Add to contacts*")
                                           candidates)))
     (action-transformer . (lambda (actions candidate)
-                            (anything-c-bbdb-create-contact actions candidate)))))
+                            (anything-c-bbdb-create-contact actions candidate))))
+  "Needs BBDB.
+
+http://bbdb.sourceforge.net/")
 ;; (anything 'anything-c-source-bbdb)
 
 (defun anything-c-bbdb-view-person-action (candidate)
@@ -4446,7 +4539,7 @@ removed."
 
 ;;;###autoload
 (defun anything-eval-expression-with-eldoc ()
-  "Same as `anything-eval-expression' but with `eldoc' support."
+  "Preconfigured anything for `anything-c-source-evaluation-result' with `eldoc' support. "
   (interactive)
   (if (window-system)
       (let ((timer (run-with-idle-timer eldoc-idle-delay
@@ -4635,7 +4728,7 @@ Return an alist with elements like (data . number_results)."
 
 ;;;###autoload
 (defun anything-surfraw (pattern engine)
-  "Search PATTERN with search ENGINE."
+  "Preconfigured `anything' to search PATTERN with search ENGINE."
   (interactive (list (read-string "SearchFor: ")
                      (anything-comp-read
                       "Engine: "
@@ -4837,7 +4930,9 @@ Return an alist with elements like (data . number_results)."
 
 (defun anything-c-anything-commands-candidates ()
   (loop for (cmd . desc) in (anything-c-list-preconfigured-anything)
-        collect (cons (substitute-command-keys (format "\\[%s] : %s" cmd desc))
+        collect (cons (if (where-is-internal cmd nil t)
+                          (substitute-command-keys (format "M-x %s (\\[%s]) : %s" cmd cmd desc))
+                        (substitute-command-keys (format "\\[%s] : %s" cmd desc)))
                       cmd)))
 
 ;;;###autoload
@@ -5455,18 +5550,16 @@ If collection is an `obarray', a test is maybe needed, otherwise
 the list would be incomplete.
 See `obarray'."
   (cond ((and (listp collection) test)
-         (loop for i in collection
-              when (funcall test i) collect i))
+         (loop for i in collection when (funcall test i) collect i))
+        ((and (eq collection obarray) test)
+         (loop for s being the symbols of collection
+            when (funcall test s) collect s))
         ((and (vectorp collection) test)
-         (let (ob)
-           (mapatoms
-            #'(lambda (s)
-                (when (funcall test s) (push s ob))))
-           ob))
-        ((and (hash-table-p collection) test)
-         (anything-comp-hash-get-items collection :test test))
+         (loop for i across collection when (funcall test i) collect i))
         ((vectorp collection)
          (loop for i across collection collect i))
+        ((and (hash-table-p collection) test)
+         (anything-comp-hash-get-items collection :test test))
         ((hash-table-p collection)
          (anything-comp-hash-get-items collection))
         (t collection)))
@@ -5533,7 +5626,7 @@ In this case EXE must be provided as \"EXE %s\"."
 
 ;;;###autoload
 (defun anything-c-run-external-command (program)
-  "Run External PROGRAM asyncronously from Emacs.
+  "Preconfigured `anything' to run External PROGRAM asyncronously from Emacs.
 If program is already running exit with error.
 You can set your own list of commands with
 `anything-c-external-commands-list'."
@@ -5721,29 +5814,32 @@ directory, open this directory."
                          'find-file)))))
 
 (defun* anything-c-action-file-line-goto (file-line-content &optional (find-file-function #'find-file))
-  (apply #'anything-goto-file-line file-line-content))
+  (apply #'anything-goto-file-line
+         (if (stringp file-line-content)
+             ;; Case: filtered-candidate-transformer is skipped
+             (cdr (anything-c-filtered-candidate-transformer-file-line-1 file-line-content))
+           file-line-content)))
 
 (require 'compile)
 (defun anything-c-filtered-candidate-transformer-file-line (candidates source)
-  (mapcar
-   (lambda (candidate)
-     (if (not (string-match "^\\(.+?\\):\\([0-9]+\\):\\(.*\\)$" candidate))
-         (error "Filename and line number not found")
-       (let ((filename (match-string 1 candidate))
-             (lineno (match-string 2 candidate))
-             (content (match-string 3 candidate)))
-         (cons (format "%s:%s\n %s"
-                       (propertize filename 'face compilation-info-face)
-                       (propertize lineno 'face compilation-line-face)
-                       content)
-               (list (expand-file-name
-                      filename
-                      (or (anything-interpret-value (anything-attr 'default-directory))
-                          (and (anything-candidate-buffer)
-                               (buffer-local-value
-                                'default-directory (anything-candidate-buffer)))))
-                     (string-to-number lineno) content)))))
-   candidates))
+  (delq nil (mapcar 'anything-c-filtered-candidate-transformer-file-line-1 candidates)))
+
+(defun anything-c-filtered-candidate-transformer-file-line-1 (candidate)
+  (when (string-match "^\\(.+?\\):\\([0-9]+\\):\\(.*\\)$" candidate)
+    (let ((filename (match-string 1 candidate))
+          (lineno (match-string 2 candidate))
+          (content (match-string 3 candidate)))
+      (cons (format "%s:%s\n %s"
+                    (propertize filename 'face compilation-info-face)
+                    (propertize lineno 'face compilation-line-face)
+                    content)
+            (list (expand-file-name
+                   filename
+                   (or (anything-interpret-value (anything-attr 'default-directory))
+                       (and (anything-candidate-buffer)
+                            (buffer-local-value
+                             'default-directory (anything-candidate-buffer)))))
+                  (string-to-number lineno) content)))))
 
 (defun* anything-goto-file-line (file lineno content &optional (find-file-function #'find-file))
   (anything-aif (anything-attr 'before-jump-hook)
@@ -6403,11 +6499,14 @@ It also accepts a function or a variable name.")
         (dolist (i marked) (find-file-noselect i))
         (find-file-at-point candidate))))
 
-(defun anything-c-create-dired-on-marked (candidate)
-  "Create a new dired buffer with only marked candidates."
-  (let ((marked      (anything-marked-candidates))
-        (buffer-name (read-string "New Dired Buffer: ")))
-    (dired (cons buffer-name marked))))
+;; FIXME there is a bug in dired that confuse all dired commands
+;; when using this feature, so i suspend it until bug is fixed in emacs.
+;;
+;; (defun anything-c-create-dired-on-marked (candidate)
+;;   "Create a new dired buffer with only marked candidates."
+;;   (let ((marked      (anything-marked-candidates))
+;;         (buffer-name (read-string "New Dired Buffer: ")))
+;;     (dired (cons buffer-name marked))))
 
 (defun anything-delete-marked-files (ignore)
   (let* ((files (anything-marked-candidates))
