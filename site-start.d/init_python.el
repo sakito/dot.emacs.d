@@ -30,7 +30,8 @@
 ;;; Python-mode
 ;; @see http://www.python.org/emacs/python-mode/
 ;;
-(setenv "PYTHONSTARTUP" "~/.emacs.d/rc.d/pythonrc.py")
+(setenv "PYTHONSTARTUP" (expand-file-name "~/.emacs.d/rc.d/pythonrc.py"))
+(setenv "PYTHONPATH" (expand-file-name "~/local/lib/python2.7/site-packages"))
 
 (autoload 'python-mode "python-mode" "Python editing mode." t)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
@@ -41,7 +42,7 @@
 ;; python
 (cond
  (mac-p
-  (setq py-python-command "/usr/local/bin/python"))
+  (setq py-python-command (expand-file-name "~/local/bin/python")))
  (windows-p
   (setq py-python-command "C:/Python26/bin/python"))
  )

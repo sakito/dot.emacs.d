@@ -63,6 +63,8 @@
 (require 'init_eldoc)
 ;;; プログラミング関連
 (require 'init_flymake)
+;;; Pythonの設定
+(require 'init_python)
 ;; vsc and scm
 (require 'init_scm)
 ;; diff
@@ -71,8 +73,6 @@
 ;;(require 'init_woman)
 ;;;; mode-info
 (require 'init_modeinfo)
-;;; Pythonの設定
-(require 'init_python)
 ;;; Gaucheの設定
 (require 'init_gauche)
 ;;; OCaml

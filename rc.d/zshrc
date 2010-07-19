@@ -38,7 +38,6 @@ export PREFIX=/usr/local
 
 export CVS_RSH="ssh"
 export DISPLAY="localhost"
-export PYTHONSTARTUP="${HOME}/.pythonrc.py"
 
 # 時刻の設定
 export TZ=JST-9
@@ -61,7 +60,7 @@ export PATH=/usr/local/sbin:${PATH}
 export PATH=/usr/local/bin:${PATH}
 
 # MacPorts
-isdarwin && export PATH=${PATH}:/opt/local/bin
+isdarwin && export PATH=/opt/local/bin:${PATH}
 
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
@@ -77,7 +76,12 @@ export PATH=${PATH}:${HOME}/.cabal/bin
 
 # 最優先パス
 export PATH=${HOME}/bin:${PATH}
+export PATH=${HOME}/local/bin:${PATH}
 export PATH=${HOME}/bin/air/bin:${PATH}
+
+# Python
+export PYTHONSTARTUP="${HOME}/.pythonrc.py"
+export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
@@ -126,7 +130,7 @@ export CVSROOT=$HOME/var/cvs
 # for Mercurial
 export HGENCODING=utf-8
 
-export ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common'
+export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
 
 #-----------------------------------------------------------------
 # 非端末プロセスなら終了
@@ -358,7 +362,7 @@ alias reload="source ~/.zshrc"
 
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
-alias easy_install64="sudo env ARCHFLAGS='-Os -arch i386 -arch x86_64 -arch ppc -fno-common' easy_install -UZ "
+alias easy_install64="env ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common' easy_install -UZ "
 
 #-----------------------------------------------------------------
 # キーバインド設定

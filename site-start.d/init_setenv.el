@@ -35,10 +35,11 @@
                "/usr/sbin"
                "/bin"
                "/usr/bin"
-               "/opt/local/bin"
                "/sw/bin"
+               "/opt/local/bin"
                "/usr/local/bin"
                (expand-file-name "~/bin")
+               (expand-file-name "~/local/bin")
                (expand-file-name "~/.emacs.d/bin")
                ))
   (when (and (file-exists-p dir) (not (member dir exec-path)))
