@@ -38,6 +38,9 @@
 (ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
 (setq anything-c-adaptive-history-length 0)
 
+;; アルファベットで候補選択
+(setq anything-enable-shortcuts 'alphabet)
+
 (and (equal current-language-environment "Japanese")
      (require 'anything-migemo nil t))
 
@@ -253,6 +256,7 @@
 (require 'anything-project)
 ;; 設定試行錯誤中
 (add-to-list 'ap:default-project-root-files ".hg")
+(add-to-list 'ap:default-project-root-files ".ensime")
 (ap:add-project
  :name 'emacs-lisp
  :look-for '("init.el")
@@ -267,6 +271,11 @@
  :name 'howm
  :look-for '("0000-00-00-000000.howm")
  :include-regexp '("\\.howm$" "\\.txt$" "\\.rst$")
+ )
+(ap:add-project
+ :name 'scala
+ :look-for '(".ensime")
+ :include-regexp '("\\.scala$" "\\.java$" "\\.conf$" "\\.yml$" "\\.html$" "\\.js$")
  )
 (global-set-key (kbd "C-c C-f") 'anything-project)
 
