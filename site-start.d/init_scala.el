@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'scala-mode-auto)
+(setq scala-interpreter "scala -deprecation")
 
 (defun skt:scala-mode-hook ()
   (progn
@@ -33,10 +34,18 @@
     (local-set-key (kbd "C-c C-e") 'scala-eval-definition)
     (local-set-key (kbd "C-c C-c") 'scala-eval-buffer)
     (local-set-key (kbd "<C-tab>") 'other-window-or-split)
+    (local-set-key (kbd "M-;") 'comment-dwim)
+    (local-set-key (kbd "C-c ;") 'comment-dwim)
+    (local-set-key (kbd "C-c :") 'comment-dwim)
 ;;    (local-set-key (kbd "RET") 'reindent-then-newline-and-indent)
     ))
 
 (add-hook 'scala-mode-hook 'skt:scala-mode-hook)
+
+(require 'ensime)
+(setq ensime-default-server-root user-emacs-directory)
+(add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
+
 
 (provide 'init_scala)
 ;;; init_scala.el ends here
