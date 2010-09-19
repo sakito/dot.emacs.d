@@ -28,6 +28,7 @@
 (require 'log-edit)
 (require 'ewoc)
 (require 'cl)
+(require 'grep)
 
 ;;-----------------------------------------------------------------------------
 ;; ahg-version
@@ -53,6 +54,7 @@
                       ["Commit Current File" ahg-commit-cur-file t]
                       ["View Changes of Current File" ahg-diff-cur-file t]
                       ["View Change Log of Current File" ahg-log-cur-file t]
+                      ["Grep the Working Directory" ahg-manifest-grep t]
                       ["--" nil nil]
                       ("Mercurial Queues"
                        ["New Patch" ahg-qnew t]
@@ -82,6 +84,7 @@
     (define-key map "h" 'ahg-command-help)
     (define-key map "c" 'ahg-commit-cur-file)
     (define-key map "=" 'ahg-diff-cur-file)
+    (define-key map "f" 'ahg-manifest-grep)
     (define-key map (kbd "C-l") 'ahg-log-cur-file)
     (define-key map "Q"
       (let ((qmap (make-sparse-keymap)))
@@ -150,6 +153,11 @@ when calling hg. This might not always work."
 (defcustom ahg-subprocess-coding-system nil
   "If non-nil, coding system used when reading output of hg commands."
   :group 'ahg :type 'symbol)
+
+(defcustom ahg-log-revrange-size 100
+  "Length of default revision range for `ahg-log',
+`ahg-short-log' and `ahg-glog'."
+  :group 'ahg :type 'integer)
 
 (defface ahg-status-marked-face
   '((default (:inherit font-lock-preprocessor-face)))
@@ -360,6 +368,12 @@ Commands:
     (define-key qmap "l" 'ahg-mq-list-patches)
     (define-key qmap "e" 'ahg-mq-edit-series)
     (define-key ahg-status-mode-map "Q" qmap))
+  (let ((imap (make-sparse-keymap)))
+    (define-key imap "c" 'ahg-record)
+    (let ((iqmap (make-sparse-keymap)))
+      (define-key iqmap "n" 'ahg-record-qnew)
+      (define-key imap "Q" iqmap))
+    (define-key ahg-status-mode-map "i" imap))
   (easy-menu-add ahg-status-mode-menu ahg-status-mode-map))
 
 (easy-menu-define ahg-status-mode-menu ahg-status-mode-map "aHg Status"
@@ -369,6 +383,7 @@ Commands:
      [:keys "o" :active t]]
     ["--" nil nil]
     ["Commit" ahg-status-commit [:keys "c" :active t]]
+    ["Interactive Commit (Record)" ahg-record [:keys "ic" :active t]]
     ["Add" ahg-status-add [:keys "a" :active t]]
     ["Remove" ahg-status-remove [:keys "r" :active t]]
     ["Add/Remove" ahg-status-addremove [:keys "A" :active t]]
@@ -401,6 +416,7 @@ Commands:
     ["--" nil nil]
     ("Mercurial Queues"
      ["New Patch" ahg-qnew [:keys "Qn" :active t]]
+     ["New Interactive Patch" ahg-record-qnew [:keys "iQn" :active t]]
      ["View Qdiff" ahg-qdiff [:keys "Q=" :active t]]
      ["Refresh Current Patch" ahg-qrefresh [:keys "Qr" :active t]]
      ["Go to Patch..." ahg-qgoto [:keys "Qg" :active t]]
@@ -957,7 +973,8 @@ Commands:
                     (make-string (- width (length s)) ? )
                   "")))
       (insert (propertize (concat s pad) 'mouse-face 'highlight
-                          'keymap ahg-short-log-line-map)))))
+                          'keymap ahg-short-log-line-map
+                          'help-echo p4)))))
         
 (defun ahg-short-log-insert-contents (ewoc contents)
   (let ((lines (split-string contents "\n")))
@@ -1078,7 +1095,7 @@ do nothing."
                 (read-string
                  (concat "hg log"
                          (if is-on-selected-files " (on selected files)" "")
-                         ", R2: ") (cdr ahg-log-default-revisions)))
+                         ", R2: ") (ahg-log-revrange-end)))
           (when read-extra-flags
             (list (read-string
                    (concat "hg log"
@@ -1087,6 +1104,15 @@ do nothing."
     ;; remember the values entered for the next call
     (setq ahg-log-default-revisions (cons (car retval) (cadr retval)))
     retval))
+
+(defun ahg-log-revrange-end ()
+  (with-temp-buffer
+    (if (= (ahg-call-process "id" (list "-n")) 0)
+        (let ((n (string-to-number (buffer-string))))
+          (if (> n ahg-log-revrange-size)
+              (format "-%s" ahg-log-revrange-size)
+            "0"))
+      "0")))
 
 
 (defun ahg-short-log-create-ewoc ()
@@ -1537,7 +1563,7 @@ Commands:
   (toggle-read-only t)
   (save-excursion
     (goto-char (point-min))
-    (forward-line 1)
+    (while (and (not (eobp)) (not (looking-at "^---"))) (forward-line 1))
     (let ((fs (or (diff-hunk-file-names) (diff-hunk-file-names t)))
           goodpath)
       (when fs
@@ -1731,8 +1757,10 @@ that buffer is refreshed instead.)"
    (list (completing-read "Help on hg command: "
                           (ahg-dynamic-completion-table
                            ahg-complete-command-name))))
-  (let ((buffer (get-buffer-create "*hg help*")))
+  (let ((buffer (get-buffer-create "*hg help*"))
+        (oldcols (getenv "COLUMNS")))
     (with-current-buffer buffer (let ((inhibit-read-only t)) (erase-buffer)))
+    (setenv "COLUMNS" (format "%s" (window-width (selected-window))))
     (ahg-generic-command
      "help" (list command)
      (lambda (process status)
@@ -1748,7 +1776,37 @@ that buffer is refreshed instead.)"
                             (cons 'view-mode mymap)))
              (goto-char (point-min)))
          (ahg-show-error process)))
-     buffer)))
+     buffer)
+    (setenv "COLUMNS" oldcols)))
+
+;;-----------------------------------------------------------------------------
+;; manifest grep
+;;-----------------------------------------------------------------------------
+
+(defvar ahg-manifest-grep-pattern-history nil
+  "History for patterns of `ahg-manifest-grep-'.")
+
+(defun ahg-manifest-grep (pattern)
+  "Search for grep-like pattern in the working directory, considering only
+the files under version control."
+  (interactive
+   (list
+    (let* ((default
+             (cond ((and mark-active transient-mark-mode)
+                    (regexp-quote (buffer-substring (region-beginning)
+                                                    (region-end))))
+                   ((symbol-at-point)
+                    (regexp-quote (format "%s" (symbol-at-point))))
+                   (t (car ahg-manifest-grep-pattern-history))))
+           (input (read-string
+                   (if default
+                       (format "Search for pattern (default %s): "
+                               (query-replace-descr default))
+                     "Search for pattern: "))))
+      (if (and input (> (length input) 0)) input default))))
+  (grep (format "cd %s && %s manifest | xargs grep -nH -E '%s'"
+                (ahg-root) ahg-hg-command
+                (shell-quote-argument pattern))))
 
 ;;-----------------------------------------------------------------------------
 ;; MQ support
@@ -1901,8 +1959,10 @@ called interactively, PATCHNAME and FORCE are read from the minibuffer.
                         (beginning-of-line)
                         (buffer-substring-no-properties
                          (point-at-bol) (point-at-eol)))))
-                 (message msg))
-               (kill-buffer (process-buffer process)))
+                 (message msg)
+                 (if (string-match-p "^errors " msg)
+                     (ahg-show-error process)
+                   (kill-buffer (process-buffer process)))))
            (ahg-show-error process)))))))
 
 (defun ahg-qpop-all (force)
@@ -2395,6 +2455,262 @@ so that filename completion works on patch names."
          (concat (file-name-as-directory (ahg-root)) ".hg/patches/")))
     (call-interactively 'ahg-do-command)))
 
+
+;;-----------------------------------------------------------------------------
+;; ahg-record and related functions
+;;-----------------------------------------------------------------------------
+
+(defun ahg-record-setup (root selected-files)
+  (setq root (file-name-as-directory root))
+  ;;(message "ROOT IS: %s" root)
+  (let* ((backup (concat root ".hg/ahg-record-backup"))
+         (curpatch (concat root ".hg/ahg-record-patch"))
+         (isthere (or (file-exists-p backup) (file-symlink-p backup)))
+         (parents (with-temp-buffer
+                    (when (= (ahg-call-process "parents"
+                                               (list "--template" "{node} ")
+                                               (list "-R" root)) 0)
+                      (split-string (buffer-string))))))
+    (cond (isthere
+           ;; we don't want to overwrite old backups
+           (error
+            (format "stale ahg-record backup file detected in `%s', aborting"
+                    backup)))
+          ((not (= (length parents) 1))
+           ;; this is either an uncommitted merge, or we failed to get the
+           ;; parents
+           (error
+            (if (null parents)
+                "could not in determine parents of working dir, aborting"
+              "uncommitted merge detected, aborting")))
+          (t
+           ;; create the patch
+           (let ((patchbuf (generate-new-buffer "*aHg-record*")))
+             (with-current-buffer patchbuf
+               (cd root)
+               (if (= (ahg-call-process "diff" (list "--git")
+                                        (list "-R" root)) 0)
+                   (progn
+                     ;; write the backup
+                     (goto-char (point-min))
+                     (insert "# aHg record parent: "
+                             (car parents) "\n")
+                     (write-file backup)
+                     ;; now, generate the patch to edit
+                     (kill-buffer)
+                     (setq patchbuf (generate-new-buffer "*aHg-record*"))
+                     (with-current-buffer patchbuf
+                       (ahg-push-window-configuration)
+                       (if (null selected-files)
+                           ;; if there are no selected files, we can simply
+                           ;; copy the backup file, thus saving an hg call
+                           (progn
+                             (insert-file-contents backup)
+                             (goto-char (point-min))
+                             (when (looking-at "^# aHg record parent: ")
+                               (let ((kill-whole-line t))
+                                 (kill-line))))
+                         ;; otherwise, let's call hg diff again
+                         (cd root)
+                         (unless (= (ahg-call-process
+                                     "diff"
+                                     (append (list "--git") selected-files)
+                                     (list "-R" root)) 0)
+                           (kill-buffer)
+                           (error "impossible to generate diff")))
+                       (goto-char (point-min))
+                       ;; if there are binary files, abort
+                       (save-excursion
+                         (while (not (eobp))
+                           (re-search-forward "^diff --git [^\n]*$" nil 1)
+                           (forward-line 2)
+                           (beginning-of-line)
+                           (if (looking-at "^GIT binary patch$")
+                               (error "binary files in patch, aborting"))))
+                       ;; insert header
+                       (insert "# aHg record interactive buffer\n"
+                               "# edit this patch file, and press C-c C-c when done to commit the changes\n"
+                               "# if something goes wrong, there's a backup file in\n"
+                               "# " backup "\n\n")
+                       ;; now, let's return all the needed data
+                       (list backup curpatch (car parents) patchbuf)))
+                 ;; error occurred, delete the buffer and raise exception
+                 (kill-buffer)
+                 (error "impossible to generate diff"))))))))
+
+
+(defun ahg-do-record (selected-files commit-func &rest commit-func-args)
+  (condition-case err
+      (let* ((root (ahg-root))
+             (data (ahg-record-setup root selected-files))
+             (backup (car data))
+             (curpatch (cadr data))
+             (parent (caddr data))
+             (patchbuf (cadddr data)))
+        (switch-to-buffer patchbuf)
+        (ahg-diff-mode)
+        (toggle-read-only nil)
+        (local-set-key
+         (kbd "C-c C-c")
+         (lexical-let ((root root)
+                       (backup backup)
+                       (curpatch curpatch)
+                       (parent parent)
+                       (commit-func commit-func)
+                       (commit-func-args commit-func-args))
+           (lambda ()
+             (interactive)
+             (apply commit-func
+                    root backup curpatch parent commit-func-args)))))
+    (error
+     (let ((buf (generate-new-buffer "*aHg-record*")))
+       (ahg-show-error-msg (format "aHg record error: %s"
+                                   (error-message-string err)) buf)))))
+
+
+(defun ahg-record (selected-files)
+  "Interactively select which changes to commit. Similar in
+spirit to the crecord hg extension, but using the patch editing
+functionalities provided by Emacs."
+  (interactive
+   (list (when (eq major-mode 'ahg-status-mode) 
+           (mapcar 'cddr
+                   (ahg-status-get-marked
+                    nil (lambda (d) (not (string= (cadr d) "?"))))))))
+  (ahg-do-record selected-files 'ahg-record-commit))
+
+
+(defun ahg-record-commit (root backup curpatch parent)
+  (let ((buf (generate-new-buffer "*aHg-log*")))
+    ;; save the contents of the patch
+    (write-file curpatch)
+    (ahg-log-edit
+     (lexical-let ((root root)
+                   (backup backup)
+                   (curpatch curpatch)
+                   (parent parent)
+                   (patchbuf (current-buffer))
+                   (buf buf))
+       (lambda ()
+         (interactive)
+         (with-current-buffer patchbuf
+           (set-buffer-modified-p nil))
+         (let ((msg (ahg-parse-commit-message)))
+           (kill-buffer buf)
+           (ahg-record-commit-callback
+            "commit" (list "-m" msg)
+            root backup curpatch parent patchbuf))))
+     (lambda () nil)
+     buf)))
+
+
+(defun ahg-record-commit-callback (commit-cmd commit-args
+                                   root backup curpatch parent patchbuf)
+  (let ((args (list "-r" parent "--all" "--no-backup"))
+        (buf (generate-new-buffer "*aHg-record*")))
+    (cd root)
+    ;; 1. update to parent rev
+    (ahg-generic-command
+     "revert"
+     args
+     (lexical-let ((root root)
+                   (backup backup)
+                   (curpatch curpatch)
+                   (parent parent)
+                   (commit-cmd commit-cmd)
+                   (commit-args commit-args)
+                   (buf buf)
+                   (patchbuf patchbuf))
+       (lambda (process status)
+         (switch-to-buffer buf)
+         (if (string= status "finished\n")
+             (let ((args (list "--force" "--no-commit" curpatch)))
+               ;; 2. apply the patch
+               (if (= (ahg-call-process "import" args (list "-R" root)) 0)
+                   (ahg-generic-command
+                    commit-cmd commit-args
+                    (lexical-let ((root root)
+                                  (backup backup)
+                                  (curpatch curpatch)
+                                  (parent parent)
+                                  (buf buf)
+                                  (patchbuf patchbuf))
+                      (lambda (process status)
+                        (switch-to-buffer buf)
+                        (if (string= status "finished\n")
+                            ;; 4. update to the parent rev again
+                            (ahg-generic-command
+                             "revert"
+                             (list "-r" parent "--all" "--no-backup")
+                             (lexical-let ((root root)
+                                           (backup backup)
+                                           (curpatch curpatch)
+                                           (parent parent)
+                                           (buf buf)
+                                           (patchbuf patchbuf))
+                               (switch-to-buffer buf)
+                               (lambda (process status)
+                                 (if (string= status "finished\n")
+                                     ;; 5. apply the backup patch
+                                     (if (= (ahg-call-process
+                                             "import"
+                                             (list "--force" "--no-commit"
+                                                   backup)
+                                             (list "-R" root)) 0)
+                                         ;; 6. delete the backup files
+                                         (let ((sbuf
+                                                (ahg-get-status-buffer root))
+                                               (cfg
+                                                (with-current-buffer patchbuf
+                                                  ahg-window-configuration)))
+                                           (delete-file curpatch)
+                                           (delete-file backup)
+                                           (kill-buffer buf)
+                                           (kill-buffer patchbuf)
+                                           (ahg-status-maybe-refresh root)
+                                           (ahg-mq-patches-maybe-refresh root)
+                                           (set-window-configuration cfg)
+                                           (when sbuf (pop-to-buffer sbuf))
+                                           (message "changeset recorded successfully."))
+                                       ;; error
+                                       (ahg-show-error-msg
+                                        (format
+                                         "error in applying patch `%s'"
+                                         backup)))
+                                   ;; error
+                                   (ahg-show-error process))))
+                             buf)
+                          ;; error
+                          (ahg-show-error process))))
+                    buf)
+                 ;; error
+                 (ahg-show-error-msg
+                  (format "error in applying patch `%s'" curpatch))))
+           ;; error
+           (ahg-show-error process))))
+     buf)))
+
+
+(defun ahg-record-mq-commit (root backup curpatch parent mq-command mq-args)
+  ;; save the contents of the patch
+  (write-file curpatch)
+  (set-buffer-modified-p nil)
+  (ahg-record-commit-callback mq-command mq-args root backup curpatch parent
+                              (current-buffer)))
+
+
+(defun ahg-record-qnew (patchname selected-files)
+  "Interactively select which changes to include in the new mq patch PATCHNAME.
+Similar in spirit to the crecord hg extension, but using the
+patch editing functionalities provided by Emacs."
+  (interactive
+   (list (read-string "Patch name: ")
+         (when (eq major-mode 'ahg-status-mode)
+           (mapcar 'cddr (ahg-status-get-marked nil)))))
+  (ahg-do-record selected-files 'ahg-record-mq-commit
+                 "qnew" (list "--force" patchname)))
+
+                                          
 ;;-----------------------------------------------------------------------------
 ;; Various helper functions
 ;;-----------------------------------------------------------------------------
@@ -2403,8 +2719,8 @@ so that filename completion works on patch names."
   (with-temp-buffer
     (let ((process-environment (cons "LANG=" process-environment)))
       (if (= (ahg-call-process "parents"
-                               (list "-r" rev "--template" "{rev}")) 0)
-          (buffer-string)
+                               (list "-r" rev "--template" "{rev} ")) 0)
+          (car (split-string (buffer-string)))
         (if (string-to-number rev)
             (number-to-string (1- (string-to-number rev)))
           0)))))
@@ -2428,7 +2744,7 @@ destination buffer. If nil, a new buffer will be used."
           (list (concat ":" (propertize "%s" 'face '(:foreground "#DD0000"))))))
   (unless no-show-message (message "aHg: executing hg '%s' command..." command))
   (let ((lang (getenv "LANG")))
-    (unless ahg-i18n (setenv "LANG"))
+    (unless ahg-i18n (setenv "LANG") (setenv "HGPLAIN" "1"))
     (let ((process
            (apply (if use-shell 'start-process-shell-command 'start-process)
                   (concat "*ahg-command-" command "*") buffer
@@ -2451,6 +2767,7 @@ destination buffer. If nil, a new buffer will be used."
            (setq mode-line-process nil)
            (funcall sf p s))))
       )
+    (setenv "HGPLAIN")
     (setenv "LANG" lang)
     ))
 
@@ -2462,6 +2779,15 @@ destination buffer. If nil, a new buffer will be used."
     (ahg-command-mode)
     (message "aHg command exited with non-zero status: %s"
              (mapconcat 'identity (process-command process) " "))))
+
+(defun ahg-show-error-msg (msg &optional buf)
+  "Displays an error message for the given process."
+  (when buf
+    (pop-to-buffer buf))
+  (goto-char (point-max))
+  (ahg-command-mode)
+  (let ((inhibit-read-only t))
+    (insert msg "\n")))
 
 (define-derived-mode ahg-command-mode nil "aHg command"
   "Major mode for aHg commands.
@@ -2515,9 +2841,11 @@ Commands:
 
 
 (defun ahg-call-process (cmd &optional args global-opts)
-  (apply 'call-process (append (list ahg-hg-command nil t nil
-                                     "--config" "ui.report_untrusted=0")
-                               global-opts (list cmd) args)))
+  (let ((callargs (append (list ahg-hg-command nil t nil
+                                "--config" "ui.report_untrusted=0")
+                          global-opts (list cmd) args)))
+    ;;(message "callargs: %s" callargs)
+    (apply 'call-process callargs)))
 
 (defmacro ahg-dynamic-completion-table (fun)
   (if (fboundp 'completion-table-dynamic)
