@@ -113,6 +113,9 @@
  (ns-p (require 'init_sysns))
  )
 
+;; custom-file
+(setq custom-file (expand-file-name "private/customize.el" user-emacs-directory))
+
 ;; 終了時バイトコンパイル
 (add-hook 'kill-emacs-query-functions
           (lambda ()
