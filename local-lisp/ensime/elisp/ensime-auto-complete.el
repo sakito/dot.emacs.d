@@ -112,7 +112,7 @@ changes will be forgotten."
 	      ;; if we are at the end of a method body, the
 	      ;; method context will be extended to include
 	      ;; the completion point.
-	      (insert "  ;exit()};")) ()
+	      (insert "  ;exit()};"))
 	      (ensime-write-buffer)
 	      (ensime-rpc-name-completions-at-point
 	       prefix is-constructor))))
@@ -375,7 +375,7 @@ be used later to give contextual help when entering arguments."
 		     ac-source-ensime-members ))
 
   (make-local-variable 'ac-use-comphist)
-  (setq ac-use-comphist nil)
+  (setq ac-use-comphist t)
 
   (make-local-variable 'ac-auto-start)
   (setq ac-auto-start nil)

@@ -7,7 +7,7 @@
 ;;     This file includes code from slime.el of the SLIME project
 ;;     (also licensend under the GNU General Public License.) The
 ;;     following copyrights therefore apply:
-;;     
+;;
 ;;     Copyright (C) 2003  Eric Marsden, Luke Gorrie, Helmut Eller
 ;;     Copyright (C) 2004,2005,2006  Luke Gorrie, Helmut Eller
 ;;     Copyright (C) 2007,2008,2009  Helmut Eller, Tobias C. Rittweiler
@@ -109,7 +109,7 @@
   :type 'integer
   :group 'ensime-server)
 
-(defcustom ensime-default-server-cmd 
+(defcustom ensime-default-server-cmd
   (if (eq system-type 'windows-nt)  "bin/server.bat" "bin/server.sh")
   "Command to launch server process."
   :type 'string
@@ -120,9 +120,9 @@
   :type 'string
   :group 'ensime-server)
 
-(defcustom ensime-mode-key-prefix [?\C-c] 
-  "The prefix key for ensime-mode commands." 
-  :group 'ensime-mode 
+(defcustom ensime-mode-key-prefix [?\C-c]
+  "The prefix key for ensime-mode commands."
+  :group 'ensime-mode
   :type 'sexp)
 
 (defvar ensime-protocol-version "0.0.1")
@@ -169,16 +169,17 @@ argument is supplied) is a .scala or .java file."
 	(before-save-hook nil))
     (save-buffer)))
 
-(defun ensime-write-buffer (&optional filename clear-mod)
+(defun ensime-write-buffer (&optional filename clear-modtime set-unmodified)
   "Write the contents of buffer to its buffer-file-name.
 Do not show 'Writing..' message."
   (let ((file (or filename buffer-file-name))
 	(write-region-annotate-functions nil)
 	(write-region-post-annotation-function nil))
-    (when clear-mod
-      (clear-visited-file-modtime)
-      (set-buffer-modified-p nil))
+    (when clear-modtime
+      (clear-visited-file-modtime))
     (write-region (point-min) (point-max) file nil 'nomessage)
+    (when set-unmodified
+      (set-buffer-modified-p nil))
     ))
 
 
@@ -606,7 +607,6 @@ If not, message the user."
 	     (let ((c (ensime-connect config host port)))
 	       (ensime-set-config c config)
 	       (ensime-set-server-process c server-proc)
-	       
 	       ;; As a conveniance, we associate the client connection with
 	       ;; the server buffer.
 	       ;; This assumes that there's only one client connection
@@ -888,6 +888,8 @@ to the last section."
 	      (,name (if matchedp (match-string 2 ,str) nil)))
 	 ,@body))))
 
+(defun ensime-strip-dollar-signs (str)
+  (replace-regexp-in-string "\\$" "" str))
 
 (defmacro ensime-assert-buffer-saved-interactive (&rest body)
   "Offer to save buffer if buffer is modified. Execute body only if
@@ -2388,13 +2390,13 @@ interface we are implementing."
       (t nil)
       ))))
 
-(defun ensime-completing-read-path (prompt)
+(defun ensime-completing-read-path (prompt &optional initial)
   ;; Note: First thing we do is bind buffer connection so 
   ;; completion function will have access.
   (let ((ensime-dispatching-connection 
 	 (ensime-current-connection)))
     (completing-read prompt #'ensime-path-completions
-		     nil nil (ensime-package-path-at-point))))
+		     nil nil (or initial (ensime-package-containing-point)))))
 
 (defun ensime-inspect-package-by-path (path)
   (ensime-package-inspector-show 
