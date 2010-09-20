@@ -1872,41 +1872,17 @@ If prefix numeric arg is given go ARG level down."
                         (replace-match tramp-name nil t anything-pattern)))
                      (t anything-pattern)))
          (tramp-verbose anything-tramp-verbose)) ; No tramp message when 0.
-    ;; Inlined version (<2010-02-18 Jeu.>.) of `tramp-handle-directory-files'
-    ;; to fix bug in tramp that doesn't show the dot file names(i.e "." "..")
-    ;; and sorting.
-    (flet ((tramp-handle-directory-files
-               (directory &optional full match nosort files-only)
-             "Like `directory-files' for Tramp files."
-             ;; FILES-ONLY is valid for XEmacs only.
-             (when (file-directory-p directory)
-               (setq directory (file-name-as-directory (expand-file-name directory)))
-               (let ((temp (nreverse (file-name-all-completions "" directory)))
-                     result item)
-
-                 (while temp
-                   (setq item (directory-file-name (pop temp)))
-                   (when (and (or (null match) (string-match match item))
-                              (or (null files-only)
-                                  ;; Files only.
-                                  (and (equal files-only t) (file-regular-p item))
-                                  ;; Directories only.
-                                  (file-directory-p item)))
-                     (push (if full (concat directory item) item)
-                           result)))
-                 (if nosort result (sort result 'string<))))))
-
-      (set-text-properties 0 (length path) nil path)
-      (setq anything-pattern (replace-regexp-in-string " " ".*" path))
-      (cond ((or (file-regular-p path)
-                 (and ffap-url-regexp (string-match ffap-url-regexp path)))
-             (list path))
-            ((string= anything-pattern "") (directory-files "/" t))
-            ((file-directory-p path) (directory-files path t))
-            (t
-             (append
-              (list path)
-              (directory-files (file-name-directory path) t)))))))
+    (set-text-properties 0 (length path) nil path)
+    (setq anything-pattern (replace-regexp-in-string " " ".*" path))
+    (cond ((or (file-regular-p path)
+               (and ffap-url-regexp (string-match ffap-url-regexp path)))
+           (list path))
+          ((string= anything-pattern "") (directory-files "/" t))
+          ((file-directory-p path) (directory-files path t))
+          (t
+           (append
+            (list path)
+            (directory-files (file-name-directory path) t))))))
 
 (defface anything-dired-symlink-face
   '((t (:foreground "DarkOrange")))
@@ -2521,6 +2497,53 @@ It is cleared after jumping line.")
     (type . file)))
 ;; (anything 'anything-c-source-files-in-all-dired)
 
+(defcustom anything-c-filelist-file-name nil
+  "*Filename of file list.
+Accept a list of string for multiple files.
+
+This file tend to be very large (> 100MB) and recommend to be in ramdisk for speed.
+File list is created by make-filelist.rb script.
+
+Usage:
+  ruby make-filelist.rb > /tmp/all.filelist
+
+Then
+ ;; Assume that /tmp is ramdisk or tmpfs
+ (setq anything-grep-candidates-fast-directory-regexp \"^/tmp/\")
+ (setq anything-c-filelist-file-name \"/tmp/all.filelist\")
+"
+  :type 'string  
+  :group 'anything-config)
+(defvar anything-c-source-filelist
+  '((name . "FileList")
+    (grep-candidates . anything-c-filelist-file-name)
+    (candidate-number-limit . 200)
+    (requires-pattern . 4)
+    (type . file)))
+
+;;;###autoload
+(defun anything-filelist ()
+  "Preconfigured `anything' to open files instantly."
+  (interactive)
+  (anything-other-buffer 'anything-c-source-filelist "*anything file list*"))
+
+;;;###autoload
+(defun anything-filelist+ ()
+  "Preconfigured `anything' to open files/buffers/bookmarks instantly.
+
+This is a replacement for `anything-for-files'."
+  (interactive)
+  (anything-other-buffer
+   '(anything-c-source-ffap-line
+     anything-c-source-ffap-guesser
+     anything-c-source-buffers+
+     anything-c-source-recentf
+     anything-c-source-bookmarks
+     anything-c-source-file-cache
+     anything-c-source-filelist)
+   "*anything file list*"))
+
+
 ;;;; <info>
 ;;; Info pages
 (defvar anything-c-info-pages nil
@@ -2925,16 +2948,23 @@ To get non-interactive functions listed, use
   "Preconfigured `anything' for Emacs commands.
 It is `anything' replacement of regular `M-x' `execute-extended-command'."
   (interactive)
-  (let ((command (anything-comp-read "M-x " obarray
-                                     :test 'commandp
-                                     :must-match t
-                                     :requires-pattern 2
-                                     :name "Emacs Commands"
-                                     :persistent-action
-                                     #'(lambda (candidate)
-                                         (describe-function (intern candidate)))
-                                     :persistent-help "Describe this command"
-                                     :history extended-command-history))
+  (let* (in-help help-cand
+         (command (anything-comp-read
+                   "M-x " obarray
+                   :test 'commandp
+                   :must-match t
+                   :requires-pattern 2
+                   :name "Emacs Commands"
+                   :persistent-action
+                   #'(lambda (candidate)
+                       (if (and in-help (string= candidate help-cand))
+                           (progn (kill-buffer "*Help*") (setq in-help nil))
+                           (describe-function (intern candidate))
+                           (setq in-help t))
+                       (setq help-cand candidate))
+                   :persistent-help "Describe this command"
+                   :history extended-command-history
+                   :sort 'string-lessp))
         (history (loop with hist
                     for i in extended-command-history
                     for com = (intern i)
@@ -3554,7 +3584,7 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
 ;; You should have now:
 ;; user_pref("browser.bookmarks.autoExportHTML", true);
 
-(defvar anything-firefox-bookmark-url-regexp "\\(https\\|http\\|ftp\\|about\\|file\\)://[^ ]*")
+(defvar anything-firefox-bookmark-url-regexp "\\(https\\|http\\|ftp\\|about\\|file\\)://[^ \"]*")
 (defvar anything-firefox-bookmarks-regexp ">\\([^><]+.[^</a>]\\)")
 
 (defun anything-get-firefox-user-init-dir ()
@@ -3563,8 +3593,10 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
          (moz-user-dir
           (with-current-buffer (find-file-noselect (concat moz-dir "profiles.ini"))
             (goto-char (point-min))
-            (when (search-forward "Path=" nil t)
-              (buffer-substring-no-properties (point) (point-at-eol))))))
+            (prog1
+                (when (search-forward "Path=" nil t)
+                  (buffer-substring-no-properties (point) (point-at-eol)))
+              (kill-buffer)))))
     (file-name-as-directory (concat moz-dir moz-user-dir))))
 
 (defun anything-guess-firefox-bookmark-file ()
@@ -3577,18 +3609,15 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
     (with-temp-buffer
       (insert-file-contents file)
       (goto-char (point-min))
-      (while (not (eobp))
-        (forward-line)
-        (when (re-search-forward "href=\\|^ *<DT><A HREF=" nil t)
-          (beginning-of-line)
+      (while (re-search-forward "href=\\|^ *<DT><A HREF=" nil t)
+          (forward-line 0)
           (when (re-search-forward url-regexp nil t)
-            (setq url (concat "\"" (match-string 0))))
-          (beginning-of-line)
+            (setq url (match-string 0)))
           (when (re-search-forward bmk-regexp nil t)
             (setq title (match-string 1)))
-          (push (cons title url) bookmarks-alist))))
+          (push (cons title url) bookmarks-alist)
+          (forward-line)))
     (nreverse bookmarks-alist)))
-
 
 (defvar anything-c-firefox-bookmarks-alist nil)
 (defvar anything-c-source-firefox-bookmarks
@@ -3600,8 +3629,7 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
                      anything-firefox-bookmark-url-regexp
                      anything-firefox-bookmarks-regexp))))
     (candidates . (lambda ()
-                    (mapcar #'car
-                            anything-c-firefox-bookmarks-alist)))
+                    (mapcar #'car anything-c-firefox-bookmarks-alist)))
     (filtered-candidate-transformer
      anything-c-adaptive-sort
      anything-c-highlight-firefox-bookmarks)
@@ -3620,16 +3648,12 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
 ;; (anything 'anything-c-source-firefox-bookmarks)
 
 (defun anything-c-firefox-bookmarks-get-value (elm)
-  (replace-regexp-in-string "\"" ""
-                            (cdr (assoc elm
-                                        anything-c-firefox-bookmarks-alist))))
-
+  (assoc-default elm anything-c-firefox-bookmarks-alist))
 
 (defun anything-c-highlight-firefox-bookmarks (bookmarks source)
   (loop for i in bookmarks
         collect (propertize
-                 i
-                 'face '((:foreground "YellowGreen"))
+                 i 'face '((:foreground "YellowGreen"))
                  'help-echo (anything-c-firefox-bookmarks-get-value i))))
 
 ;; W3m bookmark
@@ -5892,25 +5916,26 @@ package name - description."
               ,hash-table)
      li-items))
 
-(defun anything-comp-read-get-candidates (collection &optional test)
-  "Convert collection to list.
-If collection is an `obarray', a test is maybe needed, otherwise
-the list would be incomplete.
-See `obarray'."
-  (cond ((and (listp collection) test)
-         (loop for i in collection when (funcall test i) collect i))
-        ((and (eq collection obarray) test)
-         (loop for s being the symbols of collection
-            when (funcall test s) collect s))
-        ((and (vectorp collection) test)
-         (loop for i across collection when (funcall test i) collect i))
-        ((vectorp collection)
-         (loop for i across collection collect i))
-        ((and (hash-table-p collection) test)
-         (anything-comp-hash-get-items collection :test test))
-        ((hash-table-p collection)
-         (anything-comp-hash-get-items collection))
-        (t collection)))
+(defun anything-comp-read-get-candidates (collection &optional test sort-fn)
+  "Convert COLLECTION to list removing elements that don't match TEST.
+SORT-FN is a predicate to sort COLLECTION.
+If collection is an `obarray', a TEST is needed. See `obarray'."
+  (let ((cands
+         (cond ((and (listp collection) test)
+                (loop for i in collection when (funcall test i) collect i))
+               ((and (eq collection obarray) test)
+                (loop for s being the symbols of collection
+                   when (funcall test s) collect s))
+               ((and (vectorp collection) test)
+                (loop for i across collection when (funcall test i) collect i))
+               ((vectorp collection)
+                (loop for i across collection collect i))
+               ((and (hash-table-p collection) test)
+                (anything-comp-hash-get-items collection :test test))
+               ((hash-table-p collection)
+                (anything-comp-hash-get-items collection))
+               (t collection))))
+    (if sort-fn (sort cands sort-fn) cands)))
 
 (defun* anything-comp-read (prompt collection
                                    &key
@@ -5922,25 +5947,31 @@ See `obarray'."
                                    (history nil)
                                    (persistent-action nil)
                                    (persistent-help "DoNothing")
-                                   (name "Anything Completions"))
+                                   (name "Anything Completions")
+                                   sort)
   "Anything `completing-read' emulation.
 PROMPT is the prompt name to use.
 COLLECTION can be a list, vector, obarray or hash-table.
 Keys:
-TEST :a predicate called with one arg i.e candidate.
-INITIAL-INPUT :same as initial-input arg in `anything'.
-BUFFER :name of anything-buffer.
-MUST-MATCH :candidate selected must be one of COLLECTION.
-REQUIRES-PATTERN :Same as anything attribute, default is 0.
-HISTORY :a list containing specific history, default is nil.
+
+TEST: A predicate called with one arg i.e candidate.
+INITIAL-INPUT: Same as initial-input arg in `anything'.
+BUFFER: Name of anything-buffer.
+MUST-MATCH: Candidate selected must be one of COLLECTION.
+REQUIRES-PATTERN: Same as anything attribute, default is 0.
+HISTORY: A list containing specific history, default is nil.
 When it is non--nil, all elements of HISTORY are displayed in
 anything-buffer before COLLECTION.
-PERSISTENT-ACTION :a function called with one arg i.e candidate.
-PERSISTENT-HELP :a string to document PERSISTENT-ACTION.
-NAME :The name related to this local source.
+PERSISTENT-ACTION: A function called with one arg i.e candidate.
+PERSISTENT-HELP: A string to document PERSISTENT-ACTION.
+NAME: The name related to this local source.
+SORT: A predicate to give to `sort' e.g `string-lessp'.
+
 Any prefix args passed during `anything-comp-read' invocation will be recorded
 in `anything-current-prefix-arg', otherwise if prefix args where given before
-`anything-comp-read' invocation, the value of `current-prefix-arg' will be used."
+`anything-comp-read' invocation, the value of `current-prefix-arg' will be used.
+That's mean you can pass prefix arg before or after calling
+a command that use `anything-comp-read'."
   (when (get-buffer anything-action-buffer)
     (kill-buffer anything-action-buffer))
   (or (anything
@@ -5956,7 +5987,7 @@ in `anything-current-prefix-arg', otherwise if prefix args where given before
           (candidates
            . (lambda ()
                (let ((cands (anything-comp-read-get-candidates
-                             collection test)))
+                             collection test sort)))
                  (if (or must-match (string= anything-pattern ""))
                      cands (append (list anything-pattern) cands)))))
           (requires-pattern . ,requires-pattern)
@@ -6026,7 +6057,9 @@ You can set your own list of commands with
                  :history anything-external-command-history)))
   (anything-run-or-raise program)
   (setq anything-external-command-history
-        (cons program (delete program anything-external-command-history))))
+        (cons program (delete program
+                              (loop for i in anything-external-command-history
+                                 when (executable-find i) collect i)))))
 
 (defsubst* anything-c-position (item seq &key (test 'eq))
   "A simple and faster replacement of CL `position'."
@@ -6156,7 +6189,8 @@ If not found or a prefix arg is given query the user which tool to use."
                            :history anything-external-command-history)
                           " %s")))
          (real-prog-name (replace-regexp-in-string " %s" "" program)))
-    (unless def-prog
+    (unless (or def-prog ; Association exists, no need to record it.
+                (not (file-exists-p fname))) ; Don't record non--filenames.
       (when
           (y-or-n-p
            (format
@@ -6171,7 +6205,9 @@ If not found or a prefix arg is given query the user which tool to use."
     (anything-run-or-raise program file)
     (setq anything-external-command-history
           (cons real-prog-name
-                (delete real-prog-name anything-external-command-history)))))
+                (delete real-prog-name
+                        (loop for i in anything-external-command-history
+                             when (executable-find i) collect i))))))
 
 
 ;;;###autoload
@@ -6892,6 +6928,45 @@ If optional 2nd argument is non-nil, the file opened with `auto-revert-mode'.")
 It also accepts a function or a variable name.")
 
 ;;; (anything '(((name . "persistent-help test")(candidates "a")(persistent-help . "TEST"))))
+
+;; Plug-in: Type customize
+(defun anything-c-uniq-list (lst)
+  "Like `remove-duplicates' in CL.
+But cut deeper duplicates and test by `equal'. "
+  (reverse (remove-duplicates (reverse lst) :test 'equal)))
+(defvar anything-additional-type-attributes nil)
+(defun anything-c-arrange-type-attribute (type spec)
+  "Override type attributes by `define-anything-type-attribute'.
+
+The SPEC is like source. The symbol `REST' is replaced with original attribute value.
+
+ Example: Set `play-sound-file' as default action
+   (anything-c-arrange-type-attribute 'file
+      '((action (\"Play sound\" . play-sound-file)
+                REST ;; Rest of actions (find-file, find-file-other-window, ...)
+   )))
+"
+  (add-to-list 'anything-additional-type-attributes
+               (cons type
+                     (loop with typeattr = (assoc-default type anything-type-attributes)
+                      for (attr . value) in spec
+                      if (listp value)
+                      collect (cons attr
+                                    (anything-c-uniq-list
+                                     (loop for v in value
+                                           if (eq v 'REST)
+                                           append (assoc-default attr typeattr)
+                                           else
+                                           collect v)))
+                      else
+                      collect (cons attr value)))))
+(put 'anything-c-arrange-type-attribute 'lisp-indent-function 1)
+
+(defun anything-compile-source--type-customize (source)
+  (anything-aif (assoc-default (assoc-default 'type source) anything-additional-type-attributes)
+      (append it source)
+    source))
+(add-to-list 'anything-compile-source-functions 'anything-compile-source--type-customize t)
 
 ;; Plug-in: default-action
 (defun anything-compile-source--default-action (source)
