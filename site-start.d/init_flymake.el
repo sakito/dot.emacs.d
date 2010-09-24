@@ -33,9 +33,6 @@
               (concat "CHK_SOURCES=" source)
               "SYNTAX_CHECK_MODE=1")))
 
-(set-face-background 'flymake-errline "red4")
-(set-face-background 'flymake-warnline "dark slate blue")
-
 ;; flymakeのエラー表示をミニバッファに表示
 (defun flymake-display-err-minibuffer ()
   "Display any errors or warnings for the current line in the minibuffer."

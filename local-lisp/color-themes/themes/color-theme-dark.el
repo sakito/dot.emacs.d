@@ -40,11 +40,11 @@
       (header-line ((t (:box (:line-width 2 :style released-button) :background "grey20" :foreground "grey90" :box nil))))
 
       (highlight ((t (:background "darkolivegreen"))))
-      (highlight-current-line-face ((t (:background "#282626"))))
+      (highlight-current-line ((t (:background "#282626"))))
 
       ;; isearch
       (isearch ((t (:background "palevioletred2" :foreground "brown4"))))
-      (isearch-lazy-highlight-face ((t (:background "paleturquoise4"))))
+      (isearch-lazy-highlight ((t (:background "paleturquoise4"))))
 
       ;; whitespcae
       (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine"))))
@@ -162,6 +162,10 @@
       ;; 変更点のハイライト
       (highlight-changes ((t (:foreground nil :background "#382f2f"))))
       (highlight-changes-delete ((t (:foreground nil :background "#916868"))))
+
+      ;; flymake
+      (flymake-errline ((t (:background "red4"))))
+      (flymake-warnline ((t (:background "dark slate blue"))))
 
       )))
 (provide 'color-theme-dark)
