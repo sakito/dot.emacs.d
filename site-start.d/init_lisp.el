@@ -32,15 +32,30 @@
 ;(modify-coding-system-alist 'file "\\.el$" '(undecided . iso-2022-jp-unix))
 ; Emacs Lisp info filesの場所
 (setq Info-default-directory-list
-      (cons (expand-file-name
-             "~/.emacs.d/share/info"
-             "/sw/share/info"
-             )
-            Info-default-directory-list )
-      )
+      (append Info-default-directory-list
+              '((expand-file-name "~/.emacs.d/share/info")
+                "/opt/local/share/info"
+                "/sw/share/info")))
 
 (require 'el-mock)
 (require 'el-expectations)
+
+;; function の説明を pos-tip で表示する関数
+(require 'pos-tip)
+(defun describe-function-at-point (function)
+  "Display the full documentation of FUNCTION (a symbol) in tooltip."
+  (interactive (list (function-called-at-point)))
+  (if (null function)
+      (pos-tip-show
+       "** You didn't specify a function! **" '("white" . "red4"))
+    (pos-tip-show
+     (with-temp-buffer
+       (let ((standard-output (current-buffer)))
+         (prin1 function)
+         (princ " is ")
+         (describe-function-1 function)
+         (buffer-string)))
+     '("white" . "dim gray") nil nil 0)))
 
 (defun skt:emacs-lisp-hook ()
   (setq indent-tabs-mode nil)
@@ -51,6 +66,7 @@
   (local-set-key (kbd "C-c C-d") 'eval-defun)
   (local-set-key (kbd "C-c ;") 'comment-dwim)
   (local-set-key (kbd "C-c :") 'comment-dwim)
+  (local-set-key (kbd "C-c f") 'describe-function-at-point)
   (when (fboundp 'expectations)
     ;; C-M-x compile-defun
     (local-set-key (kbd "C-c C-t") 'expectations-execute))

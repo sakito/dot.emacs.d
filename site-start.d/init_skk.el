@@ -48,10 +48,6 @@
 
 (skk-mode)
 
-(setq skk-rom-kana-rule-list
-      (append skk-rom-kana-rule-list
-              '(("@" nil "@"))))
-
 (when (or mac-p linux-p)
   (setq skk-server-host "localhost")
   (setq skk-server-portnum 1178))
@@ -59,6 +55,10 @@
 
 ;;"「"を入力したら"」"も自動で挿入
 ;; (setq skk-auto-insert-paren t)
+
+(setq skk-rom-kana-rule-list
+      (append skk-rom-kana-rule-list
+              '(("@" nil "@"))))
 
 ;; 送り仮名が厳密に正しい候補を優先して表示
 (setq skk-henkan-strict-okuri-precedence t)
@@ -75,10 +75,43 @@
 (setq skk-isearch-start-mode 'latin)
 
 ;; C-x C-fでファイルを開くとSKK
-;;(add-hook 'find-file-hooks
-;;          (lambda ()
-            ;(skk-latin-mode 1)
-;;            ))
+(add-hook 'find-file-hooks
+          (lambda ()
+            (skk-latin-mode t)
+            ))
+
+(add-hook 'skk-load-hook
+          (lambda ()
+            (require 'context-skk)
+            (add-to-list 'context-skk-programming-mode 'scala-mode)
+            ))
+
+(defadvice skk-latin-mode (after no-latin-mode-in-lisp-interaction activate)
+  "`lisp-interaction-mode' において英数モードを回避する。"
+  (when (eq major-mode 'lisp-interaction-mode)
+    (skk-mode-off)))
+
+;; pos-tip が有効な時だけ以下の設定を実施
+(when (require 'pos-tip nil t)
+  ;; 変換時に注釈 (annotation) を表示する
+  (setq skk-show-annotation t)
+  ;; 変換候補一覧と注釈 (annotation) を tooltip で表示
+  (setq skk-show-tooltip t)
+  ;; Tip 描画に pos-tip を利用
+  (setq skk-tooltip-function
+        #'(lambda (tooltip-str)
+            (pos-tip-show tooltip-str nil nil nil 0)))
+
+  ;; Tooltip 表示位置の調整
+  ;; (setq skk-tooltip-x-offset 3)
+  ;; (setq skk-tooltip-y-offset 10)
+
+  (when skk-show-tooltip
+    ;; tooltip のルックスを指定する。デフォルトでは Emacs 標準のルックスになる
+    (setq skk-tooltip-parameters
+          '((background-color . "dim gray")
+            (border-color . "dim gray"))))
+  )
 
 (provide 'init_skk)
 ;;; init_skk.el ends here

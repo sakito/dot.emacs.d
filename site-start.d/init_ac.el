@@ -26,6 +26,9 @@
 
 ;;; Code:
 
+;; @see http://www.emacswiki.org/emacs/PosTip
+(require 'pos-tip nil t)
+
 ;; @see http://github.com/m2ym/auto-complete
 ;; @see http://www.emacswiki.org/emacs/AutoComplete
 ;; @see http://cx4a.org/software/auto-complete/manual.ja.html
@@ -65,8 +68,8 @@
 ;; 補完候補のソート
 (setq ac-use-comphist t)
 
-;; クイックヘルプが表示されるとバッファが大きく変更される場合があるので停止
-(setq ac-use-quick-help nil)
+;; クイックヘルプを表示(pos-tipが存在する場合はそれを利用する)
+(setq ac-use-quick-help t)
 
 ;; ソートファイルの保存場所を変更
 (setq ac-comphist-file
