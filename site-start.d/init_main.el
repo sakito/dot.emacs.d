@@ -136,6 +136,7 @@
 (require 'init_speedbar)
 
 (require 'init_org)
+(require 'init_slime)
 
 ;;; private 設定
 (require 'init_private)
