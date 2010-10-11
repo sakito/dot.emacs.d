@@ -225,10 +225,10 @@
   "Send region to slime-repl."
   (interactive "r")
   (let ((buf-name (buffer-name (current-buffer)))
-        (sbcl-buf (get-buffer "*slime-repl ccl*")))
-    (cond (sbcl-buf
+        (ccl-buf (get-buffer "*slime-repl ccl*")))
+    (cond (ccl-buf
            (copy-region-as-kill start end)
-           (switch-to-buffer-other-window sbcl-buf)
+           (switch-to-buffer-other-window ccl-buf)
            (yank)
            (slime-repl-send-input "\n")
            (switch-to-buffer-other-window buf-name))
