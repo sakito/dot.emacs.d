@@ -26,6 +26,19 @@
 
 ;;; Code:
 
+;; org-mode
+(require 'org-install)
+;; 改行する
+(setq org-startup-truncated nil)
+(org-remember-insinuate)
+(setq org-directory "~/org/")
+(setq org-default-notes-file (concat org-directory "notes.org"))
+(setq org-remember-templates
+      '(("Todo" ?t "** TODO %?\n   %i\n   %a\n   %t" nil "Inbox")
+        ("Bug" ?b "** TODO %?   :bug:\n   %i\n   %a\n   %t" nil "Inbox")
+        ("Idea" ?i "** %?\n   %i\n   %a\n   %t" nil "New Ideas")
+        ))
+
 ;; org-babel
 (require 'ob)
 
