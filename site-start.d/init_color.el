@@ -42,6 +42,15 @@
                  '(left . 500)
                  )
                 default-frame-alist)))
+ ((= (display-pixel-height) 900)
+  (setq default-frame-alist
+        (append (list
+                 '(width . 110)
+                 '(height . 50)
+                 '(top . 22)
+                 '(left . 637)
+                 )
+                default-frame-alist)))
  ;; とりあえずその他 完全に未確認で分岐できる事を確認するためのコード
  (t
   (setq default-frame-alist
