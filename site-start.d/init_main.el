@@ -48,7 +48,7 @@
 ;; smartchr
 (require 'init_smartchr)
 ;; migemo
-(require 'init_cmigemo)
+;;(require 'init_cmigemo)
 ;;; Elscreen
 (require 'init_elscreen)
 ;; session
