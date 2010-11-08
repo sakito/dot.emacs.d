@@ -57,12 +57,13 @@
 ;; サーバが起動していた場合は先に起動していた方を優先
 (require 'server)
 (unless (server-running-p) (server-start))
-(setq server-visit-hook
-      '(lambda () 
-         ;; Frame を前面にする
-         (raise-frame (selected-frame))
-         ;; キーボードフォーカスを選択しているFrameにする
-         (x-focus-frame (selected-frame))))
+(defun skt:raise-frame()
+  ;; Frame を前面にする
+  (raise-frame (selected-frame))
+  ;; キーボードフォーカスを選択しているFrameにする
+  (x-focus-frame (selected-frame)))
+(add-hook 'server-visit-hook 'skt:raise-frame)
+(add-hook 'find-file-hook 'skt:raise-frame)
 
 ;;起動時のmessageを表示しない
 (setq inhibit-startup-message t)
@@ -119,12 +120,18 @@
 (setq next-line-add-newlines nil)
 
 ;; スクロールのマージン
-;; 一行ずつスクロールする
-(setq scroll-conservatively 35)
-(setq scroll-margin 0)
+;; 指定した数字行だけスクロール
+(setq scroll-conservatively 10000)
+;; scroll-conservatively の古いバージョン。一行ずつスクロールする
 (setq scroll-step 1)
+;; 上端、下端における余白幅(初期設定 0)
+;; (setq scroll-margin 10)
+;; カーソル位置を変更しない
+(setq scroll-preserve-screen-position t)
+;; shell-mode において最後の行ができるだけウィンドウの一番下にくるようにする
 (setq comint-scroll-show-maximum-output t)
-;(setq next-screen-context-lines 3)
+;; C-v や M-v した時に以前の画面にあった文字を何行分残すか(初期設定 2)
+;;(setq next-screen-context-lines 5)
 
 ;; 終了時に聞く
 (setq confirm-kill-emacs 'y-or-n-p)
