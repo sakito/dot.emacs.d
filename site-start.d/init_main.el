@@ -137,6 +137,7 @@
 
 (require 'init_org)
 (require 'init_slime)
+(require 'init_calendar)
 
 ;;; private 設定
 (require 'init_private)
