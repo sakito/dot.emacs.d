@@ -45,7 +45,7 @@
   (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
   (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
-  (local-set-key (kbd ">") (smartchr '(">>>" ">" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
   )
 
 (defun smartchr-custom-keybindings-objc ()
@@ -92,6 +92,7 @@
               'css-mode-hook
               'nxml-mode-hook
               'js2-mode-hook
+              'lisp-mode-hook
               ))
   (add-hook hook 'smartchr-custom-keybindings))
 
