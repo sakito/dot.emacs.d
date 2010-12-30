@@ -34,6 +34,27 @@
       (global-set-key "\M-w" 'kill-region)
       ))
 
+;; カーソル移動に追随してウィンドウを移動する
+;; (defadvice previous-line
+;;   (after scroll-up-in-place activate)
+;;   (if (> (current-line) 30)
+;;       (scroll-down 1)))
+
+;; (defadvice next-line
+;;   (after scroll-down-in-place activate)
+;;   (if (> (current-line) 30)
+;;       (scroll-up 1)))
+
+;; (defun scroll-up-in-place (n)
+;;   (interactive "p")
+;;   (forward-line (- n)))
+;; (defun scroll-down-in-place (n)
+;;   (interactive "p")
+;;   (forward-line n))
+;; (global-set-key "\M-p" 'scroll-up-in-place)
+;; (global-set-key "\M-n" 'scroll-down-in-place)
+
+
 ;; C-x C-l にて選択範囲を小文字に変換する機能
 ;; (put 'downcase-region 'disabled nil)
 ;; C-x C-u にて選択範囲を大文字に変換する機能
@@ -65,13 +86,13 @@
       (set-frame-parameter nil 'fullscreen nil)
     (set-frame-parameter nil 'fullscreen 'fullboth)
     ))
-(global-set-key (kbd "C-c m") 'toggle-fullscreen)
+;; (global-set-key (kbd "C-c m") 'toggle-fullscreen)
 
 
 (when ns-p
   ;; 
   ;; (setq ns-alternate-modifier (quote alt))
-  (setq ns-command-modifier (quote meta))
+;;  (setq ns-command-modifier (quote meta))
   ;; dndの動作を Emacs22と同じにする
   (define-key global-map [ns-drag-file] 'ns-find-file))
 
@@ -90,6 +111,8 @@
   ;; (setq mac-command-key-is-meta nil)
   ;; (setq ns-command-modifier (quote meta))
 
+  ;; システムの IM を無視する
+  (setq mac-use-input-method-on-system nil)
   ;; 起動したら US にする
   (add-hook 'after-init-hook 'mac-change-language-to-us)
   ;; minibuffer 内は US にする
@@ -97,6 +120,9 @@
   (mac-translate-from-yen-to-backslash)
   ;; 入力モードを英語に変更
   (setq mac-ts-script-language-on-focus '(0 . 0))
+
+  ;; smooth scroll を on
+  (setq mac-mouse-wheel-smooth-scroll t)
 )
 
 (provide 'init_key)
