@@ -36,12 +36,13 @@
  ((= (display-pixel-height) 1200)
   (setq default-frame-alist
         (append (list
-                 '(width . 190)
+                 '(width . 185)
                  '(height . 65)
-                 '(top . 90)
-                 '(left . 500)
+                 '(top . 130)
+                 '(left . 590)
                  )
                 default-frame-alist)))
+ ;; MacBook Pro ディスプレイ
  ((= (display-pixel-height) 900)
   (setq default-frame-alist
         (append (list
