@@ -31,7 +31,8 @@ isemacs(){
 #-----------------------------------------------------------------
 # setup shell dir
 #SHELL=/bin/zsh
-isdarwin && export SHELL=/sw/bin/zsh
+#isdarwin && export SHELL=/sw/bin/zsh
+isdarwin && export SHELL=/opt/local/bin/zsh
 
 export PREFIX=/usr/local
 #export EXEC_PREFIX=/usr/local/bin
@@ -73,6 +74,9 @@ export PATH=${PATH}:/usr/local/git/bin
 
 # Haskell
 export PATH=${PATH}:${HOME}/.cabal/bin
+
+# Go
+export PATH=${PATH}:${HOME}/bin/go
 
 # 最優先パス
 export PATH=${HOME}/bin:${PATH}
@@ -120,7 +124,7 @@ export  CLICOLOR_FORCE=1
 #export CC=cc
 
 # set man command env.
-export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man
+export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man:/opt/local/man
 export MANPAGER=/usr/bin/less
 export MANWIDTH=80
 
@@ -359,6 +363,7 @@ alias s=source
 alias x=start
 alias j=jobs
 alias reload="source ~/.zshrc"
+alias emacs='emacs -nw'
 
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
