@@ -20,6 +20,11 @@
 ;;     MA 02111-1307, USA.
 
 
+(defgroup ensime-db nil
+  "Customization of ensime debugger support."
+  :group 'ensime
+  :prefix 'ensime-db)
+
 (defcustom ensime-db-cmd-template 
   '("jdb" "-classpath" :classpath "-sourcepath" :sourcepath :debug-class :debug-args)
   "The command to launch the debugger. Keywords will be replaced
@@ -407,12 +412,12 @@ their values."
 the current project's dependencies. Returns list of form (cmd [arg]*)"
   (if (ensime-connected-p)
       (let* ((conf (ensime-rpc-debug-config))
-	     (debug-class 
+	     (debug-class
 	      (ensime-strip-dollar-signs
-	       (ensime-completing-read-path 
+	       (ensime-completing-read-path
 		"Qualified name of class to debug: "
 		ensime-db-default-main-class)))
-	     (debug-args (read-string 
+	     (debug-args (read-string
 			  "Commandline arguments: "
 			  ensime-db-default-main-args)))
 	(setq ensime-db-default-main-class debug-class)
@@ -426,18 +431,19 @@ the current project's dependencies. Returns list of form (cmd [arg]*)"
   "Run a Scala interpreter in an Emacs buffer"
   (interactive)
 
-  (ensime-with-conn-interactive 
+  (ensime-with-conn-interactive
    conn
    (let ((root-path (or (ensime-configured-project-root) "."))
 	 (cmd-line (ensime-db-get-cmd-line)))
 
      (save-selected-window
-       (switch-to-buffer-other-window 
+       (switch-to-buffer-other-window
 	(get-buffer-create ensime-db-buffer-name))
 
        (comint-mode)
 
-       (set (make-local-variable 'comint-prompt-regexp) "^> \\|^[^ ]+\\[[0-9]+\\] ")
+       (set (make-local-variable 'comint-prompt-regexp)
+	    "^> \\|^[^ ]+\\[[0-9]+\\] ")
        (set (make-local-variable 'comint-process-echoes) nil)
        (set (make-local-variable 'comint-scroll-to-bottom-on-output) t)
        (set (make-local-variable 'comint-prompt-read-only) t)
@@ -453,8 +459,9 @@ the current project's dependencies. Returns list of form (cmd [arg]*)"
        (ensime-db-clear-marker-overlays)
 
        (cd root-path)
-       (comint-exec (current-buffer) 
-		    "ensime-debug-cmd" 
+       (ensime-assert-executable-on-path (car cmd-line))
+       (comint-exec (current-buffer)
+		    "ensime-debug-cmd"
 		    (car cmd-line)
 		    nil (cdr cmd-line))
 
