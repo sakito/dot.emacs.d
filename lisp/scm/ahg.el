@@ -57,7 +57,7 @@
                       ["Grep the Working Directory" ahg-manifest-grep t]
                       ["--" nil nil]
                       ("Mercurial Queues"
-                       ["New Patch" ahg-qnew t]
+                       ["New Patch..." ahg-qnew t]
                        ["View Qdiff" ahg-qdiff t]
                        ["Refresh Current Patch" ahg-qrefresh t]
                        ["Go to Patch..." ahg-qgoto t]
@@ -127,6 +127,11 @@ command output." :group 'ahg :type 'boolean)
 command output, instead of waiting for the command to finish."
   :group 'ahg :type 'boolean)
 
+(defcustom ahg-do-command-interactive-regexp "\\<\\(in\\|incoming\\|out\\|outgoing\\|pull\\|push\\)\\>"
+  "Regexp for commands that might require a username/password
+input in `ahg-do-command'."
+  :group 'ahg :type 'regexp)
+
 (defcustom ahg-auto-refresh-status-buffer t
   "If non-nil, automatically refresh the *aHg status* buffer when certain
 operations (e.g. add, remove, commit) are performed."
@@ -138,6 +143,11 @@ operations (e.g. add, remove, commit) are performed."
 
 (defcustom ahg-diff-use-git-format t
   "If non-nil, aHg commands that output a diff will use the git format."
+  :group 'ahg :type 'boolean)
+
+(defcustom ahg-qrefresh-use-short-flag t
+  "If non-nil, aHg qrefresh command will use the --short flag. See the help
+for qrefresh for more information."
   :group 'ahg :type 'boolean)
 
 (defcustom ahg-yesno-short-prompt t
@@ -415,7 +425,7 @@ Commands:
      )
     ["--" nil nil]
     ("Mercurial Queues"
-     ["New Patch" ahg-qnew [:keys "Qn" :active t]]
+     ["New Patch..." ahg-qnew [:keys "Qn" :active t]]
      ["New Interactive Patch" ahg-record-qnew [:keys "iQn" :active t]]
      ["View Qdiff" ahg-qdiff [:keys "Q=" :active t]]
      ["Refresh Current Patch" ahg-qrefresh [:keys "Qr" :active t]]
@@ -1298,9 +1308,11 @@ a prefix argument, prompts also for EXTRA-FLAGS."
   (let ((buffer (get-buffer-create
                  (concat "*hg log (details): " (ahg-root) "*")))
         (command-list (ahg-args-add-revs r1 r2))
-        (template "{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n"))  
+        ;;(template "{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n"))
+        (ahgstyle (concat (file-name-directory (symbol-file 'ahg-log 'defun))
+                          "map-cmdline.ahg")))
     (setq command-list (append command-list
-                               (list "-v" "--template" template)
+                               (list "--style" ahgstyle) ;"ahg")
                                (when extra-flags (split-string extra-flags))))
     (when ahg-file-list-for-log-command
       (setq command-list (append command-list ahg-file-list-for-log-command)))
@@ -1324,7 +1336,58 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                   (propertize dn 'face ahg-header-line-root-face)
                   "\n\n")))
            (ahg-show-error process))))
-     buffer)))
+     buffer
+     )))
+
+(defvar ahg-log-file-line-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-2]
+      (lambda (event)
+        (interactive "e")
+        (select-window (posn-window (event-end event)) t)
+        (goto-char (posn-point (event-end event)))
+        (let ((fn (ahg-log-filename-at-point (point))))
+          (when (file-exists-p fn)
+            (find-file-other-window fn)))))
+    (define-key map [S-mouse-2]
+      (lambda (event)
+        (interactive "e")
+        (select-window (posn-window (event-end event)) t)
+        (let ((pt (posn-point (event-end event))))
+          (goto-char pt)
+          (let* ((r1 (ahg-log-revision-at-point t))
+                 (r2 (ahg-first-parent-of-rev r1)))
+            (ahg-diff
+             r2 r1
+             (list (ahg-log-filename-at-point pt)))))))
+    (define-key map "f"
+      (lambda ()
+        (interactive)
+        (let ((fn (ahg-log-filename-at-point (point))))
+          (when (file-exists-p fn)
+            (find-file fn)))))
+    (define-key map "o"
+      (lambda ()
+        (interactive)
+        (let ((fn (ahg-log-filename-at-point (point))))
+          (when (file-exists-p fn)
+            (find-file-other-window fn)))))
+    (define-key map "="
+      (lambda ()
+        (interactive)
+          (let* ((r1 (ahg-log-revision-at-point t))
+                 (r2 (ahg-first-parent-of-rev r1)))
+            (ahg-diff r2 r1 (list (ahg-log-filename-at-point (point)))))))
+    map))
+
+(defun ahg-log-filename-at-point (point)
+  (interactive "d")
+  (save-excursion
+    (goto-char point)
+    (buffer-substring-no-properties
+     (+ 13 ;; (length "             ")
+        (point-at-bol))
+     (point-at-eol))))
 
 (defun ahg-format-log-buffer ()
   (goto-char (point-min))
@@ -1362,9 +1425,20 @@ a prefix argument, prompts also for EXTRA-FLAGS."
         ;; sixth line, date
         (insert "date:        ")
         (next)
-        ;; seventh line, files
-        (insert "files:       ")
-        (next)
+        ;; seventh line, files, until an empty line is found
+        (unless (looking-at "^$")
+          (set-text-properties (point-at-bol) (point-at-eol)
+                               (list 'mouse-face 'highlight
+                                     'keymap ahg-log-file-line-map))
+          (insert "files:       ")
+          (next))
+        (while (not (looking-at "^$"))
+          (set-text-properties (point-at-bol) (point-at-eol)
+                               (list 'mouse-face 'highlight
+                                     'keymap ahg-log-file-line-map))
+          (insert "             ")
+          (next))
+        (delete-char 1) ;; remove the empty line at the end of the list of files
         ;; rest is the description
         (insert "description:\n")
         ;; each line in the description starts with a '\t'
@@ -1701,7 +1775,10 @@ that buffer is refreshed instead.)"
          (buffer (get-buffer-create (concat "*hg command: "
                                             (ahg-root) "*")))
          (curdir default-directory)
-         (should-refresh current-prefix-arg))
+         (should-refresh current-prefix-arg)
+         (is-interactive
+          (ahg-string-match-p ahg-do-command-interactive-regexp cmdname))
+         (ahg-i18n (if is-interactive nil ahg-i18n)))
     (when ahg-do-command-extra-args
       (let ((extra (mapconcat 'identity ahg-do-command-extra-args " ")))
         (setq cmdargs
@@ -1743,10 +1820,45 @@ that buffer is refreshed instead.)"
                (pop-to-buffer (current-buffer))
                (goto-char (point-min)))
            (ahg-show-error process))))
-     buffer t ;; use-shell
-            nil ;; no-show-message
-            t ;; report-untrusted
-            )))
+     buffer
+     t ;; use-shell
+     nil ;; no-show-message
+     t ;; report-untrusted
+     (when is-interactive 'ahg-do-command-filter) ;; filterfunc
+     is-interactive ;; is-interactive
+     )))
+
+
+(defun ahg-do-command-filter (process string)
+  (when (buffer-name (process-buffer process))
+    ;; insert output into the buffer
+    (with-current-buffer (process-buffer process)
+      (let ((moving (= (point) (process-mark process)))
+            (inhibit-read-only t))
+        (save-excursion
+          ;; Insert the text, advancing the process marker.
+          (goto-char (process-mark process))
+          (insert string)
+          (set-marker (process-mark process) (point))
+          ;; check if we are expecting a user name or a password
+          (let (user pass data)
+            (save-excursion
+              (backward-word)
+              (cond ((looking-at "\\<user: $") (setq user t))
+                    ((looking-at "\\<password: $") (setq pass t))))
+            (cond (user (setq data (concat (read-string "user: ") "\n"))
+                        (process-send-string process data))
+                  (pass (setq data (concat (read-passwd "password: ") "\n"))
+                        (process-send-string process data)
+                        (setq data "***\n")
+                        ))
+            (when data
+              (insert data)
+              (set-marker (process-mark process) (point)))
+            )
+          )
+        (if moving (goto-char (process-mark process)))))))
+  
 
 ;;-----------------------------------------------------------------------------
 ;; hg help
@@ -1804,7 +1916,7 @@ the files under version control."
                                (query-replace-descr default))
                      "Search for pattern: "))))
       (if (and input (> (length input) 0)) input default))))
-  (grep (format "cd %s && %s manifest | xargs grep -nH -E '%s'"
+  (grep (format "cd %s && %s manifest | xargs grep -nHE -e %s"
                 (ahg-root) ahg-hg-command
                 (shell-quote-argument pattern))))
 
@@ -1854,8 +1966,9 @@ hg qseries command."
         nil))))
 
 (defun ahg-qnew (patchname force edit-log-message)
-  "Create a new mq patch PATCHNAME. If FORCE is non-nil, use the -f switch.
-If EDIT-LOG-MESSAGE is non-nil, pop a buffer to enter a commit
+  "Create a new mq patch PATCHNAME. If FORCE is nil, abort if
+there are outstanding changes in the working directory. If
+EDIT-LOG-MESSAGE is non-nil, pop a buffer to enter a commit
 message to use instead of the default one. When called
 interactively, the name of the patch and the FORCE flag are read
 from the minibuffer, and EDIT-LOG-MESSAGE is non-nil only if
@@ -1867,28 +1980,32 @@ selected files will be incorporated into the patch."
          (and (ahg-uncommitted-changes-p)
               (ahg-y-or-n-p "Import outstanding changes into patch? "))
          current-prefix-arg))
-  (let ((files (when (eq major-mode 'ahg-status-mode)
-                 (mapcar 'cddr (ahg-status-get-marked nil)))))
-    (if edit-log-message
-        (ahg-log-edit
-         (lexical-let ((force force))
-           (lambda () (interactive)
-             (ahg-mq-log-callback "qnew" (when force (list "-f")))))
-         (lexical-let ((flist (cons patchname files))) (lambda () flist))
-         (generate-new-buffer "*aHg-log*"))
-      ;; else
-      (ahg-generic-command
-       "qnew" (append (when force (list "-f")) (list patchname) files)
-       (lexical-let ((aroot (ahg-root)))
-         (lambda (process status)
-           (if (string= status "finished\n")
-               (progn
-                 (ahg-status-maybe-refresh aroot)
-                 (ahg-mq-patches-maybe-refresh aroot)
-                 (message "mq command qnew successful.")
-                 (kill-buffer (process-buffer process)))
-             (ahg-show-error process)))))
-       )))
+  (if (and (not force) (ahg-uncommitted-changes-p))
+      (message "mq command qnew aborted.")
+    (let ((files (when (eq major-mode 'ahg-status-mode)
+                   (mapcar 'cddr (ahg-status-get-marked nil))))
+          (qnew-args (append (when ahg-diff-use-git-format (list "--git"))
+                             (list "--force"))))
+      (if edit-log-message
+          (ahg-log-edit
+           (lexical-let ((qnew-args qnew-args))
+             (lambda () (interactive)
+               (ahg-mq-log-callback "qnew" qnew-args)))
+           (lexical-let ((flist (cons patchname files))) (lambda () flist))
+           (generate-new-buffer "*aHg-log*"))
+        ;; else
+        (ahg-generic-command
+         "qnew" (append qnew-args (list patchname) files)
+         (lexical-let ((aroot (ahg-root)))
+           (lambda (process status)
+             (if (string= status "finished\n")
+                 (progn
+                   (ahg-status-maybe-refresh aroot)
+                   (ahg-mq-patches-maybe-refresh aroot)
+                   (message "mq command qnew successful.")
+                   (kill-buffer (process-buffer process)))
+               (ahg-show-error process)))))
+        ))))
 
 (defun ahg-qrefresh (get-log-message)
   "Refreshes the current mq patch. If GET-LOG-MESSAGE is non-nil,
@@ -1917,11 +2034,14 @@ only the selected files will be refreshed."
                     (buffer-substring-no-properties
                      (point-min) (1- (point-max)))))))
           (ahg-log-edit
-           (lambda () (interactive) (ahg-mq-log-callback "qrefresh"))
+           (lexical-let ((args (when ahg-diff-use-git-format (list "--git"))))
+             (lambda () (interactive) (ahg-mq-log-callback "qrefresh" args)))
            (lexical-let ((flist files)) (lambda () flist))
            buf msg content))
       (ahg-generic-command
-       "qrefresh" files
+       "qrefresh" (append (when (and files ahg-qrefresh-use-short-flag)
+                            (list "--short"))
+                          (when ahg-diff-use-git-format (list "--git")) files)
        (lexical-let ((aroot (ahg-root)))
          (lambda (process status)
            (if (string= status "finished\n")
@@ -1960,7 +2080,7 @@ called interactively, PATCHNAME and FORCE are read from the minibuffer.
                         (buffer-substring-no-properties
                          (point-at-bol) (point-at-eol)))))
                  (message msg)
-                 (if (string-match-p "^errors " msg)
+                 (if (ahg-string-match-p "^errors " msg)
                      (ahg-show-error process)
                    (kill-buffer (process-buffer process)))))
            (ahg-show-error process)))))))
@@ -2111,6 +2231,15 @@ last refresh."
      buf)))
 
 
+(define-generic-mode ahg-mq-series-mode
+  '("#") ;; comments
+  '() ;; keywords
+  '() ;; extra font locks
+  '() ;; auto mode list
+  '() ;; functions for setup
+  "Major mode for editing MQ patch series files.")
+
+
 (defun ahg-mq-edit-series ()
   (interactive)
   ;; first, check whether there is any patch applied. If so, ask the user
@@ -2125,7 +2254,8 @@ last refresh."
          (edit-series (lambda (root)
                         (find-file-other-window
                          (concat (file-name-as-directory root)
-                                 ".hg/patches/series")))))
+                                 ".hg/patches/series"))
+                        (ahg-mq-series-mode))))
       (if pop
           (ahg-generic-command
            "qpop" (list "--all")
@@ -2708,7 +2838,8 @@ patch editing functionalities provided by Emacs."
          (when (eq major-mode 'ahg-status-mode)
            (mapcar 'cddr (ahg-status-get-marked nil)))))
   (ahg-do-record selected-files 'ahg-record-mq-commit
-                 "qnew" (list "--force" patchname)))
+                 "qnew" (append (when ahg-diff-use-git-format (list "--git"))
+                                (list "--force" patchname))))
 
                                           
 ;;-----------------------------------------------------------------------------
@@ -2734,7 +2865,10 @@ patch editing functionalities provided by Emacs."
 (defun ahg-generic-command (command args sentinel
                                     &optional buffer use-shell
                                               no-show-message
-                                              report-untrusted)
+                                              report-untrusted
+                                              filterfunc
+                                              is-interactive
+                                              global-opts)
   "Executes then given hg command, with the given
 arguments. SENTINEL is a sentinel function. BUFFER is the
 destination buffer. If nil, a new buffer will be used."
@@ -2752,6 +2886,9 @@ destination buffer. If nil, a new buffer will be used."
                   (append
                    (unless report-untrusted
                      (list "--config" "ui.report_untrusted=0"))
+                   (when is-interactive
+                     (list "--config" "ui.interactive=1"))
+                   global-opts
                    (list command) args))))
       (when ahg-subprocess-coding-system
         (set-process-coding-system process ahg-subprocess-coding-system))
@@ -2766,6 +2903,7 @@ destination buffer. If nil, a new buffer will be used."
                       cmd))
            (setq mode-line-process nil)
            (funcall sf p s))))
+      (set-process-filter process filterfunc)
       )
     (setenv "HGPLAIN")
     (setenv "LANG" lang)
@@ -2859,6 +2997,12 @@ Commands:
          (matches (file-expand-wildcards (concat (substring command idx) "*")))
          (prev (substring command 0 idx)))
     (mapcar (function (lambda (a) (concat prev a))) matches)))
+
+(defun ahg-string-match-p (&rest args)
+  (if (fboundp 'string-match-p)
+      (apply 'string-match-p args)
+    (save-match-data
+      (apply 'string-match args))))
 
 ;;-----------------------------------------------------------------------------
 ;; log-edit related functions
