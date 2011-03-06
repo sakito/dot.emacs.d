@@ -89,6 +89,8 @@ export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
+export ANT_HOME=~/bin/apache-ant-1.8.2
+export PATH=${ANT_HOME}/bin:${PATH}
 
 ### Java
 # Jakarta Maven
