@@ -48,7 +48,7 @@
 ;; smartchr
 (require 'init_smartchr)
 ;; migemo
-;;(require 'init_cmigemo)
+(require 'init_cmigemo)
 ;;; Elscreen
 (require 'init_elscreen)
 ;; session
@@ -138,6 +138,7 @@
 (require 'init_org)
 (require 'init_slime)
 (require 'init_calendar)
+(require 'init_popwin)
 
 ;;; private 設定
 (require 'init_private)
