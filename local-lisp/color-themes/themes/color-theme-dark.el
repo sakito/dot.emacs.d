@@ -1,71 +1,63 @@
 (eval-when-compile
   (require 'color-theme))
 
-(defvar my-original-keyword-face 'my-original-keyword-face)
-(defface my-original-keyword-face
+(defvar mark-tabs-face 'mark-tabs-face)
+(defface mark-tabs-face
+  '((((class color))
+     (:foreground "red" :underline t)))
+  nil
+  :group 'face)
+(defvar mark-whitespace-face 'mark-whitespace-face)
+(defface mark-whitespace-face
+  '((((class color))
+     (:background "gray")))
+  nil
+  :group 'face)
+(defvar mark-lineendspaces 'mark-lineendspaces-face)
+(defface mark-lineendspaces-face
+  '((((class color))
+     (:foreground "SteelBlue" :underline t)))
+  nil
+  :group 'face)
+(defvar brackets-face 'brackets-face)
+(defface brackets-face
+  '((((class color))
+     (:foreground "khaki1")))
+  "Face for displaying a brackets.
+UK
+[ ]:square brackets
+( ):round brackets
+{ }:curly brackets
+< >:angle brackets
+USA
+[ ]:brackets
+( ):parentheses
+{ }:brace
+< >:angle brackets
+"
+  :group 'faces)
+
+(defvar operator-face 'operator-face)
+(defface operator-face
   '((((class color))
      (:foreground "orange")))
-  "Face for displaying a original keyword."
+  "Face for displaying a operator.|&!.+=-/%*,"
   :group 'faces)
 
-(defmacro my-original-keyword-face-add-support (keywords)
-  "Generate a lambda expression for use in a hook."
-  `(lambda ()
-     (let* ((regexp "(\\|)\\|{\\|\\}\\|\\[\\|\\]\\|\\.\\|=\\|\\:")
-            (match (assoc regexp ,keywords)))
-       (unless (eq (cdr match) my-original-keyword-face)
-         (setq ,keywords (append (list (cons regexp my-original-keyword-face)) ,keywords))))))
+(defadvice font-lock-mode (before my-font-lock-mode ())
+  (font-lock-add-keywords
+   major-mode
+   '(
+     ("\t" 0 mark-tabs-face append)
+     ("　" 0 mark-whitespace-face append)
+     ;; ("[ \t]+$" 0 my-mark-lineendspaces append)
+     ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 brackets-face append)
+     ;; ("[|!\\.\\+\\=\\&]\\|-\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 operator-face append)
+     ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 operator-face append)
 
-(defvar paren-face 'paren-face)
-(defface paren-face
-  '((((class color))
-     (:foreground "gray55")))
-  "Face for displaying a paren."
-  :group 'faces)
-
-(defmacro paren-face-add-support (keywords)
-  "Generate a lambda expression for use in a hook."
-  `(lambda ()
-     (let* ((regexp "(\\|)")
-            (match (assoc regexp ,keywords)))
-       (unless (eq (cdr match) paren-face)
-         (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
-
-;; (defvar brace-face 'brace-face)
-;; (defface brace-face
-;;   '((((class color))
-;;      (:foreground "orange")))
-;;   "Face for displaying a brace."
-;;   :group 'faces)
-
-;; (defvar bracket-face 'bracket-face)
-;; (defface bracket-face
-;;   '((((class color))
-;;      (:foreground "orange")))
-;;   "Face for displaying a bracket."
-;;   :group 'faces)
-
-;; (defmacro brace-face-add-support (keywords)
-;;   "Generate a lambda expression for use in a hook."
-;;   `(lambda ()
-;;      (let* ((regexp "{\\|}")
-;;             (match (assoc regexp ,keywords)))
-;;        (unless (eq (cdr match) brace-face)
-;;          (setq ,keywords (append (list (cons regexp brace-face)) ,keywords))))))
-
-;; (defmacro bracket-face-add-support (keywords)
-;;   "Generate a lambda expression for use in a hook."
-;;   `(lambda ()
-;;      (let* ((regexp "\\[\\|\\]")
-;;             (match (assoc regexp ,keywords)))
-;;        (unless (eq (cdr match) bracket-face)
-;;          (setq ,keywords (append (list (cons regexp bracket-face)) ,keywords))))))
-
-(add-hook 'scheme-mode-hook           (paren-face-add-support scheme-font-lock-keywords-2))
-(add-hook 'lisp-mode-hook             (paren-face-add-support lisp-font-lock-keywords-2))
-(add-hook 'emacs-lisp-mode-hook       (paren-face-add-support lisp-font-lock-keywords-2))
-(add-hook 'lisp-interaction-mode-hook (paren-face-add-support lisp-font-lock-keywords-2))
-(add-hook 'python-mode-hook (my-original-keyword-face-add-support python-font-lock-keywords))
+     )))
+(ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
+(ad-activate 'font-lock-mode)
 
 (defun color-theme-dark ()
    "Color theme by Tomas Cerha, created 2001-11-13. color-theme-deep-blue"

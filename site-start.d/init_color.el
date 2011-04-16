@@ -154,33 +154,6 @@
 ;; (global-whitespace-mode 1) 常に whitespace-mode だと動作が遅くなる場合がある
 (global-set-key (kbd "C-x w") 'global-whitespace-mode)
 
-;; タブ文字、全角空白、文末の空白の色付け
-;; font-lockに対応したモードでしか動作しません
-(defface my-mark-tabs
-  '((t (:foreground "red" :underline t)))
-  nil :group 'skt)
-(defface my-mark-whitespace
-  '((t (:background "gray")))
-  nil :group 'skt)
-(defface my-mark-lineendspaces
-  '((t (:foreground "SteelBlue" :underline t)))
-  nil :group 'skt)
-
-(defvar my-mark-tabs 'my-mark-tabs)
-(defvar my-mark-whitespace 'my-mark-whitespace)
-(defvar my-mark-lineendspaces 'my-mark-lineendspaces)
-
-(defadvice font-lock-mode (before my-font-lock-mode ())
-  (font-lock-add-keywords
-   nil
-   '(
-     ("\t" 0 my-mark-tabs append)
-     ("　" 0 my-mark-whitespace append)
-;;     ("[ \t]+$" 0 my-mark-lineendspaces append)
-     )))
-(ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
-(ad-activate 'font-lock-mode)
-
 ;; 行末の空白を表示
 (setq-default show-trailing-whitespace t)
 ;; EOB を表示
