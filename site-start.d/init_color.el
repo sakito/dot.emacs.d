@@ -137,7 +137,22 @@
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; @see http://www.emacswiki.org/emacs/WhiteSpace
 ;; @see http://xahlee.org/emacs/whitespace-mode.html
-(setq whitespace-style '(spaces tabs newline space-mark tab-mark newline-mark))
+(setq whitespace-style '(spaces tabs space-mark tab-mark))
+(setq whitespace-display-mappings
+      '(
+       ;; (space-mark 32 [183] [46]) ; normal space, ·
+        (space-mark 160 [164] [95])
+        (space-mark 2208 [2212] [95])
+        (space-mark 2336 [2340] [95])
+        (space-mark 3616 [3620] [95])
+        (space-mark 3872 [3876] [95])
+        (space-mark ?\x3000 [?\□]) ;; 全角スペース
+        ;; (newline-mark 10 [182 10]) ; newlne, ¶
+        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+        ))
+(require 'whitespace)
+;; (global-whitespace-mode 1) 常に whitespace-mode だと動作が遅くなる場合がある
+(global-set-key (kbd "C-x w") 'global-whitespace-mode)
 
 ;; タブ文字、全角空白、文末の空白の色付け
 ;; font-lockに対応したモードでしか動作しません
@@ -157,7 +172,7 @@
 
 (defadvice font-lock-mode (before my-font-lock-mode ())
   (font-lock-add-keywords
-   major-mode
+   nil
    '(
      ("\t" 0 my-mark-tabs append)
      ("　" 0 my-mark-whitespace append)
@@ -179,11 +194,16 @@
 (global-highlight-changes-mode t)
 (setq highlight-changes-visibility-initial-state t)
 (global-set-key (kbd "M-]") 'highlight-changes-next-change)
-(global-set-key (kbd "M-[")  'highlight-changes-previous-change)
+(global-set-key (kbd "M-[") 'highlight-changes-previous-change)
 
 ;; 現在行に色を付ける
-(global-hl-line-mode)
-(hl-line-mode 1)
+;;(global-hl-line-mode)
+;;(hl-line-mode 1)
+;; 標準の hl-line だと結構邪魔なので拡張機能に変更
+;; @see http://www.emacswiki.org/emacs/hl-line%2B.el
+(require 'hl-line+)
+(toggle-hl-line-when-idle 1)
+
 
 ;; 列に色を付ける
 ;; @see http://www.emacswiki.org/emacs/CrosshairHighlighting

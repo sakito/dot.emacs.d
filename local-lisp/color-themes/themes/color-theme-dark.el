@@ -1,6 +1,72 @@
 (eval-when-compile
   (require 'color-theme))
 
+(defvar my-original-keyword-face 'my-original-keyword-face)
+(defface my-original-keyword-face
+  '((((class color))
+     (:foreground "orange")))
+  "Face for displaying a original keyword."
+  :group 'faces)
+
+(defmacro my-original-keyword-face-add-support (keywords)
+  "Generate a lambda expression for use in a hook."
+  `(lambda ()
+     (let* ((regexp "(\\|)\\|{\\|\\}\\|\\[\\|\\]\\|\\.\\|=\\|\\:")
+            (match (assoc regexp ,keywords)))
+       (unless (eq (cdr match) my-original-keyword-face)
+         (setq ,keywords (append (list (cons regexp my-original-keyword-face)) ,keywords))))))
+
+(defvar paren-face 'paren-face)
+(defface paren-face
+  '((((class color))
+     (:foreground "gray55")))
+  "Face for displaying a paren."
+  :group 'faces)
+
+(defmacro paren-face-add-support (keywords)
+  "Generate a lambda expression for use in a hook."
+  `(lambda ()
+     (let* ((regexp "(\\|)")
+            (match (assoc regexp ,keywords)))
+       (unless (eq (cdr match) paren-face)
+         (setq ,keywords (append (list (cons regexp paren-face)) ,keywords))))))
+
+;; (defvar brace-face 'brace-face)
+;; (defface brace-face
+;;   '((((class color))
+;;      (:foreground "orange")))
+;;   "Face for displaying a brace."
+;;   :group 'faces)
+
+;; (defvar bracket-face 'bracket-face)
+;; (defface bracket-face
+;;   '((((class color))
+;;      (:foreground "orange")))
+;;   "Face for displaying a bracket."
+;;   :group 'faces)
+
+;; (defmacro brace-face-add-support (keywords)
+;;   "Generate a lambda expression for use in a hook."
+;;   `(lambda ()
+;;      (let* ((regexp "{\\|}")
+;;             (match (assoc regexp ,keywords)))
+;;        (unless (eq (cdr match) brace-face)
+;;          (setq ,keywords (append (list (cons regexp brace-face)) ,keywords))))))
+
+;; (defmacro bracket-face-add-support (keywords)
+;;   "Generate a lambda expression for use in a hook."
+;;   `(lambda ()
+;;      (let* ((regexp "\\[\\|\\]")
+;;             (match (assoc regexp ,keywords)))
+;;        (unless (eq (cdr match) bracket-face)
+;;          (setq ,keywords (append (list (cons regexp bracket-face)) ,keywords))))))
+
+(add-hook 'scheme-mode-hook           (paren-face-add-support scheme-font-lock-keywords-2))
+(add-hook 'lisp-mode-hook             (paren-face-add-support lisp-font-lock-keywords-2))
+(add-hook 'emacs-lisp-mode-hook       (paren-face-add-support lisp-font-lock-keywords-2))
+(add-hook 'lisp-interaction-mode-hook (paren-face-add-support lisp-font-lock-keywords-2))
+(add-hook 'python-mode-hook (my-original-keyword-face-add-support python-font-lock-keywords))
+
 (defun color-theme-dark ()
    "Color theme by Tomas Cerha, created 2001-11-13. color-theme-deep-blue"
    (interactive)
@@ -47,7 +113,8 @@
       (isearch-lazy-highlight ((t (:background "paleturquoise4"))))
 
       ;; whitespcae
-      (whitespace-space ((t (:family "IPAGothic" :foreground "aquamarine"))))
+      (whitespace-space ((t (:foreground "aquamarine"))))
+      (whitespace-tab ((t (:foreground "aquamarine"))))
       ;; 行末半角スペース
       (trailing-whitespace ((t (:underline "SteelBlue"))))
 
@@ -107,16 +174,21 @@
       (font-latex-warning-face ((t (:bold t :foreground "Pink" :weight bold))))
 
       (font-lock-builtin-face ((t (:foreground "LightCoral"))))
-      (font-lock-comment-face ((t (:italic t :foreground "PaleGreen1" :slant italic))))
+      ;;(font-lock-comment-face ((t (:italic t :foreground "PaleGreen1" :slant italic))))
+      (font-lock-comment-face ((t (:foreground "#888a85"))))
       (font-lock-constant-face ((t (:foreground "gold"))))
       (font-lock-doc-face ((t (:foreground "BlanchedAlmond"))))
       (font-lock-doc-string-face ((t (:foreground "BlanchedAlmond"))))
-      (font-lock-function-name-face ((t (:bold t :foreground "khaki" :weight bold))))
+      ;;(font-lock-function-name-face ((t (:bold t :foreground "khaki" :weight bold))))
+      (font-lock-function-name-face ((t (:foreground "yellow"))))
       (font-lock-keyword-face ((t (:bold t :foreground "sky blue" :weight bold))))
       (font-lock-preprocessor-face ((t (:foreground "gold"))))
       (font-lock-reference-face ((t (:foreground "LightCoral"))))
-      (font-lock-string-face ((t (:foreground "burlywood"))))
-      (font-lock-type-face ((t (:foreground "CadetBlue1"))))
+      ;;(font-lock-string-face ((t (:foreground "burlywood"))))
+      ;;(font-lock-string-face ((t (:foreground "lawn green"))))
+       (font-lock-string-face ((t (:foreground "#8ae234"))))
+      ;;(font-lock-type-face ((t (:foreground "CadetBlue1"))))
+      (font-lock-type-face ((t (:foreground "yellow"))))
       (font-lock-variable-name-face ((t (:foreground "SeaGreen2"))))
       (font-lock-warning-face ((t (:foreground "yellow"))))
 
@@ -129,12 +201,18 @@
       (show-paren-match-face ((t (:foreground "#2e3436" :background "#73d216"))))
       (show-paren-mismatch-face ((t (:background "#ad7fa8" :foreground "#2e3436"))))
 
+      (font-lock-regexp-grouping-backslash ((t (:foreground "gray50"))))
+      (font-lock-regexp-grouping-construct ((t (:foreground "orange"))))
+
       (widget-button-face ((t (:bold t :weight bold))))
       (widget-button-pressed-face ((t (:foreground "red"))))
       (widget-documentation-face ((t (:foreground "lime green"))))
       (widget-field-face ((t (:background "dim gray"))))
       (widget-inactive-face ((t (:foreground "light gray"))))
       (widget-single-line-field-face ((t (:background "dim gray"))))
+
+      ;; python
+      (py-pseudo-keyword-face ((t (:bold t :foreground "dark turquoise" :weight bold))))
 
       ;; rst
       (rst-level-1-face ((t (:background "gray0" :foreground "white"))))

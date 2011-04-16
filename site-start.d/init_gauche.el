@@ -41,19 +41,10 @@
     (select-window win)
     ))
 
-;; カッコを薄くする。好みによります。
-(defvar paren-face 'paren-face)
-(make-face 'paren-face)
-(set-face-background 'paren-face "black")
-(set-face-foreground 'paren-face "gray50")
-
 (add-hook 'scheme-mode-hook
           (function
             (lambda ()
               (define-key scheme-mode-map "\C-c!" 'my-scm-shell)
-              (setq scheme-font-lock-keywords-2
-                    (append '(("(\\|)" . paren-face))
-                            scheme-font-lock-keywords-2))
               )))
 
 ;; 新な関数は以下のようにして呼べばよいです。
