@@ -139,6 +139,7 @@
 (require 'init_slime)
 (require 'init_calendar)
 (require 'init_popwin)
+(require 'init_linum)
 
 ;;; private 設定
 (require 'init_private)
