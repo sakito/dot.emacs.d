@@ -62,9 +62,27 @@ USA
 (defun color-theme-dark ()
    "Color theme by Tomas Cerha, created 2001-11-13. color-theme-deep-blue"
    (interactive)
+
+   (let* ((color-bg3   "#002b36")
+          (color-bg2   "#073642")
+          (color-bg1   "#586e75")
+          (color-bg0   "#657b83")
+          (color-fg0  "#839496")
+          (color-fg1  "#93a1a1")
+          (color-fg2  "#eee8d5")
+          (color-fg3  "#fdf6e3")
+          (yellow     "#b58900")
+          (orange     "#cb4b16")
+          (red        "#dc322f")
+          (magenta    "#d33682")
+          (violet     "#6c71c4")
+          (blue       "#268bd2")
+          (cyan       "#2aa198")
+          (green      "#859900"))
+
    (color-theme-install
     '(color-theme-dark
-      ((background-color . "#191717")
+      ((background-color . "#002b36")
        (background-mode . dark)
        (border-color . "black")
        (cursor-color . "green")
@@ -77,7 +95,7 @@ USA
        (vc-annotate-very-old-color . "#0046FF")
        (view-highlight-face . highlight)
        (widget-mouse-face . highlight))
-      (default ((t (:stipple nil :background "#102e4e" :foreground "#eeeeee" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :family "September"))))
+      (default ((t (:background "#002b36" :foreground "#fdf6e3"))))
 
       (bold ((t (:bold t :weight bold :height 1.1))))
       (italic ((t (:italic t :slant italic :height 1.1))))
@@ -97,8 +115,8 @@ USA
       (tooltip ((t (:background "lightyellow" :foreground "black"))))
       (header-line ((t (:box (:line-width 2 :style released-button) :background "grey20" :foreground "grey90" :box nil))))
 
-      (highlight ((t (:background "darkolivegreen"))))
-      (highlight-current-line ((t (:background "#282626"))))
+      (highlight ((t (:background "#586e75"))))
+      (highlight-current-line ((t (:background "#586e75"))))
 
       ;; isearch
       (isearch ((t (:background "palevioletred2" :foreground "brown4"))))
@@ -166,8 +184,7 @@ USA
       (font-latex-warning-face ((t (:bold t :foreground "Pink" :weight bold))))
 
       (font-lock-builtin-face ((t (:foreground "LightCoral"))))
-      ;;(font-lock-comment-face ((t (:italic t :foreground "PaleGreen1" :slant italic))))
-      (font-lock-comment-face ((t (:foreground "#888a85"))))
+      (font-lock-comment-face ((t (:slant italic :foreground "#586e75"))))
       (font-lock-constant-face ((t (:foreground "gold"))))
       (font-lock-doc-face ((t (:foreground "BlanchedAlmond"))))
       (font-lock-doc-string-face ((t (:foreground "BlanchedAlmond"))))
@@ -237,5 +254,5 @@ USA
       (flymake-errline ((t (:background "red4"))))
       (flymake-warnline ((t (:background "dark slate blue"))))
 
-      )))
+      ))))
 (provide 'color-theme-dark)
