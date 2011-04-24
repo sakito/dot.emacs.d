@@ -71,12 +71,12 @@
 ;;    (local-set-key "\C-c\C-l" 'rst-compile-alt-toolset)
     'turn-off-auto-fill
     ;; color-theme が無効になる場合があるので暫定対処 原因は後程調査 TODO
-    (set-face-background rst-level-1-face "gray0")
-    (set-face-background rst-level-2-face "gray0")
-    (set-face-background rst-level-3-face "gray0")
-    (set-face-background rst-level-4-face "gray0")
-    (set-face-background rst-level-5-face "gray0")
-    (set-face-background rst-level-6-face "gray0")
+    (set-face-background rst-level-1-face "#cb4b16")
+    (set-face-background rst-level-2-face "#b58900")
+    (set-face-background rst-level-3-face "#dc322f")
+    (set-face-background rst-level-4-face "#d33682")
+    (set-face-background rst-level-5-face "#6c71c4")
+    (set-face-background rst-level-6-face "#268bd2")
 ;;    (local-set-key "\C-c\C-f\C-e" 'rst-change-font-emphasis)
 ;;    (local-set-key "\C-c\C-f\C-n" 'rst-change-font-normal)
 ;; `rst-change-font-bold'......[C-c C-f C-b] -> change font (bold)
