@@ -165,7 +165,8 @@
 
 ;; 変更点に色付け
 (global-highlight-changes-mode t)
-(setq highlight-changes-visibility-initial-state t)
+;; 初期は非表示として highlight-changes-visible-mode で表示する
+(setq highlight-changes-visibility-initial-state nil)
 (global-set-key (kbd "M-]") 'highlight-changes-next-change)
 (global-set-key (kbd "M-[") 'highlight-changes-previous-change)
 
