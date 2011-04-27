@@ -28,6 +28,8 @@
 
 ;; org-mode
 (require 'org-install)
+;; 初期全表示
+(setq org-startup-folded "showall")
 ;; 改行する
 (setq org-startup-truncated nil)
 (org-remember-insinuate)
