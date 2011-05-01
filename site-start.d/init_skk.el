@@ -69,7 +69,7 @@
 ;; 変換候補をインラインに表示
 (setq skk-show-inline t)
 ;; 縦に表示したい場合以下を設定
-;;(setq skk-show-inline 'vertical)
+(setq skk-show-inline 'vertical)
 
 ;; isearch時にSKKをオフ
 (setq skk-isearch-start-mode 'latin)
@@ -105,7 +105,7 @@
   ;; Tooltip 表示位置の調整
   ;; (setq skk-tooltip-x-offset 3)
   ;; (setq skk-tooltip-y-offset 10)
-
+  ;;(require 'popup)
   (when skk-show-tooltip
     ;; tooltip のルックスを指定する。デフォルトでは Emacs 標準のルックスになる
     (setq skk-tooltip-parameters
