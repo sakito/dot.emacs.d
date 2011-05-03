@@ -28,14 +28,57 @@
 
 ;;; Code:
 
-;; (autoload 'sql-mode "sql" "SQL Edit mode" t)
-;(setq sql-user "test")
-;; (require 'plsql)
-;; (setq plsql-indent 2)
+(autoload 'master-mode "master" "Master mode minor mode." t)
+
+;; SQL mode 起動で sql 関連 lisp をロード
+(eval-after-load "sql"
+  '(progn
+     ;; http://www.emacswiki.org/emacs/sql-indent.el
+     (load-library "sql-indent")
+     ;; http://www.emacswiki.org/emacs/sql-complete.el
+     (load-library "sql-complete")
+     ;; http://www.emacswiki.org/emacs/sql-transform.el
+     (load-library "sql-transform")
+     ))
+
+;; 接続プログラムの名称
+(setq sql-postgres-program "psql")
+(setq sql-mysql-program "mysql")
+(setq sql-sqlite-program "sqlite3")
+
+;; データベース接続初期設定
+(setq sql-database "test")
 (setq sql-user "testuser")
 (setq sql-password "")
-(setq sql-postgres-program "/usr/local/bin/psql")
 
+;; SQL モード設定
+(add-hook 'sql-mode-hook
+          (function (lambda ()
+                      (setq sql-indent-offset 2)
+                      (setq sql-indent-maybe-tab nil)
+                      (local-set-key "\C-cu" 'sql-to-update) ; sql-transform
+                      ;; SQLi の自動ポップアップ
+                      (setq sql-pop-to-buffer-after-send-region t)
+                      ;; master モードを有効にし、SQLi をスレーブバッファにする
+                      (master-mode t)
+                      (master-set-slave sql-buffer)
+                      )))
+
+(add-hook 'sql-set-sqli-hook
+          (function (lambda ()
+                      (master-set-slave sql-buffer))))
+
+;; interactive-mode の設定
+(add-hook 'sql-interactive-mode-hook
+          (function (lambda ()
+                      ;; 「;」をタイプしたら SQL 文を実行
+                      (setq sql-electric-stuff 'semicolon)
+                      ;; comint 関係の設定
+                      (setq comint-buffer-maximum-size 500)
+                      (setq comint-input-autoexpand t)
+                      (setq comint-output-filter-functions
+                            'comint-truncate-buffer)
+                      )))
 
 (provide 'init_sql)
 ;;; init_sql.el ends here
