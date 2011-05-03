@@ -88,8 +88,7 @@
 (setq anything-for-files-prefered-list
       '(anything-c-source-ffap-line
         anything-c-source-ffap-guesser
-        ;;
-        anything-c-source-buffers+-howm-title
+        ;; anything-c-source-buffers+-howm-title
         anything-c-source-buffers+
         anything-c-source-recentf
         anything-c-source-bookmarks
