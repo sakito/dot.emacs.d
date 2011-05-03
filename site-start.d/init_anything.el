@@ -27,6 +27,9 @@
 ;; 
 
 ;;; Code:
+;; anything-howm
+;; @see http://d.hatena.ne.jp/kitokitoki/20110103/p1
+;;(require 'anything-howm)
 ;;(require 'anything)
 (require 'anything-config)
 ;;(require 'anything-private-config)
@@ -67,6 +70,7 @@
       '(
         anything-c-source-ffap-line
         anything-c-source-ffap-guesser
+        ;; anything-c-source-buffers+-howm-title
         anything-c-source-buffers+
         anything-c-source-file-name-history
         anything-c-source-files-in-current-dir+
@@ -84,6 +88,8 @@
 (setq anything-for-files-prefered-list
       '(anything-c-source-ffap-line
         anything-c-source-ffap-guesser
+        ;;
+        anything-c-source-buffers+-howm-title
         anything-c-source-buffers+
         anything-c-source-recentf
         anything-c-source-bookmarks
