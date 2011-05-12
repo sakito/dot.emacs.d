@@ -119,10 +119,10 @@ USA
       `(bold ((t (:bold t :weight bold :height 1.1))))
       `(italic ((t (:italic t :slant italic :height 1.1))))
       `(bold-italic ((t (:italic t :bold t :slant italic :weight bold :height 1.1))))
-      `(fixed-pitch ((t (:family "September"))))
-      `(variable-pitch ((t (:family "September"))))
+      ;;`(fixed-pitch ((t (:family "September"))))
+      ;;`(variable-pitch ((t (:family "September"))))
       `(underline ((t (:underline t))))
-      `(menu ((t (:background ,color-bg0 :foreground ,color-fg0 :family "September"))))
+      ;;`(menu ((t (:background ,color-bg0 :foreground ,color-fg0 :family "September"))))
       `(border ((t (:background ,color-bg3))))
       `(cursor ((t (:background ,green))))
       `(fringe ((t (:background ,color-bg0))))
@@ -149,15 +149,15 @@ USA
       `(trailing-whitespace ((t (:underline ,blue))))
 
       ;; info
-      `(Info-title-1-face ((t (:bold t :weight bold :family "September" :height 1.728))))
-      `(Info-title-2-face ((t (:bold t :weight bold :family "September" :height 1.44))))
-      `(Info-title-3-face ((t (:bold t :weight bold :family "September" :height 1.2))))
-      `(Info-title-4-face ((t (:bold t :weight bold :family "September"))))
+      `(Info-title-1-face ((t (:bold t :weight bold :height 1.728))))
+      `(Info-title-2-face ((t (:bold t :weight bold :height 1.44))))
+      `(Info-title-3-face ((t (:bold t :weight bold :height 1.2))))
+      `(Info-title-4-face ((t (:bold t :weight bold ))))
 
       `(info-header-node ((t (:foreground ,skyblue))))
       `(info-header-xref ((t (:bold t :weight bold :foreground ,green4))))
       `(info-menu-5 ((t (:foreground ,orange))))
-      `(info-menu-header ((t (:bold t :weight bold :family "September"))))
+      `(info-menu-header ((t (:bold t :weight bold))))
       `(info-node ((t (:foreground ,skyblue))))
       `(info-xref ((t (:bold t :foreground ,green4 :weight bold))))
 
@@ -213,10 +213,10 @@ USA
       `(font-lock-builtin-face ((t (:foreground ,red))))
       `(font-lock-comment-face ((t (:slant italic :foreground ,color-fg1))))
       `(font-lock-constant-face ((t (:foreground ,lightyellow))))
-      `(font-lock-doc-face ((t (:foreground ,color-fg3))))
+      `(font-lock-doc-face ((t (:foreground ,green1))))
       `(font-lock-doc-string-face ((t (:foreground ,color-fg3))))
       `(font-lock-function-name-face ((t (:foreground ,yellow1))))
-      `(font-lock-keyword-face ((t (:bold t :foreground ,blue2 :weight bold))))
+      `(font-lock-keyword-face ((t (:bold t :foreground ,blue :weight bold))))
       `(font-lock-preprocessor-face ((t (:foreground ,lightyellow))))
       `(font-lock-reference-face ((t (:foreground ,red))))
       `(font-lock-string-face ((t (:foreground ,green1))))
@@ -272,6 +272,12 @@ USA
       `(org-started-kwd-face ((t (:foreground ,yellow :background ,color-fg3))))
       `(org-cancelled-kwd-face ((t (:foreground ,green :background ,color-fg3))))
       `(org-delegated-kwd-face ((t (:foreground ,cyan :background ,color-fg3))))
+      `(org-block-begin-line
+        ((t (:underline ,color-fg2 :foreground ,skyblue :background ,color-bg2))))
+      `(org-block
+        ((t (:foreground ,color-fg2 :background ,color-bg2))))
+      `(org-block-end-line
+        ((t (:overline ,color-fg2 :foreground ,skyblue :background ,color-bg2))))
 
       ;; vline
       `(vline-visual ((t (:background ,color-bg1))))

@@ -30,6 +30,10 @@
 (require 'org-install)
 ;; 初期全表示
 (setq org-startup-folded "showall")
+;; src 内に色を付ける(動作が重くなるのでコメントアウト)
+;; (setq org-src-fontify-natively t)
+;; src 内でタブを有効にする
+;; (setq org-src-tab-acts-natively t)
 ;; 改行する
 (setq org-startup-truncated nil)
 (org-remember-insinuate)
