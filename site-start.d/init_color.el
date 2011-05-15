@@ -36,10 +36,10 @@
  ((= (display-pixel-height) 1200)
   (setq default-frame-alist
         (append (list
-                 '(width . 185)
+                 '(width . 175)
                  '(height . 65)
-                 '(top . 130)
-                 '(left . 590)
+                 '(top . 120)
+                 '(left . 500)
                  )
                 default-frame-alist)))
  ;; MacBook Pro ディスプレイ
@@ -116,6 +116,10 @@
 )
 
 ;; 等幅のフォントセットを幾つか作成予定
+(when (find-font (font-spec :family "Ricty"))
+  ;; http://save.sys.t.u-tokyo.ac.jp/~yusa/fonts/ricty.html
+  ;; (add-to-list 'default-frame-alist '(font . "Ricty-16"))
+  )
 
 (when (find-font (font-spec :family "Menlo"))
   ;; ヒラギノ 角ゴ ProN + Menlo
@@ -148,7 +152,7 @@
         (space-mark 3872 [3876] [95])
         (space-mark ?\x3000 [?\□]) ;; 全角スペース
         ;; (newline-mark 10 [182 10]) ; newlne, ¶
-        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷(add-to-list 'default-frame-alist '(font . "ricty-12"))
         ))
 (require 'whitespace)
 ;; (global-whitespace-mode 1) 常に whitespace-mode だと動作が遅くなる場合がある
