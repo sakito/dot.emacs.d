@@ -216,7 +216,7 @@ USA
       `(font-lock-doc-face ((t (:foreground ,green1))))
       `(font-lock-doc-string-face ((t (:foreground ,color-fg3))))
       `(font-lock-function-name-face ((t (:foreground ,yellow1))))
-      `(font-lock-keyword-face ((t (:bold t :foreground ,blue :weight bold))))
+      `(font-lock-keyword-face ((t (:bold t :foreground ,skyblue :weight bold))))
       `(font-lock-preprocessor-face ((t (:foreground ,lightyellow))))
       `(font-lock-reference-face ((t (:foreground ,red))))
       `(font-lock-string-face ((t (:foreground ,green1))))
