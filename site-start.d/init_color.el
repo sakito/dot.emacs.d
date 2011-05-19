@@ -152,7 +152,7 @@
         (space-mark 3872 [3876] [95])
         (space-mark ?\x3000 [?\□]) ;; 全角スペース
         ;; (newline-mark 10 [182 10]) ; newlne, ¶
-        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷(add-to-list 'default-frame-alist '(font . "ricty-12"))
+        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
         ))
 (require 'whitespace)
 ;; (global-whitespace-mode 1) 常に whitespace-mode だと動作が遅くなる場合がある
