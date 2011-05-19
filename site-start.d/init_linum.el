@@ -34,15 +34,24 @@
                'lisp-interaction-mode-hook
                'lisp-mode-hook
                'java-mode-hook
+               'js2-mode-hook
                'haskell-mode-hook
                'sh-mode-hook
                'python-mode-hook
                'ess-mode-hook
                'inferior-ess-mode-hook
                'lua-mode-hook
-               'scala-mode-hook))
+               'scala-mode-hook
+               'haskell-mode-hook
+               'css-mode-hook
+               'makefile-mode-hook
+               'rst-mode-hook
+               ))
   (add-hook hook '(lambda ()
                     (linum-mode 1))))
+
+;; 表示フォーマット
+(setq linum-format "%04d")
 
 ;;yalinumの背景色の設定
 ;;(set-face-background 'yalinum-bar-face "DarkOliveGreen")
