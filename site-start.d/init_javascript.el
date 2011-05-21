@@ -39,7 +39,7 @@
 ;             )))
 
 ;; @see http://code.google.com/p/js2-mode/wiki/InstallationInstructions
-(autoload 'js2-mode "js2" nil t)
+(autoload 'js2-mode "js2-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.json$" . js2-mode))
 
@@ -56,6 +56,7 @@
             (local-set-key (kbd "C-c b") 'js-send-buffer)
             (local-set-key (kbd "C-c C-b") 'js-send-buffer-and-go)
             (local-set-key (kbd "C-c l") 'js-load-file-and-go)
+            (local-set-key (kbd "C-c C-r") 'js-send-region)
             ))
 
 (provide 'init_javascript)
