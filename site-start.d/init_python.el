@@ -65,6 +65,23 @@
 (autoload 'doctest-mode
   "doctest-mode" "Editing mode for Python Doctest examples." t)
 
+;; pip install pep8
+;; python-pep8.el https://gist.github.com/302847
+(require 'python-pep8)
+;; pip install pylint-i18n
+;; python-pylint.el https://gist.github.com/302848
+(require 'python-pylint)
+;; flymake
+(when (load "flymake" t)
+  (defun flymake-python-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "epylint" (list local-file))))
+  (add-to-list 'flymake-allowed-file-name-masks '(".+\\.py$" flymake-python-init)))
+
 ;; Pymacs
 (require 'pymacs)
 (autoload 'pymacs-apply "pymacs")
@@ -73,13 +90,24 @@
 (autoload 'pymacs-exec "pymacs" nil t)
 (autoload 'pymacs-load "pymacs" nil t)
 
+;; pip install rope
+;; pip install ropemode
+;; hg clone http://bitbucket.org/agr/ropemacs
+;; easy_install -UZ ropemacs
+;; Rope
+(pymacs-load "ropemacs" "rope-")
+(setq ropemacs-enable-autoimport t)
+
 ;; ipython
+;; pip install ipython
+;; pip install ipdb
 (require 'ipython)
-(setq ipython-command "/usr/local/bin/ipython")
+(setq ipython-command  (expand-file-name "~/local/bin/ipython"))
 ;; ipython の起動オプションを設定
 ;; デフォルトは (-i -colors LightBG)
 ;;(setq py-python-command-args '("-cl" "-i" "-colors" "Linux"))
 (setq py-python-command-args '("-i" "-colors" "Linux"))
+;;(setq py-python-command-args '("-cl" "-i" "Linux"))
 
 ;; http://www.emacswiki.org/emacs/anything-ipython.el
 (require 'anything-ipython)
@@ -88,6 +116,7 @@
   (use-anything-show-completion 'anything-ipython-complete
                                 '(length initial-pattern)))
 
+;; hook
 (defun skt:python-mode-hook ()
   (progn
     ;; キー
@@ -96,6 +125,10 @@
     (local-set-key (kbd "C-c C-r") 'py-execute-region)  ;; py-shift-region-right を上書きしている
     (local-set-key (kbd "C-c ;") 'comment-dwim)
     (local-set-key (kbd "C-c :") 'comment-dwim)
+    ;; flymake
+    (local-set-key (kbd "C-c C-w") 'flymake-mode-toggle)  ;; py-pychecker-run を上書きしている
+    (local-set-key (kbd "C-c n") 'flymake-goto-next-error)
+    (local-set-key (kbd "C-c p") 'flymake-goto-prev-error)
     ))
 (add-hook 'python-mode-hook 'skt:python-mode-hook)
 

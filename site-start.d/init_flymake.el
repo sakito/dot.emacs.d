@@ -26,12 +26,23 @@
 
 ;; flymakeを設定
 (require 'flymake)
+
+;; flymake 起動頻度 初期値:0.5
+(setq-default flymake-no-changes-timeout '3)
+
+;; make 用
 (defun flymake-get-make-cmdline (source base-dir)
   (list "make"
         (list "-s" "-C"
               base-dir
               (concat "CHK_SOURCES=" source)
               "SYNTAX_CHECK_MODE=1")))
+
+;; flymake の on off を toggle する(この関数は本来の利用ならば不要です)
+(defun flymake-mode-toggle ()
+  (if flymake-mode
+    (flymake-mode-off)
+    (flymake-mode-on)))
 
 ;; flymakeのエラー表示をミニバッファに表示
 (defun flymake-display-err-minibuffer ()
@@ -49,14 +60,17 @@
           (message "[%s] %s" line text)))
       (setq count (1- count)))))
 
+;; 次のエラーに飛ぶ
 (defadvice flymake-goto-next-error (after display-message activate compile)
   "Display the error in the minibuffer."
   (flymake-display-err-minibuffer))
 
+;; 前のエラーに飛ぶ
 (defadvice flymake-goto-prev-error (after display-message activate compile)
   "Display the error in the minibuffer."
   (flymake-display-err-minibuffer))
 
+;; 自動でエラー表示
 (defadvice flymake-mode (before post-command-stuff activate compile)
   "Add functionality to the post command hook so that if the
 cursor is sitting on a flymake error the error information is
