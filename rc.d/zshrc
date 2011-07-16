@@ -53,7 +53,7 @@ export SCREENDIR=${HOME}/.screen
 # Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
 
 # fink setting
-isdarwin && source /sw/bin/init.sh
+#isdarwin && source /sw/bin/init.sh
 
 export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
 # export PATH=/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
@@ -89,6 +89,9 @@ export PATH=${HOME}/bin/air/bin:${PATH}
 # Python
 export PYTHONSTARTUP="${HOME}/.pythonrc.py"
 export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
+export VIRTUAL_ENV=${HOME}/local
+export WORKON_HOME=$HOME/.virtualenvs
+#source ${HOME}/local/bin/virtualenvwrapper.sh
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
@@ -113,23 +116,23 @@ fi
 # TeX
 export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
 
-export  TMP="${HOME}/tmp"
-export  EDITOR="/usr/local/bin/emacsclient"
+export TMP="${HOME}/tmp"
+export EDITOR="/usr/local/bin/emacsclient"
 
 # less
 #export LESSCHARDEF=8bcccbcc18b95.33b33b.
-export  LESSCHARSET=utf-8
-export  LESS='-c -m -x4 -R'
-export  LESS="-isnMCd"
-export  LESSBINFMT='*n-'
-export  PAGER=less
-export  CLICOLOR_FORCE=1
+export LESSCHARSET=utf-8
+export LESS='-c -m -x4 -R'
+export LESS="-isnMCd"
+export LESSBINFMT='*n-'
+export PAGER=less
+export CLICOLOR_FORCE=1
 
 #CC setting
 #export CC=cc
 
 # set man command env.
-export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/man:/opt/local/man
+export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/opt/local/man
 export MANPAGER=/usr/bin/less
 export MANWIDTH=80
 
@@ -381,57 +384,56 @@ alias easy_install64="env ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common' ea
 # ほぼシステム非依存なので、特に変更する必要なし。
 #
 bindkey -e
-bindkey '^/'    undo
-bindkey '^g'    undo
-bindkey '^q'    push-line
-bindkey '^w'    kill-region
-bindkey '^i'    expand-or-complete 
-bindkey '^d'    delete-char-or-list
-bindkey '^j'    reverse-menu-complete
-bindkey '^n'    history-search-forward
-bindkey '^p'    history-search-backward
-bindkey '^r'    copy-prev-word
-bindkey ' '     magic-space
+bindkey '^/' undo
+bindkey '^g' undo
+bindkey '^q' push-line
+bindkey '^w' kill-region
+bindkey '^i' expand-or-complete 
+bindkey '^d' delete-char-or-list
+bindkey '^j' reverse-menu-complete
+bindkey '^n' history-search-forward
+bindkey '^p' history-search-backward
+bindkey '^r' copy-prev-word
+bindkey ' '  magic-space
 
 #-----------------------------------------------------------------
 # 補完ルール設定
 #-----------------------------------------------------------------
-# 
-# 必要に応じて追加すると良い。基本的な設定は以下の通り。
+# compctl は obsolute ですので設定する必要はほぼないはずです。
 #
-compctl -D -f
-compctl -C -c -f + -E -q -S '='
-compctl -caF whence which
-compctl -b bindkey
-compctl -o setopt unsetopt
-compctl -a shift
-compctl -F unfunction
-compctl -a unalias alias
-compctl -e disable
-compctl -d enable
-compctl -v typeset vared unset export
-compctl -v unset typeset declare vared readonly integer
-compctl -g '(|.)*(-/)'  cd chdir dirs pushd dircmp
-compctl -g '(|.)*(-/)' 	rd mdcd mkdir
-compctl -g '*(/)' 		rmdir dircmp
-compctl -j -P % fg bg wait jobs disown
-compctl -l '' -x 'p[1]' -f -- . source
-compctl -l '' nohup exec nice eval trap time fep
-compctl -l '' -x 'p[1]' -b -- builtin
-compctl -f -x 'r[-*d,^*]' -g '(|.)*.(gz|z|z) (|.)*(-/)' + -g '(|.)*(-/)' -- gzip
-compctl -g '*.gz *.z *.z' + -g '(|.)*(-/)' gunzip  
-compctl -g '*.f' + -g '(|.)*(-/)' melt fcat
-compctl -g '*.z' + -g '(|.)*(-/)' uncompress zmore 
-compctl -f -x 'p[1,2]' -g "*(-/) *.[ll][zz][hh] *.[ee][xx][ee]"	-- lha lhp
-compctl -f -x 'p[1]' -g "*(-/) *.[aa][rr][cc]"		-- arc
-compctl -f -x 'p[1,2]' -g "*(-/) *.[zz][ii][pp]"	-- zip unzip
-compctl -f -x 'p[1,2]' -g "*(-/) *.[aa][rr][jj]"	-- unarj
-compctl -g "*(-/) *.(z|z|gz)"	zmore zless zgrep zcmp
-compctl -f -x \
-	'p[1]' -k '(tvzf cvzf xvzf)' - \
-	's[--]' -k "(atime-preserve remove-files exclude help)" - \
-	'c[-1,*z*] p[2]' -g "*.tar.(z|z|gz) *.taz *.tgz (|.)*(-/)" - \
-	'c[-1,*f*] p[2]' -g "*.tar (|.)*(-/)" -- gtar tar
+#compctl -D -f
+#compctl -C -c -f + -E -q -S '='
+#compctl -caF whence which
+#compctl -b bindkey
+#compctl -o setopt unsetopt
+#compctl -a shift
+#compctl -F unfunction
+#compctl -a unalias alias
+#compctl -e disable
+#compctl -d enable
+#compctl -v typeset vared unset export
+#compctl -v unset typeset declare vared readonly integer
+#compctl -g '(|.)*(-/)'  cd chdir dirs pushd dircmp
+#compctl -g '(|.)*(-/)' 	rd mdcd mkdir
+#compctl -g '*(/)' 		rmdir dircmp
+#compctl -j -P % fg bg wait jobs disown
+#compctl -l '' -x 'p[1]' -f -- . source
+#compctl -l '' nohup exec nice eval trap time fep
+#compctl -l '' -x 'p[1]' -b -- builtin
+#compctl -f -x 'r[-*d,^*]' -g '(|.)*.(gz|z|z) (|.)*(-/)' + -g '(|.)*(-/)' -- gzip
+#compctl -g '*.gz *.z *.z' + -g '(|.)*(-/)' gunzip  
+#compctl -g '*.f' + -g '(|.)*(-/)' melt fcat
+#compctl -g '*.z' + -g '(|.)*(-/)' uncompress zmore 
+#compctl -f -x 'p[1,2]' -g "*(-/) *.[ll][zz][hh] *.[ee][xx][ee]"	-- lha lhp
+#compctl -f -x 'p[1]' -g "*(-/) *.[aa][rr][cc]"		-- arc
+#compctl -f -x 'p[1,2]' -g "*(-/) *.[zz][ii][pp]"	-- zip unzip
+#compctl -f -x 'p[1,2]' -g "*(-/) *.[aa][rr][jj]"	-- unarj
+#compctl -g "*(-/) *.(z|z|gz)"	zmore zless zgrep zcmp
+#compctl -f -x \
+#	'p[1]' -k '(tvzf cvzf xvzf)' - \
+#	's[--]' -k "(atime-preserve remove-files exclude help)" - \
+#	'c[-1,*z*] p[2]' -g "*.tar.(z|z|gz) *.taz *.tgz (|.)*(-/)" - \
+#	'c[-1,*f*] p[2]' -g "*.tar (|.)*(-/)" -- gtar tar
 
 #-----------------------------------------------------------------
 # システム別設定
