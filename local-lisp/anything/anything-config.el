@@ -657,6 +657,8 @@
 (require 'dired-aux)
 (require 'tramp)
 (require 'grep)
+(require 'url)
+(require 'xml)
 
 ;;; Code:
 
@@ -923,40 +925,42 @@ It will be cleared at start of next `anything' call when \
 (define-prefix-command 'anything-command-map)
 
 ;; rubikitch: Please change it freely because it is in discussion. I'll track from git.
-(define-key anything-command-map (kbd "<SPC>") 'anything-execute-anything-command)
-(define-key anything-command-map (kbd "e") 'anything-c-etags-select)
-(define-key anything-command-map (kbd "l") 'anything-locate)
-(define-key anything-command-map (kbd "s") 'anything-surfraw)
-(define-key anything-command-map (kbd "r") 'anything-regexp)
-(define-key anything-command-map (kbd "w") 'anything-w3m-bookmarks)
-(define-key anything-command-map (kbd "x") 'anything-firefox-bookmarks)
-(define-key anything-command-map (kbd "#") 'anything-emms)
-(define-key anything-command-map (kbd "m") 'anything-man-woman)
-(define-key anything-command-map (kbd "t") 'anything-top)
-(define-key anything-command-map (kbd "i") 'anything-imenu)
-(define-key anything-command-map (kbd "p") 'anything-list-emacs-process)
-(define-key anything-command-map (kbd "C-x r b") 'anything-c-pp-bookmarks)
-(define-key anything-command-map (kbd "M-y") 'anything-show-kill-ring)
+(define-key anything-command-map (kbd "<SPC>")     'anything-execute-anything-command)
+(define-key anything-command-map (kbd "e")         'anything-c-etags-select)
+(define-key anything-command-map (kbd "l")         'anything-locate)
+(define-key anything-command-map (kbd "s")         'anything-surfraw)
+(define-key anything-command-map (kbd "r")         'anything-regexp)
+(define-key anything-command-map (kbd "w")         'anything-w3m-bookmarks)
+(define-key anything-command-map (kbd "x")         'anything-firefox-bookmarks)
+(define-key anything-command-map (kbd "#")         'anything-emms)
+(define-key anything-command-map (kbd "m")         'anything-man-woman)
+(define-key anything-command-map (kbd "t")         'anything-top)
+(define-key anything-command-map (kbd "i")         'anything-imenu)
+(define-key anything-command-map (kbd "<tab>")     'anything-lisp-completion-at-point)
+(define-key anything-command-map (kbd "p")         'anything-list-emacs-process)
+(define-key anything-command-map (kbd "C-x r b")   'anything-c-pp-bookmarks)
+(define-key anything-command-map (kbd "M-y")       'anything-show-kill-ring)
 (define-key anything-command-map (kbd "C-c <SPC>") 'anything-all-mark-rings)
-(define-key anything-command-map (kbd "C-x C-f") 'anything-find-files)
-(define-key anything-command-map (kbd "f") 'anything-for-files)
-(define-key anything-command-map (kbd "C-:") 'anything-eval-expression-with-eldoc)
-(define-key anything-command-map (kbd "C-,") 'anything-calcul-expression)
-(define-key anything-command-map (kbd "M-x") 'anything-M-x)
-(define-key anything-command-map (kbd "C-x C-w") 'anything-write-file)
-(define-key anything-command-map (kbd "C-x i") 'anything-insert-file)
-(define-key anything-command-map (kbd "M-s o") 'anything-occur)
-(define-key anything-command-map (kbd "M-g s") 'anything-do-grep)
-(define-key anything-command-map (kbd "c") 'anything-colors)
-(define-key anything-command-map (kbd "F") 'anything-select-xfont)
-(define-key anything-command-map (kbd "C-c f") 'anything-recentf)
-(define-key anything-command-map (kbd "C-c g") 'anything-google-suggest)
-(define-key anything-command-map (kbd "h i") 'anything-info-at-point)
-(define-key anything-command-map (kbd "h r") 'anything-info-emacs)
-(define-key anything-command-map (kbd "C-x C-b") 'anything-buffers+)
-(define-key anything-command-map (kbd "C-c C-b") 'anything-browse-code)
-(define-key anything-command-map (kbd "C-x r i") 'anything-register)
-(define-key anything-command-map (kbd "C-c C-x") 'anything-c-run-external-command)
+(define-key anything-command-map (kbd "C-x C-f")   'anything-find-files)
+(define-key anything-command-map (kbd "f")         'anything-for-files)
+(define-key anything-command-map (kbd "C-:")       'anything-eval-expression-with-eldoc)
+(define-key anything-command-map (kbd "C-,")       'anything-calcul-expression)
+(define-key anything-command-map (kbd "M-x")       'anything-M-x)
+(define-key anything-command-map (kbd "C-x C-w")   'anything-write-file)
+(define-key anything-command-map (kbd "C-x i")     'anything-insert-file)
+(define-key anything-command-map (kbd "M-s o")     'anything-occur)
+(define-key anything-command-map (kbd "M-g s")     'anything-do-grep)
+(define-key anything-command-map (kbd "c")         'anything-colors)
+(define-key anything-command-map (kbd "F")         'anything-select-xfont)
+(define-key anything-command-map (kbd "C-c f")     'anything-recentf)
+(define-key anything-command-map (kbd "C-c g")     'anything-google-suggest)
+(define-key anything-command-map (kbd "h i")       'anything-info-at-point)
+(define-key anything-command-map (kbd "h r")       'anything-info-emacs)
+(define-key anything-command-map (kbd "h g")       'anything-info-gnus)
+(define-key anything-command-map (kbd "C-x C-b")   'anything-buffers+)
+(define-key anything-command-map (kbd "C-c C-b")   'anything-browse-code)
+(define-key anything-command-map (kbd "C-x r i")   'anything-register)
+(define-key anything-command-map (kbd "C-c C-x")   'anything-c-run-external-command)
 
 ;; In Emacs 23.1.50, minibuffer-local-must-match-filename-map was renamed to
 ;; minibuffer-local-filename-must-match-map.
@@ -991,7 +995,8 @@ It will be cleared at start of next `anything' call when \
      ["Externals Commands" anything-c-run-external-command t])
     ("Info:"
      ["Info at point" anything-info-at-point t]
-     ["Emacs Manual index" anything-info-emacs t])
+     ["Emacs Manual index" anything-info-emacs t]
+     ["Gnus Manual index" anything-info-gnus t])
     ("Org:"
      ["Org keywords" anything-org-keywords t]
      ["Org headlines" anything-org-headlines t])
@@ -999,6 +1004,7 @@ It will be cleared at start of next `anything' call when \
      ["Occur" anything-occur t]
      ["Grep" anything-do-grep t]
      ["Etags" anything-c-etags-select t]
+     ["Lisp complete at point" anything-lisp-completion-at-point t]
      ["Browse Kill ring" anything-show-kill-ring t]
      ["Browse register" anything-register t]
      ["Browse code" anything-browse-code t]
@@ -1147,11 +1153,14 @@ ffap -> recentf -> buffer -> bookmark -> file-cache -> files-in-current-dir -> l
   "Preconfigured `anything' for searching info at point.
 With a prefix-arg insert symbol at point."
   (interactive "P")
-  (anything :sources'(anything-c-source-info-elisp
-                      anything-c-source-info-cl
-                      anything-c-source-info-pages)
-            :input (and arg (thing-at-point 'symbol))
-            :buffer "*anything info*"))
+  (let ((anything-c-google-suggest-default-function
+         'anything-c-google-suggest-emacs-lisp))
+    (anything :sources'(anything-c-source-info-elisp
+                        anything-c-source-info-cl
+                        anything-c-source-info-pages
+                        anything-c-source-google-suggest)
+              :input (and arg (thing-at-point 'symbol))
+              :buffer "*anything info*")))
 
 ;;;###autoload
 (defun anything-info-emacs ()
@@ -1161,10 +1170,19 @@ With a prefix-arg insert symbol at point."
 
 ;;;###autoload
 (defun anything-show-kill-ring ()
-  "Preconfigured `anything' for `kill-ring'. It is drop-in replacement of `yank-pop'.
-You may bind this command to M-y."
+  "Preconfigured `anything' for `kill-ring'.
+It is drop-in replacement of `yank-pop'.
+You may bind this command to M-y.
+First call open the kill-ring browser, next calls move to next line."
   (interactive)
-  (anything-other-buffer 'anything-c-source-kill-ring "*anything kill-ring*"))
+  (let ((buf "*anything kill-ring*"))
+    (if (get-buffer-window buf)
+        (with-anything-window
+          (if (eq (point) (save-excursion
+                            (anything-end-of-buffer) (point)))
+              (anything-beginning-of-buffer)
+              (anything-next-line)))
+        (anything-other-buffer 'anything-c-source-kill-ring buf))))
 
 ;;;###autoload
 (defun anything-minibuffer-history ()
@@ -1211,7 +1229,8 @@ You may bind this command to M-y."
 (defun anything-buffers+ ()
   "Enhanced preconfigured `anything' for buffer."
   (interactive)
-  (anything :sources 'anything-c-source-buffers+
+  (anything :sources '(anything-c-source-buffers+
+                       anything-c-source-buffer-not-found)
             :buffer "*anything buffers*" :keymap anything-c-buffer-map))
 
 ;;;###autoload
@@ -1416,6 +1435,12 @@ http://cvs.savannah.gnu.org/viewvc/*checkout*/bm/bm/bm.el"
   "Preconfigured anything to show org headlines."
   (interactive)
   (anything-other-buffer 'anything-c-source-org-headline "*org headlines*"))
+
+;;;###autoload
+(defun anything-info-gnus ()
+  "Preconfigured anything to browse Gnus Manual."
+  (interactive)
+  (anything-other-buffer 'anything-c-source-info-gnus "*info Gnus*"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Anything Applications ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; kill buffers
@@ -1920,7 +1945,10 @@ buffer that is not the current buffer."
 (defvar anything-c-source-buffer-not-found
   '((name . "Create buffer")
     (dummy)
-    (type . buffer)))
+    (filtered-candidate-transformer (lambda (cands source)
+                                      (list anything-pattern)))
+    (action . (lambda (candidate)
+                (anything-c-switch-to-buffer (get-buffer-create candidate))))))
 ;; (anything 'anything-c-source-buffer-not-found)
 
 ;;; Buffers+
@@ -1983,14 +2011,15 @@ buffer that is not the current buffer."
            (t (propertize i 'face 'italic)))))
 
 (defvar anything-buffer-mode-line-string
-  "\\<anything-c-buffer-map>\
+  '("Buffer(s)"
+    "\\<anything-c-buffer-map>\
 \\[anything-c-buffer-help]:Help, \
 \\<anything-map>\
 \\[anything-select-action]:Acts,\
 \\[anything-exit-minibuffer]/\\[anything-select-2nd-action-or-end-of-line]/\
 \\[anything-select-3rd-action]:NthAct,\
 \\[anything-send-bug-report-from-anything]:BugReport."
-  "String displayed in mode-line in `anything-c-source-buffers+'")
+    "String displayed in mode-line in `anything-c-source-buffers+'"))
 
 (defvar anything-c-buffers-cache nil)
 (defvar anything-c-source-buffers+
@@ -2026,11 +2055,13 @@ with name matching pattern."
       (with-current-buffer buf
         (let ((mjm   (symbol-name major-mode))
               (split (split-string anything-pattern)))
-          (if (string-match " " anything-pattern)
-              (and (string-match (car split) mjm)
-                   (string-match (cadr split) cand))
-              (or (string-match anything-pattern mjm)
-                  (string-match anything-pattern cand))))))))
+          (cond ((string-match "\\s-$" anything-pattern)
+                 (string-match (car split) mjm))
+                ((string-match "\\s-" anything-pattern)
+                 (and (string-match (car split) mjm)
+                      (string-match (cadr split) cand)))
+                (t (or (string-match anything-pattern mjm)
+                       (string-match anything-pattern cand)))))))))
 
 (defun anything-c-buffer-query-replace-1 (&optional regexp-flag)
   "Query replace in marked buffers.
@@ -2046,7 +2077,7 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
        for buf in bufs
        do
        (save-window-excursion
-         (switch-to-buffer buf)
+         (anything-c-switch-to-buffer buf)
          (save-excursion
            (let ((case-fold-search t))
              (goto-char (point-min))
@@ -2061,8 +2092,12 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
   (anything-c-buffer-query-replace-1))
 
 (defun anything-c-buffer-help ()
+  "Help command for anything buffers."
   (interactive)
-  (let ((anything-help-message "== Anything Buffer ==\
+  (let ((anything-help-message "== Anything Buffer ==
+\nTips:
+You can enter a partial name of major-mode (e.g lisp, sh) to narrow down buffers.
+Enter then a space and a pattern to narrow down to buffers matching this pattern. 
 \nSpecific commands for `anything-buffer+':
 \\<anything-c-buffer-map>
 \\[anything-buffer-run-grep]\t\t->Grep Buffer(s) (C-u grep all buffers linked to a file).
@@ -2205,7 +2240,7 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
 (defun anything-c-buffers+-persistent-action (candidate)
     (if current-prefix-arg
         (anything-c-buffers-persistent-kill candidate)
-        (switch-to-buffer candidate)))
+        (anything-c-switch-to-buffer candidate)))
 
 ;; (anything 'anything-c-source-buffers+)
 
@@ -2321,17 +2356,30 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
 
   "String displayed in mode-line in `anything-c-source-find-files'")
 
+(defcustom anything-ff-auto-update-initial-value t
+  "Auto update when only one candidate directory is matched.
+This is the default value when starting `anything-find-files'."
+  :group 'anything-config
+  :type  'boolean)
+
+(defvar anything-ff-auto-update-flag anything-ff-auto-update-initial-value
+  "Internal, flag to turn on/off auto-update in `anything-find-files'.
+Don't set it directly, use instead `anything-ff-auto-update-initial-value'.")
+
 (defvar anything-c-source-find-files
   `((name . ,(concat "Find Files" anything-c-find-files-doc-header))
     ;; It is needed for filenames with capital letters
     (disable-shortcuts)
     (init . (lambda ()
-              (setq ffap-newfile-prompt t)))
+              (setq ffap-newfile-prompt t)
+              (setq anything-ff-auto-update-flag anything-ff-auto-update-initial-value)))
     (candidates . anything-find-files-get-candidates)
     (filtered-candidate-transformer anything-c-find-files-transformer)
     (image-action1 . anything-ff-rotate-image-left)
     (image-action2 . anything-ff-rotate-image-right)
     (properties-action . anything-ff-properties)
+    (toggle-auto-update . anything-ff-toggle-auto-update)
+    (kill-buffer-fname . anything-ff-kill-buffer-fname)
     (persistent-action . anything-find-files-persistent-action)
     (persistent-help . "Hit1 Expand Candidate, Hit2 or (C-u) Find file")
     (mode-line . anything-ff-mode-line-string)
@@ -2541,6 +2589,7 @@ Communication with background emacs is done with temp file
   "Copy file list FLIST to DEST showing log.
 Log is send to `anything-c-copy-files-async-log-file'.
 Copying is done asynchronously with `anything-c-copy-files-async-1'."
+  (declare (special auto-revert-interval))
   (pop-to-buffer (find-file-noselect anything-c-copy-files-async-log-file))
   (set (make-local-variable 'auto-revert-interval) 1)
   (erase-buffer)
@@ -2561,18 +2610,18 @@ Copying is done asynchronously with `anything-c-copy-files-async-1'."
                 :history (anything-find-files-history :comp-read nil))))
     (anything-c-copy-async-with-log flist dest)))
 
-(defun anything-c-copy-files-async (flist dest)
+(defun anything-c-copy-files-async ()
   "Preconfigured anything to copy file list FLIST to DEST asynchronously."
-  (interactive
-   (list (anything-c-read-file-name
-          "Copy File async: "
-          :marked-candidates t)
-         (anything-c-read-file-name
-          "Copy File async To: "
-          :preselect candidate
-          :initial-input (car anything-ff-history)
-          :history (anything-find-files-history :comp-read nil))))
-  (anything-c-copy-async-with-log flist dest))
+  (interactive)
+  (let* ((flist (anything-c-read-file-name
+                 "Copy File async: "
+                 :marked-candidates t))
+         (dest  (anything-c-read-file-name
+                 "Copy File async To: "
+                 :preselect (car flist)
+                 :initial-input (car anything-ff-history)
+                 :history (anything-find-files-history :comp-read nil))))
+    (anything-c-copy-async-with-log flist dest)))
 
 (defvar eshell-command-aliases-list nil)
 (declare-function eshell-read-aliases-list "em-alias")
@@ -2639,7 +2688,7 @@ See `anything-find-files-eshell-command-on-file-1' for more info."
            (eshell-send-input)))
     (if (get-buffer "*eshell*")
         (progn
-          (switch-to-buffer "*eshell*")
+          (anything-c-switch-to-buffer "*eshell*")
           (cd-eshell))
         (call-interactively 'eshell)
         (cd-eshell))))
@@ -2728,8 +2777,13 @@ See `anything-ff-serial-rename-1'."
   (anything-ff-serial-rename-action 'copy))
 
 (defun anything-ff-help ()
+  "Help command for `anything-find-files'."
   (interactive)
-  (let ((anything-help-message "== Anything Find Files ==\
+  (let ((anything-help-message "== Anything Find Files ==
+\nTips:
+\nEnter \"~/\" at anytime to reach home directory.
+Enter \"/\" at anytime to reach root of your file system.
+You can complete with partial basename \(e.g \"fb\" will complete \"foobar\"\).
 \nSpecific commands for `anything-find-files':
 \\<anything-find-files-map>
 \\[anything-ff-run-grep]\t\t->Run Grep (C-u Recursive).
@@ -2741,6 +2795,7 @@ See `anything-ff-serial-rename-1'."
 \\[anything-ff-run-load-file]\t\t->Load File.
 \\[anything-ff-run-symlink-file]\t\t->Symlink File.
 \\[anything-ff-run-delete-file]\t\t->Delete File.
+\\[anything-ff-run-kill-buffer-persistent]\t\t->Kill buffer candidate without quitting.
 \\[anything-ff-run-switch-to-eshell]\t\t->Switch to Eshell.
 \\[anything-ff-run-eshell-command-on-file]\t\t->Eshell command on file (C-u Run on all marked files at once).
 \\[anything-ff-run-ediff-file]\t\t->Ediff file.
@@ -2755,6 +2810,7 @@ See `anything-ff-serial-rename-1'."
 \\[anything-ff-run-switch-to-history]\t\t->Switch to anything find-files history.
 \\[anything-ff-properties-persistent]\t\t->Show file properties in a tooltip.
 \\[anything-mark-all]\t\t->Mark all visibles candidates.
+\\[anything-ff-run-toggle-auto-update]\t->Toggle auto expansion of directories.
 \\[anything-unmark-all]\t\t->Unmark all candidates, visibles and invisibles.
 \\[anything-ff-run-gnus-attach-files]\t\t->Gnus attach files to message buffer.
 \\[anything-ff-run-print-file]\t\t->Print file with default printer.
@@ -2772,47 +2828,58 @@ See `anything-ff-serial-rename-1'."
 
 (defvar anything-find-files-map
   (let ((map (copy-keymap anything-map)))
-    (define-key map (kbd "M-g s")   'anything-ff-run-grep)
-    (define-key map (kbd "M-g p")   'anything-ff-run-pdfgrep)
-    (define-key map (kbd "M-g z")   'anything-ff-run-zgrep)
-    (define-key map (kbd "M-R")     'anything-ff-run-rename-file)
-    (define-key map (kbd "M-C")     'anything-ff-run-copy-file)
-    (define-key map (kbd "M-B")     'anything-ff-run-byte-compile-file)
-    (define-key map (kbd "M-L")     'anything-ff-run-load-file)
-    (define-key map (kbd "M-S")     'anything-ff-run-symlink-file)
-    (define-key map (kbd "M-D")     'anything-ff-run-delete-file)
-    (define-key map (kbd "M-e")     'anything-ff-run-switch-to-eshell)
-    (define-key map (kbd "<M-tab>") 'anything-ff-run-complete-fn-at-point)
-    (define-key map (kbd "C-o")     'anything-ff-run-switch-other-window)
-    (define-key map (kbd "C-c C-o") 'anything-ff-run-switch-other-frame)
-    (define-key map (kbd "C-c C-x") 'anything-ff-run-open-file-externally)
-    (define-key map (kbd "M-!")     'anything-ff-run-eshell-command-on-file)
-    (define-key map (kbd "C-=")     'anything-ff-run-ediff-file)
-    (define-key map (kbd "C-c =")   'anything-ff-run-ediff-merge-file)
-    (define-key map (kbd "M-p")     'anything-ff-run-switch-to-history)
-    (define-key map (kbd "M-i")     'anything-ff-properties-persistent)
-    (define-key map (kbd "C-c ?")   'anything-ff-help)
-    (define-key map (kbd "M-a")     'anything-mark-all)
-    (define-key map (kbd "M-u")     'anything-unmark-all)
-    (define-key map (kbd "C-c C-a") 'anything-ff-run-gnus-attach-files)
-    (define-key map (kbd "C-c p")   'anything-ff-run-print-file)
+    (define-key map (kbd "M-g s")         'anything-ff-run-grep)
+    (define-key map (kbd "M-g p")         'anything-ff-run-pdfgrep)
+    (define-key map (kbd "M-g z")         'anything-ff-run-zgrep)
+    (define-key map (kbd "M-R")           'anything-ff-run-rename-file)
+    (define-key map (kbd "M-C")           'anything-ff-run-copy-file)
+    (define-key map (kbd "M-B")           'anything-ff-run-byte-compile-file)
+    (define-key map (kbd "M-L")           'anything-ff-run-load-file)
+    (define-key map (kbd "M-S")           'anything-ff-run-symlink-file)
+    (define-key map (kbd "M-D")           'anything-ff-run-delete-file)
+    (define-key map (kbd "M-K")           'anything-ff-run-kill-buffer-persistent)
+    (define-key map (kbd "M-e")           'anything-ff-run-switch-to-eshell)
+    (define-key map (kbd "<M-tab>")       'anything-ff-run-complete-fn-at-point)
+    (define-key map (kbd "C-o")           'anything-ff-run-switch-other-window)
+    (define-key map (kbd "C-c C-o")       'anything-ff-run-switch-other-frame)
+    (define-key map (kbd "C-c C-x")       'anything-ff-run-open-file-externally)
+    (define-key map (kbd "M-!")           'anything-ff-run-eshell-command-on-file)
+    (define-key map (kbd "C-=")           'anything-ff-run-ediff-file)
+    (define-key map (kbd "C-c =")         'anything-ff-run-ediff-merge-file)
+    (define-key map (kbd "M-p")           'anything-ff-run-switch-to-history)
+    (define-key map (kbd "M-i")           'anything-ff-properties-persistent)
+    (define-key map (kbd "C-c ?")         'anything-ff-help)
+    (define-key map (kbd "C-<backspace>") 'anything-ff-run-toggle-auto-update)
+    (define-key map (kbd "M-a")           'anything-mark-all)
+    (define-key map (kbd "M-u")           'anything-unmark-all)
+    (define-key map (kbd "C-c C-a")       'anything-ff-run-gnus-attach-files)
+    (define-key map (kbd "C-c p")         'anything-ff-run-print-file)
     ;; Next 2 have no effect if candidate is not an image file.
-    (define-key map (kbd "M-l")     'anything-ff-rotate-left-persistent)
-    (define-key map (kbd "M-r")     'anything-ff-rotate-right-persistent)
-    (define-key map (kbd "C-.")     'anything-find-files-down-one-level)
-    (define-key map (kbd "C-l")     'anything-find-files-down-one-level)
-    (define-key map (kbd "C-h C-b") 'anything-send-bug-report-from-anything)
+    (define-key map (kbd "M-l")           'anything-ff-rotate-left-persistent)
+    (define-key map (kbd "M-r")           'anything-ff-rotate-right-persistent)
+    (define-key map (kbd "C-.")           'anything-find-files-down-one-level)
+    (define-key map (kbd "C-l")           'anything-find-files-down-one-level)
+    (define-key map (kbd "C-h C-b")       'anything-send-bug-report-from-anything)
     (when anything-ff-lynx-style-map
-      (define-key map (kbd "<left>")  'anything-find-files-down-one-level)
-      (define-key map (kbd "<right>") 'anything-execute-persistent-action))
+      (define-key map (kbd "<left>")      'anything-find-files-down-one-level)
+      (define-key map (kbd "<right>")     'anything-execute-persistent-action))
     (delq nil map))
   "Keymap for `anything-find-files'.")
 
 (defun anything-c-quit-and-execute-action (action)
-  "Quit current anything session and execute ACTION.
-ACTION must be one of the actions of current source."
+  "Quit current anything session and execute ACTION." 
   (setq anything-saved-action action)
   (anything-exit-minibuffer))
+
+(defun anything-ff-toggle-auto-update (candidate)
+  (setq anything-ff-auto-update-flag (not anything-ff-auto-update-flag))
+  (message "[Auto expansion %s]"
+           (if anything-ff-auto-update-flag "enabled" "disabled")))
+
+;;;###autoload
+(defun anything-ff-run-toggle-auto-update ()
+  (interactive)
+  (anything-execute-persistent-action 'toggle-auto-update))
 
 ;;;###autoload
 (defun anything-ff-run-switch-to-history ()
@@ -3031,6 +3098,47 @@ or hitting C-z on \"..\"."
       (setq anything-ff-last-expanded nil))))
 (add-hook 'anything-after-update-hook 'anything-ff-retrieve-last-expanded)
 
+;; Auto-update: anything-find-files auto expansion of directories.
+;; Internal
+(defun anything-ff-update-when-only-one-matched ()
+  (when (and (anything-file-completion-source-p)
+             anything-ff-auto-update-flag)
+    (with-anything-window
+      (when (<= (anything-approximate-candidate-number) 2)
+        (anything-next-line)
+        (let ((cur-cand (anything-get-selection)))
+          (when (and (file-directory-p cur-cand)
+                     (>= (length (anything-c-basename anything-pattern)) 2)
+                     (not (string-match "^.*[.]\\{1,2\\}$" cur-cand)))
+            (anything-set-pattern (file-name-as-directory cur-cand)))
+            (anything-check-minibuffer-input-1))))))
+(add-hook 'anything-after-update-hook 'anything-ff-update-when-only-one-matched)
+
+;; Allow expanding to home directory or root
+;; when entering respectively "~/" or "//" at end of pattern.
+;; e.g /home/thierry/labo/anything-config-qp/~/
+;; will expand to "~/"
+;; and /home/thierry/labo/anything-config-qp//
+;; will expand to "/"
+(defun anything-ff-auto-expand-to-home-or-root ()
+  (when (and (anything-file-completion-source-p)
+             (string-match ".*\\(/~/\\|/\\{2\\}\\)$" anything-pattern))
+    (let ((match (match-string 1 anything-pattern)))
+      (cond ((string= match "//")
+             (if (eq system-type 'windows-nt)
+                 (setq anything-pattern "c:/")
+                 (setq anything-pattern "/")))
+            ((string= match "/~/")
+             (if (eq system-type 'windows-nt)
+                 (setq anything-pattern (replace-regexp-in-string
+                                         "\\\\" "/" (getenv "HOME")))
+                 (setq anything-pattern "~/")))))
+    (setq anything-ff-default-directory anything-pattern)
+    (with-current-buffer (window-buffer (minibuffer-window))
+      (delete-minibuffer-contents)
+      (insert anything-pattern))))
+(add-hook 'anything-after-update-hook 'anything-ff-auto-expand-to-home-or-root)
+
 (defun anything-c-point-file-in-dired (file)
   "Put point on filename FILE in dired buffer."
   (dired (file-name-directory file))
@@ -3043,19 +3151,28 @@ or hitting C-z on \"..\"."
             for i across v collect i)))
 
 (defun anything-ff-set-pattern (pattern)
+  "Handle tramp filenames in `anything-pattern'."
   (let ((methods (mapcar 'car tramp-methods))
         (reg "\\`/\\([^[/:]+\\|[^/]+]\\):.*:")
         cur-method tramp-name)
     (cond ((string= pattern "") "")
-          ((string-match "^~" pattern)
-           (replace-match (getenv "HOME") nil t pattern))
+          ((string-match ".*\\(~//\\|//\\)$" pattern)
+           (if (eq system-type 'windows-nt) "c:/" "/"))
+          ((or (string-match "^~" pattern)
+               (string-match ".*/~/$" pattern))
+           (let* ((home    (getenv "HOME"))
+                  (replace (if (eq system-type 'windows-nt)
+                               (replace-regexp-in-string
+                                "\\\\" "/" home)
+                               home)))
+             (replace-match replace nil t pattern)))
           ;; Match "/method:maybe_hostname:"
           ((and (string-match reg pattern)
-               (setq cur-method (match-string 1 pattern))
-               (member cur-method methods))
-          (setq tramp-name (anything-create-tramp-name
-                            (match-string 0 pattern)))
-          (replace-match tramp-name nil t pattern))
+                (setq cur-method (match-string 1 pattern))
+                (member cur-method methods))
+           (setq tramp-name (anything-create-tramp-name
+                             (match-string 0 pattern)))
+           (replace-match tramp-name nil t pattern))
           ;; Match "/hostname:"
           ((and (string-match  tramp-file-name-regexp pattern)
                 (setq cur-method (match-string 1 pattern))
@@ -3067,7 +3184,7 @@ or hitting C-z on \"..\"."
           ((and (not (string-match reg pattern))
                 (string-match  tramp-file-name-regexp pattern)
                 (member (match-string 1 pattern) methods))
-           "Invalid tramp file name") ; Write in anything-buffer.
+           "Invalid tramp file name")   ; Write in anything-buffer.
           ;; PATTERN is a directory, end it with "/".
           ;; This will make PATTERN not ending yet with "/"
           ;; candidate for `anything-ff-default-directory',
@@ -3087,6 +3204,12 @@ or hitting C-z on \"..\"."
   :group 'anything-config
   :type 'integer)
 
+(defcustom anything-ff-smart-completion t
+  "Try to complete filenames smarter when non--nil.
+See `anything-ff-transform-fname-for-completion' for more info."
+  :group 'anything-config
+  :type 'boolean)
+
 (defun anything-find-files-get-candidates ()
   "Create candidate list for `anything-c-source-find-files'."
   (let* ((path          (anything-ff-set-pattern anything-pattern))
@@ -3097,6 +3220,7 @@ or hitting C-z on \"..\"."
                 anything-compile-source-functions)
         (setq anything-pattern path)
         (setq anything-pattern (replace-regexp-in-string " " ".*" path)))
+    (setq anything-pattern (anything-ff-transform-fname-for-completion path))
     (setq anything-ff-default-directory
           (if (string= anything-pattern "")
               (if (eq system-type 'windows-nt) "c:/" "/")
@@ -3116,10 +3240,26 @@ or hitting C-z on \"..\"."
             (list path)
             (directory-files (file-name-directory path) t))))))
 
+(defun anything-ff-transform-fname-for-completion (fname)
+  "Return FNAME with it's basename modified as a regexp.
+e.g foo => f.*o.*o .
+If basename contain one or more space or FNAME is a valid directory name
+return FNAME unchanged."
+  (let ((bn (anything-c-basename fname)))
+    (if (or (not anything-ff-smart-completion)
+            (string-match "\\s-" bn)
+            (string-match "/$" fname) ; Allow mkdir.
+            (file-directory-p fname))
+        fname ; Fall back to match-plugin.
+        (setq bn (if (> (length bn) 2) ; Normal completion on first 2 char.
+                     (mapconcat 'identity (split-string bn "" t) ".*") bn))
+        (concat (file-name-directory fname) bn))))
+
 (defun anything-ff-save-history ()
   "Store the last value of `anything-ff-default-directory' \
 in `anything-ff-history'."
-  (when anything-ff-default-directory
+  (when (and anything-ff-default-directory
+             (anything-file-completion-source-p))
     (push anything-ff-default-directory anything-ff-history)))
 (add-hook 'anything-cleanup-hook 'anything-ff-save-history)
 
@@ -3145,10 +3285,41 @@ in `anything-ff-history'."
           dired-line))
         (message dired-line) (sit-for 5))))
 
+;;;###autoload
 (defun anything-ff-properties-persistent ()
   "Show properties without quitting anything."
   (interactive)
   (anything-execute-persistent-action 'properties-action))
+
+(defun anything-ff-kill-buffer-fname (candidate)
+  (let* ((buf (get-file-buffer candidate))
+         (buf-name (buffer-name buf)))
+    (if buf
+        (progn
+          (kill-buffer buf) (message "Buffer `%s' killed" buf))
+        (message "No buffer to kill"))))
+
+(defun anything-ff-kill-or-find-buffer-fname (candidate)
+  "Find file CANDIDATE or kill it's buffer if it is visible.
+Never kill `anything-current-buffer'.
+Never kill buffer modified.
+This is called normally on third hit of \
+\\<anything-map>\\[anything-execute-persistent-action]
+in `anything-find-files-persistent-action'."
+  (let* ((buf      (get-file-buffer candidate))
+         (buf-name (buffer-name buf)))
+    (if (and buf (get-buffer-window buf)
+             (not (eq buf (get-buffer anything-current-buffer)))
+             (not (buffer-modified-p buf)))
+        (progn
+          (kill-buffer buf) (message "Buffer `%s' killed" buf-name))
+        (find-file candidate))))
+
+;;;###autoload
+(defun anything-ff-run-kill-buffer-persistent ()
+  "Execute `anything-ff-kill-buffer-fname' whitout quitting."
+  (interactive)
+  (anything-execute-persistent-action 'kill-buffer-fname))
 
 (defcustom anything-ff-default-kbsize 1024.0
   "Default Kbsize to use for showing files size.
@@ -3226,7 +3397,8 @@ KBSIZE if a floating point number, default value is 1024.0."
             (format-time-string "%Y-%m-%d %R" (getf all :modif-time))))
           (t all))))
 
-(defun anything-c-prefix-filename (fname &optional image)
+
+(defun anything-c-prefix-filename (fname &optional image file-or-symlinkp)
   "Return fname FNAME prefixed with icon IMAGE."
   (let* ((img-name   (and image (expand-file-name
                                  image anything-c-find-files-icons-directory)))
@@ -3238,41 +3410,53 @@ KBSIZE if a floating point number, default value is 1024.0."
          (prefix-url (propertize
                       " " 'display
                       (propertize "[@]" 'face 'anything-ff-prefix))))
-    (cond ((or (file-exists-p fname)
+    (cond ((or file-or-symlinkp
+               (file-exists-p fname)
                (file-symlink-p fname))
            (if image (concat prefix-img fname) fname))
           ((string-match ffap-url-regexp fname) (concat prefix-url " " fname))
           (t (concat prefix-new " " fname)))))
 
+(defcustom anything-ff-tramp-not-fancy t
+  "No colors when listing remote files when set to non--nil.
+This make listing much faster, specially on slow machines."
+  :group 'anything-config
+  :type  'boolean)
+
 (defun anything-c-find-files-transformer (files sources)
   "Selector of transformer to use for `anything-c-source-find-files'."
-  (if (and (window-system) anything-c-find-files-show-icons)
-      (anything-c-highlight-ffiles1 files sources)
-      (anything-c-highlight-ffiles files sources)))
+  (if (and (string-match tramp-file-name-regexp anything-pattern)
+           anything-ff-tramp-not-fancy)
+      files
+      (if (and (window-system) anything-c-find-files-show-icons)
+          (anything-c-highlight-ffiles1 files sources)
+          (anything-c-highlight-ffiles files sources))))
 
 (defun anything-c-highlight-ffiles (files sources)
   "Candidate transformer for `anything-c-source-find-files' without icons."
   (loop for i in files collect
-       (cond ((and (file-symlink-p i) (not (anything-ff-valid-symlink-p i))
+       (cond ((and (stringp (car (file-attributes i)))
+                   (not (anything-ff-valid-symlink-p i))
                    (not (string-match "^\.#" (anything-c-basename i))))
               (cons (anything-c-prefix-filename
-                     (propertize i 'face 'anything-ff-invalid-symlink))
+                     (propertize i 'face 'anything-ff-invalid-symlink) nil t)
                     i))
-             ((file-symlink-p i)
+             ((stringp (car (file-attributes i)))
               (cons (anything-c-prefix-filename
-                     (propertize i 'face 'anything-ff-symlink))
+                     (propertize i 'face 'anything-ff-symlink) nil t)
                     i))
-             ((file-directory-p i)
+             ((eq t (car (file-attributes i)))
               (cons (anything-c-prefix-filename
-                     (propertize i 'face 'anything-ff-directory))
+                     (propertize i 'face 'anything-ff-directory) nil t)
                     i))
              ((file-executable-p i)
               (cons (anything-c-prefix-filename
-                     (propertize i 'face 'anything-ff-executable))
+                     (propertize i 'face 'anything-ff-executable) nil t)
                     i))
-             (t (cons (anything-c-prefix-filename
-                       (propertize i 'face 'anything-ff-file))
-                      i)))))
+             (t
+              (cons (anything-c-prefix-filename
+                     (propertize i 'face 'anything-ff-file))
+                    i)))))
 
 (defun anything-c-highlight-ffiles1 (files sources)
   "Candidate transformer for `anything-c-source-find-files' that show icons."
@@ -3475,7 +3659,7 @@ If a prefix arg is given or `anything-follow-mode' is on open file."
                (kill-buffer image-dired-display-image-buffer))
              (image-dired-display-image candidate)
              (message nil)
-             (display-buffer image-dired-display-image-buffer)
+             (anything-c-switch-to-buffer image-dired-display-image-buffer)
              (with-current-buffer image-dired-display-image-buffer
                (let ((exif-data (anything-ff-exif-data candidate)))
                  (image-dired-update-property 'help-echo exif-data))))
@@ -3488,7 +3672,9 @@ If a prefix arg is given or `anything-follow-mode' is on open file."
                   (anything-ff-file-compressed-p candidate))
              (insert-in-minibuffer (concat candidate "#")))
             ;; On second hit we open file.
-            (t (find-file candidate))))))
+            ;; On Third hit we kill it's buffer maybe.
+            (t
+             (anything-ff-kill-or-find-buffer-fname candidate))))))
 
 (defvar anything-ff-avfs-directory nil
   "*The default avfs directory, usually '.avfs'.
@@ -3897,16 +4083,13 @@ ACTION is a key that can be one of 'copy, 'rename, 'symlink, 'relsymlink."
   (interactive)
   (anything-dired-do-action-on-file :action 'hardlink))
 
-(defvar anything-dired-bindings nil)
 ;;;###autoload
-(defun anything-dired-bindings (&optional arg)
-  "Replace usual dired commands `C' and `R' by anything ones.
-When call interactively toggle dired bindings and anything bindings.
-When call non--interactively with arg > 0, enable anything bindings.
-You can put (anything-dired-binding 1) in init file to enable anything bindings."
-  (interactive)
-  (if (or (and arg (> arg 0)) (not anything-dired-bindings))
-      ;; Replace dired bindings.
+(define-minor-mode anything-dired-mode ()
+  "Enable anything completion in Dired functions.
+Bindings affected are C, R, S, H."
+  :group 'anything-config
+  :global t
+  (if anything-dired-mode
       (progn
         (substitute-key-definition
          'dired-do-copy 'anything-dired-copy-file dired-mode-map)
@@ -3915,9 +4098,7 @@ You can put (anything-dired-binding 1) in init file to enable anything bindings.
         (substitute-key-definition
          'dired-do-symlink 'anything-dired-symlink-file dired-mode-map)
         (substitute-key-definition
-         'dired-do-hardlink 'anything-dired-hardlink-file dired-mode-map)
-        (setq anything-dired-bindings t))
-      ;; Replace anything bindings.
+         'dired-do-hardlink 'anything-dired-hardlink-file dired-mode-map))
       (substitute-key-definition
        'anything-dired-copy-file 'dired-do-copy dired-mode-map)
       (substitute-key-definition
@@ -3925,8 +4106,9 @@ You can put (anything-dired-binding 1) in init file to enable anything bindings.
       (substitute-key-definition
        'anything-dired-symlink-file 'dired-do-symlink dired-mode-map)
       (substitute-key-definition
-       'anything-dired-hardlink-file 'dired-do-hardlink dired-mode-map)
-      (setq anything-dired-bindings nil)))
+       'anything-dired-hardlink-file 'dired-do-hardlink dired-mode-map)))
+      
+(defalias 'anything-dired-bindings 'anything-dired-mode)
 
 (defvar anything-c-read-file-map
   (let ((map (copy-keymap anything-map)))
@@ -3949,6 +4131,7 @@ You can put (anything-dired-binding 1) in init file to enable anything bindings.
                                    must-match
                                    (history nil)
                                    (marked-candidates nil)
+                                   (alistp t)
                                    (persistent-action 'anything-find-files-persistent-action)
                                    (persistent-help "Hit1 Expand Candidate, Hit2 or (C-u) Find file"))
   "Anything `read-file-name' emulation.
@@ -3964,7 +4147,7 @@ INITIAL-INPUT is a valid path, TEST is a predicate that take one arg."
            :sources
            `(((name . ,(concat "Read File Name History" anything-c-find-files-doc-header))
               (candidates . (lambda ()
-                              (anything-comp-read-get-candidates history)))
+                              (anything-comp-read-get-candidates history nil nil alistp)))
               (volatile)
               (persistent-action . ,persistent-action)
               (persistent-help . ,persistent-help)
@@ -4057,8 +4240,8 @@ If nil Search in all files.")
     (set-process-sentinel (get-process "locate-process")
                           #'(lambda (process event)
                               (when (string= event "finished\n")
-                                (kill-local-variable 'mode-line-format)
                                 (with-anything-window
+                                  (force-mode-line-update nil)
                                   (anything-update-move-first-line)))))))
 
 (defvar anything-c-source-locate
@@ -4092,6 +4275,7 @@ If nil Search in all files.")
 \\[anything-ff-run-delete-file]\t\t->Delete file.
 \\[anything-ff-run-switch-other-window]\t\t->Switch other window.
 \\[anything-ff-properties-persistent]\t\t->Show file properties.
+\\[anything-yank-text-at-point]\t\t->Yank text at point.
 \\[anything-ff-run-open-file-externally]\t\t->Open file with external program (C-u to choose).
 \nLocate tips:
 You can add after writing search pattern any of the locate command line options.
@@ -4109,6 +4293,7 @@ See Man locate for more infos.
     (define-key map (kbd "C-o")     'anything-ff-run-switch-other-window)
     (define-key map (kbd "M-i")     'anything-ff-properties-persistent)
     (define-key map (kbd "C-c C-x") 'anything-ff-run-open-file-externally)
+    (define-key map (kbd "C-w")     'anything-yank-text-at-point)
     (define-key map (kbd "C-c ?")   'anything-generic-file-help)
     map)
   "Generic Keymap for files.")
@@ -4256,6 +4441,7 @@ See `anything-c-grep-default-command' for format specs.")
             (:eval (when (get-process "grep-process")
                      (propertize "[Grep Process Running] "
                                  'face 'anything-grep-running)))))
+    (force-mode-line-update nil)
     (prog1
         (let ((default-directory anything-ff-default-directory))
           (start-file-process-shell-command "grep-process" nil cmd-line))
@@ -4266,7 +4452,6 @@ See `anything-c-grep-default-command' for format specs.")
            (when (string= event "finished\n")
              (with-anything-window
                (anything-update-move-first-line)
-               (kill-local-variable 'mode-line-format)
                (setq mode-line-format
                      '(" " mode-line-buffer-identification " "
                        (line-number-mode "%l") " "
@@ -4276,7 +4461,8 @@ See `anything-c-grep-default-command' for format specs.")
                                                           (point-min)
                                                           (point-max)))))
                                          (if (> nlines 0) nlines 0)))
-                               'face 'anything-grep-finish)))))))))))
+                               'face 'anything-grep-finish))))
+               (force-mode-line-update nil))))))))
 
 (defun anything-c-grep-action (candidate &optional where mark)
   "Define a default action for `anything-do-grep' on CANDIDATE.
@@ -4681,7 +4867,7 @@ If a prefix arg is given run grep on all buffers ignoring non--file-buffers."
             (anything-do-grep1 bufs))
         ;; bufs is empty, thats mean we have only CANDIDATE
         ;; and it is not a buffer-filename, fallback to occur.
-        (switch-to-buffer candidate)
+        (anything-c-switch-to-buffer candidate)
         (when (get-buffer anything-action-buffer)
           (kill-buffer anything-action-buffer))
         (anything-occur))))
@@ -4735,9 +4921,9 @@ Where '%f' format spec is filename and '%p' is page number"
        (get-process "pdfgrep-process")
        #'(lambda (process event)
            (when (string= event "finished\n")
-             (kill-local-variable 'mode-line-format)
              (with-anything-window
-               (anything-update-move-first-line))))))))
+               (anything-update-move-first-line))
+             (force-mode-line-update nil)))))))
 
 
 (defun anything-do-pdfgrep-1 (only)
@@ -5540,13 +5726,15 @@ source.")
   (let ((wfiles (woman-file-name-all-completions candidate)))
     (condition-case err
         (if (> (length wfiles) 1)
-            (woman-find-file (anything-comp-read "ManFile: " wfiles
-                                                 :must-match t))
+            (woman-find-file
+             (anything-comp-read
+              "ManFile: " wfiles :must-match t))
             (woman candidate))
             ;; If woman is unable to format correctly
             ;; use man instead.
       (error (kill-buffer) ; Kill woman buffer.
-             (man candidate)))))
+             (let ((Man-notify-method 'meek))
+               (Man-getpage-in-background candidate))))))
 
 (defvar anything-c-source-man-pages
   `((name . "Manual Pages")
@@ -5618,6 +5806,7 @@ It is `anything' replacement of regular `M-x' `execute-extended-command'."
   (interactive)
   (let* (in-help
          help-cand
+         anything-persistent-action-use-special-display
          (history (loop with hist
                      for i in extended-command-history
                      for com = (intern i)
@@ -5631,11 +5820,21 @@ It is `anything' replacement of regular `M-x' `execute-extended-command'."
                    :name "Emacs Commands"
                    :persistent-action
                    #'(lambda (candidate)
-                       (if (and in-help (string= candidate help-cand))
-                           (progn (kill-buffer "*Help*") (setq in-help nil))
-                           (describe-function (intern candidate))
-                           (setq in-help t))
-                       (setq help-cand candidate))
+                       (let ((hbuf (get-buffer (help-buffer))))
+                         (if (and in-help (string= candidate help-cand))
+                             (progn
+                               ;; When M-x is started from a help buffer,
+                               ;; Don't kill it as it is anything-current-buffer.
+                               (unless (equal hbuf anything-current-buffer)
+                                 (kill-buffer hbuf))
+                               (setq in-help nil))
+                             ;; Be sure anything-current-buffer have not a dedicated window.
+                             (set-window-dedicated-p
+                              (get-buffer-window anything-current-buffer) nil)
+                             (describe-function (intern candidate))
+                             (message nil) ; Erase the new stupid message Type "q"[...]
+                             (setq in-help t))
+                         (setq help-cand candidate)))
                    :persistent-help "Describe this command"
                    :history history
                    :sort 'string-lessp
@@ -5682,23 +5881,23 @@ Return nil if no mode-map found."
 (defun anything-M-x-transformer (candidates sources)
   "filtered-candidate-transformer to show bindings in emacs commands.
 Show global bindings and local bindings according to current `major-mode'."
-  (loop
-     with local-map = (with-current-buffer anything-current-buffer
-                        (anything-M-x-current-mode-map-alist))
-     for i in candidates
-     for cand       = (symbol-name i)
-     for local-key  = (car (rassq i local-map))
-     for key        = (substitute-command-keys (format "\\[%s]" cand))
-     collect
-       (cons (if (string-match "^M-x" key)
-                 (if local-key
-                     (concat
-                      cand " (" (propertize local-key 'face 'anything-M-x-key-face)
-                      ")")
-                     cand)
-                 (concat
-                  cand " (" (propertize key 'face 'anything-M-x-key-face) ")"))
-             cand)))
+  (with-current-buffer anything-current-buffer
+    (loop
+       with local-map = (anything-M-x-current-mode-map-alist)
+       for cand in candidates
+       for local-key  = (car (rassq cand local-map))
+       for key        = (substitute-command-keys (format "\\[%s]" cand))
+       collect
+         (cons (cond ((and (string-match "^M-x" key) local-key)
+                      (format "%s (%s)"
+                              cand (propertize
+                                    local-key
+                                    'face 'anything-M-x-key-face)))
+                     ((string-match "^M-x" key) cand)
+                     (t (format "%s (%s)"
+                                cand (propertize
+                                      key
+                                      'face 'anything-M-x-key-face)))) cand))))
 
 ;;; LaCarte
 (defvar anything-c-source-lacarte
@@ -5741,7 +5940,7 @@ Only for internal use.")
 
 Abbreviations are made by taking the first character from each
 word in the function's name, e.g. \"bb\" is an abbrev for
-`bury-buffer', \"stb\" is an abbrev for `switch-to-buffer'."
+`bury-buffer', \"stb\" is an abbrev for `anything-c-switch-to-buffer'."
   (string-match anything-c-function-abbrev-regexp candidate))
 
 (defvar anything-c-source-emacs-functions-with-abbrevs
@@ -6291,14 +6490,15 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
 ;;;###autoload
 (defun anything-bookmark-ext ()
   "Preconfigured `anything' for bookmark-extensions sources.
-Needs bookmark-ext.el
-
-http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
+Needs bookmark-ext.el:
+<http://mercurial.intuxication.org/hg/emacs-bookmark-extension>.
+Contain also `anything-c-source-google-suggest'."
   (interactive)
   (anything
    :sources
    '(anything-c-source-bookmark-files&dirs
      anything-c-source-bookmark-w3m
+     anything-c-source-google-suggest
      anything-c-source-bmkext-addressbook
      anything-c-source-bookmark-gnus
      anything-c-source-bookmark-info
@@ -6392,7 +6592,6 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
               'help-echo (anything-c-firefox-bookmarks-get-value i))))
 
 ;; W3m bookmark
-;; Bugfix:
 ;; Some users have the emacs-w3m library in load-path
 ;; without having the w3m executable :-;
 ;; So check if w3m program is present before trying to load
@@ -6400,6 +6599,7 @@ http://mercurial.intuxication.org/hg/emacs-bookmark-extension"
 (eval-when-compile
   (when (executable-find "w3m")
     (require 'w3m-bookmark nil t)))
+
 (defvar w3m-bookmark-file "~/.w3m/bookmark.html")
 
 
@@ -7056,11 +7256,11 @@ replace with STR as yanked string."
     (action . (("Goto line"
                 . (lambda (candidate)
                     (let ((items (split-string candidate ":")))
-                      (switch-to-buffer (second items))
+                      (anything-c-switch-to-buffer (second items))
                       (anything-goto-line (string-to-number (car items))))))))
     (persistent-action . (lambda (candidate)
                            (let ((items (split-string candidate ":")))
-                             (switch-to-buffer (second items))
+                             (anything-c-switch-to-buffer (second items))
                              (anything-goto-line (string-to-number (car items)))
                              (anything-match-line-color-current-line))))
     (persistent-help . "Show this line")))
@@ -7643,6 +7843,8 @@ http://bbdb.sourceforge.net/")
   '((name . "Evaluation Result")
     (disable-shortcuts)
     (dummy)
+    (multiline)
+    (mode-line . "C-RET: nl-and-indent, tab: reindent, C-tab:complete, C-p/n: next/prec-line.")
     (filtered-candidate-transformer . (lambda (candidates source)
                                         (list
                                          (condition-case nil
@@ -7650,45 +7852,83 @@ http://bbdb.sourceforge.net/")
                                                (pp-to-string
                                                 (eval (read anything-pattern))))
                                            (error "Error")))))
-    (action ("Copy result to kill-ring" . (lambda (candidate)
-                                            (with-current-buffer anything-buffer
-                                              (let ((end (save-excursion
-                                                           (goto-char (point-max))
-                                                           (search-backward "\n")
-                                                           (point))))
-                                                (kill-region (point) end))))))))
+    (action . (("Copy result to kill-ring" . (lambda (candidate)
+                                               (with-current-buffer anything-buffer
+                                                 (let ((end (save-excursion
+                                                              (goto-char (point-max))
+                                                              (search-backward "\n")
+                                                              (point))))
+                                                   (kill-region (point) end)))))
+               ("copy sexp to kill-ring" . (lambda (candidate)
+                                             (kill-new anything-input)))))))
 ;; (anything 'anything-c-source-evaluation-result)
 
 ;;;###autoload
 (defun anything-eval-expression (arg)
   "Preconfigured anything for `anything-c-source-evaluation-result'."
   (interactive "P")
-  (anything 'anything-c-source-evaluation-result (when arg (thing-at-point 'sexp))
-            nil nil nil "*anything eval*"))
+  (anything :sources 'anything-c-source-evaluation-result
+            :input (when arg (thing-at-point 'sexp))
+            :buffer "*anything eval*"
+            :keymap anything-eval-expression-map))
+
+(defun anything-eval-new-line-and-indent ()
+  (interactive)
+  (newline) (lisp-indent-line))
+
+(defvar anything-eval-expression-map
+  (let ((map (copy-keymap anything-map)))
+    (define-key map (kbd "<C-return>") 'anything-eval-new-line-and-indent)
+    (define-key map (kbd "<tab>")      'lisp-indent-line)
+    (define-key map (kbd "<C-tab>")    'lisp-complete-symbol)
+    (define-key map (kbd "C-p")        'previous-line)
+    (define-key map (kbd "C-n")        'next-line)
+    (define-key map (kbd "<up>")       'previous-line)
+    (define-key map (kbd "<down>")     'next-line)
+    (define-key map (kbd "<right>")    'forward-char)
+    (define-key map (kbd "<left>")     'backward-char)
+    map))
+
+(defvar anything-eldoc-active-minibuffers-list nil)
+(defun anything-eldoc-store-minibuffer ()
+  "Store minibuffer buffer name in `anything-eldoc-active-minibuffers-list'."
+  (with-selected-window (minibuffer-window)
+    (push (buffer-name) anything-eldoc-active-minibuffers-list)))
 
 ;;;###autoload
 (defun anything-eval-expression-with-eldoc ()
   "Preconfigured anything for `anything-c-source-evaluation-result' with `eldoc' support. "
   (interactive)
   (let ((timer (run-with-idle-timer eldoc-idle-delay
-                                    'repeat 'anything-eldoc-show-in-eval)))
+                                    'repeat 'anything-eldoc-show-in-eval))
+        (minibuffer-completing-symbol t) ; Enable lisp completion.
+        (completion-cycle-threshold t))  ; Always cycle, no pesty completion buffer (emacs24 only).
     (unwind-protect
-         (call-interactively 'anything-eval-expression)
-      (cancel-timer timer))))
+         (minibuffer-with-setup-hook
+             'anything-eldoc-store-minibuffer
+           (call-interactively 'anything-eval-expression))
+      (and timer (cancel-timer timer))
+      (setq anything-eldoc-active-minibuffers-list
+            (cdr anything-eldoc-active-minibuffers-list)))))
 
 (defun anything-eldoc-show-in-eval ()
-  "Return eldoc in a tooltip for current minibuffer input."
-  (let* ((str-all (minibuffer-completion-contents))
-         (sym     (when str-all
-                    (with-temp-buffer
-                      (insert str-all)
-                      (goto-char (point-max))
-                      (unless (looking-back ")\\|\"") (forward-char -1))
-                      (eldoc-current-symbol))))
-         (doc     (or (eldoc-get-var-docstring sym)
-                      (eldoc-get-fnsym-args-string
-                       (car (eldoc-fnsym-in-current-sexp))))))
-    (when doc (funcall anything-c-eldoc-in-minibuffer-show-fn doc))))
+  "Return eldoc in mode-line for current minibuffer input."
+  (let ((buf (with-selected-window (minibuffer-window)
+               (buffer-name))))
+    (when (member buf anything-eldoc-active-minibuffers-list)  
+      (let* ((str-all (with-current-buffer buf
+                        (minibuffer-completion-contents)))
+             (sym     (when str-all
+                        (with-temp-buffer
+                          (insert str-all)
+                          (goto-char (point-max))
+                          (unless (looking-back ")\\|\"") (forward-char -1))
+                          (eldoc-current-symbol))))
+             (info-fn (eldoc-fnsym-in-current-sexp))
+             (doc     (or (eldoc-get-var-docstring sym)
+                          (eldoc-get-fnsym-args-string
+                           (car info-fn) (cadr info-fn)))))
+        (when doc (funcall anything-c-eldoc-in-minibuffer-show-fn doc))))))
 
 (defcustom anything-c-eldoc-in-minibuffer-show-fn 'anything-c-eldoc-show-in-mode-line
   "A function to display eldoc info.
@@ -7699,11 +7939,12 @@ Should take one arg: the string to display."
 (defvar anything-c-eldoc-show-in-mode-line-delay 12)
 (defun anything-c-eldoc-show-in-mode-line (str)
   "Show string STR in mode-line."
-  (with-anything-window
-    (let ((mode-line-format (concat " " str)))
-      (force-mode-line-update)
-      (sit-for anything-c-eldoc-show-in-mode-line-delay))
-    (force-mode-line-update)))
+  (save-window-excursion
+    (with-current-buffer anything-buffer
+      (let ((mode-line-format (concat " " str)))
+        (force-mode-line-update)
+        (sit-for anything-c-eldoc-show-in-mode-line-delay))
+      (force-mode-line-update))))
 
 ;;; Calculation Result
 (defvar anything-c-source-calculation-result
@@ -7724,24 +7965,33 @@ Should take one arg: the string to display."
   (anything-other-buffer 'anything-c-source-calculation-result "*anything calcul*"))
 
 ;;; Google Suggestions
-(defvar anything-gg-sug-lgh-flag 0)
+(defvar anything-ggs-max-length-real-flag 0)
+(defvar anything-ggs-max-length-num-flag 0)
 (defun anything-c-google-suggest-fetch (input)
   "Fetch suggestions for INPUT from XML buffer.
 Return an alist with elements like (data . number_results)."
+  (setq anything-ggs-max-length-real-flag 0
+        anything-ggs-max-length-num-flag 0)
   (let ((request (concat anything-c-google-suggest-url
                          (url-hexify-string input))))
     (flet ((fetch ()
              (loop
                 with result-alist = (xml-get-children
-                                     (car (xml-parse-region (point-min) (point-max)))
+                                     (car (xml-parse-region
+                                           (point-min) (point-max)))
                                      'CompleteSuggestion)
                 for i in result-alist
                 for data = (cdr (caadr (assoc 'suggestion i)))
                 for nqueries = (cdr (caadr (assoc 'num_queries i)))
+                for lqueries = (length (anything-c-ggs-set-number-result
+                                        nqueries))
                 for ldata = (length data)
                 do
-                  (when (> ldata anything-gg-sug-lgh-flag)
-                    (setq anything-gg-sug-lgh-flag ldata))
+                  (progn
+                    (when (> ldata anything-ggs-max-length-real-flag)
+                      (setq anything-ggs-max-length-real-flag ldata))
+                    (when (> lqueries anything-ggs-max-length-num-flag)
+                      (setq anything-ggs-max-length-num-flag lqueries)))
                 collect (cons data nqueries) into cont
                 finally return cont)))
       (if anything-google-suggest-use-curl-p
@@ -7752,17 +8002,33 @@ Return an alist with elements like (data . number_results)."
               (url-retrieve-synchronously request)
             (fetch))))))
 
-
-(defun anything-c-google-suggest-set-candidates ()
+(defun anything-c-google-suggest-set-candidates (&optional request-prefix)
   "Set candidates with result and number of google results found."
-  (let ((suggestions (anything-c-google-suggest-fetch anything-input)))
-    (setq suggestions (loop for i in suggestions
-                         for interval = (- anything-gg-sug-lgh-flag (length (car i)))
-                         for elm = (concat (car i)
-                                           (make-string (+ 2 interval) ? )
-                                           "(" (cdr i) " results)")
-                         collect (cons elm (car i))))
-    (if (some (lambda (data) (equal (cdr data) anything-input)) suggestions)
+  (let ((suggestions
+         (loop with suggested-results = (anything-c-google-suggest-fetch
+                                         (or (and request-prefix
+                                                  (concat request-prefix " " anything-pattern))
+                                             anything-pattern))
+            for (real . numresult) in suggested-results
+            ;; Prepare number of results with ","
+            for fnumresult = (anything-c-ggs-set-number-result numresult)
+            ;; Calculate number of spaces to add before fnumresult
+            ;; if it is smaller than longest result
+            ;; `anything-ggs-max-length-num-flag'.
+            ;; e.g 1,234,567
+            ;;       345,678
+            ;; To be sure it is aligned properly.
+            for nspaces = (if (< (length fnumresult) anything-ggs-max-length-num-flag)
+                              (- anything-ggs-max-length-num-flag (length fnumresult))
+                              0)
+            ;; Add now the spaces before fnumresult.
+            for align-fnumresult = (concat (make-string nspaces ? ) fnumresult)
+            for interval = (- anything-ggs-max-length-real-flag (length real))
+            for spaces   = (make-string (+ 2 interval) ? )
+            for display = (format "%s%s(%s results)" real spaces align-fnumresult)
+            collect (cons display real))))
+    (if (loop for (disp . dat) in suggestions
+           thereis (equal dat anything-pattern))
         suggestions
         ;; if there is no suggestion exactly matching the input then
         ;; prepend a Search on Google item to the list
@@ -7770,6 +8036,21 @@ Return an alist with elements like (data . number_results)."
          suggestions
          (list (cons (concat "Search for " "'" anything-input "'" " on Google")
                      anything-input))))))
+
+(defun anything-c-ggs-set-number-result (num)
+  (if num
+      (progn
+        (and (numberp num) (setq num (number-to-string num)))
+        (loop for i in (reverse (split-string num "" t))
+           for count from 1
+           append (list i) into C
+           when (= count 3)
+           append (list ",") into C
+           and do (setq count 0)
+           finally return
+             (replace-regexp-in-string
+              "^," "" (mapconcat 'identity (reverse C) ""))))
+      "?"))
 
 (defvar anything-c-google-suggest-default-browser-function nil
   "*The browse url function you prefer to use with google suggest.
@@ -7784,13 +8065,22 @@ See `anything-browse-url-default-browser-alist'.")
         (funcall it arg)
       (anything-c-browse-url arg))))
 
+(defvar anything-c-google-suggest-default-function
+  'anything-c-google-suggest-set-candidates
+  "Default function to use in anything google suggest.")
+
 (defvar anything-c-source-google-suggest
   '((name . "Google Suggest")
-    (candidates . anything-c-google-suggest-set-candidates)
+    (candidates . (lambda ()
+                    (funcall anything-c-google-suggest-default-function)))
     (action . (("Google Search" . anything-c-google-suggest-action)))
     (volatile)
     (requires-pattern . 3)
     (delayed)))
+
+(defun anything-c-google-suggest-emacs-lisp ()
+  "Try to emacs lisp complete with google suggestions."
+  (anything-c-google-suggest-set-candidates "emacs lisp"))
 
 ;; (anything 'anything-c-source-google-suggest)
 
@@ -7841,15 +8131,20 @@ Return an alist with elements like (data . number_results)."
 ;;; http://surfraw.alioth.debian.org/
 ;; user variables
 (require 'browse-url)
-(defvar w3m-command nil)
+;; If default setting of `w3m-command' is not
+;; what you want you and you modify it, you will have to reeval
+;; also `anything-browse-url-default-browser-alist'.
+(defvar w3m-command "/usr/bin/w3m")
 (defvar anything-c-home-url "http://www.google.fr"
   "*Default url to use as home url.")
 
 (defvar browse-url-chromium-program "chromium-browser")
+(defvar browse-url-uzbl-program "uzbl-browser")
 (defvar anything-browse-url-default-browser-alist
   `((,w3m-command . w3m-browse-url)
     (,browse-url-firefox-program . browse-url-firefox)
     (,browse-url-chromium-program . browse-url-chromium)
+    (,browse-url-uzbl-program . browse-url-uzbl)
     (,browse-url-kde-program . browse-url-kde)
     (,browse-url-gnome-moz-program . browse-url-gnome-moz)
     (,browse-url-mozilla-program . browse-url-mozilla)
@@ -7860,6 +8155,7 @@ Return an alist with elements like (data . number_results)."
   "*Alist of (executable . function) to try to find a suitable url browser.")
 
 (defun* anything-c-generic-browser (url name &rest args)
+  "Browse URL with NAME browser."
   (let ((proc (concat name " " url)))
     (message "Starting %s..." name)
     (apply 'start-process proc nil name
@@ -7871,23 +8167,29 @@ Return an alist with elements like (data . number_results)."
            (message "%s process %s" process event))))))
 
 (defun browse-url-chromium (url)
+  "Browse URL with google chrome browser."
   (interactive "sURL: ")
   (anything-c-generic-browser
    url browse-url-chromium-program))
 
+(defun browse-url-uzbl (url &optional ignore)
+  "Browse URL with uzbl browser."
+  (interactive "sURL: ")
+  (anything-c-generic-browser url browse-url-uzbl-program "-u"))
+
 (defun anything-browse-url-default-browser (url &rest args)
   "Find the first available browser and ask it to load URL."
-  (let ((default-browser (loop
-                            for i in anything-browse-url-default-browser-alist
-                            thereis (and (car i) (executable-find (car i))))))
-    (if default-browser
-        (apply default-browser url args)
+  (let ((default-browser-fn
+         (loop for (exe . fn) in anything-browse-url-default-browser-alist
+            thereis (and exe (executable-find exe) fn))))
+    (if default-browser-fn
+        (apply default-browser-fn url args)
         (error "No usable browser found"))))
 
 (defun* anything-c-browse-url (&optional (url anything-c-home-url))
   "Default command to browse URL."
   (if browse-url-browser-function
-      (funcall browse-url-browser-function url)
+      (browse-url url)
       (anything-browse-url-default-browser url)))
 
 (defun anything-c-build-elvi-list ()
@@ -7912,12 +8214,10 @@ When nil, fallback to `browse-url-browser-function'.")
                       :must-match t
                       :name "Surfraw Search Engines"
                       :history anything-surfraw-engines-history)))
-  (let* ((engine-nodesc (car (split-string engine)))
-         (url (with-temp-buffer
-                (apply 'call-process "surfraw" nil t nil
-                       (list engine-nodesc "-p" pattern))
-                (replace-regexp-in-string
-                 "\n" "" (buffer-string))))
+  (let* ((engine-nodesc               (car (split-string engine)))
+         (url                         (shell-command-to-string
+                                       (format "surfraw %s -p %s"
+                                               engine-nodesc pattern)))
          (browse-url-browser-function (or anything-surfraw-default-browser-function
                                           browse-url-browser-function)))
     (if (string= engine-nodesc "W")
@@ -7948,7 +8248,7 @@ When nil, fallback to `browse-url-browser-function'.")
         (emms-stream-add-bookmark name url (string-to-number fd) type)
         (emms-stream-save-bookmarks-file)
         (emms-stream-quit)
-        (switch-to-buffer cur-buf)))))
+        (anything-c-switch-to-buffer cur-buf)))))
 
 (defun anything-emms-stream-delete-bookmark (elm)
   "Delete an emms-stream bookmark from anything."
@@ -7962,7 +8262,7 @@ When nil, fallback to `browse-url-browser-function'.")
         (emms-stream-delete-bookmark)
         (emms-stream-save-bookmarks-file)
         (emms-stream-quit)
-        (switch-to-buffer cur-buf)))))
+        (anything-c-switch-to-buffer cur-buf)))))
 
 (defvar anything-c-source-emms-streams
   '((name . "Emms Streams")
@@ -8208,7 +8508,7 @@ See also `anything-create--actions'."
    (append anything-create--actions-private
            '(("find-file" . find-file)
              ("find-file other window" . find-file-other-window)
-             ("New buffer" . switch-to-buffer)
+             ("New buffer" . anything-c-switch-to-buffer)
              ("New buffer other window" . switch-to-buffer-other-window)
              ("Bookmark Set" . bookmark-set)
              ("Set Register" .
@@ -8494,8 +8794,8 @@ package name - description."
 (defun anything-c-shell-command-if-needed (command)
   (interactive "sShell command: ")
   (if (get-buffer command)		; if the buffer already exists
-      (switch-to-buffer command)	; then just switch to it
-      (switch-to-buffer command)	; otherwise create it
+      (anything-c-switch-to-buffer command)	; then just switch to it
+      (anything-c-switch-to-buffer command)	; otherwise create it
       (insert (shell-command-to-string command))))
 
 (defun anything-c-apt-cache-show (package)
@@ -8605,7 +8905,7 @@ package name - description."
   "Gentoo default action that use `anything-c-gentoo-buffer'."
   (if (member elm anything-c-cache-world)
       (progn
-        (switch-to-buffer anything-c-gentoo-buffer)
+        (anything-c-switch-to-buffer anything-c-gentoo-buffer)
         (erase-buffer)
         (let ((com-list (append args (list elm))))
           (apply #'call-process command nil t nil
@@ -8623,7 +8923,7 @@ package name - description."
     (candidate-transformer anything-c-highlight-local-use)
     (action . (("Description"
                 . (lambda (elm)
-                    (switch-to-buffer anything-c-gentoo-buffer)
+                    (anything-c-switch-to-buffer anything-c-gentoo-buffer)
                     (erase-buffer)
                     (apply #'call-process "euse" nil t nil
                            `("-i"
@@ -8641,7 +8941,7 @@ package name - description."
                     (anything-c-gentoo-eshell-action elm "*sudo -p Password: euse -P")))
                ("Show which dep use this flag"
                 . (lambda (elm)
-                    (switch-to-buffer anything-c-gentoo-buffer)
+                    (anything-c-switch-to-buffer anything-c-gentoo-buffer)
                     (erase-buffer)
                     (apply #'call-process "equery" nil t nil
                            `("-C"
@@ -8758,37 +9058,28 @@ package name - description."
 
 ;; (anything 'anything-c-source-emacs-process)
 
-;; Run Externals commands within Emacs
-(defmacro* anything-comp-hash-get-items (hash-table &key test)
-  "Get the list of all keys/values of hash-table."
-  `(let ((li-items ()))
-     (maphash #'(lambda (x y)
-                  (if ,test
-                      (when (funcall ,test y)
-                        (push (list x y) li-items))
-                      (push (list x y) li-items)))
-              ,hash-table)
-     li-items))
-
-(defun anything-comp-read-get-candidates (collection &optional test sort-fn)
+;;; Anything `completing-read' replacement
+;;
+;;
+(defun anything-comp-read-get-candidates (collection &optional test sort-fn alistp)
   "Convert COLLECTION to list removing elements that don't match TEST.
 SORT-FN is a predicate to sort COLLECTION.
+ALISTP is a flag to not use `all-completions' which doesn't handle alists correctly\
+for anything.
 If collection is an `obarray', a TEST is needed. See `obarray'."
   (let ((cands
-         (cond ((and (listp collection) test)
-                (loop for i in collection when (funcall test i) collect i))
-               ((and (eq collection obarray) test)
-                (loop for s being the symbols of collection
-                   when (funcall test s) collect s))
+         (cond ((and (eq collection obarray) test)
+                (all-completions "" collection test))
                ((and (vectorp collection) test)
                 (loop for i across collection when (funcall test i) collect i))
                ((vectorp collection)
                 (loop for i across collection collect i))
-               ((and (hash-table-p collection) test)
-                (anything-comp-hash-get-items collection :test test))
-               ((hash-table-p collection)
-                (anything-comp-hash-get-items collection))
-               (t collection))))
+               ((and alistp test)
+                (loop for i in collection when (funcall test i) collect i))
+               (alistp collection)
+               ((and collection test)
+                (all-completions "" collection test))
+               (t (all-completions "" collection)))))
     (if sort-fn (sort cands sort-fn) cands)))
 
 (defun anything-cr-default-transformer (candidates source)
@@ -8807,9 +9098,11 @@ Do nothing, just return candidate list unmodified."
                                    (persistent-action nil)
                                    (persistent-help "DoNothing")
                                    (name "Anything Completions")
+                                   (volatile t)
                                    sort
                                    (fc-transformer 'anything-cr-default-transformer)
-                                   (marked-candidates nil))
+                                   (marked-candidates nil)
+                                   (alistp t))
   "Anything `completing-read' emulation.
 PROMPT is the prompt name to use.
 COLLECTION can be a list, vector, obarray or hash-table.
@@ -8826,49 +9119,335 @@ anything-buffer before COLLECTION.
 PERSISTENT-ACTION: A function called with one arg i.e candidate.
 PERSISTENT-HELP: A string to document PERSISTENT-ACTION.
 NAME: The name related to this local source.
+VOLATILE: Use volatile attribute.
 SORT: A predicate to give to `sort' e.g `string-lessp'.
 FC-TRANSFORMER: A `filtered-candidate-transformer' function.
 MARKED-CANDIDATES: If non--nil return candidate or marked candidates as a list.
+ALISTP: when non--nil \(default\) cdr of alist is returned otherwise it is the car.
 
 Any prefix args passed during `anything-comp-read' invocation will be recorded
 in `anything-current-prefix-arg', otherwise if prefix args where given before
 `anything-comp-read' invocation, the value of `current-prefix-arg' will be used.
 That's mean you can pass prefix arg before or after calling
-a command that use `anything-comp-read'."
+a command that use `anything-comp-read'.
+It support now also a function as argument, See `all-completions' for more details."
   (when (get-buffer anything-action-buffer)
     (kill-buffer anything-action-buffer))
   (flet ((action-fn (candidate)
            (if marked-candidates
                (anything-marked-candidates)
                (identity candidate))))
-    (or (anything
-         :sources
-         `(((name . ,(format "%s History" name))
-            (candidates . (lambda ()
-                            (anything-comp-read-get-candidates history)))
-            (volatile)
-            (persistent-action . ,persistent-action)
-            (persistent-help . ,persistent-help)
-            (action . ,'action-fn))
-           ((name . ,name)
-            (candidates
-             . (lambda ()
-                 (let ((cands (anything-comp-read-get-candidates
-                               collection test sort)))
-                   (if (or must-match (string= anything-pattern ""))
-                       cands (append (list anything-pattern) cands)))))
-            (filtered-candidate-transformer ,fc-transformer)
-            (requires-pattern . ,requires-pattern)
-            (persistent-action . ,persistent-action)
-            (persistent-help . ,persistent-help)
-            (volatile)
-            (action . ,'action-fn)))
-         :input initial-input
-         :prompt prompt
-         :resume 'noresume
-         :buffer buffer)
-        (keyboard-quit))))
+    (let ((hist `((name . ,(format "%s History" name))
+                  (candidates . (lambda ()
+                                  (anything-comp-read-get-candidates
+                                   history nil nil ,alistp)))
+                  (persistent-action . ,persistent-action)
+                  (persistent-help . ,persistent-help)
+                  (action . ,'action-fn)))
+          (src `((name . ,name)
+                 (candidates
+                  . (lambda ()
+                      (let ((cands (anything-comp-read-get-candidates
+                                    collection test sort alistp)))
+                        (if (or must-match (string= anything-pattern ""))
+                            cands (append (list anything-pattern) cands)))))
+                 (filtered-candidate-transformer ,fc-transformer)
+                 (requires-pattern . ,requires-pattern)
+                 (persistent-action . ,persistent-action)
+                 (persistent-help . ,persistent-help)
+                 (action . ,'action-fn))))
+      (when volatile (setq src (append src '((volatile)))))
+      (or (anything
+           :sources `(,hist ,src)
+           :input initial-input
+           :prompt prompt
+           :resume 'noresume
+           :buffer buffer)
+          (keyboard-quit)))))
 
+;; Generic completing-read
+;;
+;; Support also function as collection.
+;; e.g M-x man is supported.
+;; Support hash-table and vectors as collection.
+;; NOTE:
+;; Some crap emacs functions may not be supported
+;; like ffap-alternate-file (bad use of completing-read)
+;; and maybe others.
+;; Provide a mode `anything-completion-mode' which turn on
+;; anything in all `completing-read' and `read-file-name' in Emacs.
+;;
+(defun anything-completing-read-default
+    (prompt collection &optional
+                         predicate require-match
+                         initial-input hist def
+                         inherit-input-method)
+    "An anything replacement of `completing-read'.
+
+Don't use it directly, use instead `anything-comp-read' in your programs \
+which is more powerful.
+
+See documentation of `completing-read' and `all-completions' for details."
+  (let ((init (or def initial-input)))
+    (anything-comp-read
+     prompt collection
+     :test predicate
+     :fc-transformer #'(lambda (candidates source)
+                         (loop for i in candidates
+                            if (consp i) collect (car i)
+                            else collect i))
+     :history (eval (or (car-safe hist) hist))
+     :must-match require-match
+     :alistp nil
+     :initial-input init)))
+  
+(defun anything-generic-read-file-name
+    (prompt &optional dir default-filename mustmatch initial predicate)
+  "An anything replacement of `read-file-name'."
+  (let* ((default (and default-filename
+                      (if (listp default-filename)
+                          (car default-filename)
+                          default-filename)))
+         (init (or default initial dir default-directory))
+         (ini-input (and init (expand-file-name init))))
+    (anything-c-read-file-name prompt
+                               :initial-input init
+                               :alistp nil
+                               :must-match mustmatch
+                               :test predicate)))
+
+(defvar anything-completion-mode-string " AC")
+;;;###autoload
+(define-minor-mode anything-completion-mode
+    "Toggle generic anything completion."
+  :group 'anything
+  :global t
+  :lighter anything-completion-mode-string
+  (if anything-completion-mode
+      (progn
+        (setq completing-read-function 'anything-completing-read-default
+              read-file-name-function  'anything-generic-read-file-name)
+        (message "Anything completion enabled"))
+      (setq completing-read-function 'completing-read-default
+            read-file-name-function  'read-file-name-default)
+      (message "Anything completion disabled")))
+
+;;; Eshell completion.
+;;
+;; Enable like this in .emacs:
+;;
+;; (add-hook 'eshell-mode-hook
+;;           #'(lambda ()
+;;               (define-key eshell-mode-map [remap pcomplete] 'anything-esh-pcomplete)))
+;;
+(defvar anything-c-source-esh
+  '((name . "Eshell completions")
+    (init . (lambda ()
+              (setq anything-ec-target (thing-at-point 'symbol)
+                    pcomplete-current-completions nil
+                    pcomplete-last-completion-raw nil)))
+    (candidates . anything-esh-get-candidates)
+    (action . anything-ec-insert))
+  "Anything source for Eshell completion.")
+
+;; Internal.
+(defvar anything-ec-target "")
+(defun anything-ec-insert (candidate)
+  "Insert CANDIDATE at point.
+This is the same as `ac-insert', just inlined here for compatibility."
+  (let ((pt (point)))
+    (when (and (search-backward anything-ec-target nil t)
+               (string= (buffer-substring (point) pt) anything-ec-target))
+      (delete-region (point) pt)))
+  (insert candidate))
+
+(defun anything-esh-get-candidates ()
+  "Get candidates for eshell completion using `pcomplete'."
+  (catch 'pcompleted
+    (let* ((pcomplete-stub)
+           pcomplete-seen pcomplete-norm-func
+           pcomplete-args pcomplete-last pcomplete-index
+           (pcomplete-autolist pcomplete-autolist)
+           (pcomplete-suffix-list pcomplete-suffix-list))
+      (with-current-buffer anything-current-buffer
+        (loop
+           with table  = (pcomplete-completions)
+           with entry  = (condition-case nil
+                             ;; For Emacs24
+                             (funcall (pcomplete-entries) anything-pattern nil nil)
+                           ;; Fall back to this in Emacs23 as pcomplete-entries seem broken.
+                           (error
+                            nil
+                            (let ((fc (car (last (pcomplete-parse-arguments)))))
+                              ;; Check if last arg require fname completion.
+                              (and (file-name-directory fc) fc))))
+           for i in (if (listp table) table                     ; Emacs23 or commands.
+                        (all-completions pcomplete-stub table)) ; Emacs24
+           for file-cand = (and entry (expand-file-name i (file-name-directory entry)))
+           if (and file-cand (file-exists-p file-cand)) collect file-cand into ls
+           else collect i into ls
+           finally return
+           (if (and entry (not (string= entry "")) (file-exists-p entry))
+               (append (list (expand-file-name entry default-directory)) ls) ls))))))
+
+;;;###autoload
+(defun anything-esh-pcomplete ()
+  "Preconfigured anything to provide anything completion in eshell."
+  (interactive)
+  (let ((anything-quit-if-no-candidate t)
+        (anything-execute-action-at-once-if-one t))
+    (anything :sources 'anything-c-source-esh
+              :input (anything-ff-set-pattern   ; Handle tramp filenames.
+                      (car (last (ignore-errors ; Needed in lisp symbols completion.
+                                   (pcomplete-parse-arguments))))))))
+
+;;; Lisp symbol completion.
+;;
+;;
+(defcustom anything-lisp-completion-or-indent-delay 0.6
+  "After this delay `anything-lisp-completion-counter' is reset to 0.
+This allow to indent again without completing lisp symbol after this delay.
+Default is 0.6 seconds."
+  :group 'anything-config
+  :type  'number)
+
+(defcustom anything-lisp-completion-show-completion t
+  "Display candidate in buffer while moving selection when non--nil."
+  :group 'anything-config
+  :type 'boolean)
+
+(defface anything-lisp-show-completion
+  '((t (:background "DarkSlateGray")))
+  "*Face used for showing candidates in `anything-lisp-completion'."
+  :group 'anything-config)
+
+(defface anything-lisp-completion-info
+  '((t (:foreground "red")))
+  "*Face used for showing info in `anything-lisp-completion'."
+  :group 'anything-config)
+
+;; Internal
+(defvar anything-lisp-completion-overlay nil)
+(defvar anything-lisp-completion-counter 0)
+
+(defun anything-lisp-completion-show-completion ()
+  (overlay-put anything-lisp-completion-overlay
+               'display (anything-get-selection)))
+
+(defun anything-lisp-completion-init-overlay (beg end)
+  (and anything-lisp-completion-show-completion
+       (setq anything-lisp-completion-overlay (make-overlay beg end))
+       (overlay-put anything-lisp-completion-overlay
+                    'face 'anything-lisp-show-completion)))
+
+;;;###autoload
+(defun anything-lisp-completion-at-point ()
+  "Anything lisp symbol completion at point."
+  (interactive)
+  (let* ((data   (lisp-completion-at-point))
+         (beg    (car data))
+         (end    (point)) ; 'cadr data' is wrong when no space after point.
+         (plist  (nthcdr 3 data))
+         (pred   (plist-get plist :predicate))
+         (lgst-len 0)
+         (target (and beg end (buffer-substring-no-properties beg end)))
+         (anything-quit-if-no-candidate t)
+         (anything-execute-action-at-once-if-one t)
+         (anything-move-selection-after-hook
+          (and anything-lisp-completion-show-completion
+               (append (list 'anything-lisp-completion-show-completion)
+                       anything-move-selection-after-hook)))
+         (anything-match-plugin-enabled
+         (member 'anything-compile-source--match-plugin
+                 anything-compile-source-functions)))
+    (unwind-protect
+         (when data
+           (anything-lisp-completion-init-overlay beg end)
+           (anything
+            :sources
+            '((name . "Lisp completion")
+              (init . (lambda ()
+                        (with-current-buffer (anything-candidate-buffer 'global)
+                          (loop for sym in (all-completions target (nth 2 data) pred)
+                             for len = (length sym)
+                             when (> len lgst-len) do (setq lgst-len len)
+                             do (insert (concat sym "\n"))))))
+              (candidates-in-buffer)
+              (persistent-action . (lambda (candidate)
+                                     (let (mode-line-in-non-selected-windows)
+                                       (anything-c-eldoc-show-in-mode-line
+                                        (propertize
+                                         (anything-c-get-first-line-documentation
+                                           (intern candidate))
+                                         'face 'anything-lisp-completion-info)))))
+              (persistent-help . "Show brief doc in mode-line")
+              (filtered-candidate-transformer anything-lisp-completion-transformer)
+              (action . (lambda (candidate)
+                          (delete-region beg end)
+                          (insert candidate))))
+            :input (if anything-match-plugin-enabled (concat target " ") target)))
+      (and anything-lisp-completion-show-completion
+           (delete-overlay anything-lisp-completion-overlay)))))
+
+(defun anything-lisp-completion-transformer (candidates source)
+  "Anything candidates transformer for lisp completion."
+  (declare (special lgst-len))
+  (loop for c in candidates
+     for sym = (intern c)
+     for annot = (cond ((commandp sym) " (Com)")
+                       ((fboundp sym)  " (Fun)")
+                       ((boundp sym)   " (Var)")
+                       ((facep sym)    " (Face)"))
+     for spaces = (make-string (- lgst-len (length c)) ? )
+     collect (cons (concat c spaces annot) c)))
+
+(defun anything-c-get-first-line-documentation (sym)
+  "Return first line documentation of symbol SYM.
+If SYM is not documented, return \"Not documented\"."
+  (let ((doc (cond ((fboundp sym)
+                    (documentation sym t))
+                   ((boundp sym)
+                    (documentation-property sym 'variable-documentation t))
+                   ((facep sym)
+                    (face-documentation sym))
+                   (t nil))))
+    (if (and doc (not (string= doc ""))
+             ;; `documentation' return "\n\n(args...)"
+             ;; for CL-style functions.
+             (not (string-match-p "^\n\n" doc)))
+        (car (split-string doc "\n"))
+        "Not documented")))
+
+;;;###autoload
+(defun anything-lisp-completion-at-point-or-indent (arg)
+  "First call indent and second call complete lisp symbol.
+The second call should happen before `anything-lisp-completion-or-indent-delay',
+after this delay, next call will indent again.
+After completion, next call is always indent.
+See that like click and double mouse click.
+One hit indent, two quick hits maybe indent and complete."
+  (interactive "P")
+  ;; Be sure `indent-for-tab-command' will not try
+  ;; to use `completion-at-point'.
+  (let ((tab-always-indent (if (eq tab-always-indent 'complete)
+                               t tab-always-indent)))
+    (incf anything-lisp-completion-counter)
+    (unwind-protect
+         (if (> anything-lisp-completion-counter 1)
+             (anything-lisp-completion-at-point)
+             (indent-for-tab-command arg))
+      ;; After `anything-lisp-completion-or-indent-delay' seconds
+      ;; reset to 0.
+      (run-with-timer anything-lisp-completion-or-indent-delay nil
+                      #'(lambda ()
+                          (setq anything-lisp-completion-counter 0)))
+      ;; Always reset to 0 at second hit.
+      (when (eq anything-lisp-completion-counter 2)
+        (setq anything-lisp-completion-counter 0)))))
+
+
+;;; Run Externals commands within Emacs with anything completion
+;;
 (defun anything-c-get-pid-from-process-name (process-name)
   "Get pid from running process PROCESS-NAME."
   (loop with process-list = (list-system-processes)
@@ -9970,7 +10549,11 @@ The SPEC is like source. The symbol `REST' is replaced with original attribute v
             ;; A a non--existing filename ending with /
             ;; Create a directory and jump to it.
             (when (y-or-n-p (format "Create directory `%s'? " candidate))
-              (make-directory candidate 'parent)
+              (let ((dirfname (directory-file-name candidate)))
+                (if (file-exists-p dirfname)
+                    (error "Mkdir: Unable to create directory `%s': file exists."
+                           (anything-c-basename dirfname))
+                    (make-directory candidate 'parent)))
               (anything-find-files1 candidate))
             ;; A non--existing filename NOT ending with / or
             ;; an existing filename, create or jump to it.
@@ -10079,20 +10662,23 @@ Return nil if bmk is not a valid bookmark."
             (enable-match-plugin)
             (message "Anything-match-plugin enabled"))))))
 
+;; anything switch to buffer
+;; Shut up byte compiler in emacs24.
+;;
+(defun anything-c-switch-to-buffer (buffer-or-name)
+  "Same as `switch-to-buffer' whithout warnings at compile time."
+  (with-no-warnings
+    (switch-to-buffer buffer-or-name)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; Type Attributes
 (define-anything-type-attribute 'buffer
   `((action
-     ,@(if pop-up-frames
-           `(("Switch to buffer other window" . switch-to-buffer-other-window)
-             ,(and (locate-library "popwin") '("Switch to buffer in popup window" . popwin:popup-buffer))
-             ("Switch to buffer" . switch-to-buffer))
-         `(("Switch to buffer" . switch-to-buffer)
-           ,(and (locate-library "popwin") '("Switch to buffer in popup window" . popwin:popup-buffer))
-           ("Switch to buffer other window" . switch-to-buffer-other-window)
-           ("Switch to buffer other frame" . switch-to-buffer-other-frame)))
+     ("Switch to buffer" . anything-c-switch-to-buffer)
+     ,(and (locate-library "popwin") '("Switch to buffer in popup window" . popwin:popup-buffer))
+     ("Switch to buffer other window" . switch-to-buffer-other-window)
+     ("Switch to buffer other frame" . switch-to-buffer-other-frame)
      ,(and (locate-library "elscreen") '("Display buffer in Elscreen" . anything-find-buffer-on-elscreen))
      ("Query replace regexp" . anything-c-buffer-query-replace-regexp)
      ("View buffer" . view-buffer)
@@ -10113,16 +10699,11 @@ Return nil if bmk is not a valid bookmark."
 
 (define-anything-type-attribute 'file
   `((action
-     ,@(if pop-up-frames
-           `(("Find file other window" . find-file-other-window)
-             ,(and (locate-library "popwin") '("Find file in popup window" . popwin:find-file))
-             ("Find file(s)" . anything-find-many-files)
-             ("Find file as root" . anything-find-file-as-root))
-         `(("Find file" . anything-find-many-files)
-           ,(and (locate-library "popwin") '("Find file in popup window" . popwin:find-file))
-           ("Find file as root" . anything-find-file-as-root)
-           ("Find file other window" . find-file-other-window)
-           ("Find file other frame" . find-file-other-frame)))
+     ("Find file" . anything-find-many-files)
+     ,(and (locate-library "popwin") '("Find file in popup window" . popwin:find-file))
+     ("Find file as root" . anything-find-file-as-root)
+     ("Find file other window" . find-file-other-window)
+     ("Find file other frame" . find-file-other-frame)
      ("Open dired in file's directory" . anything-c-open-dired)
      ("Grep File(s) `C-u recurse'" . anything-find-files-grep)
      ("Pdfgrep File(s)" . anything-ff-pdfgrep)
