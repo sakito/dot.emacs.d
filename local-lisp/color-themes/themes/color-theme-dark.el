@@ -289,6 +289,7 @@ USA
       ;; anything
       ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
       `(anything-file-name ((t (:foreground ,yellow1))))
+      `(anything-candidate-number ((t (:background ,orange2 :foreground ,color-bg3))))
 
       ;; 変更点のハイライト
       `(highlight-changes ((t (:foreground nil :background ,color-bg0))))
