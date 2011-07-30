@@ -5,6 +5,7 @@ syntax: glob
 *.log
 *.orig
 .DS_Store
+.session
 auto-save-list
 anything-c-adaptive-history
 image-dired
