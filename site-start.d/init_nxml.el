@@ -2,7 +2,7 @@
 
 ;;; init_nxml.el --- nxml-mode setting
 
-;; Copyright (C) 2004-2010  sakito
+;; Copyright (C) 2004-2011 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 
@@ -36,6 +36,8 @@
   '(progn
      ;; スラッシュの入力で終了タグを自動補完
      (setq nxml-slash-auto-complete-flag t)
+     ;; タグのインデントをしない
+     (setq nxml-child-indent 0)
      (add-hook 'nxml-mode-hook
                (lambda()
                  ;; キーの設定
