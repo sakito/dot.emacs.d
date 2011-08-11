@@ -2,7 +2,7 @@
 
 ;;; init_session.el --- session.el
 
-;; Copyright (C) 2009  sakito
+;; Copyright (C) 2009-2011 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-;; 前回のカーソル位置を記憶 session に代替え
+;; 前回のカーソル位置を記憶 session に変更
 ;(require 'saveplace)
 ;(setq-default save-place t)
 ;(setq save-place-file "~/.emacs.d/var/places.txt")
@@ -46,7 +46,10 @@
   (setq history-length t)
   ;; session で無視するファイル設定
   (setq session-set-file-name-exclude-regexp
-        "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.howm-kyes")
+        "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.cache\\|\\.howm-kyes")
+  (setq session-save-file
+        (expand-file-name (concat user-emacs-directory
+                                  "/var/session/session.cache")))
   (add-hook 'after-init-hook 'session-initialize))
 
 ;; minibuffer history から重複を排除する
