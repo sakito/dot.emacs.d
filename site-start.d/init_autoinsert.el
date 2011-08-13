@@ -52,7 +52,7 @@
 ;;(add-to-list 'auto-insert-alist '(emacs-lisp-mode  . "skelton.el"))
 (add-to-list 'auto-insert-alist '(perl-mode . "perl.pl"))
 (add-to-list 'auto-insert-alist '(cperl-mode . "perl.pl"))
-(add-to-list 'auto-insert-alist '(python-mode . "python.py"))
+;;(add-to-list 'auto-insert-alist '(python-mode . "python.py"))
 ;;(add-to-list 'auto-insert-alist '(ruby-mode . "skelton.rb"))
 ;;(add-to-list 'auto-insert-alist '("¥¥.tex¥¥'" . "tex-insert.tex"))
 ;;(add-to-list 'auto-insert-alist '("¥¥.html¥¥'" . "html4trans.html"))
@@ -60,6 +60,7 @@
 (setq auto-insert-alist
       (nconc '(
                ("\\.rst$" . ["rst.rst" my-template])
+               (python-mode . ["python.py" my-template])
                ) auto-insert-alist))
 
 
@@ -68,6 +69,7 @@
     ("%file%"             . (lambda () (file-name-nondirectory (buffer-file-name))))
     ;;("%time%"             . (lambda () (format-time-string "%Y-%m-%d %k:%M:%S" (current-time))))
     ("%time%"             . (lambda () (format-time-string "%Y-%m-%d 00:00:00" (current-time))))
+    ("%year%"             . (lambda () (format-time-string "%Y" (current-time))))
 ;    ("%file-without-ext%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
 ;    ("%include-guard%"    . (lambda () (format "__SCHEME_%s__" (upcase (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
     ))
