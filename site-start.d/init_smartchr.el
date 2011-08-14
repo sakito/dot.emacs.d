@@ -95,12 +95,12 @@
               'js2-mode-hook
               'lisp-mode-hook
               'sql-mode-hook
+              'python-mode-hook
               ))
   (add-hook hook 'smartchr-custom-keybindings))
 
 (dolist (hook (list
               'emacs-lisp-mode-hook
-              'python-mode-hook
               'makefile-mode-hook
               ))
   (add-hook hook 'skelton-custom-keybindigs))
