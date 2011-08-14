@@ -1,0 +1,6 @@
+#name : <program>...</program>
+# --
+<program normalizer="javasrc" javasrcSyntaxHilight="true">
+<![CDATA[
+]]>
+</program>
