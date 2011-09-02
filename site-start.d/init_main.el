@@ -140,6 +140,7 @@
 (require 'init_calendar)
 (require 'init_popwin)
 (require 'init_linum)
+(require 'init_go)
 
 ;;; private 設定
 (require 'init_private)
