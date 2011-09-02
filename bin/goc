@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ -z ${1} ];then
+    echo "Usage: goc name"
+    exit 1;
+fi
+
+export GOROOT=${HOME}/bin/go
+export GOOS=darwin
+export GOARCH=amd64
+6g ${1}.go
+
+if [ $? -ne 0 ]; then
+    echo "6g error"
+    exit 1;
+fi
+
+6l -o ${1} ${1}.6
+
+if [ $? -ne 0 ]; then
+    echo "6l error"
+    exit 1;
+fi
+
+./${1}

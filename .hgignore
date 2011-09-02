@@ -23,4 +23,3 @@ lisp/auctex/*
 var/*
 share/*
 private/*
-bin/*
