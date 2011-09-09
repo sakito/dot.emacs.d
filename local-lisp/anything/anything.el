@@ -1,12 +1,13 @@
 ;;;; anything.el --- open anything / QuickSilver-like candidate-selection framework
 
 ;; Copyright (C) 2007              Tamas Patrovics
-;;               2008, 2009, 2010  rubikitch <rubikitch@ruby-lang.org>
+;;               2008 ~ 2011       rubikitch <rubikitch@ruby-lang.org>
+;;               2011              Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; Author: Tamas Patrovics
 ;; Maintainer: rubikitch <rubikitch@ruby-lang.org>
 ;; Keywords: files, frames, help, matching, outlines, processes, tools, convenience, anything
-;; URL: http://www.emacswiki.org/cgi-bin/wiki/download/anything.el
+;; X-URL: http://repo.or.cz/w/anything-config.git
 ;; Site: http://www.emacswiki.org/cgi-bin/emacs/Anything
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -598,7 +599,7 @@
 ;;; Code:
 
 (defvar anything-version nil)
-(setq anything-version "2.0")
+(setq anything-version "1.3")
 
 (require 'cl)
 
@@ -1362,20 +1363,6 @@ LONG-DOC is displayed below attribute name and short documentation."
        (concat "- " (symbol-name attribute)
                " " short-doc "\n\n" long-doc "\n")))
 
-(defun anything-require-at-least-version (version)
-  "Output error message unless anything.el is older than VERSION.
-This is suitable for anything applications."
-  (when (and (string= "1." (substring version 0 2))
-             (string-match "1\.\\([0-9]+\\)" anything-version)
-             (< (string-to-number (match-string 1 anything-version))
-                (string-to-number (substring version 2))))
-    (error "Please update anything.el!!
-
-M-x auto-install-batch anything
-
-You must have auto-install.el too.
-http://www.emacswiki.org/cgi-bin/wiki/download/auto-install.el
-")))
 
 (defun anything-interpret-value (value &optional source)
   "Interpret VALUE as variable, function or literal.
@@ -1486,20 +1473,25 @@ It is used to check if candidate number is 0, 1, or 2+."
           (goto-char (anything-get-previous-header-pos))
           (goto-char (point-min)))
       (forward-line 1)
-      (let ((lines (save-excursion
-                     (loop with ln = 0
-                        while (not (if in-current-source
-                                       (or (anything-pos-header-line-p) (eobp))
-                                       (eobp)))
-                        unless (anything-pos-header-line-p)
-                        do (incf ln)
-                        do (forward-line 1) finally return ln)))
-            (count-multi 1))
+      (let ((count-multi 1))
         (if (anything-pos-multiline-p)
             (save-excursion
-              (loop while (search-forward anything-candidate-separator nil t)
-                 do (incf count-multi) finally return count-multi))
-            lines)))))
+              (loop while (and (not (if in-current-source
+                                        (save-excursion
+                                          (forward-line 2)
+                                          (or (anything-pos-header-line-p) (eobp)))
+                                        (eobp)))
+                               (search-forward anything-candidate-separator nil t))
+                 do (incf count-multi)
+                 finally return count-multi))
+            (save-excursion
+              (loop with ln = 0
+                 while (not (if in-current-source
+                                (or (anything-pos-header-line-p) (eobp))
+                                (eobp)))
+                 unless (anything-pos-header-line-p)
+                 do (incf ln)
+                 do (forward-line 1) finally return ln)))))))
 
 (defmacro with-anything-quittable (&rest body)
   "If an error occur in execution of BODY, quit anything safely."
@@ -1774,8 +1766,10 @@ Argument SAVE-OR-RESTORE is one of save or restore."
                    anything-current-position
                    (buffer-name (current-buffer)))
      (goto-char (car anything-current-position))
-     (sit-for 0.1)
-     (set-window-start (selected-window) (cdr anything-current-position)))))
+     ;; Fix this position with the NOFORCE arg of `set-window-start'
+     ;; otherwise, if there is some other buffer than `anything-current-buffer'
+     ;; one, position will be lost.
+     (set-window-start (selected-window) (cdr anything-current-position) t))))
 
 
 ;; Internal.
