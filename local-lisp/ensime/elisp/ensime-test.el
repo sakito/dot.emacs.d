@@ -42,10 +42,8 @@
   "/home/aemon/src/misc/ensime"
   "The local development root.")
 
-(defvar ensime-test-env-classpath
-  (list (concat ensime-test-dev-home
-		"/project/boot/scala-2.8.1/lib/scala-library.jar"))
-  "Hard-code a classpath for testing purposes. Not great.")
+(defvar ensime-test-env-classpath '()
+  "Extra jars to include on testing classpath")
 
 (put 'ensime-test-assert-failed
      'error-conditions '(error ensime-test-assert-failed))
@@ -491,9 +489,9 @@
 
    (ensime-test
     "Test is source file predicate..."
-    (ensime-assert (ensime-is-source-file-p "dude.scala"))
-    (ensime-assert (ensime-is-source-file-p "dude.java"))
-    (ensime-assert (not (ensime-is-source-file-p "dude.javap"))))
+    (ensime-assert (ensime-source-file-p "dude.scala"))
+    (ensime-assert (ensime-source-file-p "dude.java"))
+    (ensime-assert (not (ensime-source-file-p "dude.javap"))))
 
    (ensime-test
     "Test relativization of paths..."
