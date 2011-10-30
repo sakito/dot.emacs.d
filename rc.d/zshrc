@@ -189,6 +189,12 @@ export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
 #PROMPT="%{$fg[green]%}@%#%{$reset_color%} "
 #PROMPT="%{$fg[green]%}%n@%m%{$fg[red]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%{$reset_color%} "
 
+# tmux を利用している時にプロンプトに window 番号を設定
+if [ "$TMUX" != "" ] ; then
+    # export WINDOW=`tmux display -pt $TMUX_PANE '#S:#I.#P'`
+    export WINDOW=`tmux display -pt $TMUX_PANE '#I.#P'`
+fi
+
 # カラー記述を簡略化
 autoload -Uz colors; colors
 # 左プロンプト
