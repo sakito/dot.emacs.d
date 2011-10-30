@@ -1,8 +1,10 @@
 ;;; ahg.el --- Alberto's Emacs interface for Mercurial (Hg)
 
-;; Copyright (C) 2008 Alberto Griggio
+;; Copyright (C) 2008-2011 Alberto Griggio
 
 ;; Author: Alberto Griggio <agriggio@users.sourceforge.net>
+;; URL: https://bitbucket.org/agriggio/ahg
+;; Version: 1.0.0
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,18 +25,21 @@
 ;;; (require 'ahg)
 ;;; to your .emacs
 
+;;; Code goes here.
+
 (require 'diff-mode)
 (require 'easymenu)
 (require 'log-edit)
 (require 'ewoc)
 (require 'cl)
 (require 'grep)
+(require 'dired)
 
 ;;-----------------------------------------------------------------------------
 ;; ahg-version
 ;;-----------------------------------------------------------------------------
 
-(defvar ahg-version-string "0.99")
+(defvar ahg-version-string "1.0.0")
 
 (defun ahg-version ()
   "Shows aHg version number."
@@ -168,6 +173,11 @@ when calling hg. This might not always work."
   "Length of default revision range for `ahg-log',
 `ahg-short-log' and `ahg-glog'."
   :group 'ahg :type 'integer)
+
+(defcustom ahg-map-cmdline-file nil
+  "Path to the file for mapping the command line.
+For `nil' the default file is used."
+  :group 'ahg :type 'string)
 
 (defface ahg-status-marked-face
   '((default (:inherit font-lock-preprocessor-face)))
@@ -358,6 +368,7 @@ Commands:
   (define-key ahg-status-mode-map "F" 'ahg-status-dired-find)
   (let ((showmap (make-sparse-keymap)))
     (define-key showmap "A" 'ahg-status-show-all)
+    (define-key showmap "t" 'ahg-status-show-tracked)
     (define-key showmap "m" 'ahg-status-show-modified)
     (define-key showmap "a" 'ahg-status-show-added)
     (define-key showmap "r" 'ahg-status-show-removed)
@@ -415,6 +426,7 @@ Commands:
     ["--" nil nil]
     ("Show"
      ["All" ahg-status-show-all [:keys "sA" :active t]]
+     ["Tracked" ahg-status-show-tracked [:keys "st" :active t]]
      ["Modified" ahg-status-show-modified [:keys "sm" :active t]]
      ["Added" ahg-status-show-added [:keys "sa" :active t]]
      ["Removed" ahg-status-show-removed [:keys "sr" :active t]]
@@ -445,18 +457,27 @@ Commands:
     ))
 
 
+(defvar ahg-status-consider-extra-switches nil)
+
 (defun ahg-status (&rest extra-switches)
   "Run hg status. When called non-interactively, it is possible
 to pass extra switches to hg status."
   (interactive)
   (let ((buf (get-buffer-create "*aHg-status*"))
         (curdir default-directory)
-        (show-message (interactive-p)))
+        (show-message (interactive-p))
+        (root (ahg-root)))
+    (when ahg-status-consider-extra-switches
+      (let ((sbuf (ahg-get-status-buffer root)))
+        (when sbuf
+          (with-current-buffer sbuf
+            (setq extra-switches ahg-status-extra-switches)))))    
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer))
       (setq default-directory (file-name-as-directory curdir))
-      (set (make-local-variable 'ahg-root) (ahg-root))
+      (set (make-local-variable 'ahg-root) root)
+      (set (make-local-variable 'ahg-status-extra-switches) extra-switches)
       (ahg-push-window-configuration))
     (ahg-generic-command
      "status" extra-switches
@@ -514,6 +535,7 @@ to pass extra switches to hg status."
   (ewoc-map (lambda (d) (when (car d) (setcar d nil) t)) ewoc))
 
 (defun ahg-status-show-all () (interactive) (ahg-status "-A"))
+(defun ahg-status-show-tracked () (interactive) (ahg-status "-mardc"))
 (defun ahg-status-show-modified () (interactive) (ahg-status "-m"))
 (defun ahg-status-show-added () (interactive) (ahg-status "-a"))
 (defun ahg-status-show-removed () (interactive) (ahg-status "-r"))
@@ -521,6 +543,7 @@ to pass extra switches to hg status."
 (defun ahg-status-show-clean () (interactive) (ahg-status "-c"))
 (defun ahg-status-show-unknown () (interactive) (ahg-status "-u"))
 (defun ahg-status-show-ignored () (interactive) (ahg-status "-i"))
+
 
 (defun ahg-status-get-marked (action-if-empty &optional filter)
   "Returns the list of marked nodes. If such list is empty, behave according to
@@ -609,7 +632,8 @@ the singleton list with the node at point."
 
 (defun ahg-status-refresh ()
   (interactive)
-  (let ((ahg-status-point-pos (ahg-line-point-pos)))
+  (let ((ahg-status-point-pos (ahg-line-point-pos))
+        (ahg-status-consider-extra-switches t))
     (call-interactively 'ahg-status)))
 
 
@@ -619,7 +643,9 @@ the singleton list with the node at point."
       (when buf
         (let ((ahg-status-no-pop t)
               (ahg-status-point-pos
-               (with-current-buffer buf (ahg-line-point-pos))))
+               (with-current-buffer buf (ahg-line-point-pos)))
+              ;;(ahg-status-consider-extra-switches t) - not sure about this...
+              )
           (ahg-status))))))
 
 
@@ -715,7 +741,9 @@ ahg-status, and it has an ewoc associated with it."
                (root (with-current-buffer buf ahg-root))
                (ew (ahg-get-status-ewoc root))
                (outbuf (ewoc-buffer ew))
-               (cfg (with-current-buffer buf ahg-window-configuration)))
+               (cfg (with-current-buffer buf ahg-window-configuration))
+               (extra-switches
+                (with-current-buffer buf ahg-status-extra-switches)))
           (with-current-buffer buf
             (goto-char (point-min))
             (while (not (eobp))
@@ -734,7 +762,10 @@ ahg-status, and it has an ewoc associated with it."
             (when node (goto-char (ewoc-location node))))
           (when point-pos
             (with-current-buffer outbuf
-              (ahg-goto-line-point point-pos))))
+              (ahg-goto-line-point point-pos)))
+          (with-current-buffer outbuf
+            (set (make-local-variable 'ahg-status-extra-switches)
+                 extra-switches)))
       ;; error, we signal it and pop to the buffer
       (ahg-show-error process))))
 
@@ -1309,8 +1340,11 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                  (concat "*hg log (details): " (ahg-root) "*")))
         (command-list (ahg-args-add-revs r1 r2))
         ;;(template "{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n"))
-        (ahgstyle (concat (file-name-directory (symbol-file 'ahg-log 'defun))
-                          "map-cmdline.ahg")))
+        (ahgstyle (if ahg-map-cmdline-file
+                      ahg-map-cmdline-file
+                    (concat (file-name-directory
+                             (symbol-file 'ahg-log 'defun))
+                            "map-cmdline.ahg"))))
     (setq command-list (append command-list
                                (list "--style" ahgstyle) ;"ahg")
                                (when extra-flags (split-string extra-flags))))
@@ -2927,6 +2961,23 @@ destination buffer. If nil, a new buffer will be used."
   (let ((inhibit-read-only t))
     (insert msg "\n")))
 
+
+(defun ahg-command-prompt ()
+  "Prompts for data from the minibuffer and sends it to the
+current hg command."
+  (interactive)
+  (goto-char (point-max))
+  (let ((process (get-buffer-process (current-buffer)))
+        (msg (buffer-substring-no-properties
+              (point-at-bol) (point-at-eol)))
+        data)
+    (setq data (concat (read-string msg) "\n"))
+    (process-send-string process data)
+    (let ((inhibit-read-only t))
+      (insert data))
+    (set-marker (process-mark process) (point))
+    ))
+
 (define-derived-mode ahg-command-mode nil "aHg command"
   "Major mode for aHg commands.
 
@@ -2939,11 +2990,13 @@ Commands:
   (define-key ahg-command-mode-map "h" 'ahg-command-help)
   (define-key ahg-command-mode-map "q" 'ahg-buffer-quit)
   (define-key ahg-command-mode-map "!" 'ahg-do-command)
+  (define-key ahg-command-mode-map (kbd "C-i") 'ahg-command-prompt)
   (easy-menu-add ahg-command-mode-menu ahg-command-mode-map))
 
 (easy-menu-define ahg-command-mode-menu ahg-command-mode-map "aHg Command"
   '("aHg Command"
     ["Execute Hg Command" ahg-do-command [:keys "!" :active t]]
+    ["Get data from prompt" ahg-command-prompt [:keys (kbd "C-i") :active t]]
     ["Help on Hg Command" ahg-command-help [:keys "h" :active t]]
     ["Quit" ahg-buffer-quit [:keys "q" :active t]]))
 
@@ -3083,3 +3136,5 @@ starting with 'HG:'."
 
 
 (provide 'ahg)
+
+;;; ahg.el ends here
