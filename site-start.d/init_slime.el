@@ -31,19 +31,19 @@
 ;; 文字コードの設定
 (setq slime-net-coding-system 'utf-8-unix)
 
-;; 特定の実装のみを利用する場合
+;; 特定の実装のみを利用する場合は以下のように設定
 ;;(setq inferior-lisp-program (expand-file-name "~/opt/ccl/scripts/ccl64 -K utf-8"))
 
-;; 複数実装を切り変える場合は以下
+;; 複数実装を切り変える場合は以下のように設定
 (setq slime-lisp-implementations
       `(
-        (ccl (,(expand-file-name "~/opt/ccl/scripts/ccl64") "-K"  "utf-8"))
-        ;; (ccl ("/opt/local/bin/ccl"))
-        (abcl ("/opt/local/bin/abcl"))
-        (clisp ("/opt/local/bin/clisp"))
-        (ecl ("/usr/local/bin/ecl"))
-        (gcl ("/usr/local/bin/gcl"))
-        (sbcl ("/opt/local/bin/sbcl"))
+        (ccl (,(executable-find "ccl64") "-K"  "utf-8"))
+        ;; (ccl (executable-find "ccl"))
+        (abcl (executable-find "abcl"))
+        (clisp (executable-find "clisp"))
+        (ecl (executable-find "ecl"))
+        (gcl (executable-find "gcl"))
+        (sbcl (executable-find "sbcl"))
         ))
 (setq slime-default-lisp 'ccl)
 
