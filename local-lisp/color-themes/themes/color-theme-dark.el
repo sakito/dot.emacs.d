@@ -286,6 +286,9 @@ USA
       ;; nxml
       `(nxml-element-local-name ((t (:foreground ,skyblue))))
 
+      ;; mmm
+      `(mmm-default-submode-face ((t (:background ,color-bg2 ))))
+
       ;; anything
       ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
       `(anything-file-name ((t (:foreground ,yellow1))))
