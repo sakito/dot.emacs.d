@@ -81,8 +81,8 @@
 ;(require 'init_jdee)
 ;;;; sql-mode
 (require 'init_sql)
-;;; mmm-mode [2003/10/12]現在不使用
-;(require 'init_mmm)
+;;; mmm-mode
+(require 'init_mmm)
 ;;; smart-compie
 (require 'init_smartcompile)
 ;; c
