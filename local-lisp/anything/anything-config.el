@@ -1,9 +1,11 @@
-;;; anything-config.el --- Predefined configurations for `anything.el'
+;;; anything-config.el --- Applications libary for `anything.el'
 
 ;; Filename: anything-config.el
 
-;; Description: Predefined configurations for `anything.el'
+;; Description: Applications libary for `anything.el'
+
 ;; Author: Tassilo Horn <tassilo@member.fsf.org>
+
 ;; Maintainer: Tassilo Horn <tassilo@member.fsf.org>
 ;;             rubikitch    <rubikitch@ruby-lang.org>
 ;;             Thierry Volpiatto <thierry.volpiatto@gmail.com>
@@ -11,16 +13,18 @@
 ;; Copyright (C) 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2009 ~ 2011, rubikitch, all rights reserved.
 ;; Copyright (C) 2009 ~ 2011, Thierry Volpiatto, all rights reserved.
+
 ;; Created: 2009-02-16 21:38:23
-;; Version: 0.4.1
+
 ;; X-URL: http://repo.or.cz/w/anything-config.git
+
+;; MailingList: https://groups.google.com/group/emacs-anything?hl=en
+
 ;; Keywords: anything, anything-config
+
 ;; Compatibility: GNU Emacs 22 ~ 24
-;;
-;; Features that might be required by this library:
-;;
-;; `anything'
-;;
+
+;; Dependencies: `anything.el'
 
 ;;; This file is NOT part of GNU Emacs
 
@@ -1170,6 +1174,9 @@ This can be toggled at anytime from `anything-find-files' with \
   '((describe-function . anything-completing-read-symbols)
     (describe-variable . anything-completing-read-symbols)
     (debug-on-entry . anything-completing-read-symbols)
+    (find-function . anything-completing-read-symbols)
+    (trace-function . anything-completing-read-symbols)
+    (trace-function-background . anything-completing-read-symbols)
     (ffap-alternate-file . nil))
   "Alist of handlers to replace `completing-read', `read-file-name' in `ac-mode'.
 Each entry is a cons cell like \(emacs_command . completing-read_handler\)
@@ -1375,6 +1382,7 @@ The \"-r\" option must be the last option.")
 
 
 (define-key anything-command-map (kbd "<SPC>")     'anything-execute-anything-command)
+(define-key anything-command-map (kbd "a")         'anything-c-apropos)
 (define-key anything-command-map (kbd "e")         'anything-c-etags-select)
 (define-key anything-command-map (kbd "l")         'anything-locate)
 (define-key anything-command-map (kbd "s")         'anything-surfraw)
@@ -1435,6 +1443,7 @@ The \"-r\" option must be the last option.")
   '("Anything"
     ["All anything commands" anything-execute-anything-command t]
     ["Find any Files/Buffers" anything-for-files t]
+    ["Anything Everywhere" ac-mode t]
     "----"
     ("Files:"
      ["Find files" anything-find-files t]
@@ -1446,6 +1455,8 @@ The \"-r\" option must be the last option.")
     ("Commands:"
      ["Emacs Commands" anything-M-x t]
      ["Externals Commands" anything-c-run-external-command t])
+    ("Help:"
+     ["Anything Apropos" anything-c-apropos t])
     ("Info:"
      ["Info at point" anything-info-at-point t]
      ["Emacs Manual index" anything-info-emacs t]
@@ -2615,8 +2626,7 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
 (defun anything-buffer-revert-and-update (candidate)
   (let ((marked (anything-marked-candidates)))
     (loop for buf in marked do (anything-revert-buffer buf))
-    (anything-force-update)
-    (anything-c-recenter-window)))
+    (anything-force-update candidate)))
 
 ;;;###autoload
 (defun anything-buffer-revert-persistent ()
@@ -2630,8 +2640,7 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
     (loop for buf in marked do
          (with-current-buffer (get-buffer buf)
            (save-buffer)))
-    (anything-force-update)
-    (anything-c-recenter-window)))
+    (anything-force-update candidate)))
 
 ;;;###autoload
 (defun anything-buffer-save-persistent ()
@@ -2708,10 +2717,6 @@ If REGEXP-FLAG is given use `query-replace-regexp'."
           (kill-buffer buffer))
         (kill-buffer buffer)))
   (anything-delete-current-selection))
-
-(defun anything-c-recenter-window ()
-  "Make visible current selection by recentering anything window."
-  (with-anything-window (recenter)))
 
 (defun anything-c-buffers-list-persistent-action (candidate)
     (if current-prefix-arg
@@ -2845,12 +2850,13 @@ Don't set it directly, use instead `anything-ff-auto-update-initial-value'.")
            ("Locate `C-x C-f, C-u to specify locate db'" . anything-ff-locate))))))
 ;; (anything 'anything-c-source-find-files)
 
-(defun anything-find-files-set-prompt-for-action (prompt files)
-  "Set prompt for action in `anything-find-files'."
+(defun anything-find-files-set-prompt-for-action (action files)
+  "Set prompt for action ACTION for FILES."
   (let ((len (length files)))
-    (if (> len 1)
-        (format "%s * %d Files to: " prompt len)
-        (format "%s %s to: " prompt (car files)))))
+    (format "%s *%s File(s)\n%s to: "
+            action len
+            (mapconcat (lambda (f)
+                         (format "- %s\n" f)) files ""))))
 
 (defun anything-dwim-target-directory ()
   "Return value of `default-directory' of buffer in other window.
@@ -2867,25 +2873,20 @@ for current buffer."
 (defun anything-find-files-do-action (action)
   "Generic function for creating action from `anything-c-source-find-files'.
 ACTION must be an action supported by `anything-dired-action'."
-  (let* ((ifiles   (mapcar 'expand-file-name ; Allow modify '/foo/.' -> '/foo'
-                           (anything-marked-candidates)))
-         (cand     (anything-get-selection)) ; Target
-         (prompt   (anything-find-files-set-prompt-for-action
-                    (capitalize (symbol-name action)) ifiles))
-         (parg     anything-current-prefix-arg)
-         (dest     (anything-c-read-file-name
-                    prompt
-                    :preselect (if anything-ff-transformer-show-only-basename
-                                   (anything-c-basename cand) cand)
-                    :initial-input (anything-dwim-target-directory)
-                    :history (anything-find-files-history :comp-read nil)))
-         (win-conf (current-window-configuration)))
-    (unwind-protect
-         (let ((default-directory anything-ff-default-directory))
-           (anything-dired-action
-            dest :files ifiles :action action :follow parg))
-      ;; Don't reset win-conf when following.
-      (unless parg (set-window-configuration win-conf)))))
+  (let* ((ifiles (mapcar 'expand-file-name ; Allow modify '/foo/.' -> '/foo'
+                         (anything-marked-candidates)))
+         (cand   (anything-get-selection)) ; Target
+         (prompt (anything-find-files-set-prompt-for-action
+                  (capitalize (symbol-name action)) ifiles))
+         (parg   anything-current-prefix-arg)
+         (dest   (anything-c-read-file-name
+                  prompt
+                  :preselect (if anything-ff-transformer-show-only-basename
+                                 (anything-c-basename cand) cand)
+                  :initial-input (anything-dwim-target-directory) 
+                  :history (anything-find-files-history :comp-read nil))))
+    (anything-dired-action
+     dest :files ifiles :action action :follow parg)))
 
 (defun anything-find-files-copy (candidate)
   "Copy files from `anything-find-files'."
@@ -3046,9 +3047,10 @@ Copying is done asynchronously with `anything-c-copy-files-async-1'."
 (defun anything-ff-copy-async (candidate)
   "Anything find files action to copy files async.
 Copying is done asynchronously with `anything-c-copy-files-async-1'."
-  (let ((flist (anything-marked-candidates))
+  (let* ((flist (anything-marked-candidates))
         (dest  (anything-c-read-file-name
-                "Copy File(s) async To: "
+                (anything-find-files-set-prompt-for-action
+                 "Copy Async" flist)
                 :preselect candidate
                 :initial-input (car anything-ff-history)
                 :history (anything-find-files-history :comp-read nil))))
@@ -3436,8 +3438,9 @@ The checksum is copied to kill-ring."
 (defun anything-ff-toggle-basename (candidate)
   (setq anything-ff-transformer-show-only-basename
         (not anything-ff-transformer-show-only-basename))
-  (save-excursion
-    (anything-force-update)))
+  (let ((target (if anything-ff-transformer-show-only-basename
+                    (anything-c-basename candidate) candidate)))
+    (anything-force-update target)))
 
 (defun anything-ff-run-toggle-basename ()
   (interactive)
@@ -3476,7 +3479,7 @@ If EXPAND is non--nil expand-file-name."
     "write-file" "insert-file" "dired" 
     "find-alternate-file" "find-alternate-file-other-window"
     "find-file-read-only" "list-directory"
-    "Read File Name History"
+    "Read File Name History" "mml-attach-file"
     "Rename Files" "Symlink Files"
     "Hardlink Files" "Write File"
     "Insert File" "Read File Name")
@@ -3494,7 +3497,7 @@ You should not modify this yourself and know what you do if you do so.")
 If prefix numeric arg is given go ARG level down."
   (interactive "p")
   (when (and (anything-file-completion-source-p)
-             (not (anything-ff-writing-tramp-name-p)))
+             (not (anything-ff-invalid-tramp-name-p)))
     (with-anything-window
       (setq anything-follow-mode nil))
     ;; When going to precedent level we want to be at the line
@@ -3535,7 +3538,7 @@ When only one candidate is remaining and it is a directory,
 expand to this directory."
   (when (and anything-ff-auto-update-flag
              (anything-file-completion-source-p)
-             (not (anything-ff-writing-tramp-name-p)))
+             (not (anything-ff-invalid-tramp-name-p)))
     (let* ((history-p   (string= (assoc-default
                                   'name (anything-get-current-source))
                                  "Read File Name History"))
@@ -3633,8 +3636,8 @@ This happen only in function using sources that are
 Argument PATTERN default to `anything-pattern', it is here only for debugging
 purpose."
   (when (string-match tramp-file-name-regexp pattern)
-    (let ((method (match-string 1 pattern))
-          (tn (match-string 0 pattern))
+    (let ((method      (match-string 1 pattern))
+          (tn          (match-string 0 pattern))
           (all-methods (mapcar 'car tramp-methods)))
       (remove-duplicates
        (loop for (f . h) in (tramp-get-completion-function method)
@@ -3646,14 +3649,16 @@ purpose."
 
 (defun anything-ff-before-action-hook-fn ()
   "Exit anything when user try to execute action on an invalid tramp fname."
-  (when (and (anything-file-completion-source-p)
-             (anything-ff-writing-tramp-name-p))
-    (error "[Invalid tramp file name]")))
+  (let ((cand (anything-get-selection)))
+    (when (and (anything-file-completion-source-p)
+               (anything-ff-invalid-tramp-name-p cand) ; Check candidate.
+               (anything-ff-invalid-tramp-name-p)) ; check anything-pattern.
+      (error "Error: Unknow file or directory `%s'" cand))))
 (add-hook 'anything-before-action-hook 'anything-ff-before-action-hook-fn)
 
-(defun anything-ff-writing-tramp-name-p ()
-  "Return non--nil when user is currently writing a tramp name in minibuffer."
-  (string= (anything-ff-set-pattern anything-pattern)
+(defun* anything-ff-invalid-tramp-name-p (&optional (pattern anything-pattern))
+  "Return non--nil when PATTERN is an invalid tramp filename."
+  (string= (anything-ff-set-pattern pattern)
            "Invalid tramp file name"))
 
 (defun anything-ff-set-pattern (pattern)
@@ -4066,7 +4071,11 @@ If a prefix arg is given or `anything-follow-mode' is on open file."
       (cond ((and (string= (anything-ff-set-pattern anything-pattern)
                            "Invalid tramp file name")
                   (string-match tramp-file-name-regexp candidate))
-             (insert-in-minibuffer candidate))
+             ;; First hit insert hostname and
+             ;; second hit insert ":" and expand.
+             (if (string= candidate anything-pattern)
+                 (insert-in-minibuffer (concat candidate ":"))
+                 (insert-in-minibuffer candidate)))
             (;; A symlink directory, expand it's truename.
              (and (file-directory-p candidate) (file-symlink-p candidate))
              (insert-in-minibuffer (file-name-as-directory
@@ -4135,17 +4144,11 @@ If a prefix arg is given or `anything-follow-mode' is on open file."
 
 (defun* anything-find-files-history (&key (comp-read t))
   "The `anything-find-files' history.
-Show the first `anything-ff-history-max-length' elements of `anything-ff-history'
-in an `anything-comp-read'."
+Show the first `anything-ff-history-max-length' elements of
+`anything-ff-history' in an `anything-comp-read'."
   (let ((history (when anything-ff-history
-                   (loop with dup for i in anything-ff-history
-                      ;; Remove duplicate and not existing files.
-                      ;; Keep remote files.
-                      unless (or (member i dup)
-                                 (and (not (file-remote-p i))
-                                      (not (file-exists-p i))))
-                      collect i into dup
-                      finally return dup)))) ; Remove dups.
+                   (anything-fast-remove-dups anything-ff-history
+                                              :test 'equal))))
     (when history
       (setq anything-ff-history
             (if (>= (length history) anything-ff-history-max-length)
@@ -8900,14 +8903,14 @@ Only math* symbols are collected."
     (candidate-transformer anything-c-apt-candidate-transformer)
     (display-to-real . anything-c-apt-display-to-real)
     (requires-pattern . 2)
-    (delayed)
+    (update . anything-c-apt-refresh)
     (action
      ("Show package description" . anything-c-apt-cache-show)
      ("Install package" . anything-c-apt-install)
      ("Remove package" . anything-c-apt-uninstall)
      ("Purge package" . anything-c-apt-purge))
     (persistent-action . anything-c-apt-persistent-action)
-    (persistent-help . "Show - C-u Refresh")))
+    (persistent-help . "Show package description")))
 ;; (anything 'anything-c-source-apt)
 
 (defvar anything-c-apt-query "emacs")
@@ -8920,14 +8923,11 @@ Only math* symbols are collected."
 (defun anything-c-apt-refresh ()
   "Refresh installed candidates list."
   (setq anything-c-apt-installed-packages nil)
-  (setq anything-c-apt-all-packages nil)
-  (anything-force-update))
+  (setq anything-c-apt-all-packages nil))
 
 (defun anything-c-apt-persistent-action (candidate)
   "Persistent action for APT source."
-  (if current-prefix-arg
-      (anything-c-apt-refresh)
-      (anything-c-apt-cache-show candidate)))
+  (anything-c-apt-cache-show candidate))
 
 (defun anything-c-apt-candidate-transformer (candidates)
   "Show installed candidates in a different color."
@@ -9294,6 +9294,8 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                 (loop for i across collection collect i))
                ((and alistp test)
                 (loop for i in collection when (funcall test i) collect i))
+               ((and (symbolp collection) (boundp collection))
+                (symbol-value collection))
                (alistp collection)
                ((and collection test)
                 (all-completions "" collection test))
@@ -9403,7 +9405,9 @@ that use `anything-comp-read' See `anything-M-x' for example."
            :preselect preselect
            :prompt prompt
            :resume 'noresume
+           :history history
            :buffer buffer)
+          (unless must-match default)
           (keyboard-quit)))))
 
 ;; Generic completing-read
@@ -9456,6 +9460,7 @@ that use `anything-comp-read' See `anything-M-x' for example."
     :prompt prompt
     :buffer buffer
     :input init
+    :history hist
     :resume 'noresume
     :default (or default ""))
    (keyboard-quit)))
@@ -9481,7 +9486,7 @@ that use `anything-comp-read' See `anything-M-x' for example."
                           for cand = (if (consp i) (car i) i)
                           do (set-text-properties 0 (length cand) nil cand)
                           collect cand))
-   :history (eval (or (car-safe hist) hist))
+   :history (or (car-safe hist) hist)
    :must-match require-match
    :alistp nil
    :name name
@@ -9555,8 +9560,14 @@ See documentation of `completing-read' and `all-completions' for details."
                (t ; Fall back to classic `anything-comp-read'.
                 (anything-completing-read-default-1
                  prompt collection predicate require-match
-                 initial-input hist def inherit-input-method str-command buf-name)))
-      (ac-mode 1))))
+                 initial-input hist def inherit-input-method
+                 str-command buf-name)))
+      (ac-mode 1)
+      ;; When exiting minibuffer, `this-command' is set to
+      ;; `anything-exit-minibuffer', which is unwanted when starting
+      ;; on another `completing-read', so restore `this-command' to
+      ;; initial value when exiting.
+      (setq this-command current-command))))
   
 (defun* anything-generic-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
@@ -9623,7 +9634,9 @@ See documentation of `completing-read' and `all-completions' for details."
                        :alistp nil
                        :test predicate))))
       (ac-mode 1)
-      (ido-mode (if ido-state 1 -1)))
+      (ido-mode (if ido-state 1 -1))
+      ;; Same comment as in `anything-completing-read-default'.
+      (setq this-command current-command))
     (if (and mustmatch (not (file-exists-p fname)))
         (if (y-or-n-p "File does not exists, create buffer?")
             fname (error "Abort file does not exists"))
@@ -9682,7 +9695,7 @@ Note: This mode will work only partially on Emacs23."
               (setq pcomplete-current-completions nil
                     pcomplete-last-completion-raw nil)
               ;; Eshell-command add this hook in all minibuffers
-              ;; Remove it for the anything one.
+              ;; Remove it for the anything one. (Fixed in Emacs24)
               (remove-hook 'minibuffer-setup-hook 'eshell-mode)))
     (candidates . anything-esh-get-candidates)
     (action . anything-ec-insert))
@@ -9942,6 +9955,21 @@ or between double quotes."
         (anything-c-complete-file-name-at-point)
         (anything-lisp-completion-at-point))))
 
+(defun anything-c-apropos-init (test default)
+  "Init candidates buffer for `anything-c-apropos' sources."
+  (with-current-buffer (anything-candidate-buffer 'global)
+    (goto-char (point-min))
+    (when (and default (stringp default)
+               ;; Some defaults args result as
+               ;; (symbol-name nil) == "nil".
+               ;; e.g debug-on-entry.
+               (not (string= default "nil"))
+               (funcall test (intern default)))
+      (insert (concat default "\n")))
+    (loop with all = (all-completions "" obarray test)
+       for sym in all
+       unless (and default (eq sym default))
+       do (insert (concat sym "\n")))))
 
 
 ;;; Run Externals commands within Emacs with anything completion
@@ -9978,7 +10006,7 @@ is non--nil.
 When FILE argument is provided run EXE with FILE.
 In this case EXE must be provided as \"EXE %s\"."
   (lexical-let* ((real-com (car (split-string (replace-regexp-in-string
-                                               "'%s'" "" exe))))
+                                               "%s" "" exe))))
                  (proc     (if file (concat real-com " " file) real-com)))
     (if (get-process proc)
         (if anything-raise-command
@@ -9987,7 +10015,8 @@ In this case EXE must be provided as \"EXE %s\"."
         (when (loop for i in anything-c-external-commands-list thereis real-com)
           (message "Starting %s..." real-com)
           (if file
-              (start-process-shell-command proc nil (format exe file))
+              (start-process-shell-command
+               proc nil (format exe (shell-quote-argument file)))
               (start-process-shell-command proc nil real-com))
           (set-process-sentinel
            (get-process proc)
@@ -10096,7 +10125,7 @@ If not found or a prefix arg is given query the user which tool to use."
                                (setq def-prog nil))
                              ;; No prefix arg or default program exists.
                              (replace-regexp-in-string " %s\\| '%s'" "" def-prog)))
-         (program        (concat real-prog-name " '%s'")))
+         (program        (concat real-prog-name " %s")))
     (unless (or def-prog ; Association exists, no need to record it.
                 ;; Don't try to record non--filenames associations (e.g urls).
                 (not (file-exists-p fname)))
@@ -10121,7 +10150,6 @@ If not found or a prefix arg is given query the user which tool to use."
                 (delete real-prog-name
                         (loop for i in anything-external-command-history
                              when (executable-find i) collect i))))))
-
 
 (defun anything-c-find-file-or-marked (candidate)
   "Open file CANDIDATE or open anything marked files in background."
@@ -11765,6 +11793,8 @@ It is `anything' replacement of regular `M-x' `execute-extended-command'."
   (interactive)
   (let* (in-help
          help-cand
+         special-display-buffer-names
+         special-display-regexps
          anything-persistent-action-use-special-display
          (history (loop with hist
                      for i in extended-command-history
@@ -12094,6 +12124,55 @@ You can set your own list of commands with
   (anything :sources 'anything-c-source-ucs
             :keymap  anything-c-ucs-map))
 
+;;;###autoload
+(defun anything-c-apropos ()
+  "Preconfigured anything to describe commands, functions, variables and faces."
+  (interactive)
+  (let ((default (thing-at-point 'symbol)))
+    (anything :sources
+              `(((name . "Commands")
+                 (init . (lambda ()
+                           (anything-c-apropos-init 'commandp ,default)))
+                 (persistent-action . anything-lisp-completion-persistent-action)
+                 (persistent-help . "Show brief doc in mode-line")
+                 (candidates-in-buffer)
+                 (action . (lambda (candidate)
+                             (describe-function (intern candidate)))))
+                ((name . "Functions")
+                 (init . (lambda ()
+                           (anything-c-apropos-init #'(lambda (x) (and (fboundp x)
+                                                                       (not (commandp x))))
+                                                    ,default)))
+                 (persistent-action . anything-lisp-completion-persistent-action)
+                 (persistent-help . "Show brief doc in mode-line")
+                 (candidates-in-buffer)
+                 (action . (lambda (candidate)
+                             (describe-function (intern candidate)))))
+                ((name . "Variables")
+                 (init . (lambda ()
+                           (anything-c-apropos-init 'boundp ,default)))
+                 (persistent-action . anything-lisp-completion-persistent-action)
+                 (persistent-help . "Show brief doc in mode-line")
+                 (candidates-in-buffer)
+                 (action . (lambda (candidate)
+                             (describe-variable (intern candidate)))))
+                ((name . "Faces")
+                 (init . (lambda ()
+                           (anything-c-apropos-init 'facep ,default)))
+                 (persistent-action . anything-lisp-completion-persistent-action)
+                 (persistent-help . "Show brief doc in mode-line")
+                 (candidates-in-buffer)
+                 (filtered-candidate-transformer . (lambda (candidates source)
+                                                     (loop for c in candidates
+                                                          collect (propertize c 'face (intern c)))))
+                 (action . (lambda (candidate)
+                             (describe-face (intern candidate)))))
+                ((name . "Anything attributes")
+                 (candidates . (lambda ()
+                                 (mapcar 'symbol-name anything-additional-attributes)))
+                 (action . (lambda (candidate)
+                             (with-output-to-temp-buffer "*Help*"
+                               (princ (get (intern candidate) 'anything-attrdoc))))))))))
 
 
 ;;; Unit tests are now in ../developer-tools/unit-test-anything-config.el.
