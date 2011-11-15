@@ -44,13 +44,13 @@
  (mac-p
   (setq py-python-command (expand-file-name "~/local/bin/python")))
  (windows-p
-  (setq py-python-command "C:/Python26/bin/python"))
+  (setq py-python-command "C:/Python27/bin/python"))
  )
 
 ;; pdb
 (cond
  (mac-p
-  (setq pdb-path '/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/pdb.py
+  (setq pdb-path '/Library/Frameworks/Python.framework/Versions/Current/lib/python2.7/pdb.py
         gud-pdb-command-name (symbol-name pdb-path)))
  )
 
