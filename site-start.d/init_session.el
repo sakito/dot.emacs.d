@@ -34,13 +34,14 @@
 ;; session
 (when (require 'session nil t)
   (setq session-initialize '(de-saveplace session keys menus places)
-        session-globals-include '((kill-ring 50)
+        session-globals-include '((kill-ring 500)
                                   (session-file-alist 500 t)
                                   (file-name-history 10000))
         ;; 保存時でなく閉じた時のカーソル位置を記憶する
         session-undo-check -1)
   ;; 記憶容量を倍に設定しておく
-  (setq session-globals-max-string  2048)
+  (setq session-globals-max-size 2048)
+  (setq session-globals-max-string 2048)
   (setq session-registers-max-string 2048)
   ;; ミニバッファ履歴リストの長さ制限を無くす
   (setq history-length t)
@@ -50,6 +51,8 @@
   (setq session-save-file
         (expand-file-name (concat user-emacs-directory
                                   "/var/session/session.cache")))
+  ;; 30 分で自動保存
+  (defvar my-timer-for-session-save-session (run-at-time t (* 30 60) 'session-save-session))
   (add-hook 'after-init-hook 'session-initialize))
 
 ;; minibuffer history から重複を排除する
