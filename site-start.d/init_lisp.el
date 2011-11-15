@@ -33,7 +33,9 @@
 ; Emacs Lisp info filesの場所
 (setq Info-default-directory-list
       (append Info-default-directory-list
-              '((expand-file-name "~/.emacs.d/share/info")
+              '(
+                ;;(expand-file-name "~/.emacs.d/share/info")
+                "~/.emacs.d/share/info"
                 "/opt/local/share/info"
                 "/sw/share/info")))
 
