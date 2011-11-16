@@ -142,7 +142,6 @@
 (require 'init_popwin)
 (require 'init_linum)
 (require 'init_go)
-(require 'init_malabar)
 
 ;;; private 設定
 (require 'init_private)
