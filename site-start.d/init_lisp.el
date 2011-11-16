@@ -2,7 +2,7 @@
 
 ;;; init_lisp.el --- lisp mode setting
 
-;; Copyright (C) 2004  sakito
+;; Copyright (C) 2004-2011 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -33,11 +33,9 @@
 ; Emacs Lisp info filesの場所
 (setq Info-default-directory-list
       (append Info-default-directory-list
-              '(
-                ;;(expand-file-name "~/.emacs.d/share/info")
-                "~/.emacs.d/share/info"
+              '("~/.emacs.d/share/info"
                 "/opt/local/share/info"
-                "/sw/share/info")))
+                "/usr/local/share/info")))
 
 (require 'el-mock)
 (require 'el-expectations)
