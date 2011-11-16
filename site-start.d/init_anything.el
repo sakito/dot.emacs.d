@@ -172,30 +172,7 @@
 (global-set-key (kbd "C-c i") 'anything-help-at-point)
 
 ;; 最近のファイル等を anything する
-;; see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
-;; 自動クリーニングを停止 recentf-cleanup
-(setq recentf-auto-cleanup 'never)
-;; anything で便利なので履歴の保存量を多少多めにしておく
-(setq recentf-max-saved-items 1000)
-
-;; 保存ファイルのの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
-(require 'recentf)
-(add-to-list 'recentf-keep 'file-remote-p)
-(add-to-list 'recentf-keep 'file-readable-p)
-;; 除外ファイル
-(setq recentf-exclude
-      '("\\.elc$"
-        "\\.pyc$"
-        ".recentf$"
-        ".howm-keys$"
-        "^/var/folders/"
-        "^/tmp/"))
-(add-hook 'kill-emacs-query-functions 'recentf-cleanup)
-;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
-;; (setq recentf-save-file "~/.emacs.d/var/recentf")
-
 ;; C-x C-b のバッファリストをanythingする
-(require 'recentf-ext)
 (global-set-key (kbd "C-x C-b") 'anything-for-files)
 ;; current-buffer も末尾に表示する
 (setq anything-allow-skipping-current-buffer nil)

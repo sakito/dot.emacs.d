@@ -26,13 +26,10 @@
 
 ;;; Code:
 
-;; 前回のカーソル位置を記憶 session に変更
-;(require 'saveplace)
-;(setq-default save-place t)
-;(setq save-place-file "~/.emacs.d/var/places.txt")
-
 ;; session
+;; @see http://emacs-session.sourceforge.net/
 (when (require 'session nil t)
+  ;; 前回のカーソル位置、開いたファイル履歴等を記憶
   (setq session-initialize '(de-saveplace session keys menus places)
         session-globals-include '((kill-ring 500)
                                   (session-file-alist 500 t)

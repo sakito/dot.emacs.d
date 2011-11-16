@@ -31,6 +31,10 @@
 (require 'init_setenv)
 ;; フレームサイズ、色、フォントの設定
 (require 'init_color)
+;; session
+(require 'init_session)
+;; recentf
+(require 'init_recentf)
 ;; shell、eshell 関連
 (require 'init_shell)
 ;; Lisp
@@ -51,8 +55,6 @@
 (require 'init_cmigemo)
 ;;; Elscreen
 (require 'init_elscreen)
-;; session
-(require 'init_session)
 ;; dired
 (require 'init_dired)
 ;; moccur
@@ -113,8 +115,7 @@
 ;; (require 'init_html)
 ;; css-modeの設定
 (require 'init_css)
-;;; nxml-mode
-;; @http://www.thaiopensource.com/download/
+;; nxml-mode
 (require 'init_nxml)
 ;; scala-mode
 (require 'init_scala)
@@ -141,6 +142,7 @@
 (require 'init_popwin)
 (require 'init_linum)
 (require 'init_go)
+(require 'init_malabar)
 
 ;;; private 設定
 (require 'init_private)
