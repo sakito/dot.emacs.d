@@ -29,16 +29,11 @@ isemacs(){
 #-----------------------------------------------------------------
 # 環境変数
 #-----------------------------------------------------------------
-# setup shell dir
 #SHELL=/bin/zsh
-#isdarwin && export SHELL=/sw/bin/zsh
 isdarwin && export SHELL=/opt/local/bin/zsh
 
 export PREFIX=/usr/local
 #export EXEC_PREFIX=/usr/local/bin
-
-export CVS_RSH="ssh"
-export DISPLAY="localhost"
 
 # 時刻の設定
 export TZ=JST-9
@@ -46,28 +41,41 @@ export TZ=JST-9
 # 文字コード設定
 export LC_ALL="ja_JP.UTF-8"
 
-# for screen(chmod 700)
-export SCREENDIR=${HOME}/.screen
+# DISPLAY
+export DISPLAY="localhost"
 
-# set path
+# 一時ファイル
+export TMP="${HOME}/tmp"
+
+# EDITOR
+export EDITOR="/usr/local/bin/emacsclient"
+
+# パスとコマンド固有の設定
 # Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
 
 # fink setting
 #isdarwin && source /sw/bin/init.sh
 
 export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
-# export PATH=/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
 export PATH=/usr/local/sbin:${PATH}
 export PATH=/usr/local/bin:${PATH}
 
+# for screen(chmod 700)
+export SCREENDIR=${HOME}/.screen
+
 # MacPorts
 isdarwin && export PATH=/opt/local/bin:${PATH}
+
+# CVS
+export CVSROOT=${HOME}/var/cvs
+export CVS_RSH="ssh"
 
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
 
 # LaTeX
 export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
+export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
 
 # Git
 export PATH=${PATH}:/usr/local/git/bin
@@ -81,12 +89,6 @@ export PATH=${PATH}:${HOME}/bin/go/bin
 # Firefox Addon SDK
 export PATH=${PATH}:${HOME}/bin/addon-sdk-1.0b4/bin
 
-# 最優先パス
-export PATH=${HOME}/.emacs.d/bin:${PATH}
-export PATH=${HOME}/bin:${PATH}
-export PATH=${HOME}/local/bin:${PATH}
-export PATH=${HOME}/bin/air/bin:${PATH}
-
 # Python
 export PYTHONSTARTUP="${HOME}/.pythonrc.py"
 export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
@@ -97,16 +99,15 @@ export PIP_RESPECT_VIRTUALENV=true
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
-export ANT_HOME=~/bin/apache-ant-1.8.2
+# Ant
+export ANT_HOME=${HOME}/bin/apache-ant-1.8.2
 export PATH=${ANT_HOME}/bin:${PATH}
-
-### Java
-# Jakarta Maven
+# Maven
 # export MAVEN_HOME=${HOME}/bin/maven
 # export PATH=${MAVEN_HOME}/bin:${PATH}
 
-#CLASSPATH
-#export CLASSPATH=${CLASSPATH}:.
+# CLASSPATH
+# export CLASSPATH=${CLASSPATH}:.
 if [ -r ${HOME}/lib/java/classpath ]; then
   if [ -z "$CLASSPATH" ]; then
     export CLASSPATH=`cat ${HOME}/lib/java/classpath`
@@ -114,12 +115,6 @@ if [ -r ${HOME}/lib/java/classpath ]; then
     export CLASSPATH=`cat ${HOME}/lib/java/classpath`:$CLASSPATH
   fi
 fi
-
-# TeX
-export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
-
-export TMP="${HOME}/tmp"
-export EDITOR="/usr/local/bin/emacsclient"
 
 # less
 #export LESSCHARDEF=8bcccbcc18b95.33b33b.
@@ -138,13 +133,17 @@ export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/m
 export MANPAGER=/usr/bin/less
 export MANWIDTH=80
 
-# for cvs
-export CVSROOT=$HOME/var/cvs
-
 # for Mercurial
 export HGENCODING=utf-8
 
+# 64bit
 export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
+
+# 最優先パス
+export PATH=${HOME}/.emacs.d/bin:${PATH}
+export PATH=${HOME}/bin:${PATH}
+export PATH=${HOME}/local/bin:${PATH}
+export PATH=${HOME}/bin/air/bin:${PATH}
 
 #-----------------------------------------------------------------
 # 非端末プロセスなら終了
@@ -153,42 +152,102 @@ export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
 [ $#PROMPT -eq 0 -o $#TERM -eq 0 ] && return
 
 #-----------------------------------------------------------------
-# プロンプト
+# オプション
 #-----------------------------------------------------------------
-# ユーザ名・ホスト名を左プロンプト表示、カレントディレクトリ名は
-# 右プロンプト表示する。日本語のディレクトリ名も表示できるように、
-# precmd() を使って毎回設定しなおしてみた。
-#
-#説明
-# fi     普通のファイル
-# di     ディレクトリ
-# ln     シンボリックリンク
-# ex     実行権限がついたファイル
-# *.tar  拡張子 tar  がついたファイル
-# 00     標準色
-# 01     明るくする
-# 04     下線を引く
-# 05     点滅させる
-# 30     黒色文字
-# 31     赤色文字
-# 32     緑色文字
-# 33     黄色文字
-# 34     青色文字
-# 35     紫色文字
-# 36     水色文字
-# 37     白色文字
-# 40     バックを黒
-# 41     バックを赤
-# 42     バックを緑
-# 43     バックを黄
-# 44     バックを青
-# 45     バックを紫
-# 46     バックを水色
-# 47     バックを白
-#PROMPT="%{$fg[green]%}%#%{$reset_color%} "
-#PROMPT="%{$fg[green]%}@%#%{$reset_color%} "
-#PROMPT="%{$fg[green]%}%n@%m%{$fg[red]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%{$reset_color%} "
+# 無駄なスクロールを避ける
+setopt always_last_prompt
+# 履歴ファイルに追加
+setopt append_history
+# 自動的に候補一覧を表示
+setopt auto_list
+# 自動的に補完候補を表示する
+setopt auto_menu
+# "~$var" でディレクトリにアクセス
+#setopt	auto_name_dirs
+# 変数名に対して無駄なスペースの削除やカッコの補完をする
+setopt auto_param_keys
+# cdのタイミングで自動的にpushd
+setopt auto_pushd
+# 無駄な末尾の / を削除する
+setopt auto_remove_slash
+# csh スタイルのヒストリ置換
+setopt bang_hist
+# {a-za-z} をブレース展開
+setopt brace_ccl
+# 先頭に "~" を付けたもので展開
+setopt cdable_vars
+# 語の途中でもカーソル位置で補完
+setopt complete_in_word
+# 補完動作の解釈前にエイリアス展開
+setopt complete_aliases
+# = で初まる物をコマンドとして展開する 例：ls =ps  デフォルトで有効
+# setopt equals
+# "#", "~", "^" を正規表現として扱う
+setopt extended_glob
+# 履歴ファイルに開始/終了タイムスタンプを書き込み
+setopt extended_history
+# "*" にドットファイルをマッチ
+# setopt glob_dots
+# ">" を ">!" としてヒストリ保存
+setopt hist_allow_clobber
+# 以前のコマンドと全く同じ時以前の履歴から削除して新たに追加する
+setopt hist_ignore_all_dups
+# 直前の履歴と全く同じとき履歴に追加しない
+setopt hist_ignore_dups
+# 先頭がスペースで始まるときスペースを無視
+setopt hist_ignore_space
+# 余分なスペースを削除して履歴に保存
+setopt hist_reduce_blanks
+# 履歴を直接実行せず編集状態にする
+# setopt hist_verify
+# コマンド確定後すぐに履歴ファイルに保存する(設定しないと exit 時)
+setopt inc_append_history
+# 補完候補をコンパクトにする
+setopt list_packed
+# ファイル種別を表す記号を末尾に表示
+setopt list_types
+# "val=expr" のような = 以降でファイル名展開
+setopt magic_equal_subst
+# 一覧表示せずに、すぐに最初の候補を補完
+#setopt	menu_complete
+# 複数のリダイレクトやパイプに対応
+setopt multios
+# ファイル名を数値的にソート
+setopt numeric_glob_sort
+# リダイレクトで上書き禁止
+setopt no_clobber
+# ベルを鳴らさない
+#setopt no_beep
+# シェル終了時にジョブをチェックしない
+#setopt no_check_jobs
+# C-s/C-q によるフロー制御をしない
+setopt no_flow_control
+# 走行中のジョブにシグナルを送らない
+setopt no_hup
+# 補完の時にベルを鳴らさない
+setopt no_list_beep
+# ジョブの状態をただちに知らせる
+setopt notify
+# プロンプト内で変数展開
+setopt prompt_subst
+# 8ビットクリーン表示
+setopt print_eight_bit
+# 重複するディレクトリを無視
+setopt pushd_ignore_dups
+# "rm * " を実行する前に確認しない
+# setopt rm_star_silent
+# 複数端末間で履歴ファイルを共有する
+setopt share_history
+# 行末の "` (バッククウォート)" を無視
+setopt sun_keyboard_hack
+# 変数内の文字列分解のデリミタ
+setopt sh_word_split
+# コマンド実行後は右プロンプトを消す
+setopt transient_rprompt
 
+#-----------------------------------------------------------------
+# プロンプト設定
+#-----------------------------------------------------------------
 # tmux を利用している時にプロンプトに window 番号を設定
 if [ "$TMUX" != "" ] ; then
     # export WINDOW=`tmux display -pt $TMUX_PANE '#S:#I.#P'`
@@ -196,56 +255,72 @@ if [ "$TMUX" != "" ] ; then
 fi
 
 # カラー記述を簡略化
+# 数字や文字で色を指定できるようにする
+# 0:black
+# 1:red
+# 2:green
+# 3:yellow
+# 4:blue
+# 5:magenta
+# 6:cyan
+# 7:white
+# それ以外：black
+# %f:reset_color
 autoload -Uz colors; colors
 # 左プロンプト
-PROMPT="%{$fg[green]%}%n@%m%{$fg[red]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%{$reset_color%} "
+PROMPT="%{$fg[green]%}%n@%m%{$fg[magenta]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%f "
 
 # 右プロンプト
-
 # バージョン管理システム関連の情報を表示(zsh >=4.3.6)
-autoload -Uz vcs_info
-if [[ "$TERM" == dumb ]] ; then
-    # emacs 等から接続すると dumb 端末と認識され、そうした端末では色を出さないようにする
-    zstyle ':vcs_info:*' actionformats "(%s%)-[%b|%a] " "zsh: %r"
-    zstyle ':vcs_info:*' formats       "(%s%)-[%b] "    "zsh: %r"
-else
-# these are the same, just with a lot of colours:
-    zstyle ':vcs_info:*' actionformats "${MAGENTA}(${NO_COLOUR}%s${MAGENTA})${YELLOW}-${MAGENTA}[${GREEN}%b${YELLOW}|${RED}%a${MAGENTA}]${NO_COLOUR} " \
-        "zsh: %r"
-    #zstyle ':vcs_info:*' formats       "${MAGENTA}(${NO_COLOUR}%s${MAGENTA})${YELLOW}-${MAGENTA}[${GREEN}%b${MAGENTA}]${NO_COLOUR}%} " \
-    zstyle ':vcs_info:*' formats       "${MAGENTA}(${NO_COLOUR}%s${MAGENTA})${YELLOW}-${MAGENTA}[${GREEN}%b${MAGENTA}]${NO_COLOUR} " \
-        "zsh: %r"
-    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat "%b${RED}:${YELLOW}%r"
+autoload -Uz is-at-least
+if is-at-least 4.3.6; then
+    autoload -Uz vcs_info
+    if [[ "$TERM" == dumb ]] ; then
+        # emacs 等から接続すると dumb 端末と認識され、そうした端末では色を出さないようにする
+        zstyle ':vcs_info:*' actionformats "(%s%)-[%b|%a] " "zsh: %r"
+        zstyle ':vcs_info:*' formats "(%s%)-[%b] " "zsh: %r"
+    else
+        # 色をつける
+        zstyle ':vcs_info:*' actionformats '%F{magenta}(%f%s%F{magenta})%F{yellow}-%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%F{magenta}]%f '
+        zstyle ':vcs_info:*' formats '%F{magenta}(%f%s%F{magenta})%F{yellow}-%F{magenta}[%F{green}%b%F{magenta}]%f '
+        zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{red}:%F{yellow}%r'
+        zstyle ':vcs_info:bzr:*' use-simple true
+        if is-at-least 4.3.10; then
+            zstyle ':vcs_info:*' check-for-changes true
+            zstyle ':vcs_info:*' stagedstr "+"
+            zstyle ':vcs_info:*' unstagedstr "-"
+        fi
+    fi
 fi
-#zstyle ':vcs_info:*' formats '(%s)-[%b]'
-#zstyle ':vcs_info:*' actionformats '(%s)-[%b|%a]'
 
 function precmd() {
-local color
-if [[ ${PWD}/ == /Volumes/* ]]; then
-# Volumes 以下にいる場合
-color=${fg[yellow]}${bg[red]}
-else
-# Volumes 以下にいない場合
-color=${fg[white]}
-fi
+    local color
+    if [[ ${PWD}/ == /Volumes/* ]]; then
+        # Volumes 以下にいる場合
+        color=${fg[yellow]}${bg[red]}
+    else
+        # Volumes 以下にいない場合
+        color=${fg[white]}
+    fi
 
-psvar=()
-vcs_info
-[[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
+    psvar=()
+    vcs_info
 
-if [ "$EMACS" ];then
-    # Emacs の ansi-term では右プロンプトを表示しない
-    RPROMPT=""
-else
-    RPROMPT="%{$color%}[%39<...<%~]%1(v|%F{green}%1v%f|)%{$reset_color%}"
-fi
-#RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%v|)"
+    if [ "$EMACS" ];then
+        # Emacs の ansi-term では右プロンプトを表示しない
+        RPROMPT=""
+    else
+        # setopt prompt_subst を設定するとプロンプトに変数そのまま記述できる
+        # %39<...<%- は 39文字以上になったら前方を ... に置換する設定
+        RPROMPT='[%F{green}%39<...<%~%f] ${vcs_info_msg_0_}%f'
+    fi
+
 }
-#RPROMPT="%{$color%}[$PWD]%1(v|%F{green}%1v%f|)%{$reset_color%}"
-#RPROMPT="%1(v|%F{green}%1v%f|)"
 
-# http://journal.mycom.co.jp/column/zsh/009/index.html
+# -----------------------------------------------------------------
+# 色設定
+#-----------------------------------------------------------------
+# @see http://journal.mycom.co.jp/column/zsh/009/index.html
 # color setup for ls:
 #check_com -c dircolors && eval $(dircolors -b)
 # color setup for ls on OS X:
@@ -259,119 +334,53 @@ export LSCOLORS=GxhFCxdxHbegedabagacad
 # ディレクトリを緑色にする
 #export LS_COLORS=':di=01;30:'
 #export LS_COLORS=':di=30:'
-# ファイルリスト補完でもlsと同様に色をつける
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 #-----------------------------------------------------------------
-# シェル変数設定
+# 補完設定
 #-----------------------------------------------------------------
-#
-# シェルの基本的な動作を変更するスイッチは、ほぼシステム非依存。
-# 基本的なシェル変数と動作設定は以下の通り。
-# 
-
+# 補完無視ファイル設定
+fignore=(.o .dvi .aux .toc - \~)
 # 補完の利用設定
 autoload -Uz compinit; compinit
-# sudo でも補完の対象
+# 補完表示を全てする
+zstyle ':completion:*' verbose 'yes'
+# 補完の機能を拡張
+zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
+# 補完メッセージの色
+zstyle ':completion:*:messages' format "%{$fg[yellow]%}'%d'%f"
+zstyle ':completion:*:warnings' format "%{$fg[red]%}'No matches for:'%{$fg[yellow]%}' %d'%f"
+zstyle ':completion:*:descriptions' format "%{$fg[yellow]%}'completing %B%d%b'%f"
+zstyle ':completion:*:corrections' format "%{$fg[yellow]%}'%B%d '%{$fg[red]%}'(errors: %e)%b'%f"
+# 補完説明を表示する
+zstyle ':completion:*:options' description 'yes'
+# ファイルリスト補完でもlsと同様に色をつける
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# sudo でも補完の対象とする
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
+# kill 補完で実行されるコマンドを指定
+zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
+# 補完をキャッシュ
+zstyle ':completion:*' use-cache on
+# キャッシュファイル位置
+zstyle ':completion:*' cache-path ~/var/zsh/zsh_completion.cache
+# 補完時一部のblobを省略して高速化
+zstyle ':completion:*' accept-exact '*(N)'
 
-# 無駄なスクロールを避ける
-setopt  always_last_prompt
-# ヒストリファイルに追加
-setopt  append_history
-# 自動的に候補一覧を表示
-setopt  auto_list
-# 自動的に補完候補を表示する
-setopt  auto_menu
-# "~$var" でディレクトリにアクセス
-#setopt	auto_name_dirs
-# 変数名に対して無駄なスペースの削除やカッコの補完をする
-setopt  auto_param_keys
-# cdのタイミングで自動的にpushd
-setopt auto_pushd
-# 無駄な末尾の / を削除する
-setopt  auto_remove_slash
-# csh スタイルのヒストリ置換
-setopt  bang_hist
-# {a-za-z} をブレース展開
-setopt  brace_ccl
-# 先頭に "~" を付けたもので展開
-setopt  cdable_vars
-# 語の途中でもカーソル位置で補完
-setopt  complete_in_word
-# 補完動作の解釈前にエイリアス展開
-setopt  complete_aliases
-# "#", "~", "^" を正規表現として扱う
-setopt  extended_glob
-# 履歴ファイルに開始/終了タイムスタンプを書き込み
-setopt  extended_history
-# ヒストリ置換を実行前に表示
-#setopt	hist_verify
-# "*" にドットファイルをマッチ
-#setopt	glob_dots
-# 直前のヒストリと全く同じときヒストリに追加しない
-setopt  hist_ignore_dups
-# 先頭がスペースで始まるときスペースを無視
-setopt  hist_ignore_space
-# ファイル種別を表す記号を末尾に表示
-setopt  list_types
-# "val=expr" のような = 以降でファイル名展開
-setopt  magic_equal_subst
-# 一覧表示せずに、すぐに最初の候補を補完
-#setopt	menu_complete
-# 複数のリダイレクトやパイプに対応
-setopt  multios
-# ファイル名を数値的にソート
-setopt  numeric_glob_sort
-# リダイレクトで上書き禁止
-setopt  noclobber
-# ベルを鳴らさない
-#setopt no_beep
-# シェル終了時にジョブをチェックしない
-#setopt no_check_jobs
-# C-s/C-q によるフロー制御をしない
-setopt  no_flow_control
-# 走行中のジョブにシグナルを送らない
-setopt  no_hup
-# 補完の時にベルを鳴らさない
-setopt  no_list_beep
-# ジョブの状態をただちに知らせる
-setopt  notify
-# プロンプト内で変数展開
-setopt  prompt_subst
-# 重複するディレクトリを無視
-setopt  pushd_ignore_dups
-# "rm * " を実行する前に確認
-setopt  rm_star_silent
-# 行末の "` (バッククウォート)" を無視
-setopt  sun_keyboard_hack
-# 変数内の文字列分解のデリミタ
-setopt  sh_word_split
-# ">" を ">!" としてヒストリ保存
-setopt  histallowclobber
-# 8ビットクリーン表示
-setopt  print_eight_bit
 
-# 無視設定
-fignore=(.o .dvi .aux .log .toc - \~)
+# URLをコピペした時にエスケープ対象文字を自動エスケープする
+autoload -Uz url-quote-magic
+zstyle ':url-quote-magic:*' url-metas '?'
+zle -N self-insert url-quote-magic
 
 #-----------------------------------------------------------------
 # エイリアス設定
 #-----------------------------------------------------------------
-#
-# UNIX コマンドと Windows 固有のシステムコマンドと区別するために
-# 絶対パス指定したり、よく使うコマンドに短い別名を登録したりとか。
-# 引数をとるエイリアスは、簡易関数で定義する必要がある点に注意。
-#
-# tcsh% alias m "mule !* &" → zsh%  m() { mule $* & }
-# 
 alias ls='ls -vFG'
 alias ll='ls -ltrh'
 alias la='ls -a'
 alias h='history 20'
 alias more='less'
 alias rm='rm -i'
-alias -g V="| /usr/share/vim/vim72/macros/less.sh"
 #alias which='type -path'
 alias rehash='hash -r'
 #alias rmdir='rm -rf'
@@ -382,6 +391,10 @@ alias reload="source ~/.zshrc"
 alias emacs='emacs -nw'
 alias screen='screen -U'
 
+# グローバルエイリアス
+alias -g V="| /usr/share/vim/vim72/macros/less.sh"
+
+# 自分に依存した設定
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
 alias easy_install64="env ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common' easy_install -UZ "
@@ -389,9 +402,6 @@ alias easy_install64="env ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common' ea
 #-----------------------------------------------------------------
 # キーバインド設定
 #-----------------------------------------------------------------
-#
-# ほぼシステム非依存なので、特に変更する必要なし。
-#
 bindkey -e
 bindkey '^/' undo
 bindkey '^g' undo
@@ -406,45 +416,6 @@ bindkey '^r' copy-prev-word
 bindkey ' '  magic-space
 
 #-----------------------------------------------------------------
-# 補完ルール設定
-#-----------------------------------------------------------------
-# compctl は obsolute ですので設定する必要はほぼないはずです。
-#
-#compctl -D -f
-#compctl -C -c -f + -E -q -S '='
-#compctl -caF whence which
-#compctl -b bindkey
-#compctl -o setopt unsetopt
-#compctl -a shift
-#compctl -F unfunction
-#compctl -a unalias alias
-#compctl -e disable
-#compctl -d enable
-#compctl -v typeset vared unset export
-#compctl -v unset typeset declare vared readonly integer
-#compctl -g '(|.)*(-/)'  cd chdir dirs pushd dircmp
-#compctl -g '(|.)*(-/)' 	rd mdcd mkdir
-#compctl -g '*(/)' 		rmdir dircmp
-#compctl -j -P % fg bg wait jobs disown
-#compctl -l '' -x 'p[1]' -f -- . source
-#compctl -l '' nohup exec nice eval trap time fep
-#compctl -l '' -x 'p[1]' -b -- builtin
-#compctl -f -x 'r[-*d,^*]' -g '(|.)*.(gz|z|z) (|.)*(-/)' + -g '(|.)*(-/)' -- gzip
-#compctl -g '*.gz *.z *.z' + -g '(|.)*(-/)' gunzip  
-#compctl -g '*.f' + -g '(|.)*(-/)' melt fcat
-#compctl -g '*.z' + -g '(|.)*(-/)' uncompress zmore 
-#compctl -f -x 'p[1,2]' -g "*(-/) *.[ll][zz][hh] *.[ee][xx][ee]"	-- lha lhp
-#compctl -f -x 'p[1]' -g "*(-/) *.[aa][rr][cc]"		-- arc
-#compctl -f -x 'p[1,2]' -g "*(-/) *.[zz][ii][pp]"	-- zip unzip
-#compctl -f -x 'p[1,2]' -g "*(-/) *.[aa][rr][jj]"	-- unarj
-#compctl -g "*(-/) *.(z|z|gz)"	zmore zless zgrep zcmp
-#compctl -f -x \
-#	'p[1]' -k '(tvzf cvzf xvzf)' - \
-#	's[--]' -k "(atime-preserve remove-files exclude help)" - \
-#	'c[-1,*z*] p[2]' -g "*.tar.(z|z|gz) *.taz *.tgz (|.)*(-/)" - \
-#	'c[-1,*f*] p[2]' -g "*.tar (|.)*(-/)" -- gtar tar
-
-#-----------------------------------------------------------------
 # システム別設定
 #-----------------------------------------------------------------
 #if [ ! -S ${SSH_AUTH_SOCK} ]; then
@@ -455,15 +426,14 @@ bindkey ' '  magic-space
 #    export SSH_AGENT_PID=`cat /tmp/ssh_agent_pid`
 #fi
 
-
 #-----------------------------------------------------------------
 # ローカル設定の読み込み
 #-----------------------------------------------------------------
-[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+# [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 echo Now zsh version $ZSH_VERSION start!
 
 # 端末をクリアして終了
-#builtin cls
+# builtin cls
 # end of ~/.zshrc
 #=================================================================
