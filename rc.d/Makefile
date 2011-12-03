@@ -28,6 +28,7 @@ portinstall:
 	sudo port install subversion +bash_completion +mod_dav_svn +tools +unicode_path
 	sudo port install readline
 	sudo port install jpeg
+	sudo port install lcms
 
 # no test sorry
 pipinstall:
@@ -53,5 +54,6 @@ pipinstall:
 	pip install web.py
 	pip install SQLAlchemy
 	pip install numpy
+	pip install blockdiag
 
 
