@@ -27,7 +27,6 @@
 ;; Clojure の設定は含まれません
 
 ;;; Code:
-
 ;; 文字コードの設定
 (setq slime-net-coding-system 'utf-8-unix)
 
@@ -239,6 +238,21 @@
 (defun skt:start-slime ()
   (unless (slime-connected-p)
     (save-excursion (slime))))
+
+;; skkとslimeのスペースがぶつかるので設定
+;; @see http://d.hatena.ne.jp/khiker/20070103/1167810880
+(defun skk-slime-space-insert (n)
+  (interactive "p")
+  (if (not skk-henkan-mode)
+      (slime-space n)
+    (skk-insert)))
+
+;; slime-mode
+(add-hook 'slime-mode-hook
+          '(lambda()
+             (progn
+               (define-key slime-mode-map " " 'skk-slime-space-insert)
+               )))
 
 (provide 'init_slime)
 ;;; init_slime.el ends here
