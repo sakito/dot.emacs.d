@@ -43,6 +43,8 @@
 (require 'init_key)
 ;; anything
 (require 'init_anything)
+;; popwin
+(require 'init_popwin)
 ;; 独自関数
 (require 'init_function)
 ;;; SKK
@@ -139,7 +141,6 @@
 (require 'init_org)
 (require 'init_slime)
 (require 'init_calendar)
-(require 'init_popwin)
 (require 'init_linum)
 (require 'init_go)
 
