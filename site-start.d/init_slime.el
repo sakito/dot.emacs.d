@@ -31,12 +31,12 @@
 (setq slime-net-coding-system 'utf-8-unix)
 
 ;; 特定の実装のみを利用する場合は以下のように設定
-;;(setq inferior-lisp-program (expand-file-name "~/opt/ccl/scripts/ccl64 -K utf-8"))
+;;(setq inferior-lisp-program "ccl64 -K utf-8")
 
 ;; 複数実装を切り変える場合は以下のように設定
 (setq slime-lisp-implementations
       `(
-        (ccl (,(executable-find "ccl64") "-K"  "utf-8"))
+        (ccl ("ccl64" "-K" "utf-8"))
         ;; (ccl (executable-find "ccl"))
         (abcl (executable-find "abcl"))
         (clisp (executable-find "clisp"))
@@ -80,6 +80,7 @@
   ;; 一応上書きしないようにしている
   (local-set-key (kbd "C-c C-d i") 'anything-hyperspec-and-cltl2)
   (local-set-key (kbd "C-c C-d m") 'amop-lookup)
+  (local-set-key (kbd "C-<f12>") 'slime-restart-inferior-lisp)
   )
 
 (add-hook 'slime-lisp-mode-hook 'skt:slime-hook)
@@ -230,7 +231,8 @@
            (switch-to-buffer-other-window ccl-buf)
            (yank)
            (slime-repl-send-input "\n")
-           (switch-to-buffer-other-window buf-name))
+           ;;(switch-to-buffer-other-window buf-name)
+           )
           (t (message "Not exist *slime-repl ccl* buffer!")))
     ))
 
@@ -253,6 +255,24 @@
              (progn
                (define-key slime-mode-map " " 'skk-slime-space-insert)
                )))
+
+;; popwin の設定
+;; Apropos
+(push '("*slime-apropos*") popwin:special-display-config)
+;; Macroexpand
+(push '("*slime-macroexpansion*") popwin:special-display-config)
+;; Help
+(push '("*slime-description*") popwin:special-display-config)
+;; Compilation
+(push '("*slime-compilation*" :noselect t) popwin:special-display-config)
+;; Cross-reference
+(push '("*slime-xref*") popwin:special-display-config)
+;; Debugger
+(push '(sldb-mode :stick t) popwin:special-display-config)
+;; REPL
+(push '(slime-repl-mode) popwin:special-display-config)
+;; Connections
+(push '(slime-connection-list-mode) popwin:special-display-config)
 
 (provide 'init_slime)
 ;;; init_slime.el ends here
