@@ -30,10 +30,7 @@
 
 ;; (ql:quickload "quicklisp-slime-helper")
 (load (expand-file-name "~/.ccl/quicklisp/slime-helper.el"))
-
-;;(require 'slime)
-;;(slime-setup)
-;;(require 'slime-autoloads)
+(require 'slime)
 
 ;; 文字コードの設定
 (setq slime-net-coding-system 'utf-8-unix)
