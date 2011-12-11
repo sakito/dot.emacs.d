@@ -126,7 +126,7 @@ export PAGER=less
 export CLICOLOR_FORCE=1
 
 #CC setting
-#export CC=cc
+export CC=clang
 
 # set man command env.
 export MANPATH=/usr/bin/man:/usr/local/man:/usr/share/man:/Developer/usr/share/man:/opt/local/man
@@ -268,13 +268,15 @@ fi
 # %f:reset_color
 autoload -Uz colors; colors
 # 左プロンプト
-PROMPT="%{$fg[green]%}%n@%m%{$fg[magenta]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%f "
+#PROMPT="%{$fg[green]%}%n@%m%{$fg[magenta]%}${WINDOW:+[$WINDOW]}%{$fg[white]%}%#%f "
+PROMPT="%F{green}%n@%m%F{magenta}${WINDOW:+[$WINDOW]}%F{white}%#%f "
 
 # 右プロンプト
 # バージョン管理システム関連の情報を表示(zsh >=4.3.6)
 autoload -Uz is-at-least
 if is-at-least 4.3.6; then
     autoload -Uz vcs_info
+    zstyle ':vcs_info:*' enable bzr git svn hg
     if [[ "$TERM" == dumb ]] ; then
         # emacs 等から接続すると dumb 端末と認識され、そうした端末では色を出さないようにする
         zstyle ':vcs_info:*' actionformats "(%s%)-[%b|%a] " "zsh: %r"
@@ -296,10 +298,8 @@ fi
 function precmd() {
     local color
     if [[ ${PWD}/ == /Volumes/* ]]; then
-        # Volumes 以下にいる場合
         color=${fg[yellow]}${bg[red]}
     else
-        # Volumes 以下にいない場合
         color=${fg[white]}
     fi
 
@@ -312,7 +312,14 @@ function precmd() {
     else
         # setopt prompt_subst を設定するとプロンプトに変数そのまま記述できる
         # %39<...<%- は 39文字以上になったら前方を ... に置換する設定
-        RPROMPT='[%F{green}%39<...<%~%f] ${vcs_info_msg_0_}%f'
+        #RPROMPT='[%F{green}%39<...<%~%f] ${vcs_info_msg_0_}%f'
+        if [[ ${PWD}/ == /Volumes/* ]]; then
+            # Volumes 以下にいる場合
+            RPROMPT='[%F{yellow}%K{red}%39<...<%~%k%f] ${vcs_info_msg_0_}'
+        else
+            # Volumes 以下にいない場合
+            RPROMPT='[%F{white}%39<...<%~%f] ${vcs_info_msg_0_}'
+        fi
     fi
 
 }
@@ -373,6 +380,38 @@ zstyle ':url-quote-magic:*' url-metas '?'
 zle -N self-insert url-quote-magic
 
 #-----------------------------------------------------------------
+# 関数定義
+#-----------------------------------------------------------------
+
+# ccl
+function ccl() {
+    BREAK_CHARS="(){}[],^%$#@\"\";''|\\"
+    ccl="rlwrap -pgreen -r -m --history-filename=${HOME}/.ccl/ccl_history --histsize=1000000 -c -b ${BREAK_CHARS} -f ${HOME}/.ccl/ccl_completions ccl64 -K utf-8"
+    if [ "$1" = "--script" ]; then
+        $ccl --load "$2" --eval '(ccl:quit)'
+    else
+        $ccl $@
+    fi
+}
+
+# @see http://masutaka.net/chalow/2011-09-28-1.html
+# ディレクトリを Emacs の dired で開く
+function dired () {
+    emacsclient -e "(dired \"${1:a}\")"
+}
+
+# emacs 側に設定が必要です init_elscreen に関数を定義してあります
+function cde () {
+    EMACS_CWD=`emacsclient -e "
+    (if (featurep 'elscreen)
+    (elscreen-current-directory)
+    (non-elscreen-current-directory))" | sed 's/^"\(.*\)"$/\1/'`
+
+    echo "chdir to $EMACS_CWD"
+    cd "$EMACS_CWD"
+}
+
+#-----------------------------------------------------------------
 # エイリアス設定
 #-----------------------------------------------------------------
 alias ls='ls -vFG'
@@ -390,6 +429,7 @@ alias j=jobs
 alias reload="source ~/.zshrc"
 alias emacs='emacs -nw'
 alias screen='screen -U'
+#alias ccl=ccl64
 
 # グローバルエイリアス
 alias -g V="| /usr/share/vim/vim72/macros/less.sh"
@@ -414,26 +454,6 @@ bindkey '^n' history-search-forward
 bindkey '^p' history-search-backward
 bindkey '^r' copy-prev-word
 bindkey ' '  magic-space
-
-#-----------------------------------------------------------------
-# 関数定義
-#-----------------------------------------------------------------
-# @see http://masutaka.net/chalow/2011-09-28-1.html
-# ディレクトリを Emacs の dired で開く
-function dired () {
-    emacsclient -e "(dired \"${1:a}\")"
-}
-
-# emacs 側に設定が必要です init_elscreen に関数を定義してあります
-function cde () {
-    EMACS_CWD=`emacsclient -e "
-    (if (featurep 'elscreen)
-    (elscreen-current-directory)
-    (non-elscreen-current-directory))" | sed 's/^"\(.*\)"$/\1/'`
-
-    echo "chdir to $EMACS_CWD"
-    cd "$EMACS_CWD"
-}
 
 #-----------------------------------------------------------------
 # システム別設定
