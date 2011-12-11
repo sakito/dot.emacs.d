@@ -27,6 +27,14 @@
 ;; Clojure の設定は含まれません
 
 ;;; Code:
+
+;; (ql:quickload "quicklisp-slime-helper")
+(load (expand-file-name "~/.ccl/quicklisp/slime-helper.el"))
+
+;;(require 'slime)
+;;(slime-setup)
+;;(require 'slime-autoloads)
+
 ;; 文字コードの設定
 (setq slime-net-coding-system 'utf-8-unix)
 
@@ -46,16 +54,21 @@
         ))
 (setq slime-default-lisp 'ccl)
 
-(require 'slime)
-(slime-setup)
-(require 'slime-autoloads)
-
+;; 拡張子
 (add-to-list 'auto-mode-alist '("\\.cl$" . common-lisp-mode))
 (add-to-list 'auto-mode-alist '("\\.asd$" . common-lisp-mode))
 
+;; popup バッファ内での行の切り捨てをしない
 (setq slime-truncate-lines nil)
+;; Lisp の任意のフォームをEmacsで評価可能にする
+;; セキュリティに問題がある設定なので注意すること
 (setq slime-enable-evaluate-in-emacs t)
+;; repl の履歴で重複を取り除く
+(setq slime-repl-history-remove-duplicates t)
+;; repl の履歴で無駄な空白を取り除く
+(setq slime-repl-history-trim-whitespaces t)
 
+;; auto-complete の設定
 ;; http://github.com/purcell/ac-slime/blob/master/ac-slime.el
 (setq ac-modes (append ac-modes '(lisp-mode)))
 (setq ac-modes (append ac-modes '(common-lisp-mode)))
@@ -65,6 +78,7 @@
 (defun skt:slime-hook ()
   (skt:start-slime)
   'set-up-slime-ac
+  (slime-scratch)
   (local-set-key (kbd "C-c C-z") 'slime-horizontally)
   ;; キーはなんとなく
   (local-set-key (kbd "C-c C-o") 'skt:slime-repl-send-region)
@@ -83,6 +97,7 @@
   (local-set-key (kbd "C-<f12>") 'slime-restart-inferior-lisp)
   )
 
+;; hook の設定
 (add-hook 'slime-lisp-mode-hook 'skt:slime-hook)
 (add-hook 'slime-mode-hook 'skt:slime-hook)
 (add-hook 'slime-repl-mode-hook 'skt:slime-hook)
@@ -94,8 +109,8 @@
                     slime-indentation
                     slime-references
                     slime-tramp
-                    slime-asdf
-                    slime-banner
+                    slime-scratch
+                    slime-media
                     anything-slime
                     ))
      ;; setup の引数だと動作しない環境があるので設定
@@ -104,8 +119,8 @@
      (require 'slime-indentation)
      (require 'slime-references)
      (require 'slime-tramp)
-     (require 'slime-asdf)
-     (require 'slime-banner)
+     (require 'slime-scratch)
+     (require 'slime-media)
      (require 'anything-slime)(anything-slime-init)
      (setq slime-complete-symbol*-fancy t)
      (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
@@ -133,7 +148,6 @@
                    (set-window-configuration ,window-configuration)))
                (use-local-map hs-map)))))
     ad-do-it))
-
 
 ;; cltl2
 ;; @see http://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html
@@ -201,7 +215,6 @@
   (declare (indent 2))
   `(let ((it ,p))
      (if it ,true-clause ,@false-clause)))
-
 
 ;; 縦分割して repl を表示
 ;; @see http://gist.github.com/608169
@@ -273,6 +286,11 @@
 (push '(slime-repl-mode) popwin:special-display-config)
 ;; Connections
 (push '(slime-connection-list-mode) popwin:special-display-config)
+
+;; slime scratch を保存する
+(require 'slime-scratch-log)
+(setq slsl-slime-scratch-log-file (expand-file-name "var/slime-scratch.log" user-emacs-directory))
+(setq slsl-prev-slime-scratch-string-file (expand-file-name "var/slime-scratch-prev.log" user-emacs-directory))
 
 (provide 'init_slime)
 ;;; init_slime.el ends here
