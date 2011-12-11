@@ -78,7 +78,6 @@
 (defun skt:slime-hook ()
   (skt:start-slime)
   'set-up-slime-ac
-  (slime-scratch)
   (local-set-key (kbd "C-c C-z") 'slime-horizontally)
   ;; キーはなんとなく
   (local-set-key (kbd "C-c C-o") 'skt:slime-repl-send-region)
@@ -96,11 +95,6 @@
   (local-set-key (kbd "C-c C-d m") 'amop-lookup)
   (local-set-key (kbd "C-<f12>") 'slime-restart-inferior-lisp)
   )
-
-;; hook の設定
-(add-hook 'slime-lisp-mode-hook 'skt:slime-hook)
-(add-hook 'slime-mode-hook 'skt:slime-hook)
-(add-hook 'slime-repl-mode-hook 'skt:slime-hook)
 
 (eval-after-load "slime"
   '(progn
@@ -262,7 +256,10 @@
       (slime-space n)
     (skk-insert)))
 
-;; slime-mode
+;; hook の設定
+(add-hook 'slime-lisp-mode-hook 'skt:slime-hook)
+(add-hook 'slime-mode-hook 'skt:slime-hook)
+(add-hook 'slime-repl-mode-hook 'skt:slime-hook)
 (add-hook 'slime-mode-hook
           '(lambda()
              (progn
