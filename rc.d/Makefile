@@ -15,6 +15,7 @@ dotfiles:
 	ln -s ${CWD}/pythonrc.py ${HOME}/.pythonrc.py
 	ln -s ${CWD}/tmux.conf ${HOME}/.tmux.conf
 	ln -s ${CWD}/zshrc ${HOME}/.zshrc
+	ln -s ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
 
 portinstall:
 	sudo port install nkf wget lftp findutils libxml2 libxslt w3m apg
@@ -29,6 +30,7 @@ portinstall:
 	sudo port install readline
 	sudo port install jpeg
 	sudo port install lcms
+	sudo port install rlwrap
 
 # no test sorry
 pipinstall:
