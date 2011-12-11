@@ -1,5 +1,6 @@
 syntax: glob
 *~
+*.class
 *.elc
 *.pyc
 *.pyo
@@ -15,7 +16,13 @@ syntax: glob
 Thumbs.db
 TAGS
 _build
+build/*
 auto-save-list
 anything-c-adaptive-history
 image-dired
 tmp/*
+target/*
+*.pbxuser
+*.mode1v3
+*.xcworkspacedata
+*.xcuserdatad/*
