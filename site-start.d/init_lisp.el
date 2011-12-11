@@ -40,6 +40,11 @@
 (require 'el-mock)
 (require 'el-expectations)
 
+;; scratch バッファを保存する
+(require 'scratch-log)
+(setq sl-scratch-log-file (expand-file-name "var/scratch.log" user-emacs-directory))
+(setq sl-prev-scratch-string-file (expand-file-name "var/scratch-prev.log" user-emacs-directory))
+
 ;; function の説明を pos-tip で表示する関数
 (require 'pos-tip)
 (defun describe-function-at-point (function)
