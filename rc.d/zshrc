@@ -161,7 +161,7 @@ setopt append_history
 # 自動的に候補一覧を表示
 setopt auto_list
 # 自動的に補完候補を表示する
-setopt auto_menu
+unsetopt auto_menu
 # "~$var" でディレクトリにアクセス
 #setopt	auto_name_dirs
 # 変数名に対して無駄なスペースの削除やカッコの補完をする
@@ -180,6 +180,8 @@ setopt cdable_vars
 setopt complete_in_word
 # 補完動作の解釈前にエイリアス展開
 setopt complete_aliases
+# タイプミスの修正
+setopt correct
 # = で初まる物をコマンドとして展開する 例：ls =ps  デフォルトで有効
 # setopt equals
 # "#", "~", "^" を正規表現として扱う
@@ -200,6 +202,8 @@ setopt hist_ignore_space
 setopt hist_reduce_blanks
 # 履歴を直接実行せず編集状態にする
 # setopt hist_verify
+# ctr-d で終了しない
+setopt ignore_eof
 # コマンド確定後すぐに履歴ファイルに保存する(設定しないと exit 時)
 setopt inc_append_history
 # 補完候補をコンパクトにする
@@ -228,6 +232,8 @@ setopt no_hup
 setopt no_list_beep
 # ジョブの状態をただちに知らせる
 setopt notify
+# 補完候補の最初を自動補完しない
+unsetopt menu_complete
 # プロンプト内で変数展開
 setopt prompt_subst
 # 8ビットクリーン表示
@@ -353,6 +359,8 @@ autoload -Uz compinit; compinit
 zstyle ':completion:*' verbose 'yes'
 # 補完の機能を拡張
 zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
+# 補完候補に LSCOLORS 同様色を付与
+zstyle ':completion:*:default' list-colors ${(s.:.)LSCOLORS}
 # 補完メッセージの色
 zstyle ':completion:*:messages' format "%{$fg[yellow]%}'%d'%f"
 zstyle ':completion:*:warnings' format "%{$fg[red]%}'No matches for:'%{$fg[yellow]%}' %d'%f"
