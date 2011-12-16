@@ -27,6 +27,8 @@
 (require 'recentf)
 ;; @see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
 (require 'recentf-ext)
+;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
+(setq recentf-save-file (expand-file-name "var/recentf.cache" user-emacs-directory))
 
 ;; @see http://masutaka.net/chalow/2011-10-30-2.html
 (defvar my-recentf-list-prev nil)
@@ -73,8 +75,6 @@ do nothing. And suppress the output from `message' and
         "^/tmp/"))
 ;; Emacs 終了時に cleanup
 (add-hook 'kill-emacs-query-functions 'recentf-cleanup)
-;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
-(setq recentf-save-file (expand-file-name "var/recentf.cache" user-emacs-directory))
 
 ;; 30分で自動保存
 (defvar my-timer-for-recentf-save-list (run-at-time t (* 30 60) 'recentf-save-list))
