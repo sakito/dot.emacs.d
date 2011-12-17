@@ -32,6 +32,9 @@
 (autoload 'w3m "w3m" "Interface for w3m on Emacs." t)
 (autoload 'w3m-find-file "w3m" "w3m interface function for local file." t)
 
+;; パスの判定がエラーになる場合があるのでパスを設定
+(setq w3m-command (executable-find "w3m"))
+
 ;; リンク を w3m で開く
 (global-set-key (kbd "C-x m") 'browse-url-at-point)
 ;; (global-set-key (kbd "C-c v") 'browse-url-at-point)
