@@ -18,9 +18,8 @@ ccl64 --load quicklisp.lisp
 
 ln -s ~/.emacs.d/rc.d/ccl-init.lips ~/.ccl-init.lips
 
-;; quicklispを利用して以下のライブライリをインストールしている
-(ql:quickload "linedit")
-
+;; quicklispを利用してライブライリをインストールしている
+ccl load ~/.emacs.d/rc.d/quicklisp-install.lisp --eval '(ccl:quit)'
 
 |#
 
@@ -59,3 +58,4 @@ ln -s ~/.emacs.d/rc.d/ccl-init.lips ~/.ccl-init.lips
                           :if-does-not-exist :create)
     (format output "~{~(~A~)~%~}" (sort symbols #'string<))))
 
+;;; ccl-init.lisp ends here
