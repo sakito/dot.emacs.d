@@ -260,6 +260,11 @@ if [ "$TMUX" != "" ] ; then
     export WINDOW=`tmux display -pt $TMUX_PANE '#I.#P'`
 fi
 
+# tmux で接続先が screen の時の対処
+case ${TERM} in
+    screen-256color) TERM=screen.xterm-xfree86
+esac
+
 # カラー記述を簡略化
 # 数字や文字で色を指定できるようにする
 # 0:black
