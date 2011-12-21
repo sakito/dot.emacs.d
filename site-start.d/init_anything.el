@@ -38,8 +38,8 @@
 
 ;; session を利用するため anything-c-adaptive-save-history を作成しない
 (remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
-(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
-(ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
+;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
+;;(ad-disable-advice 'anything-select-action 'before 'anything-c-adaptive-select-action)
 (setq anything-c-adaptive-history-length 0)
 
 ;; アルファベットで候補選択
