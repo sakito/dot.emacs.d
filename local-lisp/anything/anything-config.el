@@ -824,6 +824,16 @@ PARENT if non-nil should be a keymap."
       ,@(if (keymapp maps) (list maps) maps)
       ,@parent)))
 
+(unless (fboundp 'apply-partially)
+  (defun apply-partially (fun &rest args)
+    "Return a function that is a partial application of FUN to ARGS.
+ARGS is a list of the first N arguments to pass to FUN.
+The result is a new function which does the same as FUN, except that
+the first N arguments are fixed at the values with which this function
+was called."
+    (lexical-let ((fun fun) (args1 args))
+      (lambda (&rest args2) (apply fun (append args1 args2))))))
+
 
 ;;; Customize
 ;;
@@ -8550,7 +8560,8 @@ When nil, fallback to `browse-url-browser-function'.")
                           for tracknum  = (or (assoc-default 'info-tracknumber v) "unknown")
                           for song      = (or (assoc-default 'info-title v) "unknown")
                           for info      = (concat artist " - " genre " - " tracknum ": " song)
-                          unless (string-match "^http:" name) collect (cons info name))))
+                          unless (string-match "^\\(http\\|mms\\):" name)
+                          collect (cons info name))))
     (filtered-candidate-transformer . anything-c-emms-files-modifier)
     (candidate-number-limit . 9999)
     (action . (("Play file" . emms-play-file)
