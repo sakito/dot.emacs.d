@@ -1,8 +1,7 @@
 #|
 Copyright (C) %year% sakito <sakito@sakito.com>
 
-All parts of this program are licensed under the terms of the LLGPL
-unless otherwise noted.
+This program is licensed under the terms of the LLGPL.
 |#
 
 (in-package :cl-user)
