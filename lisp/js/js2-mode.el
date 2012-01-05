@@ -4512,8 +4512,7 @@ Function also calls `js2-node-add-children' to add the parent link."
         pos)
     (unless buf
       (error "No buffer available for node %s" node))
-    (save-excursion
-      (set-buffer buf)
+    (with-current-buffer buf
       (buffer-substring-no-properties (setq pos (js2-node-abs-pos node))
                                       (+ pos (js2-node-len node))))))
 
@@ -4829,7 +4828,10 @@ You should use `js2-print-tree' instead of this function."
        ;; I'll wait for people to notice incorrect warnings.
        ((and (= tt js2-EXPR_VOID)
              (js2-expr-stmt-node-p node)) ; but not if EXPR_RESULT
-        (js2-node-has-side-effects (js2-expr-stmt-node-expr node)))
+        (let ((expr (js2-expr-stmt-node-expr node)))
+          (or (js2-node-has-side-effects expr)
+              (when (js2-string-node-p expr)
+                (string= "use strict" (js2-string-node-value expr))))))
        ((= tt js2-COMMA)
         (js2-node-has-side-effects (js2-infix-node-right node)))
        ((or (= tt js2-AND)
@@ -6982,7 +6984,7 @@ For instance, following a 'this' reference requires a parent function node."
 ;; a nested sub-alist element looks like (INDEX-NAME SUB-ALIST).
 ;; The sub-alist entries immediately follow INDEX-NAME, the head of the list.
 
-(defsubst js2-treeify (lst)
+(defun js2-treeify (lst)
   "Convert (a b c d) to (a ((b ((c d)))))"
   (if (null (cddr lst))  ; list length <= 2
       lst
@@ -7327,8 +7329,7 @@ leaving a statement, an expression, or a function definition."
         ast)
     (or buf (setq buf (current-buffer)))
     (message nil)  ; clear any error message from previous parse
-    (save-excursion
-      (set-buffer buf)
+    (with-current-buffer buf
       (setq js2-scanned-comments nil
             js2-parsed-errors nil
             js2-parsed-warnings nil
@@ -9893,10 +9894,12 @@ a comma)."
         (and (js-re-search-backward "\n" nil t)
 	     (progn
 	       (skip-chars-backward " \t")
-	       (backward-char)
-	       (and (js-looking-at-operator-p)
-		    (and (progn (backward-char)
-				(not (looking-at "\\*\\|++\\|--\\|/[/*]"))))))))))
+               (unless (bolp)
+                 (backward-char)
+                 (and (js-looking-at-operator-p)
+                      (and (progn
+                             (backward-char)
+                             (not (looking-at "\\*\\|++\\|--\\|/[/*]")))))))))))
 
 (defun js-end-of-do-while-loop-p ()
   "Returns non-nil if word after point is `while' of a do-while
@@ -10491,15 +10494,16 @@ If so, we don't ever want to use bounce-indent."
   (add-to-invisibility-spec '(js2-outline . t))
   (set (make-local-variable 'line-move-ignore-invisible) t)
   (set (make-local-variable 'forward-sexp-function) #'js2-mode-forward-sexp)
+
+  (if (fboundp 'run-mode-hooks)
+      (run-mode-hooks 'js2-mode-hook)
+    (run-hooks 'js2-mode-hook))
+
   (setq js2-mode-functions-hidden nil
         js2-mode-comments-hidden nil
         js2-mode-buffer-dirty-p t
         js2-mode-parsing nil)
-  (js2-reparse)
-
-  (if (fboundp 'run-mode-hooks)
-      (run-mode-hooks 'js2-mode-hook)
-    (run-hooks 'js2-mode-hook)))
+  (js2-reparse))
 
 (defun js2-mode-exit ()
   "Exit `js2-mode' and clean up."
@@ -10765,7 +10769,8 @@ This ensures that the counts and `next-error' are correct."
 (defun js2-echo-error (old-point new-point)
   "Called by point-motion hooks."
   (let ((msg (get-text-property new-point 'help-echo)))
-    (if msg
+    (if (and msg (or (not (current-message))
+                     (string= (current-message) "Quit")))
         (message msg))))
 
 (defalias #'js2-echo-help #'js2-echo-error)
