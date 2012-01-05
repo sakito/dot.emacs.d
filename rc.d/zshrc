@@ -445,7 +445,7 @@ alias screen='screen -U'
 #alias ccl=ccl64
 
 # グローバルエイリアス
-alias -g V="| /usr/share/vim/vim72/macros/less.sh"
+alias -g V="| /usr/share/vim/vim73/macros/less.sh"
 
 # 自分に依存した設定
 alias sakuradiary="~/bin/scp_diary.command"
