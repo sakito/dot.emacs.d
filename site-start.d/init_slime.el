@@ -29,7 +29,7 @@
 ;;; Code:
 
 ;; (ql:quickload "quicklisp-slime-helper")
-(load (expand-file-name "~/.ccl/quicklisp/slime-helper.el"))
+(load "~/.ccl/quicklisp/slime-helper")
 (require 'slime)
 
 ;; 文字コードの設定
@@ -102,6 +102,7 @@
                     slime-tramp
                     slime-scratch
                     slime-media
+                    slime-annot
                     anything-slime
                     ))
      ;; setup の引数だと動作しない環境があるので設定
@@ -112,6 +113,7 @@
      (require 'slime-tramp)
      (require 'slime-scratch)
      (require 'slime-media)
+     (require 'slime-annot)
      (require 'anything-slime)(anything-slime-init)
      (setq slime-complete-symbol*-fancy t)
      (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
@@ -277,7 +279,7 @@
 ;; Debugger
 (push '(sldb-mode :stick t) popwin:special-display-config)
 ;; REPL
-(push '(slime-repl-mode) popwin:special-display-config)
+;; (push '(slime-repl-mode) popwin:special-display-config)
 ;; Connections
 (push '(slime-connection-list-mode) popwin:special-display-config)
 
@@ -285,6 +287,13 @@
 (require 'slime-scratch-log)
 (setq slsl-slime-scratch-log-file (expand-file-name "var/slime-scratch.log" user-emacs-directory))
 (setq slsl-prev-slime-scratch-string-file (expand-file-name "var/slime-scratch-prev.log" user-emacs-directory))
+
+;; slime-scratch
+(defun skt:slime-scratch ()
+  (interactive)
+  (progn
+    (slime-scratch)
+    (slsl-restore-scratch)))
 
 (provide 'init_slime)
 ;;; init_slime.el ends here
