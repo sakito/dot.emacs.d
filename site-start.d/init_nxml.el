@@ -2,7 +2,7 @@
 
 ;;; init_nxml.el --- nxml-mode setting
 
-;; Copyright (C) 2004-2011 sakito
+;; Copyright (C) 2004-2012 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 
@@ -30,7 +30,7 @@
 ;;; Code:
 
 (add-to-list 'auto-mode-alist
-             '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|svg\\|xhtml\\|html\\)\\'" . nxml-mode))
+             '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|svg\\|xhtml\\|html\\|jsp\\|php\\)\\'" . nxml-mode))
 
 (eval-after-load "nxml-mode"
   '(progn
@@ -50,7 +50,7 @@
 
 (eval-after-load "rng-loc"
   '(progn
-     (add-to-list 'rng-schema-locating-files (expand-file-name "~/.emacs.d/etc/schema/schemas.xml"))
+     (add-to-list 'rng-schema-locating-files (expand-file-name "etc/schema/schemas.xml" user-emacs-directory))
      ))
 
 (provide 'init_nxml)
