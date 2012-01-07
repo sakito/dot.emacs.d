@@ -40,7 +40,8 @@
 ;; rstでメモを書く
 (setq auto-mode-alist
       (append '(
-                ("\\.howm$" . rst-mode)
+                ;;("\\.howm$" . rst-mode)
+                ("\\.howm$" . org-mode)
                 )
               auto-mode-alist))
 
@@ -52,7 +53,8 @@
 
 ;; テンプレートの形式を変更
 (setq howm-template
-      (concat howm-view-title-header " %title%cursor\n========================================\n\n"))
+      ;;(concat howm-view-title-header " %title%cursor\n========================================\n\n"))
+      (concat howm-view-title-header " %title%cursor\n\n\n"))
 
 ;; RET でファイルを開く際, 一覧バッファを消す
 ;; C-u RET なら残る
