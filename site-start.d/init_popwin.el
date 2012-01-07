@@ -49,7 +49,14 @@
                                    (popwin:find-file (dired-get-file-for-visit))))
 ;; (key-chord-define-global "mn" 'popwin:messages)
 
-
+;; http://cx4a.blogspot.com/2011/12/popwineldirexel.html
+(require 'direx)
+;; direx:direx-modeのバッファをウィンドウ左辺に幅25でポップアップ
+;; :dedicatedにtを指定することで、direxウィンドウ内でのバッファの切り替えが
+;; ポップアップ前のウィンドウに移譲される
+(push '(direx:direx-mode :position right :width 30)
+      popwin:special-display-config)
+(global-set-key (kbd "C-c C-s") 'direx:jump-to-directory-other-window)
 
 (provide 'init_popwin)
 ;;; init_popwin.el ends here
