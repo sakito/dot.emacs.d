@@ -9,15 +9,11 @@ syntax: glob
 auto-save-list
 anything-c-adaptive-history
 image-dired
-lisp/apel/*
-lisp/emu/*
 lisp/flim/*
 lisp/semi/*
 lisp/wl/*
 lisp/w3m/*
-lisp/skk/*
 lisp/navi2ch/*
-lisp/howm/*
 lisp/auctex/*
 *tex*
 var/*
