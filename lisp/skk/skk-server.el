@@ -6,9 +6,9 @@
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-server.el,v 1.52 2011/05/03 10:40:36 skk-cvs Exp $
+;; Version: $Id: skk-server.el,v 1.54 2011/11/07 22:05:41 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2011/05/03 10:40:36 $
+;; Last Modified: $Date: 2011/11/07 22:05:41 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -53,8 +53,8 @@ When called interactively, print version information."
     (message "%s" (skk-server-version)))
    ((not (or skk-server-host
 	     skk-servers-list))
-    (skk-error "Lack of host information of SKK server"
-	       "辞書サーバのホスト情報がありません"))
+    (skk-error "辞書サーバのホスト情報がありません"
+	       "Lack of host information of SKK server"))
    ((skk-server-live-p (skk-open-server))
     (let (v)
       (save-match-data
@@ -206,12 +206,7 @@ HOST が nil ならば `skk-server-host' を参照する。
 				skkserv-working-buffer
 				(or host skk-server-host)
 				(or port "skkserv"))))
-      (cond
-       ((eval-when-compile (and skk-running-gnu-emacs
-				(>= emacs-major-version 22)))
-	(set-process-query-on-exit-flag process nil))
-       (t
-	(process-kill-without-query process)))
+      (skk-process-kill-without-query process)
       process)))
 
 (defun skk-startup-server (host prog jisyo port)

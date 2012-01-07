@@ -74,6 +74,10 @@
 ;; isearch時にSKKをオフ
 (setq skk-isearch-start-mode 'latin)
 
+;; カーソル付近に mode-string を表示(14.4 から)
+(setq skk-show-mode-show t)
+(setq skk-show-mode-style 'tooltip)
+
 ;; C-x C-fでファイルを開くとSKK
 (add-hook 'find-file-hooks
           (lambda ()

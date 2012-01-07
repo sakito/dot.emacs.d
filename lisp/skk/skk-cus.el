@@ -52,7 +52,7 @@
     (skk-japanese-message-and-error
      (const :tag "メッセージは日本語で通知する" t) "")
     (skk-verbose
-     (const :tag "助言的メッセージを表示する" t) "")
+     (const :tag "冗長なメッセージを表示する" t) "")
     (skk-show-japanese-menu
      (const :tag "メニューバーを日本語で表示する" t) "")
     (skk-show-annotation
@@ -219,7 +219,11 @@
 	       (skk-cus-info skk-cus-params-input)
 	       (skk-cus-info skk-cus-params-misc))))
     (kill-buffer (get-buffer-create "*SKK の基本設定*"))
-    (switch-to-buffer (get-buffer-create "*SKK の基本設定*"))
+;;     (switch-to-buffer (get-buffer-create "*SKK の基本設定*"))
+    (set-window-buffer (selected-window)
+		       (get-buffer-create "*SKK の基本設定*"))
+    (set-buffer "*SKK の基本設定*")
+
     (skk-custom-mode)
     (widget-insert "SKK の基本設定。終わったら ")
     (widget-create 'push-button
@@ -300,7 +304,9 @@
   (skk-cus-set)
   (bury-buffer)
   (unless (eq skk-custom-buffer-original (current-buffer))
-    (switch-to-buffer skk-custom-buffer-original))
+;;      (switch-to-buffer skk-custom-buffer-original))
+    (set-window-buffer (selected-window)
+		       (get-buffer skk-custom-buffer-original)))
   (skk-adjust-user-option))
 
 ;;;###autoload

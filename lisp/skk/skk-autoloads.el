@@ -1,6 +1,6 @@
 ;;; skk-autoloads.el --- autoload settings for SKK.
 
-;; This file was generated automatically by SKK-MK at Sat Jul 16 23:23:21 2011.
+;; This file was generated automatically by SKK-MK at Sat Jan  7 15:57:03 2012.
 
 ;; This file is part of Daredevil SKK.
 
@@ -45,8 +45,8 @@ Not documented
 ;;;***
 
 ;;;### (autoloads (skk-jis2sjis2 skk-search-ja-dic skk-emacs-prepare-modeline-properties
-;;;;;;  skk-emacs-prepare-menu) "skk-emacs" "skk-emacs.el" (19945
-;;;;;;  34559))
+;;;;;;  skk-emacs-prepare-menu) "skk-emacs" "skk-emacs.el" (20201
+;;;;;;  9232))
 ;;; Generated autoloads from skk-emacs.el
 
 (autoload 'skk-emacs-prepare-menu "skk-emacs" "\
@@ -157,12 +157,13 @@ Not documented
 
 ;;;***
 
-;;;### (autoloads (skk-annotation-wikipedia-region-or-at-point skk-annotation-wikipedia-cache
-;;;;;;  skk-annotation-treat-wikipedia skk-annotation-wikipedia skk-annotation-quote
-;;;;;;  skk-annotation-toggle-display-p skk-annotation-display-p
-;;;;;;  skk-annotation-remove skk-annotation-add skk-annotation-message
+;;;### (autoloads (skkannot-cache skk-annotation-wikipedia skk-annotation-lookup-dict
+;;;;;;  skk-annotation-preread-dict skk-annotation-lookup-DictionaryServices
+;;;;;;  skk-annotation-start-python skk-annotation-lookup-region-or-at-point
+;;;;;;  skk-annotation-message skk-annotation-quote skk-annotation-remove
+;;;;;;  skk-annotation-add skk-annotation-toggle-display-p skk-annotation-display-p
 ;;;;;;  skk-annotation-show skk-annotation-find-and-show skk-annotation-get)
-;;;;;;  "skk-annotation" "skk-annotation.el" (19973 9355))
+;;;;;;  "skk-annotation" "skk-annotation.el" (20201 9232))
 ;;; Generated autoloads from skk-annotation.el
 
 (autoload 'skk-annotation-get "skk-annotation" "\
@@ -171,7 +172,7 @@ Not documented
 \(fn ANNOTATION)" nil nil)
 
 (autoload 'skk-annotation-find-and-show "skk-annotation" "\
-Not documented
+$B3F<o%j%=!<%9$+$i%"%N%F!<%7%g%s$r<hF@$7I=<($9$k!#(B
 
 \(fn PAIR)" nil nil)
 
@@ -180,11 +181,15 @@ Not documented
 
 \(fn ANNOTATION &optional WORD SOURCES)" nil nil)
 
-(autoload 'skk-annotation-message "skk-annotation" "\
+(autoload 'skk-annotation-display-p "skk-annotation" "\
+Not documented
 
-$B%*%W%7%g%J%k0z?t(B SITUATION $B$,(B $B%7%s%\%k(B annotation $B$G$"$l$P!"(B
+\(fn TEST)" nil nil)
 
-\(fn &optional SITUATION)" nil nil)
+(autoload 'skk-annotation-toggle-display-p "skk-annotation" "\
+Not documented
+
+\(fn)" t nil)
 
 (autoload 'skk-annotation-add "skk-annotation" "\
 $B:G8e$K3NDj$7$?8l$K(B annotation $B$rIU$1$k!#(B
@@ -199,46 +204,62 @@ NO-PREVIOUS-ANNOTATION $B$r;XDj(B (\\[Universal-Argument] \\[skk-annotation-ad
 
 \(fn)" t nil)
 
-(autoload 'skk-annotation-display-p "skk-annotation" "\
-Not documented
-
-\(fn TEST)" nil nil)
-
-(autoload 'skk-annotation-toggle-display-p "skk-annotation" "\
-Not documented
-
-\(fn)" t nil)
-
 (autoload 'skk-annotation-quote "skk-annotation" "\
 $B:G8e$K3NDj$7$?8l$K4^$^$l$k(B `;' $B$r8uJd$N0lIt$H$7$F(B quote $B$9$k!#(B
 
 \(fn &optional QUIET)" t nil)
+
+(autoload 'skk-annotation-message "skk-annotation" "\
+Not documented
+
+\(fn &optional SITUATION)" nil nil)
+
+(autoload 'skk-annotation-lookup-region-or-at-point "skk-annotation" "\
+$BA*BrNN0h$^$?$O%]%$%s%H0LCV$NC18l$r<-=q$GD4$Y$k!#(B
+$B<-=q$H$7$F$O(B lookup.el$B!"(BMac OS X $B$N<-=q%5!<%S%9!"(BWikipedia/Wikitionary $B$J$I$,(B
+$BMxMQ$5$l$k!#(B
+
+$BNN0h$,A*Br$5$l$F$$$J$1$l$PC18l$N;O$a$H=*$o$j$r?dB,$7$FD4$Y$k!#(B
+
+$BD4$Y$?7k2L$r(B `skk-annotation-show-as-message' $B$,(B Non-nil $B$G$"$l$P%(%3!<%(%j%"(B
+$B$K!"(Bnil $B$G$"$l$PJL(B window $B$KI=<($9$k!#(B
+
+\(fn &optional PREFIX-ARG START END)" t nil)
+
+(autoload 'skk-annotation-start-python "skk-annotation" "\
+OS X $B$N!V<-=q!W$rMxMQ$9$k$?$a$K(B python $B$r5/F0$9$k!#(B
+
+\(fn &optional WAIT)" nil nil)
+
+(autoload 'skk-annotation-lookup-DictionaryServices "skk-annotation" "\
+python $B$r2p$7$F(B DictionaryServices $B$rMxMQ$7%"%N%F!<%7%g%s$r<hF@$9$k!#(B
+$B%*%W%7%g%s0z?t(B TRUNCATE $B$,(B non-nil $B$N>l9g$O8uJd0lMwMQ$KC;$$%"%N%F!<%7%g%s(B
+$B$K9J$j$3$`!#(B
+
+\(fn WORD &optional TRUNCATE FORCE)" nil nil)
+
+(autoload 'skk-annotation-preread-dict "skk-annotation" "\
+dict $B$N%W%m%;%9$r5/F0$9$k!#@hFI$_$N$?$a$KMQ$$$k!#(B
+
+\(fn WORD &optional NOWAIT)" nil nil)
+
+(autoload 'skk-annotation-lookup-dict "skk-annotation" "\
+dict $B$N%W%m%;%9$rI,MW$J$i5/F0$7!"7k2L$rD4$Y$k!#(B
+$B0UL#$,<hF@$G$-$?>l9g$K$O7k2L$rJ8;zNs$H$7$FJV$9!#(B
+
+\(fn WORD &optional TRUNCATE)" nil nil)
 
 (autoload 'skk-annotation-wikipedia "skk-annotation" "\
 Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k!#(B
 
 \(fn WORD &optional SOURCES)" nil nil)
 
-(autoload 'skk-annotation-treat-wikipedia "skk-annotation" "\
-WORD $B$,A^F~$5$l$k$H$-$KI=<($5$l$k$Y$-Cm<a$r@8@.$9$k!#(B
-$B@8@.$7$?Cm<a$rJV$9!#(B
+(defalias 'skk-annotation-wikipedia-region-or-at-point 'skk-annotation-lookup-region-or-at-point)
 
-\(fn WORD &optional SOURCES)" nil nil)
-
-(autoload 'skk-annotation-wikipedia-cache "skk-annotation" "\
+(autoload 'skkannot-cache "skk-annotation" "\
 Not documented
 
 \(fn WORD &optional SOURCES)" nil nil)
-
-(autoload 'skk-annotation-wikipedia-region-or-at-point "skk-annotation" "\
-$BA*BrNN0h$^$?$O%]%$%s%H0LCV$NC18l$r(B Wikipedia/Wikitionary $B$GD4$Y$k!#(B
-$BNN0h$,A*Br$5$l$F$$$J$1$l$PC18l$N;O$a$H=*$o$j$r?dB,$7$FD4$Y$k!#(B
-$BD4$Y$?7k2L$r(B `skk-annotation-show-as-message' $B$,(B Non-nil $B$G$"$l$P%(%3!<%(%j%"(B
-$B$K!"(Bnil $B$G$"$l$PJL(B window $B$KI=<($9$k!#(B
-
-\(fn &optional PREFIX-ARG START END)" t nil)
-
-(defalias 'skk-annotation-wikipedia-region 'skk-annotation-wikipedia-region-or-at-point)
 
 ;;;***
 
@@ -427,7 +448,7 @@ Not documented
 ;;;***
 
 ;;;### (autoloads (skk-cus-set skk-cus-setup skk-customize skk-customize-group-skk)
-;;;;;;  "skk-cus" "skk-cus.el" (19957 5613))
+;;;;;;  "skk-cus" "skk-cus.el" (20138 47082))
 ;;; Generated autoloads from skk-cus.el
 
 (autoload 'skk-customize-group-skk "skk-cus" "\
@@ -494,7 +515,7 @@ mail-user-agent $B$r@_Dj$9$k$3$H$K$h$j9%$_$N%a!<%k%$%s%?!<%U%'%$%9$r;HMQ$9$k$3$
 ;;;;;;  skk-ignore-dic-word skk-times skk-minus skk-plus skk-calc
 ;;;;;;  skk-gengo-to-ad-1 skk-gengo-to-ad skk-ad-to-gengo-1 skk-ad-to-gengo
 ;;;;;;  skk-clock skk-today skk-default-current-date skk-current-date)
-;;;;;;  "skk-gadget" "skk-gadget.el" (19945 25575))
+;;;;;;  "skk-gadget" "skk-gadget.el" (19991 41202))
 ;;; Generated autoloads from skk-gadget.el
 
 (autoload 'skk-current-date "skk-gadget" "\
@@ -622,7 +643,7 @@ NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$J$&!#(B
 ;;;***
 
 ;;;### (autoloads (skk-inline-show) "skk-inline" "skk-inline.el"
-;;;;;;  (19948 50351))
+;;;;;;  (20167 22005))
 ;;; Generated autoloads from skk-inline.el
 
 (autoload 'skk-inline-show "skk-inline" "\
@@ -634,7 +655,7 @@ Not documented
 
 ;;;### (autoloads (skk-isearch-skk-mode skk-isearch-mode-cleanup
 ;;;;;;  skk-isearch-mode-setup skk-isearch-message) "skk-isearch"
-;;;;;;  "skk-isearch.el" (19945 28605))
+;;;;;;  "skk-isearch.el" (20198 39238))
 ;;; Generated autoloads from skk-isearch.el
 
 (autoload 'skk-isearch-message "skk-isearch" "\
@@ -665,7 +686,7 @@ Not documented
 
 ;;;### (autoloads (skk-katakana-to-jisx0201-region skk-hiragana-to-jisx0201-region
 ;;;;;;  skk-toggle-katakana skk-jisx0201-mode) "skk-jisx0201" "skk-jisx0201.el"
-;;;;;;  (19977 49434))
+;;;;;;  (20149 62622))
 ;;; Generated autoloads from skk-jisx0201.el
 
 (autoload 'skk-jisx0201-mode "skk-jisx0201" "\
@@ -691,7 +712,7 @@ Not documented
 ;;;***
 
 ;;;### (autoloads (skk-edit-private-jisyo skk-jisyo-edit-mode) "skk-jisyo-edit-mode"
-;;;;;;  "skk-jisyo-edit-mode.el" (19957 5613))
+;;;;;;  "skk-jisyo-edit-mode.el" (19991 41203))
 ;;; Generated autoloads from skk-jisyo-edit-mode.el
 
 (autoload 'skk-jisyo-edit-mode "skk-jisyo-edit-mode" "\
@@ -717,7 +738,7 @@ C-c C-k   Abort
 
 SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 
-$B%*%W%7%g%s0z?t(B CODING-SYSTEM $B$K$F8D?M<-=q$N%3!<%I7O$r;XDj2DG=!#(B
+$B%*%W%7%g%J%k0z?t(B CODING-SYSTEM $B$K$F8D?M<-=q$N%3!<%I7O$r;XDj2DG=!#(B
 
 $B$3$N5!G=$O=>Mh$N<jF0$G$N8D?M<-=qJT=8$h$jG[N8$5$l$F$$$k$,!"(BSKK $B<-=q$N9=J8$r(B
 $B%A%'%C%/$9$k$3$H$O$G$-$:!"<+8J@UG$$G$NJT=8$G$"$k$3$H$OJQ$o$j$J$$!#(B
@@ -730,7 +751,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 ;;;;;;  skk-hurigana-katakana-region skk-hurigana-message skk-hurigana-region
 ;;;;;;  skk-gyakubiki-katakana-message skk-gyakubiki-katakana-region
 ;;;;;;  skk-gyakubiki-message skk-gyakubiki-and-henkan skk-gyakubiki-region)
-;;;;;;  "skk-kakasi" "skk-kakasi.el" (19903 52849))
+;;;;;;  "skk-kakasi" "skk-kakasi.el" (20130 9048))
 ;;; Generated autoloads from skk-kakasi.el
 
 (autoload 'skk-gyakubiki-region "skk-kakasi" "\
@@ -849,8 +870,8 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 ;;;***
 
 ;;;### (autoloads (skk-list-chars skk-display-code-for-char-at-point
-;;;;;;  skk-input-by-code-or-menu) "skk-kcode" "skk-kcode.el" (19977
-;;;;;;  49434))
+;;;;;;  skk-input-by-code-or-menu) "skk-kcode" "skk-kcode.el" (20204
+;;;;;;  7866))
 ;;; Generated autoloads from skk-kcode.el
 
 (autoload 'skk-input-by-code-or-menu "skk-kcode" "\
@@ -864,7 +885,8 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 \(fn &optional ARG)" t nil)
 
 (autoload 'skk-list-chars "skk-kcode" "\
-Docstring.
+$BJQ?t(B `skk-kcode-charset' $B$K=>$C$FJ8;z0lMw$rI=<($9$k(B.
+\\[universal-argument] $BIU$-$G<B9T$9$k$H!"(Bfollowing-char() $B$rM%@hI=<($9$k(B.
 
 \(fn ARG)" t nil)
 
@@ -940,7 +962,7 @@ Not documented
 
 ;;;***
 
-;;;### (autoloads nil "skk-macs" "skk-macs.el" (19973 9355))
+;;;### (autoloads nil "skk-macs" "skk-macs.el" (20217 49926))
 ;;; Generated autoloads from skk-macs.el
 
 (put 'skk-defadvice 'lisp-indent-function 'defun)
@@ -1042,7 +1064,7 @@ Server completion $B$KBP1~$7$?<-=q%5!<%P$rMxMQ$9$kJd40%W%m%0%i%`!#(B
 
 ;;;### (autoloads (skk-disconnect-server skk-adjust-search-prog-list-for-server-search
 ;;;;;;  skk-search-server-1 skk-server-version) "skk-server" "skk-server.el"
-;;;;;;  (19903 56228))
+;;;;;;  (20152 22069))
 ;;; Generated autoloads from skk-server.el
 
 (autoload 'skk-server-version "skk-server" "\
@@ -1071,8 +1093,19 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 
 ;;;***
 
+;;;### (autoloads (skk-show-mode) "skk-show-mode" "skk-show-mode.el"
+;;;;;;  (20205 20347))
+;;; Generated autoloads from skk-show-mode.el
+
+(autoload 'skk-show-mode "skk-show-mode" "\
+Not documented
+
+\(fn)" t nil)
+
+;;;***
+
 ;;;### (autoloads (skk-search-tankanji skk-tankan-search skk-tankan)
-;;;;;;  "skk-tankan" "skk-tankan.el" (19977 49434))
+;;;;;;  "skk-tankan" "skk-tankan.el" (20188 46903))
 ;;; Generated autoloads from skk-tankan.el
 
 (autoload 'skk-tankan "skk-tankan" "\
@@ -1097,7 +1130,7 @@ Not documented
 
 ;;;***
 
-;;;### (autoloads (skk-tutorial) "skk-tut" "skk-tut.el" (19945 35502))
+;;;### (autoloads (skk-tutorial) "skk-tut" "skk-tut.el" (20205 29410))
 ;;; Generated autoloads from skk-tut.el
 
 (autoload 'skk-tutorial "skk-tut" "\
@@ -1108,7 +1141,7 @@ You can select English version by \\[universal-argument] \\[skk-tutorial].
 
 ;;;***
 
-;;;### (autoloads (skk-preload) "skk-vars" "skk-vars.el" (19974 54701))
+;;;### (autoloads (skk-preload) "skk-vars" "skk-vars.el" (20221 24219))
 ;;; Generated autoloads from skk-vars.el
 
 (put 'skk-deflocalvar 'lisp-indent-function 'defun)
@@ -1125,8 +1158,8 @@ Emacs $B$N5/F0$=$N$b$N$OCY$/$J$k$,!"(BDDSKK $B$N=i2s5/F0$rAa$/$9$k$3$H$,$G$-$
 
 ;;;***
 
-;;;### (autoloads (skk-version) "skk-version" "skk-version.el" (19981
-;;;;;;  45125))
+;;;### (autoloads (skk-version) "skk-version" "skk-version.el" (20223
+;;;;;;  50107))
 ;;; Generated autoloads from skk-version.el
 
 (autoload 'skk-version "skk-version" "\
@@ -1140,7 +1173,7 @@ the codename.
 
 ;;;### (autoloads (skk-preload skk-remove-duplicates skk-henkan-on-message
 ;;;;;;  skk-compile-rule-list skk-auto-fill-mode skk-mode) "skk"
-;;;;;;  "skk.el" (19976 61472))
+;;;;;;  "skk.el" (20205 20348))
 ;;; Generated autoloads from skk.el
 
 (autoload 'skk-mode "skk" "\
@@ -1247,7 +1280,7 @@ Emacs $B5/F0;~$K$"$i$+$8$a(B SKK $B$r8F$V$3$H$G(B SKK $B$N1~Ez$rB.$/$9$k!#
 
 ;;;### (autoloads (skk-study-read skk-study-copy-theme skk-study-remove-theme
 ;;;;;;  skk-study-switch-current-theme skk-study-save skk-study-update
-;;;;;;  skk-study-search) "skk-study" "skk-study.el" (19945 28605))
+;;;;;;  skk-study-search) "skk-study" "skk-study.el" (20008 8039))
 ;;; Generated autoloads from skk-study.el
 
 (autoload 'skk-study-search "skk-study" "\

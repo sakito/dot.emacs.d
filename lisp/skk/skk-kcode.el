@@ -7,9 +7,9 @@
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-kcode.el,v 1.97 2011/06/28 11:55:06 skk-cvs Exp $
+;; Version: $Id: skk-kcode.el,v 1.101 2011/12/17 04:46:50 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2011/06/28 11:55:06 $
+;; Last Modified: $Date: 2011/12/17 04:46:50 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -91,11 +91,14 @@
   (read-string (format (if skk-japanese-message-and-error
 			   "\
 `%s' の文字を指定します。7/8 ビット JIS コード (00nn), 区点コード (00-00),\
- UNICODE (U+00nn), または [RET] (文字一覧): "
+ UNICODE (U+00nn), または [RET] (%s): "
 			 "\
 To find a character in `%s', type 7/8 bits JIS code (00nn),\
- KUTEN code (00-00), UNICODE (U+00nn), or [RET] for List: ")
-		       skk-kcode-charset)))
+ KUTEN code (00-00), UNICODE (U+00nn), or [RET] for %s: ")
+		       skk-kcode-charset
+		       (if (eq skk-kcode-method 'code-or-char-list)
+			   "char-list"
+			 "menu"))))
 
 (defun skk-kcode-parse-code-string (str)
   (let* ((list (split-string str "-"))
@@ -435,11 +438,10 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
  を表示する。"
   (interactive)
   (if (eobp)
-      (and (skk-message "カーソルがバッファの終端にあります"
-			"Cursor is at the end of the buffer")
-	   t) ; エコーした文字列をカレントバッファに挿入しないように。
-    (skk-display-code (following-char))
-    t))
+      (skk-message "カーソルがバッファの終端にあります"
+		   "Cursor is at the end of the buffer")
+    (skk-display-code (following-char)))
+  t) ; エコーした文字列をカレントバッファに挿入しないように。
 
 (defun skk-display-code (char)
 ;;   (require 'font-lock)
@@ -471,6 +473,7 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
 						 'skk-display-code-prompt-face)
 				     (format "U+%04x" char)))
 			    ((and (eval-when-compile (fboundp 'char-to-ucs))
+				  (fboundp 'char-to-ucs)
 				  (char-to-ucs char))
 			     (concat ", "
 				     (propertize "UNICODE:" 'face
@@ -524,15 +527,20 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
 		    (format "%3d" (skk-char-octet char 0)))))
      ;;
      (t
-      (skk-error "判別できない文字です"
-		 "Cannot understand this character")))
+      (setq mesg (if skk-japanese-message-and-error
+		     "判別できない文字です"
+		   "Cannot understand this character"))))
     ;;
-    (if (and window-system
-	     skk-show-tooltip
-	     (not (eq (symbol-function 'skk-tooltip-show-at-point) 'ignore)))
-	(funcall skk-tooltip-function
-		 (replace-regexp-in-string ", " "\n\t" mesg))
-      (message "%s" mesg))))
+    (cond
+     ((and window-system
+	   skk-show-tooltip
+	   (not (eq (symbol-function 'skk-tooltip-show-at-point) 'ignore)))
+      (funcall skk-tooltip-function
+	       (replace-regexp-in-string ", " "\n\t" mesg)))
+     (skk-show-candidates-always-pop-to-buffer
+      (skk-annotation-show (replace-regexp-in-string ", " "\n\t" mesg)))
+     (t
+      (message "%s" mesg)))))
 
 (defun skk-jis2sjis (char1 char2)
   (let* ((ch2 (if (eq (* (/ char1 2) 2) char1)
@@ -601,35 +609,36 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
 
 ;;;###autoload
 (defun skk-list-chars (arg)
-  "Docstring."
-  (interactive "p")
-;;   (require 'font-lock)
+  "変数 `skk-kcode-charset' に従って文字一覧を表示する.
+\\[universal-argument] 付きで実行すると、following-char() を優先表示する."
+  (interactive "P")
   (setq skk-list-chars-original-window-configuration
 	(current-window-configuration))
-  (let ((buf (progn (and (get-buffer skk-list-chars-buffer-name)
-			 (kill-buffer skk-list-chars-buffer-name))
-		    (get-buffer-create skk-list-chars-buffer-name)))
-	(ch (char-to-string (if arg
-				(following-char)
-			      (make-char skk-kcode-charset 33 33)))))
-    (setq skk-kcode-charset (if arg
-				(car (split-char (string-to-char ch)))
-			      skk-kcode-charset))
-    (if (eq skk-kcode-charset 'ascii)
-	(setq skk-kcode-charset 'japanese-jisx0208
-	      ch (char-to-string (make-char skk-kcode-charset 33 33))))
-    (skk-kakutei)			; ▽ or ▼ で \ した場合
+  (let* ((buf (progn (and (get-buffer skk-list-chars-buffer-name)
+			  (kill-buffer skk-list-chars-buffer-name))
+		     (get-buffer-create skk-list-chars-buffer-name)))
+	 (char (if arg
+		   (following-char)
+		 (make-char skk-kcode-charset 33 33)))
+	 (charset (if arg
+		      (car (split-char char))
+		    skk-kcode-charset)))
+    (if (eq charset 'ascii)
+	(setq charset 'japanese-jisx0208
+	      char (make-char 'japanese-jisx0208 33 33)))
+    (when skk-henkan-mode		; ▽ or ▼ で呼ばれた場合
+      (skk-kakutei))
     (setq skk-list-chars-destination-buffer (current-buffer))
     (set-buffer buf)
     (setq buffer-read-only nil)
     (erase-buffer)
     (set-buffer-multibyte t)
-    (insert (format "variable skk-kcode-charset's value is `%s'.\n"
-		    skk-kcode-charset))
+    (insert (format "Characters in the coded character set `%s'.\n"
+		    charset))
     (dotimes (high 94)			; from ?\x21 to ?\x7e
-      (skk-list-chars-sub (+ high 33) skk-kcode-charset))
+      (skk-list-chars-sub (+ high 33) charset))
     (pop-to-buffer buf)
-    (search-backward ch)
+    (search-backward (char-to-string char))
     (setq skk-list-chars-point (point))
     (put-text-property skk-list-chars-point (progn (forward-char) (point))
 		       'face 'skk-list-chars-face)

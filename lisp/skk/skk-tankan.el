@@ -5,9 +5,9 @@
 ;; Author: YAGI Tatsuya <ynyaaa@ybb.ne.jp>
 ;; Author: Tsuyoshi Kitamoto <tsuyoshi.kitamoto@gmail.com>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-tankan.el,v 1.51 2011/06/28 11:55:06 skk-cvs Exp $
+;; Version: $Id: skk-tankan.el,v 1.54 2011/12/05 12:21:11 skk-cvs Exp $
 ;; Keywords: japanese
-;; Last Modified: $Date: 2011/06/28 11:55:06 $
+;; Last Modified: $Date: 2011/12/05 12:21:11 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -154,6 +154,239 @@
      11 (7 11 11 11) 11 (9 11 11 11) (7 11) 11
      (11 12) 12 (11 12 12) 12 13 13 13 (8 13 13)
      14 14 (12 12 15 15) (10 16) (11 16) 17])
+
+(defconst skk-tankan-radical-name
+  ;; 読みは http://ja.wiktionary.org/wiki/Wiktionary:漢字索引 部首
+  ;; から引用した。
+  ["〓"
+   "いち"				;1
+   "ぼう、たてぼう"			;2
+   "てん"				;3
+   "の"					;4
+   "おつ"				;5
+   "はねぼう"				;6
+   "に"					;7
+   "なべぶた"				;8
+   "ひと、ひとがしら"			;9
+   "にんにょう、ひとあし"		;10
+   "いる、いりがしら、いりやね"		;11
+   "はち、はちがしら"			;12
+   "けいがまえ、まきがまえ、どうがまえ"	;13
+   "わかんむり"				;14
+   "にすい"				;15
+   "つくえ、つくえきにょう、かぜかんむり" ;16
+   "かんにょう、うけばこ"		;17
+   "かたな"				;18
+   "ちから"				;19
+   "つつみがまえ"			;20
+   "ひ、あいくち"			;21
+   "はこがまえ"				;22
+   "かくしがまえ"			;23
+   "じゅう"				;24
+   "ぼく、ぼくのと"			;25
+   "ふしづくり"				;26
+   "がんだれ"				;27
+   "む"					;28
+   "また"				;29
+   "くち、くちへん"			;30
+   "くにがまえ"				;31
+   "つち、つちへん"			;32
+   "さむらい、さむらいかんむり"		;33
+   "ふゆがしら、ちかんむり"		;34
+   "すいにょう、なつのあし"		;35
+   "ゆう、ゆうべ"			;36
+   "だい、だいかんむり、だいかしら"	;37
+   "おんな、おんなへん"			;38
+   "こ、こへん"				;39
+   "うかんむり"				;40
+   "すん"				;41
+   "しょう、しょうがしら、なおがしら"	;42
+   "だいのまげあし"			;43
+   "しかばね、しかばねかんむり"		;44
+   "てつ、くさのめ"			;45
+   "やま、やまへん"			;46
+   "まがりかわ"				;47
+   "こう、たくみへん"			;48
+   "こ、き、おのれ、い、すでに、し、み"	;49
+   "はば、はばへん、きんべん"		;50
+   "かん、いちじゅう"			;51
+   "よう、いとがしら"			;52
+   "まだれ"				;53
+   "えんにょう、いんにょう"		;54
+   "きょう、こまぬき"			;55
+   "よく、しきがまえ"			;56
+   "ゆみ、ゆみへん"			;57
+   "けいがしら"				;58
+   "さんづくり、けかざり"		;59
+   "ぎょうにんべん"			;60
+   "こころ"				;61
+   "ほこ、ほこづくり"			;62
+   "と、とかんむり"			;63
+   "て"					;64
+   "しにょう、えだにょう"		;65
+   "ぼくづくり、ぼくにょう、のぶん"	;66
+   "ぶん"				;67
+   "と、とます"				;68
+   "おの、おのづくり"			;69
+   "ほう、ほうへん、かたへん"		;70
+   "なし、むにょう、すでのつくり"	;71
+   "ひ、ひへん、にちへん"		;72
+   "ひらび"				;73
+   "つき、つきへん"			;74
+   "き、きへん"				;75
+   "あくび"				;76
+   "とめる、とめへん"			;77
+   "がつへん、かばねへん"		;78
+   "ほこづくり、るまた"			;79
+   "なかれ、はは"			;80
+   "ならびひ、くらべる"			;81
+   "け"					;82
+   "うじ"				;83
+   "きがまえ"				;84
+   "みず、したみず"			;85
+   "ひ、ひへん"				;86
+   "つめ、そうにょう"			;87
+   "ちち"				;88
+   "こう"				;89
+   "しょう、しょうへん"			;90
+   "かた、かたへん"			;91
+   "きば、きばへん"			;92
+   "うし"				;93
+   "いぬ"				;94
+   "げん"				;95
+   "たま"				;96
+   "うり"				;97
+   "かわら"				;98
+   "あまい"				;99
+   "いきる、うまれる"			;100
+   "もちいる"				;101
+   "た、たへん"				;102
+   "ひき"				;103
+   "やまいだれ"				;104
+   "はつがしら"				;105
+   "しろ"				;106
+   "けがわ、ひのかわ"			;107
+   "さら"				;108
+   "め、めへん"				;109
+   "ほこ、ほこへん"			;110
+   "や、やへん"				;111
+   "いし、いしへん"			;112
+   "しめす"				;113
+   "じゅうのあし"			;114
+   "のぎ、のぎへん"			;115
+   "あな、あなかんむり"			;116
+   "たつ、たつへん"			;117
+   "たけ、たけかんむり"			;118
+   "こめ、こめへん"			;119
+   "いと"				;120
+   "ほとぎ、ほとぎへん、ふ"		;121
+   "あみがしら"				;122
+   "ひつじ、ひつじへん"			;123
+   "はね"				;124
+   "おいかんむり"			;125
+   "しこうして"				;126
+   "らいすき、らいへん"			;127
+   "みみ、みみへん"			;128
+   "いつ、ふでづくり"			;129
+   "にく"				;130
+   "しん"				;131
+   "じ、みずから"			;132
+   "いたる、いたるへん"			;133
+   "うす"				;134
+   "した、したへん"			;135
+   "まいあし"				;136
+   "ふね、ふねへん"			;137
+   "ごん、ごんづくり、ねづくり、うしとら" ;138
+   "いろ"				;139
+   "くさ、くさかんむり"			;140
+   "とらかんむり、とらがしら"		;141
+   "むし、むしへん"			;142
+   "ち"					;143
+   "ぎょうがまえ、ゆきがまえ"		;144
+   "ころも"				;145
+   "にし、おおいかんむり"		;146
+   "みる"				;147
+   "つの、つのへん"			;148
+   "ことば、げん、ごんべん"		;149
+   "たに、たにへん"			;150
+   "まめ、まめへん"			;151
+   "いのこ、いのこへん、ぶた"		;152
+   "むじなへん"				;153
+   "かい、かいへん、こがい"		;154
+   "あか"				;155
+   "はしる、そうにょう"			;156
+   "あし、あしへん"			;157
+   "み、みへん"				;158
+   "くるま、くるまへん"			;159
+   "しん、からい"			;160
+   "しんのたつ"				;161
+   "しんにょう、しんにゅう"		;162
+   "むら"				;163
+   "とりへん、ひよみのとり、さけのとり"	;164
+   "のごめ、のごめへん"			;165
+   "さと、さとへん"			;166
+   "かね、かねへん"			;167
+   "ながい"				;168
+   "もん、もんがまえ、かどがまえ"	;169
+   "おか"				;170
+   "れいづくり"				;171
+   "ふるとり"				;172
+   "あめ、あめかんむり"			;173
+   "あお"				;174
+   "あらず"				;175
+   "めん"				;176
+   "かわへん、つくりがわ"		;177
+   "なめしがわ"				;178
+   "にら"				;179
+   "おと、おとへん"			;180
+   "おおがい"				;181
+   "かぜ"				;182
+   "とぶ"				;183
+   "しょく、しょくへん"			;184
+   "くび"				;185
+   "かおり"				;186
+   "うま、うまへん"			;187
+   "ほね、ほねへん"			;188
+   "たかい"				;189
+   "かみかんむり、かみがしら"		;190
+   "とうがまえ、たたかいがまえ"		;191
+   "ちょう、においざけ"			;192
+   "かなえ"				;193
+   "おに、きにょう"			;194
+   "さかな、うおへん"			;195
+   "とり、とりへん"			;196
+   "しお"				;197
+   "しか"				;198
+   "むぎ、ばくにょう"			;199
+   "あさ、あさかんむり"			;200
+   "き"					;201
+   "きび"				;202
+   "くろ"				;203
+   "ぬいとり、ふつへん、ち"		;204
+   "べんあし、かえる、べん"		;205
+   "かなえ、てい"			;206
+   "つづみ"				;207
+   "ねずみ、ねずみへん"			;208
+   "はな、はなへん"			;209
+   "せい"				;210
+   "は、はへん"				;211
+   "りゅう"				;212
+   "かめ"				;213
+   "やく、ふえ"				;214
+   ]
+  "部首の読み")
+
+;; ;; ↓何かに使えそうな alist
+;; (let ((i 0)
+;;       alist)
+;;   (mapc #'(lambda (radical)
+;; 	    (mapc #'(lambda (yomi)
+;; 		      (setq alist (cons (cons radical yomi) alist)))
+;; 		  (split-string (aref skk-tankan-radical-name i) "、"))
+;; 	    (setq i (1+ i)))
+;; 	(append skk-tankan-radical-vector nil))
+;;   alist)
+
 
 ;;; japanese-jisx0208, japanese-jisx0213-1 用の部首・画数データ
 ;; 1面-14区-01点 から 2Byte ずつ使用している
@@ -1607,15 +1840,27 @@ METHOD が 2 であれば総画数として検索を実行する。
   ;;   ただし、face を導入してしまった(2011-1-3)ので、動的に face を適用させるため
   ;;   当面は alist も動的に生成する。
   (let ((i 1)
+	(len (length skk-tankan-radical-vector))
 	alist)
-    (while (< i (length skk-tankan-radical-vector))
+    (while (< i len)
       (setq alist (cons (list (concat (format "%03d " i)
-				      (propertize (aref skk-tankan-radical-vector i)
-						  'face 'skk-tankan-face)))
+				      (propertize
+				       (aref skk-tankan-radical-vector i)
+				       'face 'skk-tankan-face)
+				      (propertize
+				       (concat " ("
+					       (aref skk-tankan-radical-name i)
+					       ")")
+				       'face 'skk-tankan-radical-name-face)))
 			alist))
       (setq i (1+ i)))
-    (string-to-number (completing-read "部首を番号で選択（TABで一覧表示）: "
-				       alist nil t))))
+
+    (setq i (string-to-number (completing-read "部首を番号で選択（TABで一覧表示）: "
+					       alist nil t)))
+    (message "%s %s"
+	     (aref skk-tankan-radical-vector i)
+	     (aref skk-tankan-radical-name i))
+    i))
 
 (defun skk-tankan-mode ()
   "Major mode for skk-tankan.
@@ -1626,32 +1871,67 @@ METHOD が 2 であれば総画数として検索を実行する。
 	major-mode 'skk-tankan-mode)
   (use-local-map skk-tankan-mode-map))
 
+(defconst skk-tankan-name-radical-alist
+  (let ((i 1)
+	alist)
+    (mapc #'(lambda (radical)
+	      (mapc #'(lambda (yomi)
+			(setq alist
+			      (cons (cons (format "%-16s (%03d) %s" yomi i radical)
+					  nil)
+				    alist)))
+		    (split-string (aref skk-tankan-radical-name i) "、"))
+	      (setq i (1+ i)))
+	  (cdr (append skk-tankan-radical-vector nil)))
+    alist))
+
+(defun skk-tankan-yomi-compread ()
+  (let ((radical (completing-read "部首を読みで選択（TABで一覧表示）: "
+				  skk-tankan-name-radical-alist nil t)))
+    (if (equal "" radical)
+	0
+      (save-match-data
+	(string-match "(\\(.+\\))" radical)
+	(string-to-number (substring radical (match-beginning 1) (match-end 1)))))))
+
 ;;;###autoload
 (defun skk-tankan (arg)
   "単漢字変換を開始する。
 \\[skk-tankan] で部首変換を、
 \\[universal-argument] 数値 \\[skk-tankan] で総画数変換を開始する。"
   (interactive "P")
-  (let ((buf (get-buffer-create "*単漢字*"))
-	(list (skk-tankan-select-tankanji-kouho
-	       (cons nil (if (integerp arg)
-			     (skk-search-by-stroke-or-radical arg 2)
-			   (skk-search-by-stroke-or-radical
-			    (skk-tankan-bushu-compread) 0))))))
-    (set-buffer buf)
-    (setq buffer-read-only nil)
-    (erase-buffer)
-    (set-buffer-multibyte t)
-    (dolist (str list)
-      (insert (format " %s  %s\n"
-		      (propertize (substring str 0 1) 'face 'skk-tankan-face)
-		      (substring str 2)))))
-  (set-buffer-modified-p nil)
-  (setq buffer-read-only t)
-  (pop-to-buffer "*単漢字*")
-  (goto-char (point-min))
-  (skk-tankan-mode)
-  (skk-tankan-overlay))
+  (let (tankan)
+    (if (integerp arg)
+	(setq tankan (skk-search-by-stroke-or-radical arg 2))
+      (let ((i (skk-tankan-bushu-compread)))
+	(if (zerop i)
+	    (progn
+	      (setq i (skk-tankan-yomi-compread))
+	      (if (zerop i)
+		  (setq tankan nil)
+		(setq tankan (skk-search-by-stroke-or-radical i 0))))
+	  (setq tankan (skk-search-by-stroke-or-radical i 0)))))
+
+    (when tankan
+      (let ((buf (get-buffer-create "*単漢字*"))
+	    list)
+	(setq skk-tankan-mode-original-window-configuration
+	      (current-window-configuration))
+	(setq list (skk-tankan-select-tankanji-kouho (cons nil tankan)))
+	(set-buffer buf)
+	(setq buffer-read-only nil)
+	(erase-buffer)
+	(set-buffer-multibyte t)
+	(dolist (str list)
+	  (insert (format " %s  %s\n"
+			  (propertize (substring str 0 1) 'face 'skk-tankan-face)
+			  (substring str 2))))
+	(set-buffer-modified-p nil)
+	(setq buffer-read-only t)
+	(pop-to-buffer "*単漢字*")
+	(goto-char (point-min))
+	(skk-tankan-mode)
+	(skk-tankan-overlay)))))
 
 (defun skk-tankan-overlay ()
   (or skk-tankan-overlay
@@ -1687,9 +1967,8 @@ METHOD が 2 であれば総画数として検索を実行する。
 
 (defun skk-tankan-mode-quit ()
   (interactive)
-  (if (one-window-p)
-      (switch-to-buffer "*scratch*")
-    (delete-window)))
+  (kill-buffer "*単漢字*")
+  (set-window-configuration skk-tankan-mode-original-window-configuration))
 
 (defun skk-tankan-mode-display-code ()
   (interactive)

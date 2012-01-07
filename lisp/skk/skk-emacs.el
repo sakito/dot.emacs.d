@@ -81,14 +81,20 @@
        :keys nil
        :key-sequence nil]
       "--"
+      ["Find kanji by radicals" skk-tankan t]
+      ["Show list of characters" (skk-list-chars nil) t]
+      ["Lookup word in region or at point"
+       skk-annotation-lookup-region-or-at-point t]
+      ["SKK Clock" (skk-clock nil t) t]
+      "--"
       ["Read Manual" skk-emacs-info t]
       ["Start Tutorial" skk-tutorial t]
       ["Customize SKK" skk-customize-group-skk t]
       ["Customize SKK (simple)" skk-customize t]
+      "--"
       ["Send a Bug Report"
        (let (skk-japanese-message-and-error)
 	 (skk-submit-bug-report)) t]
-      "--"
       ["About Daredevil SKK.." skk-version t]
       ["Visit Daredevil Web Site" skk-emacs-visit-openlab t])))
 
@@ -121,6 +127,10 @@
     ("Start Tutorial" . "チュートリアル")
     ("Customize SKK" . "SKK をカスタマイズ")
     ("Customize SKK (simple)" . "SKK をカスタマイズ (簡易版)")
+    ("Find kanji by radicals" . "漢字を部首から調べる")
+    ("Show list of characters" . "文字コード表")
+    ("SKK Clock" . "SKK 時計")
+    ("Lookup word in region or at point" . "領域またはポイントの語句を調べる")
     ("Send a Bug Report" . "バグを報告する")
     ("About Daredevil SKK.." . "Daredevil SKK について..")
     ("Visit Daredevil Web Site" . "Daredevil SKK のサイトへ")))
@@ -457,6 +467,10 @@
     ;; (text . (x . y))
     (cons text (cons columns lines))))
 
+(defun skk-tooltip-relative-p ()
+  (and (featurep 'ns)
+       (< emacs-major-version 24)))
+
 (defun skk-tooltip-show-at-point (text &optional situation)
   "TEXT を tooltip で表示する。
 オプショナル引数 SITUATION がシンボル annotation であれば、
@@ -554,22 +568,24 @@
 	    ;; x 座標 (左からの)
 	    left (+ (car tip-destination)
 		    (nth 0 (window-inside-pixel-edges win))
-		    (if (featurep 'ns)
+		    (if (skk-tooltip-relative-p)
 			0
-		      (frame-parameter (selected-frame) 'left))
+		      (eval (frame-parameter (selected-frame) 'left)))
 		    skk-tooltip-x-offset)
 	    ;; y 座標 (上からの)
 	    top  (+ (cdr tip-destination)
 		    (nth 1 (window-inside-pixel-edges win))
-		    (if (featurep 'ns)
+		    (if (skk-tooltip-relative-p)
 			0
 		      (+ (if tool-bar-mode
 			     skk-emacs-tool-bar-height
 			   0)
-			 (if menu-bar-mode
+			 (if (and menu-bar-mode
+				  (not (or (boundp 'mac-carbon-version-string)
+					   (featurep 'ns))))
 			     skk-emacs-menu-bar-height
 			   0)
-			 (frame-parameter (selected-frame) 'top)
+			 (eval (frame-parameter (selected-frame) 'top))
 			 (+ fontsize spacing)))
 		    skk-tooltip-y-offset)
 	    tooltip-info (skk-tooltip-resize-text text)
@@ -582,7 +598,7 @@
 	    screen-width (display-pixel-width)
 	    screen-height (display-pixel-height))
       ;;
-      (unless (featurep 'ns)
+      (unless (skk-tooltip-relative-p)
 	(when (> (+ left text-width) screen-width)
 	  ;; 右に寄りすぎて欠けてしまわないように
 	  (setq left (- left (- (+ left text-width
