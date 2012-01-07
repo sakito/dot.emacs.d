@@ -263,13 +263,16 @@
 (global-set-key (kbd "C-c C-f") 'anything-project)
 
 
-;; キー設定 現在以下は設定すみなのでする必要はない
-;;(define-key anything-map (kbd "C-p") 'anything-previous-line)
-;;(define-key anything-map (kbd "C-n") 'anything-next-line)
-;;(define-key anything-map (kbd "M-n") 'anything-next-source)
-;;(define-key anything-map (kbd "M-p") 'anything-previous-source)
-;;(define-key anything-map (kbd "C-v") 'anything-next-page)
-;;(define-key anything-map (kbd "M-v") 'anything-previous-page)
+;; http://d.hatena.ne.jp/syohex/20120105/1325770778
+;; anything in dired
+(defun my/anything-dired ()
+  (interactive)
+  (let ((curbuf (current-buffer)))
+    (if (anything-other-buffer
+         '(anything-c-source-files-in-current-dir+)
+         " *anything-dired*")
+        (kill-buffer curbuf))))
+(define-key dired-mode-map (kbd "p") 'my/anything-dired)
 
 (provide 'init_anything)
 ;;; init_anything.el ends here
