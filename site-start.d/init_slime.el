@@ -279,7 +279,7 @@
 ;; Debugger
 (push '(sldb-mode :stick t) popwin:special-display-config)
 ;; REPL
-;; (push '(slime-repl-mode) popwin:special-display-config)
+(push '(slime-repl-mode :stick t :position bottom :width 25) popwin:special-display-config)
 ;; Connections
 (push '(slime-connection-list-mode) popwin:special-display-config)
 
