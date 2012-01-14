@@ -106,8 +106,12 @@
 ;; ipython の起動オプションを設定
 ;; デフォルトは (-i -colors LightBG)
 ;;(setq py-python-command-args '("-cl" "-i" "-colors" "Linux"))
-(setq py-python-command-args '("-i" "-colors" "Linux"))
+;;(setq py-python-command-args '("-i" "-colors" "Linux"))
+(setq-default py-python-command-args '("-i" "--pylab" "--colors=Linux"))
 ;;(setq py-python-command-args '("-cl" "-i" "Linux"))
+;;(define-key py-mode-map (kbd "M-<tab>") 'anything-ipython-complete)
+;;(define-key py-shell-map (kbd "M-<tab>") 'anything-ipython-complete)
+;;(define-key py-mode-map (kbd "C-c M") 'anything-ipython-import-modules-from-buffer)
 
 ;; http://www.emacswiki.org/emacs/anything-ipython.el
 (require 'anything-ipython)
