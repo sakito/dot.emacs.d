@@ -100,7 +100,7 @@
 (setq ipython-completion-command-string "print(';'.join(__IP.Completer.all_completions('%s')))\n")
 
 (defadvice ipython-shell-hook (after unset-completion-key () activate)
-  (define-key py-mode-map (kbd "M-<tab>") 'anything-ipython-complete))
+  (define-key python-mode-map (kbd "M-<tab>") 'anything-ipython-complete))
 
 ;; Modify original `ipython-complete' to fit with anything.
 (defun anything-ipython-completion-list (pattern)
