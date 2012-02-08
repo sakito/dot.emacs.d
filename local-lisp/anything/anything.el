@@ -1,4 +1,4 @@
-;;;; anything.el --- open anything / QuickSilver-like candidate-selection framework
+;;; anything.el --- open anything / QuickSilver-like candidate-selection framework
 
 ;; Copyright (C) 2007              Tamas Patrovics
 ;;               2008 ~ 2012       rubikitch <rubikitch@ruby-lang.org>
@@ -9,7 +9,8 @@
 ;; Maintainers: rubikitch <rubikitch@ruby-lang.org>
 ;;              Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
-;; Keywords: files, frames, help, matching, outlines, processes, tools, convenience, anything
+;; Keywords: files, frames, help, matching, outlines,
+;;           processes, tools, convenience, anything
 
 ;; X-URL: <http://repo.or.cz/w/anything-config.git>
 
@@ -45,9 +46,11 @@
 ;;  ---------------------
 
 ;;  * Commands defined here are:
-;; [EVAL] (autodoc-document-lisp-buffer :type 'command :prefix "anything-" :docstring t)
+;; [EVAL] (autodoc-document-lisp-buffer :type 'command :prefix "anything" :docstring t)
 ;; `anything-open-last-log'
 ;; Open anything log file of last anything session.
+;; `anything'
+;; Main function to execute anything sources.
 ;; `anything-resume'
 ;; Resurrect previously invoked `anything'.
 ;; `anything-resume-window-only'
@@ -109,9 +112,9 @@
 ;; `anything-execute-persistent-action'
 ;; Perform the associated action ATTR without quitting anything.
 ;; `anything-scroll-other-window'
-;; Scroll other window	(not *Anything* window) upward.
+;; Scroll other window (not *Anything* window) upward.
 ;; `anything-scroll-other-window-down'
-;; Scroll other window	(not *Anything* window) downward.
+;; Scroll other window (not *Anything* window) downward.
 ;; `anything-toggle-visible-mark'
 ;; Toggle anything visible mark at point.
 ;; `anything-display-all-visible-marks'
@@ -142,7 +145,7 @@
 ;; `anything-sources'
 ;; A list of sources to use with `anything'.
 ;; `anything-type-attributes'
-;; It's a list of					(TYPE ATTRIBUTES ...).
+;; It's a list of                                      (TYPE ATTRIBUTES ...).
 ;; `anything-enable-shortcuts'
 ;; *Whether to use digit/alphabet shortcut to select the first nine matches.
 ;; `anything-shortcut-keys-alist'
@@ -290,7 +293,7 @@
 ;; `anything-last-log-file'
 ;; Not documented.
 ;; `anything-compile-source-functions'
-;; Functions to compile elements of `anything-sources'	(plug-in).
+;; Functions to compile elements of `anything-sources' (plug-in).
 ;; `anything-quit'
 ;; Not documented.
 ;; `anything-additional-attributes'
@@ -1998,7 +2001,8 @@ For ANY-PRESELECT ANY-RESUME ANY-KEYMAP, See `anything'."
       ;; by `anything-maybe-update-keymap'.
       (unless anything-local-map-override-anything-map
         (anything-aif (or src-keymap any-keymap)
-            (set-keymap-parent it anything-map)))
+            (ignore-errors
+              (set-keymap-parent it anything-map))))
       (set (make-local-variable 'anything-map)
            (or src-keymap any-keymap anything-map))
       (anything-log-eval (anything-approximate-candidate-number)
@@ -2028,9 +2032,9 @@ It will override `anything-map' with the keymap attribute of current source
 if some when multiples sources are present."
   (with-anything-window
     (let ((kmap (assoc-default 'keymap (anything-get-current-source))))
-      (when (and kmap (> (length anything-sources) 1))
-        (and anything-local-map-override-anything-map
-             (set-keymap-parent kmap (default-value 'anything-map)))
+      (when kmap
+        (and (not anything-local-map-override-anything-map)
+             (ignore-errors (set-keymap-parent kmap (default-value 'anything-map))))
         (setq overriding-local-map kmap)))))
 (add-hook 'anything-move-selection-after-hook 'anything-maybe-update-keymap)
 
@@ -2248,6 +2252,22 @@ Cache the candidates if there is not yet a cached value."
 
 
 ;;; (@* "Core: candidate transformers")
+(defun anything-transform-mapcar (function args)
+  "`mapcar' for candidate-transformer.
+
+ARGS is (cand1 cand2 ...) or ((disp1 . real1) (disp2 . real2) ...)
+
+\(anything-transform-mapcar 'upcase '(\"foo\" \"bar\"))
+=> (\"FOO\" \"BAR\")
+\(anything-transform-mapcar 'upcase '((\"1st\" . \"foo\") (\"2nd\" . \"bar\")))
+=> ((\"1st\" . \"FOO\") (\"2nd\" . \"BAR\"))
+"
+  (loop for arg in args
+        if (consp arg)
+        collect (cons (car arg) (funcall function (cdr arg)))
+        else
+        collect (funcall function arg)))
+
 (defun anything-process-candidate-transformer (candidates source)
   "Execute candidate-transformer function on all CANDIDATES of SOURCE."
   (anything-aif (assoc-default 'candidate-transformer source)
