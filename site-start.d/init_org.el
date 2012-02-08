@@ -57,7 +57,8 @@
             (make-variable-frame-local 'yas/trigger-key)
             (setq yas/trigger-key [tab])
             (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-            (define-key yas/keymap [tab] 'yas/next-field)))
+            (define-key yas/keymap [tab] 'yas/next-field)
+            (local-set-key (kbd "<C-tab>") 'other-window-or-split)))
 
 (provide 'init_org)
 ;;; init_org.el ends here
