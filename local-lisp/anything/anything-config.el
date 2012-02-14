@@ -1265,6 +1265,58 @@ Set it to 0 to disable requires-pattern in `anything-M-x'."
   :group 'anything-config
   :type 'boolean)
 
+;;; Build info-index sources with info-index plug-in.
+;;
+;;
+(defun anything-c-build-info-index-command (name doc source buffer)
+  "Define an anything command NAME with documentation DOC.
+Arg SOURCE will be an existing anything source named
+`anything-c-source-info-<NAME>' and BUFFER a string buffer name."
+  (eval (list 'defun name nil doc
+              (list 'interactive)
+              (list 'anything
+                    :sources source
+                    :buffer buffer
+                    :candidate-number-limit 1000))))
+
+(defun anything-c-define-info-index-sources (var-value &optional commands)
+  "Define anything sources named anything-c-source-info-<NAME>.
+Sources are generated for all entries of `anything-c-default-info-index-list'.
+If COMMANDS arg is non--nil build also commands named `anything-info<NAME>'.
+Where NAME is one of `anything-c-default-info-index-list'."
+  (loop with symbols = (loop for str in var-value
+                             collect
+                             (intern (concat "anything-c-source-info-" str)))
+        for sym in symbols
+        for str in var-value
+        do (set sym (list (cons 'name (format "Info index: %s" str))
+                          (cons 'info-index str)))
+        when commands
+        do (let ((com (intern (concat "anything-info-" str))))
+	     (anything-c-build-info-index-command com
+               (format "Predefined anything for %s info." str) sym
+               (format "*anything info %s*" str)))))
+
+(defun anything-info-index-set (var value)
+  (set var value)
+  (anything-c-define-info-index-sources value t))
+
+(defcustom anything-c-default-info-index-list
+  '("elisp" "cl" "org" "gnus" "tramp" "ratpoison"
+    "zsh" "bash" "coreutils" "fileutils"
+    "find" "sh-utils" "textutils" "libc"
+    "make" "automake" "autoconf" "emacs-lisp-intro"
+    "emacs" "elib" "eieio" "gauche-refe" "guile"
+    "guile-tut" "goops" "screen" "latex" "gawk"
+    "sed" "m4" "wget" "binutils" "as" "bfd" "gprof"
+    "ld" "diff" "flex" "grep" "gzip" "libtool"
+    "texinfo" "info" "gdb" "stabs" "cvsbook" "cvs"
+    "bison" "id-utils" "global")
+  "Info Manual entries to use for building anything info index commands."
+  :group 'anything-config
+  :type 'list
+  :set 'anything-info-index-set)
+
 
 ;;; General internal variables
 ;;
@@ -2231,6 +2283,16 @@ Otherwise your command will be called many times like this:
 \\[anything-send-bug-report-from-anything]:BugReport."
     "String displayed in mode-line in `anything-c-source-buffers-list'"))
 
+(defvar anything-occur-mode-line
+  "\\<anything-map>\
+\\[anything-help]:Help,\
+\\<anything-occur-map>\
+\\[anything-occur-run-query-replace-regexp]:Query replace regexp,\
+\\<anything-map>\
+\\[anything-select-action]:Acts,\
+\\[anything-exit-minibuffer]/\\[anything-select-2nd-action-or-end-of-line]/\
+\\[anything-select-3rd-action]:NthAct,\
+\\[anything-send-bug-report-from-anything]:BugReport.")
 
 
 ;;; Utilities Functions
@@ -3850,7 +3912,7 @@ expand to this directory."
                                 ;; and one directory candidate, move to it.
                                 (anything-next-line))
                               (anything-get-selection))))
-            (when (file-directory-p cur-cand)
+            (when (and (stringp cur-cand) (file-directory-p cur-cand))
               (if (and (not (string-match "^.*[.]\\{1,2\\}$" cur-cand)) ; [1]
                        ;; Maybe we are here because completed-p is true
                        ;; but check this again to be sure. (Windows fix)
@@ -4041,16 +4103,19 @@ It is same as `directory-files' but always returns the
 dotted filename '.' and '..' on root directories on Windows
 systems."
   (setq directory (expand-file-name directory))
-  (if (string-match "^[a-zA-Z]\\{1\\}:/$" directory)
-      (let* ((dot (concat directory "."))
-             (dot2 (concat directory ".."))
-             (lsdir (remove
-                     dot2
-                     (remove
-                      dot
-                      (directory-files directory full)))))
-        (append (list dot dot2) lsdir))
-      (directory-files directory full)))
+  (let ((ls (directory-files directory full))
+        dot dot2 lsdir)
+    (if (or
+         ;; A windows volume.
+         (string-match "^[a-zA-Z]\\{1\\}:/$" directory)
+         ;; Empty directories on ftp hosts may have no dot dirs.
+         (and (file-remote-p directory)
+              (string-match "^/ftp:" directory)))
+        (progn (setq dot (concat directory "."))
+               (setq dot2 (concat directory ".."))
+               (setq lsdir (remove dot2 (remove dot ls)))
+               (append (list dot dot2) lsdir))
+        ls)))
 
 (defun anything-ff-transform-fname-for-completion (fname)
   "Return FNAME with it's basename modified as a regexp.
@@ -5836,56 +5901,6 @@ source.")
                                     (info (replace-regexp-in-string
                                            "^[^:]+: " "" node-str))))))
     (requires-pattern . 2)))
-
-
-;;; Build info-index sources with info-index plug-in.
-;;
-;;
-;; Note that `name' attribute is not needed since
-;; `anything-c-insert-summary' have been removed.
-(defvar anything-c-default-info-index-list
-  '("elisp" "cl" "org" "gnus" "tramp" "ratpoison"
-    "zsh" "bash" "coreutils" "fileutils"
-    "find" "sh-utils" "textutils" "libc"
-    "make" "automake" "autoconf" "emacs-lisp-intro"
-    "emacs" "elib" "eieio" "gauche-refe" "guile"
-    "guile-tut" "goops" "screen" "latex" "gawk"
-    "sed" "m4" "wget" "binutils" "as" "bfd" "gprof"
-    "ld" "diff" "flex" "grep" "gzip" "libtool"
-    "texinfo" "info" "gdb" "stabs" "cvsbook" "cvs"
-    "bison" "id-utils" "global"))
-
-(defun anything-c-build-info-index-command (name doc source buffer)
-  "Define an anything command NAME with documentation DOC.
-Arg SOURCE will be an existing anything source named
-`anything-c-source-info-<NAME>' and BUFFER a string buffer name."
-  (eval (list 'defun name nil doc
-              (list 'interactive)
-              (list 'anything
-                    :sources source
-                    :buffer buffer
-                    :candidate-number-limit 1000))))
-
-(defun anything-c-define-info-index-sources (&optional commands)
-  "Define anything sources named anything-c-source-info-<NAME>.
-Sources are generated for all entries of `anything-c-default-info-index-list'.
-If COMMANDS arg is non--nil build also commands named `anything-info<NAME>'.
-Where NAME is one of `anything-c-default-info-index-list'."
-  (loop with symbols = (loop for str in anything-c-default-info-index-list
-                             collect
-                             (intern (concat "anything-c-source-info-" str)))
-        for sym in symbols
-        for str in anything-c-default-info-index-list
-        do (set sym (list (cons 'name (format "Info index: %s" str))
-                          (cons 'info-index str)))
-        when commands
-        do (let ((com (intern (concat "anything-info-" str))))
-	     (anything-c-build-info-index-command com
-               (format "Predefined anything for %s info." str) sym
-               (format "*anything info %s*" str)))))
-
-;; Define now info-index sources and commands.
-(anything-c-define-info-index-sources t)
 
 
 ;;; Man and woman UI
@@ -8683,6 +8698,7 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
                ("Query replace regexp (C-u Not inside word.)"
                 . anything-c-occur-query-replace-regexp)))
     (recenter)
+    (mode-line . anything-occur-mode-line)
     (keymap . ,anything-occur-map)
     (requires-pattern . 1)
     (delayed)))
@@ -11880,7 +11896,9 @@ otherwise search in whole buffer."
          ;; rule out anything-match-plugin because the input is one regexp.
          (delq 'anything-compile-source--match-plugin
                (copy-sequence anything-compile-source-functions))))
-    (anything-other-buffer 'anything-c-source-occur "*Anything Occur*")))
+    (anything :sources 'anything-c-source-occur
+              :buffer "*Anything Occur*"
+              :history 'anything-c-grep-history)))
 
 ;;;###autoload
 (defun anything-browse-code ()
@@ -12368,6 +12386,7 @@ With a prefix arg reload cache."
     (setq anything-ec-target (or target " "))
     (with-anything-show-completion beg end
       (anything :sources 'anything-c-source-esh
+                :buffer "*anything pcomplete*"
                 :input (anything-ff-set-pattern ; Handle tramp filenames.
                         (car (last (ignore-errors ; Needed in lisp symbols completion.
                                      (pcomplete-parse-arguments)))))))))

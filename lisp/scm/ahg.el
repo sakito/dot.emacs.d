@@ -31,7 +31,8 @@
 (require 'easymenu)
 (require 'log-edit)
 (require 'ewoc)
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 (require 'grep)
 (require 'dired)
 
@@ -271,6 +272,15 @@ For `nil' the default file is used."
 
 
 ;;-----------------------------------------------------------------------------
+;; some dynamically-generated variables, defined here to prevent compiler
+;;-----------------------------------------------------------------------------
+(defvar ahg-status-extra-switches)
+(defvar ahg-root)
+(defvar ewoc)
+(defvar ahg-window-configuration)
+
+
+;;-----------------------------------------------------------------------------
 ;; hg root
 ;;-----------------------------------------------------------------------------
 
@@ -367,6 +377,7 @@ Commands:
   (define-key ahg-status-mode-map "$" 'ahg-status-shell-command)
   (define-key ahg-status-mode-map "F" 'ahg-status-dired-find)
   (let ((showmap (make-sparse-keymap)))
+    (define-key showmap "s" 'ahg-status-show-default)
     (define-key showmap "A" 'ahg-status-show-all)
     (define-key showmap "t" 'ahg-status-show-tracked)
     (define-key showmap "m" 'ahg-status-show-modified)
@@ -425,6 +436,7 @@ Commands:
     ["Diff Marked" ahg-status-diff-all [:keys "D" :active t]]
     ["--" nil nil]
     ("Show"
+     ["Default" ahg-status-show-default [:keys "ss" :active t]]
      ["All" ahg-status-show-all [:keys "sA" :active t]]
      ["Tracked" ahg-status-show-tracked [:keys "st" :active t]]
      ["Modified" ahg-status-show-modified [:keys "sm" :active t]]
@@ -534,6 +546,7 @@ to pass extra switches to hg status."
   (interactive)
   (ewoc-map (lambda (d) (when (car d) (setcar d nil) t)) ewoc))
 
+(defun ahg-status-show-default () (interactive) (ahg-status ""))
 (defun ahg-status-show-all () (interactive) (ahg-status "-A"))
 (defun ahg-status-show-tracked () (interactive) (ahg-status "-mardc"))
 (defun ahg-status-show-modified () (interactive) (ahg-status "-m"))
@@ -1444,7 +1457,7 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                                      (point-at-bol) (point-at-eol))))
                 (kill-whole-line t))
             (kill-line)
-            (mapcar (lambda (tag) (insert "tag:         " tag "\n")) tags)))
+            (mapc (lambda (tag) (insert "tag:         " tag "\n")) tags)))
         ;; fourth line, parents
         (if (looking-at "^$")
             (delete-char 1) 
@@ -1452,7 +1465,7 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                                         (point-at-bol) (point-at-eol))))
                 (kill-whole-line t))
             (kill-line)
-            (mapcar (lambda (p) (insert "parent:      " p "\n")) parents)))
+            (mapc (lambda (p) (insert "parent:      " p "\n")) parents)))
         ;; fifth line, user
         (insert "user:        ")
         (next)
@@ -2912,7 +2925,8 @@ destination buffer. If nil, a new buffer will be used."
           (list (concat ":" (propertize "%s" 'face '(:foreground "#DD0000"))))))
   (unless no-show-message (message "aHg: executing hg '%s' command..." command))
   (let ((lang (getenv "LANG")))
-    (unless ahg-i18n (setenv "LANG") (setenv "HGPLAIN" "1"))
+    (setenv "HGPLAIN" "1")
+    (unless ahg-i18n (setenv "LANG"))
     (let ((process
            (apply (if use-shell 'start-process-shell-command 'start-process)
                   (concat "*ahg-command-" command "*") buffer

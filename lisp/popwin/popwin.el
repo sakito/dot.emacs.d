@@ -103,19 +103,6 @@ the selected window."
   "Return t if BUFFER might be thought of as a buried buffer."
   (eq (car (last (buffer-list))) buffer))
 
-(defun popwin:window-point (window)
-  "Save as `window-point-1'."
-  (if (eq window (selected-window))
-      (with-current-buffer (window-buffer window) (point))
-    (window-point window)))
-
-(defun popwin:set-window-point (window point)
-  "Save as `set-window-point-1'."
-  (if (eq window (selected-window))
-      (with-current-buffer (window-buffer window)
-	(goto-char point))
-    (set-window-point window point)))
-
 (defmacro popwin:save-selected-window (&rest body)
   "Evaluate BODY saving the selected window."
   `(with-selected-window (selected-window) ,@body))
@@ -127,34 +114,36 @@ minibuffer window is selected."
       (minibuffer-selected-window)
     (selected-window)))
 
-(defun popwin:called-interactively-p ()
-  (with-no-warnings
-    (if (or (>= emacs-major-version 24)
-            (and (= emacs-major-version 23)
-                 (>= emacs-minor-version 2)))
-        (called-interactively-p 'any)
-      (called-interactively-p))))
-
 
 
 ;;; Common
 
-(defvar popwin:empty-buffer nil
-  "Marker buffer of indicating a window of the buffer is being a
-popup window.")
+(defvar popwin:debug nil)
 
-(defun popwin:empty-buffer ()
-  (if (buffer-live-p popwin:empty-buffer)
-      popwin:empty-buffer
-    (setq popwin:empty-buffer
-          (get-buffer-create " *popwin-empty*"))))
+(defvar popwin:dummy-buffer nil)
+
+(defun popwin:dummy-buffer ()
+  (if (buffer-live-p popwin:dummy-buffer)
+      popwin:dummy-buffer
+    (setq popwin:dummy-buffer
+          (get-buffer-create " *popwin-dummy*"))))
+
+(defun popwin:window-point (window)
+  (if (eq window (selected-window))
+      (with-current-buffer (window-buffer window) (point))
+    (window-point window)))
+
+(defun popwin:set-window-point (window point)
+  "Forcely set window-point."
+  (with-current-buffer (popwin:dummy-buffer)
+    (set-window-point window point)))
 
 (defun popwin:window-trailing-edge-adjustable-p (window)
   "Return t if a trailing edge of WINDOW is adjustable."
   (let ((next-window (next-window window)))
     (and (not (eq next-window (frame-first-window)))
          (not (eq (window-buffer next-window)
-                  (popwin:empty-buffer))))))
+                  (popwin:dummy-buffer))))))
 
 (defun* popwin:adjust-window-edges (window
                                     edges
@@ -203,8 +192,8 @@ new-window."
           (cdr node)
         (popwin:adjust-window-edges window edges hfactor vfactor)
         (with-selected-window window
-          (popwin:switch-to-buffer buffer t)
-          (goto-char point))
+          (popwin:switch-to-buffer buffer t))
+        (popwin:set-window-point window point)
         (when selected
           (select-window window))
         `((,old-win . ,window)))
@@ -301,7 +290,7 @@ window-configuration."
           (popwin:create-popup-window-1 root-win size position)
         ;; Mark popup-win being a popup window.
         (with-selected-window popup-win
-          (popwin:switch-to-buffer (popwin:empty-buffer) t))
+          (popwin:switch-to-buffer (popwin:dummy-buffer) t))
         (let ((win-map (popwin:replicate-window-config master-win root hfactor vfactor)))
           (list master-win popup-win win-map))))))
 
@@ -386,6 +375,9 @@ popup buffer.")
                                   popwin:popup-window-dedicated-p
                                   popwin:popup-window-stuck-p
                                   popwin:window-outline)))
+  (defun popwin:valid-context-p (context)
+    (window-live-p (plist-get context 'popwin:popup-window)))
+
   (defun popwin:current-context ()
     (loop for var in context-vars
           collect var
@@ -403,11 +395,13 @@ popup buffer.")
   (defun popwin:pop-context ()
     (popwin:use-context (pop popwin:context-stack)))
 
-  (defun popwin:find-context-for-buffer (buffer)
+  (defun* popwin:find-context-for-buffer (buffer &key valid-only)
     (loop with stack = popwin:context-stack
           for context = (pop stack)
           while context
-          if (eq buffer (plist-get context 'popwin:popup-buffer))
+          if (and (eq buffer (plist-get context 'popwin:popup-buffer))
+                  (or (not valid-only)
+                      (popwin:valid-context-p context)))
           return (list context stack))))
 
 (defun popwin:update-window-references-in-context-stack (map)
@@ -433,7 +427,9 @@ popup buffer.")
 (defun popwin:close-popup-window-timer ()
   (condition-case var
       (popwin:close-popup-window-if-necessary)
-    (error (message "popwin:close-popup-window-timer: error: %s" var))))
+    (error
+     (message "popwin:close-popup-window-timer: error: %s" var)
+     (when popwin:debug (backtrace)))))
 
 (defun popwin:close-popup-window (&optional keep-selected)
   "Close the popup window and restore to the previous window
@@ -476,6 +472,7 @@ the popup window will be closed are followings:
            (quit-requested
             (and (eq last-command 'keyboard-quit)
                  (eq last-command-event ?\C-g)))
+           (orig-this-command this-command)
            (popup-buffer-alive
             (buffer-live-p popwin:popup-buffer))
            (popup-buffer-buried
@@ -496,8 +493,10 @@ the popup window will be closed are followings:
                 (and other-window-selected
                      (not minibuf-window-p)
                      (not popwin:popup-window-stuck-p)))
-        (setq this-command 'popwin:close-popup-window)
-        (run-hooks 'pre-command-hook)
+        (when (and quit-requested
+                   (null orig-this-command))
+          (setq this-command 'popwin:close-popup-window)
+          (run-hooks 'pre-command-hook))
         (if reading-from-minibuf
             (progn
               (popwin:close-popup-window)
@@ -509,8 +508,9 @@ the popup window will be closed are followings:
           (when popup-buffer-changed-despite-of-dedicated
             (popwin:switch-to-buffer window-buffer)
             (goto-char window-point)))
-        (run-hooks 'post-command-hook)
-        (execute-kbd-macro [])))))
+        (when (and quit-requested
+                   (null orig-this-command))
+          (run-hooks 'post-command-hook))))))
 
 (defun* popwin:popup-buffer (buffer
                              &key
@@ -530,7 +530,7 @@ BUFFER."
   (setq buffer (get-buffer buffer))
   (popwin:push-context)
   (multiple-value-bind (context context-stack)
-      (popwin:find-context-for-buffer buffer)
+      (popwin:find-context-for-buffer buffer :valid-only t)
     (if context
         (progn
           (popwin:use-context context)
@@ -718,7 +718,7 @@ usual. This function can be used as a value of
   (popwin:display-buffer-1
    buffer-or-name
    :if-config-not-found
-   (unless (popwin:called-interactively-p)
+   (unless (called-interactively-p)
      (lambda (buffer)
        (popwin:original-display-buffer buffer not-this-window)))))
 
