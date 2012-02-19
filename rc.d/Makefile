@@ -16,6 +16,10 @@ dotfiles:
 	ln -s ${CWD}/tmux.conf ${HOME}/.tmux.conf
 	ln -s ${CWD}/zshrc ${HOME}/.zshrc
 	ln -s ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
+	[ -d ${HOME}/.buildout ] || mkdir ${HOME}/.buildout
+	cp ${CWD}/buildout/default.cfg ${HOME}/.buildout
+	echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg
+	echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
 
 portinstall:
 	sudo port install nkf wget lftp findutils libxml2 libxslt w3m apg
