@@ -57,5 +57,8 @@ pipinstall:
 	pip install SQLAlchemy
 	pip install numpy
 	pip install blockdiag
+	pip install pep8
+	pip install pylint
+	pip install coverage
 
 
