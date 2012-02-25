@@ -36,6 +36,9 @@
 ;; デフォルト設定にしたいなら以下を記述
 ;; (ac-config-default)
 
+;; 辞書ディレクトリの設定
+(add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
+
 ;; デフォルトの補完候補
 (set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
 
@@ -56,6 +59,9 @@
 
 ;; 待ち時間を長めに取る
 (setq ac-delay 0.2)
+
+;; 補完候補を C-n C-p で選択可能にする
+(setq ac-use-menu-map t)
 
 ;; 補完メニューを自動表示しない
 ;;(setq ac-auto-show-menu nil)
