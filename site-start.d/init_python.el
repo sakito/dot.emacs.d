@@ -74,13 +74,14 @@
 ;; flymake
 (when (load "flymake" t)
   (defun flymake-python-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "epylint" (list local-file))))
-  (add-to-list 'flymake-allowed-file-name-masks '(".+\\.py$" flymake-python-init)))
+      (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                         'flymake-create-temp-inplace))
+             (local-file (file-relative-name
+                          temp-file
+                          (file-name-directory buffer-file-name))))
+        (list "lintrunner.py" (list local-file))))
+    (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
+    (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
 
 ;; Pymacs
 (require 'pymacs)
@@ -95,14 +96,15 @@
 ;; hg clone http://bitbucket.org/agr/ropemacs
 ;; easy_install -UZ ropemacs
 ;; Rope
-(pymacs-load "ropemacs" "rope-")
-(setq ropemacs-enable-autoimport t)
+;;(pymacs-load "ropemacs" "rope-")
+;;(setq ropemacs-enable-autoimport t)
 
 ;; ipython
 ;; pip install ipython
 ;; pip install ipdb
 (require 'ipython)
-(setq ipython-command  (expand-file-name "~/local/bin/ipython"))
+(setq ipython-command (expand-file-name "~/local/bin/ipython"))
+(setq py-shell-switch-buffers-on-execute nil)
 ;; ipython の起動オプションを設定
 ;; デフォルトは (-i -colors LightBG)
 ;;(setq py-python-command-args '("-cl" "-i" "-colors" "Linux"))
@@ -120,13 +122,66 @@
   (use-anything-show-completion 'anything-ipython-complete
                                 '(length initial-pattern)))
 
+;; auto-complete
+;; @see http://chrispoole.com/project/ac-python/
+;;(require 'ac-python)
+
+;; @see http://tic-tacs.blogspot.com/2012/01/emacsauto-complete-pycompletepython.html
+(eval-after-load "pymacs"
+  '(add-to-list 'pymacs-load-path "~/.emacs.d/lisp/python-mode"))
+(add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
+;; auto-completeでpycompleteを渡すための設定
+(defvar ac-source-pycomplete
+  '((prefix "\\(?:\\.\\|->\\)\\(\\(?:[a-zA-Z_][a-zA-Z0-9_]*\\)?\\)" nil 1)
+    (candidates . ac-pycomplete-candidates)
+    (require . 0)))
+(defun ac-pycomplete-candidates ()
+  (pycomplete-get-all-completions (py-symbol-near-point) (py-find-global-imports)))
+(defun ac-python-mode-setup ()
+  (setq ac-sources (append '(ac-source-pycomplete)
+                           ac-sources)))
+(add-hook 'python-mode-hook 'ac-python-mode-setup)
+(global-set-key (kbd "M-h") 'ac-complete-interactive-pycomplete)
+(defvar ac-source-pycomplete-interactive
+  '((prefix "\\(?:\\.\\|->\\)\\(\\(?:[a-zA-Z_][a-zA-Z0-9_]*\\)?\\)" nil 1)
+    (candidates . ac-pycomplete-candidates)
+    (requires . 0)))
+(defun ac-complete-interactive-pycomplete ()
+  (interactive)
+  (auto-complete '(ac-source-pycomplete-interactive)))
+
+;; function
+(defun skt:py-execute-dwim ()
+  "なんとなく状況に合せて実行 TODO"
+  (interactive)
+  (cond
+   ;; class で初まる行の時
+   ((or (py-statement-opens-class-p))
+    (py-execute-class))
+   ;; def で初まる行の時
+   ((or (py-statement-opens-def-p))
+    (py-execute-def))
+   ;; return, raise 等で初まる行の時
+   ((or (py-statement-closes-block-p))
+    (py-execute-block))
+   ;; block の場合
+;   ((or (py-beginning-of-block-p)
+;        (py-beginning-of-block))
+;    (py-execute-block))
+   ;; statement の場合
+   ((or (py-beginning-of-statement-p)
+        (py-beginning-of-statement))
+    (py-execute-statement))
+   ))
+
 ;; hook
 (defun skt:python-mode-hook ()
   (progn
     ;; キー
     (local-set-key (kbd "C-c C-l") 'anything-ipython-complete) ;; py-shift-region-left を上書きしている
-    (local-set-key (kbd "C-c e") 'anything-ipython-complete)
-    (local-set-key (kbd "C-c C-r") 'py-execute-region)  ;; py-shift-region-right を上書きしている
+    ;;(local-set-key (kbd "C-c e") 'anything-ipython-complete)
+    (local-set-key (kbd "C-c C-e") 'skt:py-execute-dwim)
+    (local-set-key (kbd "C-c C-r") 'py-execute-region-no-switch)  ;; py-shift-region-right を上書きしている
     (local-set-key (kbd "C-c ;") 'comment-dwim)
     (local-set-key (kbd "C-c :") 'comment-dwim)
     ;; flymake

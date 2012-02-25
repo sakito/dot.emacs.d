@@ -491,7 +491,8 @@ the next line."
 matches last process output."
  (let* ((start-marker (or comint-last-output-start
                           (point-min-marker)))
-        (end-marker (process-mark (get-buffer-process (current-buffer))))
+        ;;(end-marker (process-mark (get-buffer-process (current-buffer))))
+        (end-marker (process-mark (get-buffer-process "*IPython*")))
         (text (ansi-color-filter-apply (buffer-substring start-marker end-marker))))
    ;; XXX if `text' matches both pattern, it MUST be the last prompt-2
    (when (and (string-match py-shell-input-prompt-2-regexp text)
