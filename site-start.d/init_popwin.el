@@ -32,6 +32,8 @@
 (setq popwin:special-display-config
       (append '(
                 ("*anything*" :height 20)
+                ("*Anything Find Files*" :height 20)
+                ("*anything for files*" :height 20)
                 ("*Compile-Log*" :height 10 :noselect t)
                 (dired-mode :position top)
                 ;; ("*terminal<1>*")
