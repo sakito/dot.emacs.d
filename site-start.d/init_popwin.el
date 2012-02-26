@@ -1,6 +1,6 @@
 ;;; init_popwin.el --- popwin
 
-;; Copyright (C) 2011  sakito
+;; Copyright (C) 2011-2012 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -31,9 +31,10 @@
 (setq anything-samewindow nil)
 (setq popwin:special-display-config
       (append '(
-                ("*anything*" :height 20)
+                ("\\*anything" :regexp t :height 20)
                 ("*Anything Find Files*" :height 20)
-                ("*anything for files*" :height 20)
+                ;;("*anything for files*" :height 20)
+                ;;("*anything help*" :height 20)
                 ("*Compile-Log*" :height 10 :noselect t)
                 (dired-mode :position top)
                 ;; ("*terminal<1>*")
@@ -42,6 +43,7 @@
                 ("*Backtrace*")
                 ("*sdic*" :noselect)
                 ("*aHg diff*" :position top :height 50)
+                ("*aHg log*" :position left)
                 ("\\*hg command" :regexp t :noselect)
                 )
               popwin:special-display-config))

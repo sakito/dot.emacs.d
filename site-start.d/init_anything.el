@@ -181,21 +181,6 @@
 ;; M-yでkill-ringの内容をanythingする
 (global-set-key (kbd "M-y") 'anything-show-kill-ring)
 
-;; anything した時のウィンドウを常に下部に開く。高さは比率にて自動算出
-;; anything の最新では標準機能に縦横の切り替えを C-t でする機能が存在している
-;; split-root http://nschum.de/src/emacs/split-root/
-;;(require 'split-root)
-;; 比率
-;;(defvar anything-compilation-window-height-percent 30.0)
-;;(defun anything-compilation-window-root (buf)
-;;  (setq anything-compilation-window
-;;        (split-root-window (truncate (* (frame-height)
-;;                                        (/ anything-compilation-window-height-percent
-;;                                           100.0)))))
-;;  (set-window-buffer anything-compilation-window buf))
-;;(setq anything-display-function 'anything-compilation-window-root)
-
-
 ;;; anything-c-moccurの設定
 ;; see http://d.hatena.ne.jp/IMAKADO/20080724/1216882563
 (require 'anything-c-moccur)
