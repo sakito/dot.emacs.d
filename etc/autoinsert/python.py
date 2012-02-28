@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 # Copyright (C) %year% sakito <sakito@sakito.com>
+
 
 def main():
     pass
