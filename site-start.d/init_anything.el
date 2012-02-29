@@ -29,8 +29,11 @@
 ;;; Code:
 ;; anything-howm
 ;; @see http://d.hatena.ne.jp/kitokitoki/20110103/p1
-;; (require 'anything-howm)
-;; (defvar anything-howm-data-directory "~/howm")
+(require 'anything-howm)
+(defvar anything-howm-data-directory "~/howm")
+;; 最近のメモとして100個まで表示
+(setq anything-howm-recent-menu-number-limit 100)
+
 ;; (require 'anything)
 (require 'anything-config)
 ;; (require 'anything-private-config)
@@ -63,6 +66,9 @@
 
 (anything-read-string-mode 1)
 
+;; @see https://gist.github.com/396108
+(require 'anything-flymake)
+
 ;; http://www.emacswiki.org/emacs/anything-show-completion.el
 (require 'anything-show-completion)
 
@@ -70,6 +76,7 @@
 (define-key anything-map (kbd "C-;") 'abort-recursive-edit)
 (setq anything-sources
       '(
+        anything-c-source-flymake
         anything-c-source-ffap-line
         anything-c-source-ffap-guesser
         ;; anything-c-source-buffers+-howm-title
@@ -132,7 +139,7 @@
   (interactive)
   (anything 'anything-c-source-find-files
             (anything-find-files-input (ffap-guesser) (thing-at-point 'filename))
-            "Find Files or Url: " nil nil "*Anything Find Files*"))
+            "Find Files or Url: " nil nil "*anything Find Files*"))
 
 (defun anything-find-files-input (fap tap)
   "Default input of `anything-find-files'."
