@@ -1,4 +1,4 @@
-;;; anything-howm.el
+;;; anything-howm.el --- Anything completion for howm
 
 ;; Copyright (C) 2009-2011 kitokitoki
 
@@ -108,6 +108,7 @@
 (defvar anything-howm-menu-buffer "*anything-howm-menu*")
 (defvar anything-howm-default-title "")
 (defvar anything-howm-data-directory "/path/to/howm-data-directory")
+(defvar anything-howm-file-name-extension "howm")
 
 ;;; Version
 
@@ -131,7 +132,7 @@ With prefix arg HERE, insert it at point."
                                    (anything-howm-get-recent-title-list
                                     (howm-recent-menu anything-howm-recent-menu-number-limit))
                                    "\n")))))
-    (candidates-in-buffer)    
+    (candidates-in-buffer)
     (candidate-number-limit . 9999)
     (action .
       (("Open howm file(s)" . anything-howm-find-files)
@@ -145,7 +146,7 @@ With prefix arg HERE, insert it at point."
              (anything-howm-select-file-by-title candidate))))
        ("Create new memo" .
           (lambda (template)
-            (anything-howm-create-new-memo nil)))
+            (anything-howm-create-new-memo "")))
        ("Create new memo on region" .
           (lambda (template)
             (anything-howm-create-new-memo (anything-howm-set-selected-text))))
@@ -158,31 +159,45 @@ With prefix arg HERE, insert it at point."
     (migemo)
     ))
 
+(defvar anything-howm-title-to-file-cache (make-hash-table :test 'equal))
+
 (defun anything-howm-persistent-action (candidate)
   (let ((buffer (get-buffer-create anything-howm-persistent-action-buffer)))
       (with-current-buffer buffer
         (erase-buffer)
         (insert-file-contents (anything-howm-select-file-by-title candidate))
         (goto-char (point-min)))
-      (pop-to-buffer buffer)
+      (anything-c-switch-to-buffer buffer)
       (howm-mode t)))
 
 (defun anything-howm-select-file-by-title (title)
-  (loop for recent-menu-x in (howm-recent-menu anything-howm-recent-menu-number-limit)
-        for list-item-file  = (first recent-menu-x)
-        for list-item-name  = (second recent-menu-x)
-        if (string-equal title list-item-name)
-          return list-item-file))
+  (let ((cached-item-file (gethash title anything-howm-title-to-file-cache)))
+    (if cached-item-file
+        cached-item-file
+      (loop for recent-menu-x in (howm-recent-menu
+                                  anything-howm-recent-menu-number-limit)
+            for list-item-file  = (first recent-menu-x)
+            for list-item-name  = (second recent-menu-x)
+            if (string-equal title list-item-name)
+            return (puthash list-item-name list-item-file
+                            anything-howm-title-to-file-cache)))))
 
 (defun anything-howm-find-files (candidate)
   (anything-aif (anything-marked-candidates)
       (dolist (i it)
-        (find-file (anything-howm-select-file-by-title i)))
-    (find-file (anything-howm-select-file-by-title candidate))))
+        (progn
+          (find-file (anything-howm-select-file-by-title i))
+          (howm-mode t)))
+    (progn
+      (find-file (anything-howm-select-file-by-title candidate))
+      (howm-mode t))))
 
 (defun anything-howm-get-recent-title-list (recent-menu-list)
   (loop for recent-menu-x in recent-menu-list
-        for list-item-name  = (second recent-menu-x)
+        for list-item-file = (first recent-menu-x)
+        for list-item-name = (second recent-menu-x)
+        do (puthash list-item-name list-item-file
+                    anything-howm-title-to-file-cache)
         collect list-item-name))
 
 (defun anything-howm-create-new-memo (text)
@@ -221,7 +236,7 @@ With prefix arg HERE, insert it at point."
     ""))
 
 (defvar anything-howm-menu-list
-      '(("c [メモを作成]" . "(anything-howm-create-new-memo nil)")
+      '(("c [メモを作成]" . "(anything-howm-create-new-memo \"\")")
         ("cr[リージョンからメモを作成]" . "(anything-howm-create-new-memo (anything-howm-set-selected-text))")
         ("s [固定]" . "(howm-list-grep-fixed)")
         ("g [正規]" . "(howm-list-grep)")
@@ -231,41 +246,33 @@ With prefix arg HERE, insert it at point."
 
 (defvar anything-c-source-howm-menu
   '((name . "メニュー")
-    (candidates . anything-howm-menu-list)    
+    (candidates . anything-howm-menu-list)
     (type . sexp)))
 
 (defun anything-cached-howm-menu ()
   (interactive)
-  (let ((anything-display-function 'anything-howm-display-buffer))    
     (if (get-buffer anything-howm-menu-buffer)
         (anything-resume anything-howm-menu-buffer)
-      (anything-howm-menu-command))))
+      (anything-howm-menu-command)))
 
 (defun anything-howm-menu-command ()
   (interactive)
-  (let ((anything-display-function 'anything-howm-display-buffer))
     (anything-other-buffer
      '(anything-c-source-howm-menu
        anything-c-howm-recent)
-     anything-howm-menu-buffer)))
+     anything-howm-menu-buffer))
 
 (defun anything-howm-resume ()
   (interactive)
   (when (get-buffer anything-howm-menu-buffer)
     (anything-resume anything-howm-menu-buffer)))
 
-(defun anything-howm-display-buffer (buf)
-  "左右分割で表示する"
-  (delete-other-windows)
-  (split-window (selected-window) nil t)
-  (pop-to-buffer buf))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; howm のファイルは日付形式のため，複数開いていると見分けにくい。
 ;; anything-c-source-buffers+-howm-title では、一覧時にタイトルを表示する
 
-(defvar anything-c-source-buffers+-howm-title      
+(defvar anything-c-source-buffers+-howm-title
   '((name . "Buffers")
     (candidates . anything-c-buffer-list)
     (real-to-display . anything-howm-title-real-to-display)
@@ -279,7 +286,7 @@ With prefix arg HERE, insert it at point."
 ;;(anything anything-c-source-buffers+-howm-title)
 
 (defun anything-howm-title-real-to-display (file-name)
-  (if (equal "howm" (file-name-extension file-name))
+  (if (equal anything-howm-file-name-extension (file-name-extension file-name))
       (anything-howm-title-get-title file-name)
     file-name))
 
