@@ -413,6 +413,22 @@ function ccl() {
     fi
 }
 
+# sbcl
+function sbcl() {
+    BREAK_CHARS="(){}[],^%$#@\"\";''|\\"
+    RLWRAP=""
+    if [ $TERM = "dumb" ]; then  # slime
+        RLWRAP=""
+    else
+        RLWRAP="rlwrap -pgreen -r -m --history-filename=${HOME}/.sbcl/sbcl_history --histsize=1000000 -c -b ${BREAK_CHARS} -f ${HOME}/.sbcl/sbcl_completions"
+    fi
+    if [ $# -eq 0 ]; then
+        $RLWRAP sbcl
+    else # permits #!/usr/bin/env sbcl , but breaks sbcl --help, etc.
+        sbcl --script $*
+    fi
+}
+
 # @see http://masutaka.net/chalow/2011-09-28-1.html
 # ディレクトリを Emacs の dired で開く
 function dired () {
