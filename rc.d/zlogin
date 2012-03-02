@@ -26,6 +26,6 @@ if ( ! test $TMUX ) && ( ! expr $TERM : "^screen" > /dev/null ) && which tmux > 
         fi
     else
         echo "Create new tmux session."
-        tmux
+        tmux new-session -n $(hostname -s)
     fi
 fi
