@@ -22,7 +22,8 @@ dotfiles:
 	echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
 
 portinstall:
-	sudo port install nkf wget lftp findutils libxml2 libxslt w3m apg
+	sudo port install nkf wget lftp libxml2 libxslt w3m apg
+	sudo port install coreuitls findutils
 	sudo port install zsh-devel +mp_completion +pcre +examples +doc
 	sudo port install screen
 	sudo port install tmux +screen
@@ -64,5 +65,6 @@ pipinstall:
 	pip install pep8
 	pip install pylint
 	pip install coverage
+	pip install pyzmq
 
 
