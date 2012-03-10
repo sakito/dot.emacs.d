@@ -14,7 +14,9 @@ mq=
 purge=
 extdiff=
 progress=
-hgsubversion=
+#hgsubversion=
+hgsubversion = ~/lib/python/hgsubversion/hgsubversion
+flow = ~/.emacs.d/share/python/hgflow.py
 [diff]
 git = True
 [extdiff]
@@ -30,3 +32,8 @@ status.removed = red bold blue_background
 status.deleted = cyan bold underline
 status.unknown = green bold underline
 status.ignored = black bold
+[web]
+cacerts = ~/etc/Certificates.pem
+[flow]
+autoshelve = true
+
