@@ -1162,8 +1162,8 @@ class Flow( object ) :
                 self._shelve()
                 self._update( rev = rev )
             if (msg) :
-                msg = "%s\n" % msg
-            self._create_branch( fullname, "%sflow: Created branch '%s'." % (msg, fullname,), **kwarg )
+                msg = " %s\n" % msg
+            self._create_branch( fullname, "flow: Created branch '%s'.%s" % (fullname, msg,), **kwarg )
 
             
 
@@ -1586,6 +1586,7 @@ class Flow( object ) :
             tag_name = None
 
         kwarg          = _getopt( self.ui, "finish", kwarg )
+        msg            = kwarg.pop( "message", ""   )
         onstream       = kwarg.pop( "onstream", False )
         curr_workspace = self.curr_workspace
         curr_stream    = curr_workspace.stream()
@@ -1635,7 +1636,9 @@ class Flow( object ) :
         if (destin_with_trunk or destin_without_trunk) :
             # If either list is not empty.
             self._update( curr_workspace )
-            self._commit( close_branch = True, message = "flow: Closed %s %s." % (stream, name,), **kwarg )
+            if (msg) :
+                msg = " %s\n" % msg
+            self._commit( close_branch = True, message = "flow: Closed %s %s.%s" % (stream, name, msg,), **kwarg )
         else :
             # If both lists are empty.
             raise AbortFlow( "No branch in %s to finish." % stream )
