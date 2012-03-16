@@ -1136,25 +1136,33 @@ do nothing."
     command-list))
 
 
+(defun ahg-maybe-revset (rev)
+  (not (null (string-match "[()]" rev))))
+
+
 ;; helper function used by ahg-short-log, ahg-log and ahg-log-cur-file to
 ;; get arguments from the user
 (defvar ahg-log-default-revisions '("tip" . "0"))
 (defun ahg-log-read-args (is-on-selected-files read-extra-flags)
-  (let ((retval
-         (append
-          (list (read-string
-                 (concat "hg log"
-                         (if is-on-selected-files " (on selected files)" "")
-                         ", R1: ") (car ahg-log-default-revisions))
-                (read-string
-                 (concat "hg log"
-                         (if is-on-selected-files " (on selected files)" "")
-                         ", R2: ") (ahg-log-revrange-end)))
-          (when read-extra-flags
-            (list (read-string
-                   (concat "hg log"
-                           (if is-on-selected-files " (on selected files)" "")
-                           ", extra switches: ") ""))))))
+  (let* ((firstrev
+          (read-string
+           (concat "hg log"
+                   (if is-on-selected-files " (on selected files)" "")
+                   ", R1: ") (car ahg-log-default-revisions)))
+         (retval
+          (append
+           (list
+            firstrev
+            (when (not (ahg-maybe-revset firstrev))
+              (read-string
+               (concat "hg log"
+                       (if is-on-selected-files " (on selected files)" "")
+                       ", R2: ") (ahg-log-revrange-end))))
+           (when read-extra-flags
+             (list (read-string
+                    (concat "hg log"
+                            (if is-on-selected-files " (on selected files)" "")
+                            ", extra switches: ") ""))))))
     ;; remember the values entered for the next call
     (setq ahg-log-default-revisions (cons (car retval) (cadr retval)))
     retval))
@@ -1341,6 +1349,18 @@ buffer, do nothing."
       (goto-char rev-pos))))
 
 (defvar ahg-dir-name-for-log-command nil)
+
+(defconst ahg-log-style-map
+  "changeset = \"{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n\"
+file = \"{file}\\n\"
+")
+
+(defun ahg-log-prepare-style-map ()
+  (unless (file-exists-p "/dev/stdin")
+    (let ((f (make-temp-file "ahg")))
+      (with-temp-file f
+        (insert ahg-log-style-map))
+      f)))
   
 (defun ahg-log (r1 r2 &optional extra-flags)
   "Run hg log. R1 and R2 specify the range of revisions to
@@ -1352,14 +1372,10 @@ a prefix argument, prompts also for EXTRA-FLAGS."
   (let ((buffer (get-buffer-create
                  (concat "*hg log (details): " (ahg-root) "*")))
         (command-list (ahg-args-add-revs r1 r2))
-        ;;(template "{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n"))
-        (ahgstyle (if ahg-map-cmdline-file
-                      ahg-map-cmdline-file
-                    (concat (file-name-directory
-                             (symbol-file 'ahg-log 'defun))
-                            "map-cmdline.ahg"))))
+        (ahgstyle (ahg-log-prepare-style-map)))
     (setq command-list (append command-list
-                               (list "--style" ahgstyle) ;"ahg")
+                               (list "--style" (if ahgstyle ahgstyle
+                                                 "/dev/stdin"))
                                (when extra-flags (split-string extra-flags))))
     (when ahg-file-list-for-log-command
       (setq command-list (append command-list ahg-file-list-for-log-command)))
@@ -1367,24 +1383,34 @@ a prefix argument, prompts also for EXTRA-FLAGS."
       (let ((inhibit-read-only t))
         (erase-buffer)
         (ahg-push-window-configuration)))
-    (ahg-generic-command
-     "log" command-list
-     (lexical-let ((dn (or ahg-dir-name-for-log-command default-directory)))
-       (lambda (process status)
-         (if (string= status "finished\n")
-             (progn
-               (pop-to-buffer (process-buffer process))
-               (ahg-format-log-buffer)
-               (ahg-log-mode)
-               (goto-char (point-min))
-               (let ((inhibit-read-only t))
-                 (insert
-                  (propertize "hg log for " 'face ahg-header-line-face)
-                  (propertize dn 'face ahg-header-line-root-face)
-                  "\n\n")))
-           (ahg-show-error process))))
-     buffer
-     )))
+    (let ((proc
+           (ahg-generic-command
+            "log" command-list
+            (lexical-let ((dn (or ahg-dir-name-for-log-command
+                                  default-directory))
+                          (ahgstyle ahgstyle))
+              (lambda (process status)
+                (if (string= status "finished\n")
+                    (progn
+                      (pop-to-buffer (process-buffer process))
+                      (ahg-format-log-buffer)
+                      (ahg-log-mode)
+                      (goto-char (point-min))
+                      (let ((inhibit-read-only t))
+                        (insert
+                         (propertize "hg log for " 'face ahg-header-line-face)
+                         (propertize dn 'face ahg-header-line-root-face)
+                         "\n\n"))
+                      (when ahgstyle
+                        (delete-file ahgstyle)))
+                  (ahg-show-error process))))
+            buffer
+            )))
+      (unless ahgstyle
+        (process-send-string proc ahg-log-style-map)
+        (process-send-eof proc)
+        ))))
+      
 
 (defvar ahg-log-file-line-map
   (let ((map (make-sparse-keymap)))
@@ -1873,6 +1899,8 @@ that buffer is refreshed instead.)"
      t ;; report-untrusted
      (when is-interactive 'ahg-do-command-filter) ;; filterfunc
      is-interactive ;; is-interactive
+     nil ;; global-opts
+     (not is-interactive) ;; no-hgplain
      )))
 
 
@@ -2910,12 +2938,14 @@ patch editing functionalities provided by Emacs."
     (kill-buffer buf)))
 
 (defun ahg-generic-command (command args sentinel
-                                    &optional buffer use-shell
+                                    &optional buffer
+                                              use-shell
                                               no-show-message
                                               report-untrusted
                                               filterfunc
                                               is-interactive
-                                              global-opts)
+                                              global-opts
+                                              no-hgplain)
   "Executes then given hg command, with the given
 arguments. SENTINEL is a sentinel function. BUFFER is the
 destination buffer. If nil, a new buffer will be used."
@@ -2924,8 +2954,9 @@ destination buffer. If nil, a new buffer will be used."
     (setq mode-line-process
           (list (concat ":" (propertize "%s" 'face '(:foreground "#DD0000"))))))
   (unless no-show-message (message "aHg: executing hg '%s' command..." command))
-  (let ((lang (getenv "LANG")))
-    (setenv "HGPLAIN" "1")
+  (let ((lang (getenv "LANG"))
+        retprocess)
+    (unless no-hgplain (setenv "HGPLAIN" "1"))
     (unless ahg-i18n (setenv "LANG"))
     (let ((process
            (apply (if use-shell 'start-process-shell-command 'start-process)
@@ -2952,10 +2983,13 @@ destination buffer. If nil, a new buffer will be used."
            (setq mode-line-process nil)
            (funcall sf p s))))
       (set-process-filter process filterfunc)
+      (setq retprocess process)
       )
     (setenv "HGPLAIN")
     (setenv "LANG" lang)
-    ))
+    retprocess
+    )
+  )
 
 (defun ahg-show-error (process)
   "Displays an error message for the given process."
