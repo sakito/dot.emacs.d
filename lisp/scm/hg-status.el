@@ -28,7 +28,8 @@
   (force-mode-line-update t))
 
 (defun hg-status-install-state-mark-modeline (color)
-  (push (vc-hg-branch-name) mode-line-format)
+  (push `(hg-status-state-mark-modeline
+          ,(vc-hg-branch-name)) mode-line-format)
   (push `(hg-status-state-mark-modeline
           ,(hg-status-state-mark-modeline-dot color))
         mode-line-format)
