@@ -40,6 +40,16 @@
   (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
   )
 
+(defun smartchr-custom-keybindings-py ()
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+  (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+  (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+  (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'")))
+  (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
+  )
+
 (defun smartchr-custom-keybindings-rst ()
   (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
   (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -95,7 +105,6 @@
               'js2-mode-hook
               'lisp-mode-hook
               'sql-mode-hook
-              'python-mode-hook
               ))
   (add-hook hook 'smartchr-custom-keybindings))
 
@@ -106,8 +115,9 @@
   (add-hook hook 'skelton-custom-keybindigs))
 
 ;; モードオリジナル追加設定
-(add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
+(add-hook 'python-mode-hook 'smartchr-custom-keybindings-py)
 (add-hook 'rst-mode-hook 'smartchr-custom-keybindings-rst)
+(add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
 (add-hook 'scala-mode-hook 'smartchr-custom-keybindings-scala)
 
