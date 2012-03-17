@@ -1,7 +1,8 @@
 # -*- mode:sh -*-
-# ~/.zshrc 
+# ~/.zshrc
 # 作成開始: [2002/10/01]
-# 
+# 大規模改訂: [2011/07/17]
+#
 #-----------------------------------------------------------------
 # 基本設定
 #-----------------------------------------------------------------
@@ -50,25 +51,30 @@ export TMP="${HOME}/tmp"
 # EDITOR
 export EDITOR="/usr/local/bin/emacsclient"
 
-# パスとコマンド固有の設定
-# Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
-
-# fink setting
-#isdarwin && source /sw/bin/init.sh
-
-export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
-export PATH=/usr/local/sbin:${PATH}
-export PATH=/usr/local/bin:${PATH}
+# CVS
+export CVSROOT=${HOME}/var/cvs
+export CVS_RSH="ssh"
 
 # for screen(chmod 700)
 export SCREENDIR=${HOME}/.screen
 
+# パスとコマンド固有の設定
+# Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
+
+export PATH=/usr/local/sbin:${PATH}
+export PATH=/usr/local/bin:${PATH}
+
 # MacPorts
 isdarwin && export PATH=/opt/local/bin:${PATH}
 
-# CVS
-export CVSROOT=${HOME}/var/cvs
-export CVS_RSH="ssh"
+# Python
+export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
+export PYTHONSTARTUP="${HOME}/.pythonrc.py"
+export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
+export VIRTUAL_ENV=${HOME}/local
+export WORKON_HOME=${HOME}/.virtualenvs
+#source ${HOME}/local/bin/virtualenvwrapper.sh
+export PIP_RESPECT_VIRTUALENV=true
 
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
@@ -88,14 +94,6 @@ export PATH=${PATH}:${HOME}/bin/go/bin
 
 # Firefox Addon SDK
 export PATH=${PATH}:${HOME}/bin/addon-sdk-1.3/bin
-
-# Python
-export PYTHONSTARTUP="${HOME}/.pythonrc.py"
-export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
-export VIRTUAL_ENV=${HOME}/local
-export WORKON_HOME=${HOME}/.virtualenvs
-#source ${HOME}/local/bin/virtualenvwrapper.sh
-export PIP_RESPECT_VIRTUALENV=true
 
 # sage
 export PATH=${PATH}:/Applications/sage
@@ -478,6 +476,35 @@ function cde () {
     cd "$EMACS_CWD"
 }
 
+# hg flow 用(暫定)
+# TODO 実質決め打ちでエラー処理等はしてない。また使い易いかも現在は考慮してない
+function hgflow() {
+    local MSG= FLAG_S= FLAG_B=
+    local HGCMD="hg flow"
+    while getopts :m:sfnrh opt
+    do
+        case ${opt} in
+        m) MSG=${OPTARG};;
+        s) FLAG_S=true;;
+        f) FLAG_S=false;;
+        n) FLAG_B="feature";;
+        r) FLAG_B="release";;
+        h) FLAG_B="hotfix";;
+        \?) echo "$0 不正なオプション -$OPTARG" >&2;;
+        esac
+    done
+    if [ -z "${MSG}" ] || [ -z "${FLAG_S}" ]  || [ -z "${FLAG_B}" ]; then
+        echo "usage: $0 [-m msg] [-sf] [-nrh]"
+    else
+        shift $((OPTIND -1))
+        if [ "${FLAG_S}" = true ]; then
+            echo "${HGCMD} ${FLAG_B} start $*"
+        else
+            echo "${HGCMD} ${FLAG_B} finish $*"
+        fi
+    fi
+}
+
 #-----------------------------------------------------------------
 # エイリアス設定
 #-----------------------------------------------------------------
@@ -497,6 +524,9 @@ alias reload="source ~/.zshrc"
 alias emacs='emacs -nw'
 alias screen='screen -U'
 #alias ccl=ccl64
+alias hgpush="hg push --new-branch"
+#alias hgflow="hg flow"
+
 
 # グローバルエイリアス
 alias -g V="| /usr/share/vim/vim73/macros/less.sh"
