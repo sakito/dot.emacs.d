@@ -99,59 +99,31 @@
         anything-c-source-ffap-guesser
         ;; anything-c-source-buffers+-howm-title
         anything-c-source-buffers-list
-        anything-c-source-recentf
+        ;; anything-c-source-recentf
+        anything-c-source-file-name-history
         anything-c-source-bookmarks
         anything-c-source-file-cache
         anything-c-source-files-in-current-dir+
         ))
 
-;; C-x C-f の先頭を ffap 系にする
-;; (setq anything-find-file-additional-sources-at-first
-;;       '(
-;;         anything-c-source-ffap-line
-;;         anything-c-source-ffap-guesser
-;;         ))
-;; 追加のソース
-;; (setq anything-find-file-additional-sources
-;;       '(anything-c-source-locate))
-;; (defadvice arfn-sources
-;;   (after additional-arfn-sources-at-first activate)
-;;   "Add additional sources at first."
-;;   (setq ad-return-value
-;;         (append anything-find-file-additional-sources-at-first
-;;                 ad-return-value)))
-;;(ad-deactivate 'arfn-sources)
-
-;; (defun skt:anything-find-files ()
-;;   "Preconfigured anything for `find-file'."
-;;   (interactive)
-;;   (let ((fap (ffap-guesser)))
-;;     (if (and fap (file-exists-p fap)) 
-;;         (anything 'anything-c-source-find-files (expand-file-name fap))))
-;;   (anything (anything-c-source-find-files (expand-file-name default-directory))
-;;             'anything-c-source-recentf
-;;             )
-;;   )
-
 ;; anything-find-files を上書き
-(defun anything-find-files ()
-  "Preconfigured `anything' for anything implementation of `find-file'."
-  (interactive)
-  (anything 'anything-c-source-find-files
-            (anything-find-files-input (ffap-guesser) (thing-at-point 'filename))
-            "Find Files or Url: " nil nil "*anything Find Files*"))
+;(defun anything-find-files ()
+;  "Preconfigured `anything' for anything implementation of `find-file'."
+;  (interactive)
+;  (anything 'anything-c-source-find-files
+;            (anything-find-files-input (ffap-guesser) (thing-at-point 'filename))
+;            "Find Files or Url: " nil nil "*anything Find Files*"))
 
-(defun anything-find-files-input (fap tap)
-  "Default input of `anything-find-files'."
-  (let* ((file-p (and fap (file-exists-p fap)
-                      (file-exists-p
-                       (file-name-directory (expand-file-name tap)))))
-         (input  (if file-p (expand-file-name fap) (expand-file-name tap))))
-    (or input (expand-file-name default-directory))))
+;(defun anything-find-files-input (fap tap)
+;  "Default input of `anything-find-files'."
+;  (let* ((file-p (and fap (file-exists-p fap)
+;                      (file-exists-p
+;                       (file-name-directory (expand-file-name tap)))))
+;         (input  (if file-p (expand-file-name fap) (expand-file-name tap))))
+;    (or input (expand-file-name default-directory))))
 
-;; anything 本体では anything-quit-and-find-file 
+;; anything 本体では anything-quit-and-find-file
 (global-set-key (kbd "C-x C-f") 'anything-find-files)
-
 
 ;; 検索の対象を変更した物を作成
 (defun anything-help-at-point ()
