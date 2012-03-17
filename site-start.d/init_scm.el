@@ -41,6 +41,9 @@
 (setenv "HGENCODING" "utf-8")
 (require 'ahg)
 
+;; @see https://gist.github.com/546650
+(require 'hg-status)
+
 ;; svn
 ;; @see http://svn.apache.org/repos/asf/subversion/trunk/contrib/client-side/emacs/dsvn.el
 (autoload 'svn-status "dsvn" "Run `svn status'." t)
