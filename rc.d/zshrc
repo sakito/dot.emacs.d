@@ -68,10 +68,10 @@ export PATH=/usr/local/bin:${PATH}
 isdarwin && export PATH=/opt/local/bin:${PATH}
 
 # Python
-export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
+#export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
 export PYTHONSTARTUP="${HOME}/.pythonrc.py"
-export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
-export VIRTUAL_ENV=${HOME}/local
+export VIRTUAL_ENV_DISABLE_PROMPT=true
+source ${HOME}/local/bin/activate
 export WORKON_HOME=${HOME}/.virtualenvs
 #source ${HOME}/local/bin/virtualenvwrapper.sh
 export PIP_RESPECT_VIRTUALENV=true

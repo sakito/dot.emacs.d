@@ -39,15 +39,12 @@ portinstall:
 
 # no test sorry
 pipinstall:
-	sudo easy_install -UZ pip
-	hash -r
-	sudo pip install virtualenv
-	hash -r
-	virtualenv --no-site-packages -p /usr/local/bin/python ${HOME}/local
-	hash -r
+	curl -O https://raw.github.com/pypa/virtualenv/develop/virtualenv.py
+	python virtualenv.py --distribute -p /usr/local/bin/python ${HOME}/local
+	source ${HOME}/local/bin/activate
 	pip install readline
 	pip install mercurial
-	echo "/opt/subversion/lib/svn-python" >  ~/local/lib/python2.7/site-packages/svn-python.pth
+	echo "/opt/subversion/lib/svn-python" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
 	pip install hgsubversion
 	pip install hg-git
 	pip install docutils
@@ -66,5 +63,5 @@ pipinstall:
 	pip install pylint
 	pip install coverage
 	pip install pyzmq
-
+	pip install pillow
 
