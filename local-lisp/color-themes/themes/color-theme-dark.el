@@ -301,8 +301,8 @@ USA
       `(highlight-changes-delete ((t (:foreground nil :background ,color-bg1))))
 
       ;; flymake
-      `(flymake-errline ((t (:background ,orange))))
-      `(flymake-warnline ((t (:background ,violet))))
+      `(flymake-errline ((t (:underline ,orange))))
+      `(flymake-warnline ((t (:underline ,violet))))
 
       )))))
 (provide 'color-theme-dark)
