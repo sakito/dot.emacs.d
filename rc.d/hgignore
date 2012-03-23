@@ -32,3 +32,4 @@ target/*
 *.xcworkspacedata
 *.xcuserdatad/*
 *.egg-info
+*.tmp
