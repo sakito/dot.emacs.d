@@ -27,8 +27,10 @@
 ;;; Code:
 
 ;; vc
-;; vc はすばらしいがわたしは利用しないので無効にする
+;; vc はすばらしいがわたしは hg 以外は利用しないので一旦無効にする
 (setq vc-handled-backends nil)
+(setq vc-display-status nil)
+(setq vc-consult-headers nil)
 ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
 (setq vc-follow-symlinks t)
 
