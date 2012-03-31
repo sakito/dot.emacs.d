@@ -114,15 +114,17 @@
   ;; システムの IM を無視する
   (setq mac-use-input-method-on-system nil)
   ;; 起動したら US にする
-  (add-hook 'after-init-hook 'mac-change-language-to-us)
+;  (add-hook 'after-init-hook 'mac-change-language-to-us)
   ;; minibuffer 内は US にする
-  (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
+;  (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
   (mac-translate-from-yen-to-backslash)
   ;; 入力モードを英語に変更
-  (setq mac-ts-script-language-on-focus '(0 . 0))
+;  (setq mac-ts-script-language-on-focus '(0 . 0))
 
   ;; smooth scroll を on
   (setq mac-mouse-wheel-smooth-scroll t)
+
+  
 )
 
 (provide 'init_key)
