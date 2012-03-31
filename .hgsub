@@ -1,3 +1,2 @@
-# hg-git を利用しているため [git] を入れていません
-rc.d/zsh.d/plugins/zaw = git://github.com/zsh-users/zaw.git
-rc.d/zsh.d/plugins/auto-fu.zsh = git://github.com/hchbaw/auto-fu.zsh.git
+rc.d/zsh.d/plugins/zaw = [git]git://github.com/zsh-users/zaw.git
+rc.d/zsh.d/plugins/auto-fu.zsh = [git]git://github.com/hchbaw/auto-fu.zsh.git
