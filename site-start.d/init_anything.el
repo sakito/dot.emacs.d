@@ -125,7 +125,7 @@
 ;    (or input (expand-file-name default-directory))))
 
 ;; anything 本体では anything-quit-and-find-file
-(global-set-key (kbd "C-x C-f") 'anything-find-files)
+;;(global-set-key (kbd "C-x C-f") 'anything-find-files)
 
 ;; 検索の対象を変更した物を作成
 (defun anything-help-at-point ()
