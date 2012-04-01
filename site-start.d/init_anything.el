@@ -27,17 +27,18 @@
 ;; 
 
 ;;; Code:
+;; (require 'anything)
+(require 'anything-config)
+;; (require 'anything-private-config)
+(require 'anything-match-plugin)
+
 ;; anything-howm
 ;; @see http://d.hatena.ne.jp/kitokitoki/20110103/p1
 (require 'anything-howm)
 (defvar anything-howm-data-directory "~/howm")
 ;; 最近のメモとして100個まで表示
 (setq anything-howm-recent-menu-number-limit 100)
-
-;; (require 'anything)
-(require 'anything-config)
-;; (require 'anything-private-config)
-(require 'anything-match-plugin)
+(global-set-key (kbd "C-c , a") 'anything-howm-menu-command)
 
 ;; session を利用するため anything-c-adaptive-save-history を作成しない
 (remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
@@ -82,6 +83,7 @@
         ;; anything-c-source-buffers+-howm-title
         anything-c-source-buffers-list
         anything-c-source-file-name-history
+        anything-c-howm-recent
         anything-c-source-files-in-current-dir+
         anything-c-source-extended-command-history
         anything-c-source-emacs-commands
