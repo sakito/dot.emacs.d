@@ -31,8 +31,8 @@
 ;; 環境設定->ファイルタイプ-> text -> sourcecode -> sourcecode.c -> その他 -> Emacs.app
 ;; 「その他」から選択すること。デフォルトに存在する emacs は Terminal.app が起動してしまう
 ;; 通常は以下を設定しないとフレームが新規作成される。パッチを当てていると不要
-(when ns-p
-  (setq ns-pop-up-frames nil))
+;;(when ns-p
+;;  (setq ns-pop-up-frames nil))
 
 ;; 拡張子が m もしくは mm のファイルは matlab-mode とぶつかる
 ;; 拡張子が h のファイルをそのまま設定してしまうと C や C++ 開発で困る
@@ -87,11 +87,12 @@
         ("\\.hpp$" (".cpp" ".c"))))
 
 ;; flymake
-(defvar xcode:gccver "4.0")
-(defvar xcode:sdkver "3.1.2")
-(defvar xcode:sdkpath "/Developer/Platforms/iPhoneSimulator.platform/Developer")
+;;(defvar xcode:gccver "4.2")
+(defvar xcode:sdkver "5.1")
+(defvar xcode:sdkpath "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
 (defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneSimulator" xcode:sdkver ".sdk"))
-(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
+;;(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
+(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/clang"))
 ;;(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x" "objective-c" "-std=c99"))
 (defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99" "-isysroot" xcode:sdk))
 (defvar flymake-last-position nil)
@@ -110,7 +111,7 @@
 
 ;; ドキュメントの参照
 (require 'xcode-document-viewer)
-(setq xcdoc:document-path "/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_1.iPhoneLibrary.docset")
+(setq xcdoc:document-path "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.docset")
 (setq xcdoc:open-w3m-other-buffer t)
 
 ;; hook の設定
