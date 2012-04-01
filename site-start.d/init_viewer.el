@@ -33,7 +33,7 @@
 ;; 初期から view mode
 (viewer-aggressive-setup 'force)
 ;; 全てのファイルを対象
-(setq view-mode-by-default-regexp ".*")
+;;(setq view-mode-by-default-regexp ".*")
 
 (add-hook 'view-mode-hook
           '(lambda()

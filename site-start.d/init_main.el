@@ -143,6 +143,10 @@
 (require 'init_calendar)
 (require 'init_linum)
 (require 'init_go)
+(require 'init_viewer)
+(require 'init_keychord)
+
+
 
 ;;; private 設定
 (require 'init_private)
