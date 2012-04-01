@@ -42,7 +42,7 @@ pipinstall:
 	curl -O https://raw.github.com/pypa/virtualenv/develop/virtualenv.py
 	python virtualenv.py --distribute -p /usr/local/bin/python ${HOME}/local
 	source ${HOME}/local/bin/activate
-	pip install readline
+	easy_install readline
 	pip install mercurial
 	echo "/opt/subversion/lib/svn-python" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
 	pip install hgsubversion
