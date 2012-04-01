@@ -44,6 +44,9 @@
 (setenv "SHELL" shell-file-name)
 (setq explicit-shell-file-name shell-file-name)
 
+;; 拡張子
+(add-to-list 'auto-mode-alist '("\\.zsh$" . sh-mode))
+
 ;; TODO
 ;;(setq explicit-bash-args '("-login" "-i"))
 ;;(setq shell-command-switch "-c")
