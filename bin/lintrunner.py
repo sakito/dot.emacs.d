@@ -115,7 +115,7 @@ class PylintRunner(LintRunner):
     command = PYLINT_COMMAND
     sane_default_ignore_codes = set([
         'C0301',  # Line to long
-        #"C0103",  # Naming convention
+        'C0103',  # Naming convention
         'C0111',  # Missing Docstring
         #"E1002",  # Use super on old-style class
         #"W0232",  # No __init__
@@ -124,8 +124,8 @@ class PylintRunner(LintRunner):
         #"W0511",  # FIXME/TODO
         #"W0142",  # *args or **kwargs magic.
         'R0904',  # Too many public methods
-        #"R0903",  # Too few public methods
-        #"R0201",  # Method could be a function
+        'R0903',  # Too few public methods
+        'R0201',  # Method could be a function
         #"W0141",  # Used built in function map
         ])
 
