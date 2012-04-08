@@ -222,7 +222,7 @@ setopt numeric_glob_sort
 # リダイレクトで上書き禁止
 setopt no_clobber
 # ベルを鳴らさない
-#setopt no_beep
+setopt no_beep
 # シェル終了時にジョブをチェックしない
 #setopt no_check_jobs
 # C-s/C-q によるフロー制御をしない
