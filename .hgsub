@@ -1,2 +1,3 @@
 rc.d/zsh.d/plugins/zaw = [git]git://github.com/zsh-users/zaw.git
 rc.d/zsh.d/plugins/auto-fu.zsh = [git]git://github.com/hchbaw/auto-fu.zsh.git
+rc.d/zsh.d/completions = [git]git://github.com/zsh-users/zsh-completions.git
