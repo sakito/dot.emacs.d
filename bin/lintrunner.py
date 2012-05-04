@@ -142,6 +142,7 @@ class PylintRunner(LintRunner):
         return ('--output-format', 'parseable',
                 '--include-ids', 'y',
                 '--reports', 'n',
+                #'--errors-only',
                 '-d ' + ','.join(self.operative_ignore_codes))
 
 
@@ -247,7 +248,8 @@ def main():
         Pep8Runner,
         PylintRunner,
         #PyflakesRunner,
-        CompilerRunner):
+        #CompilerRunner,
+        ):
         runner = runnerclass(virtualenv=options.virtualenv,
                              ignore_codes=options.ignore_codes)
         try:
