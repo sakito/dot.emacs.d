@@ -5,7 +5,7 @@
 ;; Author: François Pinard <pinard@iro.umontreal.ca>
 ;; Maintainer: François Pinard <pinard@iro.umontreal.ca>
 ;; Created: 2001
-;; Version: 0.24-beta2
+;; Version: 0.25
 ;; Keywords: Python interface protocol
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@
            "Tell XEmacs if STRING should be handled as multibyte."
            (not (member (find-charset-string string) '(nil (ascii))))))
         (t
-         ; Tell XEmacs that STRING is unibyte, when Mule is not around!
+         ;; Tell XEmacs that STRING is unibyte, when Mule is not around!
          (defalias 'pymacs-multibyte-string-p 'ignore)))
 
   ;; pymacs-report-error
@@ -84,7 +84,7 @@
   ;; pymacs-timerp
   (defalias 'pymacs-timerp
     (cond ((fboundp 'timerp) 'timerp)
-         ; XEmacs case - yet having post-gc-hook, this is unused.
+          ;; XEmacs case - yet having post-gc-hook, this is unused.
           ((fboundp 'itimerp) 'itimerp)
           (t 'ignore)))
 
@@ -174,11 +174,11 @@ which is the default."
   (unless (stringp module)
     (error "`%s' should be a string" module))
   (unless (pymacs-python-reference function)
-    (put function 'python-module module)
+
     (defalias function
       `(lambda (&rest args)
          ,(or docstring
-              (format "`%s' function to be loaded from Python module `%s'"
+              (format "Function `%s' to be loaded from Python module `%s'"
                       function module))
          ,(cond ((eq interactive t) '(interactive))
                 (interactive `(interactive ,interactive)))
@@ -192,7 +192,7 @@ which is the default."
   "Compile TEXT as a Python expression, and return its value."
   (interactive "sPython expression? ")
   (let ((value (pymacs-serve-until-reply "eval" `(princ ,text))))
-    (when (called-interactively-p 'interactive)
+    (when (interactive-p)
       (message "%S" value))
     value))
 
@@ -202,7 +202,7 @@ which is the default."
 This functionality is experimental, and does not appear to be useful."
   (interactive "sPython statements? ")
   (let ((value (pymacs-serve-until-reply "exec" `(princ ,text))))
-    (when (called-interactively-p 'interactive)
+    (when (interactive-p)
       (message "%S" value))
     value))
 
@@ -251,13 +251,7 @@ equivalents, other structures are converted into Lisp handles."
                  "It interfaces to a Python function.\n\n"
                  (when python-doc
                    (if raw python-doc (substitute-command-keys python-doc)))))
-        ad-do-it)))
-
-  (defadvice find-lisp-object-file-name (around pymacs-ad-py-module activate)
-    (if (and (symbolp (ad-get-arg 0))
-             (get (ad-get-arg 0) 'python-module))
-        (setq ad-return-value (get (ad-get-arg 0) 'python-module))
-      ad-do-it)))
+        ad-do-it))))
 
 (defun pymacs-python-reference (object)
   ;; Return the text reference of a Python object if possible, else nil.
@@ -331,7 +325,7 @@ equivalents, other structures are converted into Lisp handles."
         (inhibit-file-name-operation operation))
     (apply operation arguments)))
 
-;(add-to-list 'file-name-handler-alist '("\\.el\\'" . pymacs-file-handler))
+;;(add-to-list 'file-name-handler-alist '("\\.el\\'" . pymacs-file-handler))
 
 ;;; Gargabe collection of Python IDs.
 
@@ -620,7 +614,7 @@ The timer is used only if `post-gc-hook' is not available.")
             (unless (accept-process-output process pymacs-timeout-at-start)
               (pymacs-report-error
                "Pymacs helper did not start within %d seconds"
-                     pymacs-timeout-at-start)))
+               pymacs-timeout-at-start)))
           (let ((marker (process-mark process))
                 (limit-position (+ (match-end 0)
                                    (string-to-number (match-string 1)))))
@@ -634,9 +628,9 @@ The timer is used only if `post-gc-hook' is not available.")
           (if (and (pymacs-proper-list-p reply)
                    (= (length reply) 2)
                    (eq (car reply) 'version))
-              (unless (string-equal (cadr reply) "0.24-beta2")
+              (unless (string-equal (cadr reply) "0.25")
                 (pymacs-report-error
-                 "Pymacs Lisp version is 0.24-beta2, Python is %s"
+                 "Pymacs Lisp version is 0.25, Python is %s"
                  (cadr reply)))
             (pymacs-report-error "Pymacs got an invalid initial reply")))))
     (if (not pymacs-use-hash-tables)
