@@ -364,6 +364,7 @@ Commands:
   (define-key ahg-status-mode-map "D" 'ahg-status-diff-all)
   (define-key ahg-status-mode-map "r" 'ahg-status-remove)
   (define-key ahg-status-mode-map "g" 'ahg-status-refresh)
+  (define-key ahg-status-mode-map "I" 'ahg-status-add-to-hgignore)
   (define-key ahg-status-mode-map "q" 'ahg-buffer-quit)
   (define-key ahg-status-mode-map "U" 'ahg-status-undo)
   (define-key ahg-status-mode-map "!" 'ahg-status-do-command)
@@ -406,6 +407,9 @@ Commands:
       (define-key iqmap "n" 'ahg-record-qnew)
       (define-key imap "Q" iqmap))
     (define-key ahg-status-mode-map "i" imap))
+  (let ((amap (make-sparse-keymap)))
+    (define-key amap "a" 'ahg-status-commit-amend)
+    (define-key ahg-status-mode-map "C" amap))
   (easy-menu-add ahg-status-mode-menu ahg-status-mode-map))
 
 (easy-menu-define ahg-status-mode-menu ahg-status-mode-map "aHg Status"
@@ -416,9 +420,11 @@ Commands:
     ["--" nil nil]
     ["Commit" ahg-status-commit [:keys "c" :active t]]
     ["Interactive Commit (Record)" ahg-record [:keys "ic" :active t]]
+    ["Amend" ahg-status-commit-amend [:keys "Ca" :active t]]
     ["Add" ahg-status-add [:keys "a" :active t]]
     ["Remove" ahg-status-remove [:keys "r" :active t]]
     ["Add/Remove" ahg-status-addremove [:keys "A" :active t]]
+    ["Add to .hgignore" ahg-status-add-to-hgignore [:keys "I" :active t]]
     ["Undo" ahg-status-undo [:keys "U" :active t]]
     ["Hg Command" ahg-status-do-command [:keys "!" :active t]]
     ["Shell Command" ahg-status-shell-command [:keys "$" :active t]]
@@ -580,6 +586,25 @@ the singleton list with the node at point."
   (interactive)
   (let ((files (ahg-status-get-marked nil)))
     (ahg-commit (mapcar 'cddr files))))
+
+(defun ahg-status-commit-amend ()
+  (interactive)
+  (let ((files (ahg-status-get-marked nil))
+        msg
+        logmsg)
+    (with-temp-buffer
+      (when (= (ahg-call-process "log"
+                                 (list "-r" "." "--template"
+                                       "{node|short}\\n{desc}")) 0)
+        (goto-char (point-min))
+        (setq msg (format "amending changeset %s"
+                          (buffer-substring-no-properties (point-min)
+                                                          (point-at-eol))))
+        (forward-line 1)
+        (setq logmsg (buffer-substring-no-properties
+                      (point-at-bol) (point-max)))))
+    (ahg-commit (append (list "--amend") (mapcar 'cddr files))
+                msg logmsg)))
 
 (defun ahg-status-add ()
   (interactive)
@@ -867,6 +892,25 @@ Uses find-dired to get them into nicely."
      files " ")
     " -false")))
 
+
+(defun ahg-status-add-to-hgignore ()
+  "Adds the selected files to .hgignore for the current repository."
+  (interactive)
+  (let ((files (ahg-status-get-marked 'cur)))
+    (when (ahg-y-or-n-p (format "Add %d files to .hgignore? " (length files)))
+      (let* ((aroot (ahg-root))
+             (hgignore (concat (file-name-as-directory aroot) ".hgignore")))
+        (with-temp-buffer
+          (when (file-exists-p hgignore)
+            (insert-file-contents hgignore))
+          (goto-char (point-max))
+          (insert "\n# added by aHg on " (current-time-string)
+                  "\nsyntax: glob\n")
+          (mapc (lambda (f) (insert (cddr f) "\n")) files)
+          (write-file hgignore)
+          (kill-buffer))
+        (ahg-status-maybe-refresh aroot)))))
+
 ;;-----------------------------------------------------------------------------
 ;; hg commit
 ;;-----------------------------------------------------------------------------
@@ -892,13 +936,15 @@ Uses find-dired to get them into nicely."
              (ahg-show-error process)))))))
   (kill-buffer (current-buffer)))
 
-(defun ahg-commit (files)
+(defun ahg-commit (files &optional msg logmsg)
   "Run hg commit. Pops up a buffer for editing the log file."
   (let ((buf (generate-new-buffer "*aHg-log*")))
     (ahg-log-edit
      'ahg-commit-callback
      (lexical-let ((flist files)) (lambda () flist))
-     buf)))
+     buf
+     msg
+     logmsg)))
 
 (defun ahg-commit-cur-file ()
   "Run hg commit on the current file only."
