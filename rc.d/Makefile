@@ -64,4 +64,6 @@ pipinstall:
 	pip install coverage
 	pip install pyzmq
 	pip install pillow
+	pip install rlcompleter2
+	pip install fancycompleter
 

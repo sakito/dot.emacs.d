@@ -4,7 +4,6 @@ syntax: glob
 *.elc
 *.pyc
 *.pyo
-*.class
 *.entrypickle
 *.log
 *.pdf
@@ -14,7 +13,7 @@ syntax: glob
 .org-id-locations
 .DS_Store
 develop-eggs
-eggs
+#eggs
 parts
 .installed.cfg
 .mr.developer.cfg
@@ -33,3 +32,4 @@ target/*
 *.xcuserdatad/*
 *.egg-info
 *.tmp
+dist/*
