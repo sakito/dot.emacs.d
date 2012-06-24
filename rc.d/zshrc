@@ -79,6 +79,7 @@ export PIP_RESPECT_VIRTUALENV=true
 
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
+export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 
 # LaTeX
 export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
@@ -406,7 +407,8 @@ zstyle ':completion:*' recent-dirs-insert both
 #-----------------------------------------------------------------
 # plugin
 #-----------------------------------------------------------------
-#fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions $fpath)
+# rm -f ~/.zcompdump; compinit
+fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions $fpath)
 
 #unsetopt auto_remove_slash
 unsetopt sh_word_split
