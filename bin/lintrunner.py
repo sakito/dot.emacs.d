@@ -253,7 +253,8 @@ def main():
         runner = runnerclass(virtualenv=options.virtualenv,
                              ignore_codes=options.ignore_codes)
         try:
-            runner.run(args[0])
+            if args is not None and len(args) > 0:
+                runner.run(args[0])
         except Exception:
             #print >> sys.stdout, '{0} FAILED'.format(runner)
             print 'ERROR : {0} failed to run at {1} line 1.'.format(
