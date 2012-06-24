@@ -3,7 +3,7 @@
 ;;; init_color.el --- color setting file
 
 
-;; Copyright (C) 2004-2010  sakito
+;; Copyright (C) 2004-2012  sakito
 ;; Author: sakito <sakito@sakito.com>
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@
         (append (list
                  '(width . 175)
                  '(height . 65)
-                 '(top . 120)
+                 '(top . 50)
                  '(left . 500)
                  )
                 default-frame-alist)))
