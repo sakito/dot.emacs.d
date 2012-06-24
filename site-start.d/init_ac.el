@@ -22,9 +22,12 @@
 
 ;;; Commentary:
 
-;; 
+;; 補完関連の設定
 
 ;;; Code:
+
+;; abbrev
+(setq abbrev-file-name (expand-file-name "local-lisp/abbrev_defs.el" user-emacs-directory))
 
 ;; @see http://www.emacswiki.org/emacs/PosTip
 (require 'pos-tip nil t)

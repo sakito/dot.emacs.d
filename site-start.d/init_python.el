@@ -79,7 +79,7 @@
              (local-file (file-relative-name
                           temp-file
                           (file-name-directory buffer-file-name))))
-        (list "lintrunner.py" (list local-file))))
+        (list "lintrunner.exe" (list local-file))))
     (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
     (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
 
