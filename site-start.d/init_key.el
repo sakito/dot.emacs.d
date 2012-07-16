@@ -119,7 +119,7 @@
   (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
   (mac-translate-from-yen-to-backslash)
   ;; 入力モードを英語に変更
-;  (setq mac-ts-script-language-on-focus '(0 . 0))
+  (setq mac-ts-script-language-on-focus '(0 . 0))
 
   ;; smooth scroll を on
   (setq mac-mouse-wheel-smooth-scroll t)
