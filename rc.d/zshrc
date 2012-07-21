@@ -516,7 +516,8 @@ afu-ad-delete-unambiguous-prefix afu+accept-and-hold
 # 汎用
 
 # @see http://d.hatena.ne.jp/jeneshicc/20110215/1297778049
-# 結構覚えているのであまり使わないがサンプルとして入れる
+# このGnu tar には解凍時、圧縮形式を自動判定する機能があるので、
+# この関数はほぼ不要だが、サンプルとして入れている
 function ex () {
     if [ -f $1 ] ; then
         case $1 in
