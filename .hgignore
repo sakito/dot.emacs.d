@@ -15,7 +15,7 @@ lisp/wl/*
 lisp/w3m/*
 lisp/navi2ch/*
 lisp/auctex/*
-*tex*
+#*tex*
 var/*
 share/*
 private/*
