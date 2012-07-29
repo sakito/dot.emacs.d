@@ -30,7 +30,8 @@ portinstall:
 	sudo port install gawk gsed
 	sudo port install yasm
 	sudo port install scala29 ocaml smlnj
-	sudo port install gauche ccl lisp-hyperspec
+	sudo port install gauche slib
+	sudo port install ccl lisp-hyperspec
 	sudo port install subversion +bash_completion +mod_dav_svn +tools +unicode_path
 	sudo port install readline
 	sudo port install jpeg
