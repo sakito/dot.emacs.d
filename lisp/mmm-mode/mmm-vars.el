@@ -33,6 +33,7 @@
 ;;; Code:
 
 (require 'mmm-compat)
+(require 'cl)
 
 ;; MISCELLANEOUS
 ;;{{{ Shut up the Byte Compiler
@@ -128,6 +129,7 @@
     font-lock-syntax-table
     font-lock-mark-block-function       ; Override this?
     font-lock-syntactic-keywords
+    indent-line-function
     parse-sexp-ignore-comments  ; Fixes indentation in PHP-mode?
     ;; Can be different in different buffers
     (c-basic-offset
@@ -289,18 +291,8 @@
 	 comment-start-skip))
     ,@(mapcar
        (lambda (var) (list var nil '(js-mode)))
-       '(beginning-of-defun-function
-         end-of-defun-function
-         js-indent-level
-         js--quick-match-re
-         js--quick-match-re-func
-         before-change-functions
-         js--cache-end
-         js--last-parse-pos
-         js--state-at-last-parse-pos
-         imenu-create-index-function
-         ;; TODO: add some more?
-         ))
+       '(js--quick-match-re
+         js--quick-match-re-func))
     ;; Skeleton insertion
     skeleton-transformation
     ;; Abbrev mode
@@ -391,35 +383,51 @@ of coloring respectively.
                  (const :tag "Low" 1)
                  (const :tag "High" 2)))
 
-(defface mmm-init-submode-face '((t (:background "Pink")))
+(defface mmm-init-submode-face '((((background light)) (:background "Pink"))
+				 (((background dark)) (:background "MediumOrchid"))
+				 (t (:background "Pink")))
   "Face used for submodes containing initialization code."
   :group 'mmm-faces)
 
-(defface mmm-cleanup-submode-face '((t (:background "Wheat")))
+(defface mmm-cleanup-submode-face '((((background light)) (:background "Wheat"))
+				    (((background dark)) (:background "peru"))
+				    (t (:background "Wheat")))
   "Face used for submodes containing cleanup code."
   :group 'mmm-faces)
 
-(defface mmm-declaration-submode-face '((t (:background "Aquamarine")))
+(defface mmm-declaration-submode-face '((((background light)) (:background "Aquamarine"))
+					(((background dark)) (:background "DarkTurquoise"))
+					(t (:background "Aquamarine")))
   "Face used for submodes containing declarations."
   :group 'mmm-faces)
 
-(defface mmm-comment-submode-face '((t (:background "SkyBlue")))
+(defface mmm-comment-submode-face '((((background light)) (:background "SkyBlue"))
+				    (((background dark)) (:background "SteelBlue"))
+				    (t (:background "SkyBlue")))
   "Face used for submodes containing comments and documentation."
   :group 'mmm-faces)
 
-(defface mmm-output-submode-face '((t (:background "Plum")))
+(defface mmm-output-submode-face '((((background light)) (:background "Plum"))
+				    (((background dark)) (:background "MediumVioletRed"))
+				    (t (:background "Plum")))
   "Face used for submodes containing expression that are output."
   :group 'mmm-faces)
 
-(defface mmm-special-submode-face '((t (:background "MediumSpringGreen")))
+(defface mmm-special-submode-face '((((background light)) (:background "MediumSpringGreen"))
+				    (((background dark)) (:background "ForestGreen"))
+				    (t (:background "MediumSpringGreen")))
   "Face used for special submodes not fitting any other category."
   :group 'mmm-faces)
 
-(defface mmm-code-submode-face '((t (:background "LightGray")))
+(defface mmm-code-submode-face '((((background light)) (:background "LightGray"))
+				 (((background dark)) (:background "DimGray"))
+				 (t (:background "LightGray")))
   "Face used for submodes containing ordinary code."
   :group 'mmm-faces)
 
-(defface mmm-default-submode-face '((t (:background "gray85")))
+(defface mmm-default-submode-face '((((background light)) (:background "gray85"))
+				    (((background dark)) (:background "gray20"))
+				    (t (:background "gray85")))
   "Face used for all submodes at decoration level 1.
 Also used at decoration level 2 for submodes not specifying a type."
   :group 'mmm-faces)
@@ -774,6 +782,44 @@ an existing buffer."
 file name.  In these modes, this file name is the same as that of the
 parent buffer.  In general, this has been found to cause more problems
 than it solves, but some modes require it.")
+
+;;}}}
+;;{{{ Idle Parsing
+
+(defcustom mmm-parse-when-idle nil
+  "Non-nil to automatically reparse the buffer when it has some
+  modifications and Emacs has been idle for `mmm-idle-timer-delay'."
+  :type 'boolean
+  :group 'mmm)
+
+(defcustom mmm-idle-timer-delay 0.2
+  "Delay in secs before re-parsing after user makes changes."
+  :type 'number
+  :group 'mmm)
+(make-variable-buffer-local 'mmm-idle-timer-delay)
+
+(defvar mmm-mode-parse-timer nil "Private variable.")
+(make-variable-buffer-local 'mmm-mode-parse-timer)
+(defvar mmm-mode-buffer-dirty nil "Private variable.")
+(make-variable-buffer-local 'mmm-mode-buffer-dirty)
+
+(defun mmm-mode-edit (beg end len)
+  (setq mmm-mode-buffer-dirty t)
+  (mmm-mode-reset-timer))
+
+(defun mmm-mode-reset-timer ()
+  (when mmm-mode-parse-timer
+    (cancel-timer mmm-mode-parse-timer))
+  (setq mmm-mode-parse-timer
+        (run-with-idle-timer mmm-idle-timer-delay nil
+                             #'mmm-mode-idle-reparse (current-buffer))))
+
+(defun mmm-mode-idle-reparse (buffer)
+  (with-current-buffer buffer
+    (when mmm-mode-buffer-dirty
+      (mmm-apply-all)
+      (setq mmm-mode-buffer-dirty nil)
+      (setq mmm-mode-parse-timer nil))))
 
 ;;}}}
 

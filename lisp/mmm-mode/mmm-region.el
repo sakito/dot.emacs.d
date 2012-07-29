@@ -472,12 +472,12 @@ Does not handle delimiters.  Use `mmm-make-region'."
 (defun mmm-clear-overlays (&optional start stop strict)
   "Clears all MMM overlays overlapping START and STOP.
 If STRICT, only clear those entirely included in that region."
-  (mapcar #'delete-overlay
-	  (if strict
-	      (mmm-overlays-contained-in (or start (point-min))
-					 (or stop (point-max)))
-	    (mmm-overlays-overlapping (or start (point-min))
-				      (or stop (point-max)))))
+  (mapc #'delete-overlay
+        (if strict
+            (mmm-overlays-contained-in (or start (point-min))
+                                       (or stop (point-max)))
+          (mmm-overlays-overlapping (or start (point-min))
+                                    (or stop (point-max)))))
   (mmm-update-submode-region))
 
 ;;}}}
@@ -507,8 +507,7 @@ is non-nil, don't quit if the info is already there."
           ;; On errors, the temporary buffers don't get deleted, so here
           ;; we get rid of any old ones that may be hanging around.
           (when (buffer-live-p (get-buffer mmm-temp-buffer-name))
-            (save-excursion
-              (set-buffer (get-buffer mmm-temp-buffer-name))
+            (with-current-buffer (get-buffer mmm-temp-buffer-name)
               (set-buffer-modified-p nil)
               (kill-buffer (current-buffer))))
           ;; Now make a new temporary buffer.
@@ -552,7 +551,6 @@ is non-nil, don't quit if the info is already there."
                  font-lock-fontify-region-function))
           (put mode 'mmm-beginning-of-syntax-function
                font-lock-beginning-of-syntax-function))
-        (put mode 'mmm-indent-line-function indent-line-function)
         ;; Get variables
         (setq global-vars (mmm-get-locals 'global)
               buffer-vars (mmm-get-locals 'buffer)
@@ -594,11 +592,15 @@ different keymaps, syntax tables, local variables, etc. for submodes."
 (defun mmm-add-hooks ()
   (if (featurep 'xemacs)
       (make-local-hook 'post-command-hook))
-  ;; FIXME: Use text properties `point-entered' and `point-left' instead?
-  (add-hook 'post-command-hook 'mmm-update-submode-region nil 'local))
+  (add-hook 'post-command-hook 'mmm-update-submode-region nil t)
+  (when mmm-parse-when-idle
+    (add-hook 'pre-command-hook 'mmm-mode-reset-timer nil t)
+    (add-hook 'after-change-functions 'mmm-mode-edit nil t)))
 
 (defun mmm-remove-hooks ()
-  (remove-hook 'post-command-hook 'mmm-update-submode-region 'local))
+  (remove-hook 'post-command-hook 'mmm-update-submode-region t)
+  (remove-hook 'pre-command-hook 'mmm-mode-reset-timer t)
+  (remove-hook 'after-change-functions 'mmm-mode-edit t))
 
 ;;}}}
 ;;{{{ Local Variables
@@ -782,9 +784,9 @@ of the REGIONS covers START to STOP."
                 (when (get (car elt) 'mmm-font-lock-mode)
                   (mmm-fontify-region-list (car elt) (cdr elt))))
             (mmm-regions-alist start stop)))
-  ;; It's in `post-command-hook' too, but that's executed before fontifying,
-  ;; so the latter messes up local vars (such as `mmm-current-submode')
-  ;; until after the next command if we do not update.
+  ;; It's in `post-command-hook' too, but that's executed before font-lock,
+  ;; so the latter messes up local vars (such as line-indent-function)
+  ;; until after the next command.
   (mmm-update-submode-region)
   (when loudly (message nil)))
 
@@ -821,67 +823,6 @@ of the REGIONS covers START to STOP."
           (point-min)))))
 
 ;;}}}
-
-;; INDENTATION
-
-(defun mmm-indent-line ()
-  (interactive)
-  (mmm-update-submode-region)
-  (let ((submode-indent-function
-         (get mmm-current-submode 'mmm-indent-line-function))
-        (primary-indent-function
-         (get mmm-primary-mode 'mmm-indent-line-function))
-        added-whitespace)
-    (if (and mmm-current-overlay mmm-current-submode
-             ;; region starts before the current line
-             (< (overlay-start mmm-current-overlay)
-                (point-at-bol)))
-        (if (<= (overlay-end mmm-current-overlay)
-                (save-excursion (back-to-indentation) (point)))
-            ;; we're at the closing tag
-            (mmm-indent-to-region-start)
-          (save-restriction
-            (save-excursion
-              (goto-char (overlay-start mmm-current-overlay))
-              (when (not (looking-at "^\\|\\s-*$"))
-                ;; Submode region has text on the same line as the opening tag,
-                ;; pad it with whitespace to make the following lines line up.
-                (setq added-whitespace (current-column))
-                (insert-char ?  added-whitespace)))
-            (narrow-to-region (overlay-start mmm-current-overlay)
-                              (overlay-end mmm-current-overlay))
-            (funcall submode-indent-function)
-            (when added-whitespace
-              ;; remove the padding
-              (save-excursion
-                (goto-char (overlay-start mmm-current-overlay))
-                (delete-char added-whitespace))))
-          ;; If submode indent function moved us to bol,
-          ;; we're on the top level, indent according to the primary mode.
-          (when (zerop (current-indentation))
-            (mmm-indent-to-region-start
-             (mmm-mode-indent-offset mmm-primary-mode))))
-      (funcall primary-indent-function))))
-
-(put 'sgml-mode 'mmm-indent-offset-var 'sgml-basic-offset)
-(put 'nxml-mode 'mmm-indent-offset-var 'nxml-child-indent)
-
-(defun mmm-mode-indent-offset (mode)
-  (let (name)
-    (while (and mode (not (setq name (get mode 'mmm-indent-offset-var))))
-      (setq mode (get mode 'derived-mode-parent)))
-    (if name
-        (symbol-value name))))
-
-(defun mmm-indent-to-region-start (&optional additional-indent)
-  (let* ((indent (current-indentation))
-         (offset (- (current-column) indent)))
-    (indent-line-to
-     (save-excursion
-       (goto-char (1- (overlay-start mmm-current-overlay)))
-       (+ (current-indentation)
-          (or additional-indent 0))))
-    (when (> offset 0) (forward-char offset))))
 
 (provide 'mmm-region)
 
