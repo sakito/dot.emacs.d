@@ -102,12 +102,6 @@ export PATH=${PATH}:/Applications/sage
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
-# Ant
-export ANT_HOME=${HOME}/bin/apache-ant-1.8.2
-export PATH=${ANT_HOME}/bin:${PATH}
-# Maven
-# export MAVEN_HOME=${HOME}/bin/maven
-# export PATH=${MAVEN_HOME}/bin:${PATH}
 
 # CLASSPATH
 # export CLASSPATH=${CLASSPATH}:.
