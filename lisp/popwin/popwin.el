@@ -1,6 +1,6 @@
 ;;; popwin.el --- Popup Window Manager.
 
-;; Copyright (C) 2011  Tomohiro Matsuyama
+;; Copyright (C) 2011, 2012  Tomohiro Matsuyama
 
 ;; Author: Tomohiro Matsuyama <tomo@cx4a.org>
 ;; Keywords: convenience
@@ -41,17 +41,6 @@
 ;; how to display such buffers. See docstring of
 ;; `popwin:special-display-config' for more information.
 ;;
-;; Instead of a recommended way, you can also use popwin by setting
-;; `special-display-function' like:
-;;
-;;     (require 'popwin)
-;;     (setq special-display-function
-;;           'popwin:special-display-popup-window)
-;;
-;; In this case, you need to change `special-display-buffer-names' or
-;; `special-display-regexps' so that popwin takes care of such
-;; buffers.
-;; 
 ;; The default width/height/position of popup window can be changed by
 ;; setting `popwin:popup-window-width', `popwin:popup-window-height',
 ;; and `popwin:popup-window-position'.  You can also change the
@@ -500,6 +489,9 @@ the popup window will be closed are followings:
            (quit-requested
             (and (eq last-command 'keyboard-quit)
                  (eq last-command-event ?\C-g)))
+           (other-window-selected
+            (and (not (eq window popwin:focus-window))
+                 (not (eq window popwin:popup-window))))
            (orig-this-command this-command)
            (popup-buffer-alive
             (buffer-live-p popwin:popup-buffer))
@@ -507,12 +499,11 @@ the popup window will be closed are followings:
             (popwin:buried-buffer-p popwin:popup-buffer))
            (popup-buffer-changed-despite-of-dedicated
             (and popwin:popup-window-dedicated-p
+                 (or (not other-window-selected)
+                     (not reading-from-minibuf))
                  (buffer-live-p window-buffer)
                  (not (eq popwin:popup-buffer window-buffer))))
-           (popup-window-alive (popwin:popup-window-live-p))
-           (other-window-selected
-            (and (not (eq window popwin:focus-window))
-                 (not (eq window popwin:popup-window)))))
+           (popup-window-alive (popwin:popup-window-live-p)))
       (when (or quit-requested
                 (not popup-buffer-alive)
                 popup-buffer-buried
@@ -609,7 +600,7 @@ be closed by `popwin:close-popup-window'."
 
 (defmacro popwin:without-special-displaying (&rest body)
   "Evaluate BODY without special displaying."
-  `(let (display-buffer-function special-display-function) ,@body))
+  `(let (display-buffer-function) ,@body))
 
 (defcustom popwin:special-display-config
   '(("*Help*")
@@ -760,7 +751,7 @@ usual. This function can be used as a value of
        (popwin:original-display-buffer buffer not-this-window)))))
 
 (defun popwin:special-display-popup-window (buffer &rest ignore)
-  "The `special-display-function' with a popup window."
+  "Obsolete."
   (popwin:display-buffer-1 buffer))
 
 (defun popwin:display-last-buffer ()
@@ -785,6 +776,8 @@ usual. This function can be used as a value of
 (defun popwin:pop-to-buffer (buffer &optional other-window norecord)
   "Same as `pop-to-buffer' except that this function will use
 `popwin:display-buffer-1' instead of `display-buffer'."
+  (interactive (list (read-buffer "Pop to buffer: " (other-buffer))
+                     (if current-prefix-arg t)))
   (popwin:pop-to-buffer-1 buffer
                           :other-window other-window
                           :norecord norecord))
@@ -884,7 +877,8 @@ Keymap:
 | s, C-s | popwin:select-popup-window |
 | M-s    | popwin:stick-popup-window  |
 | 0      | popwin:close-popup-window  |
-| m, C-m | popwin:messages            |")
+| m, C-m | popwin:messages            |
+| u, C-u | popwin:universal-display   |")
 
 (provide 'popwin)
 ;;; popwin.el ends here
