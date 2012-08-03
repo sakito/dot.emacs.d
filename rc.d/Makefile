@@ -44,27 +44,6 @@ pipinstall:
 	python virtualenv.py --distribute -p /usr/local/bin/python ${HOME}/local
 	source ${HOME}/local/bin/activate
 	easy_install readline
-	pip install mercurial
 	echo "/opt/subversion/lib/svn-python" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
-	pip install hgsubversion
-	pip install hg-git
-	pip install docutils
-	pip install Pygments
-	pip install nose
-	pip install Sphinx
-	pip install ipython
-	pip install Cython
-	pip install lxml
-	pip install chardet
-	pip install web.py
-	pip install SQLAlchemy
-	pip install numpy
-	pip install blockdiag
-	pip install pep8
-	pip install pylint
-	pip install coverage
-	pip install pyzmq
-	pip install pillow
-	pip install rlcompleter2
-	pip install fancycompleter
+	pip -r requirements.txt
 
