@@ -55,9 +55,6 @@ export EDITOR="/usr/local/bin/emacsclient"
 export CVSROOT=${HOME}/var/cvs
 export CVS_RSH="ssh"
 
-# for screen(chmod 700)
-export SCREENDIR=${HOME}/.screen
-
 # パスとコマンド固有の設定
 # Mac OS X の初期パスは /usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:
 
@@ -78,8 +75,8 @@ export WORKON_HOME=${HOME}/.virtualenvs
 export PIP_RESPECT_VIRTUALENV=true
 
 # mysql
-export PATH=/usr/local/mysql/bin:${PATH}
-export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
+#export PATH=/usr/local/mysql/bin:${PATH}
+#export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 
 # LaTeX
 export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
@@ -256,11 +253,6 @@ if [ "$TMUX" != "" ] ; then
     # export WINDOW=`tmux display -pt $TMUX_PANE '#S:#I.#P'`
     export WINDOW=`tmux display -pt $TMUX_PANE '#I.#P'`
 fi
-
-# tmux で接続先が screen の時の対処
-case ${TERM} in
-    screen-256color) TERM=screen.xterm-xfree86
-esac
 
 # カラー記述を簡略化
 # 数字や文字で色を指定できるようにする
@@ -650,7 +642,6 @@ alias x=start
 alias j=jobs
 alias reload="source ~/.zshrc"
 alias emacs='emacs -nw'
-alias screen='screen -U'
 #alias ccl=ccl64
 alias hgpush="hg push --new-branch"
 #alias hgflow="hg flow"
@@ -662,7 +653,7 @@ alias -g V="| /usr/share/vim/vim73/macros/less.sh"
 # 自分に依存した設定
 alias sakuradiary="~/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
-alias easy_install64="env ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common' easy_install -UZ "
+alias easy_install64="env ARCHFLAGS='-Os -arch x86_64 -fno-common' easy_install -UZ "
 
 #-----------------------------------------------------------------
 # キーバインド設定
