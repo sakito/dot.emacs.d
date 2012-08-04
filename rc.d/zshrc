@@ -646,6 +646,9 @@ alias emacs='emacs -nw'
 alias hgpush="hg push --new-branch"
 #alias hgflow="hg flow"
 
+# http://d.hatena.ne.jp/mollifier/20101227/p1
+autoload -Uz zmv
+alias zmv='noglob zmv -W'
 
 # グローバルエイリアス
 alias -g V="| /usr/share/vim/vim73/macros/less.sh"
