@@ -94,3 +94,4 @@ virtualenv
 web.py
 webcolors
 requests
+rst2pdf
