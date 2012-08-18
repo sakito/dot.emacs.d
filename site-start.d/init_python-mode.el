@@ -1,6 +1,6 @@
 ;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
 
-;;; init_python.el --- Python Setting
+;;; init_python-mode.el --- Python Mode Setting
 
 ;; Copyright (C) 2004-2010  sakito
 
@@ -21,15 +21,15 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-;;; Commentary: Python-mode および Pythonコーディングに便利な設定
+;;; Commentary:
 
-;; 
+;; Python-mode および Pythonコーディングに便利な設定
+;;; Python-mode
+;; @see http://www.python.org/emacs/python-mode/
+;; @see https://launchpad.net/python-mode/
 
 ;;; Code:
 
-;;; Python-mode
-;; @see http://www.python.org/emacs/python-mode/
-;;
 (setenv "PYTHONSTARTUP" (expand-file-name "~/.emacs.d/rc.d/pythonrc.py"))
 (setenv "PYTHONPATH" (expand-file-name "~/local/lib/python2.7/site-packages"))
 
@@ -287,5 +287,5 @@
 
 
 
-(provide 'init_python)
-;;; init_python.el ends here
+(provide 'init_python-mode)
+;;; init_python-mode.el ends here
