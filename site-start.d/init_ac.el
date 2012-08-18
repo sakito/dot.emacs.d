@@ -27,7 +27,9 @@
 ;;; Code:
 
 ;; abbrev
-(setq abbrev-file-name (expand-file-name "local-lisp/abbrev_defs.el" user-emacs-directory))
+(setq
+ abbrev-file-name
+ (expand-file-name "local-lisp/abbrev_defs.el" user-emacs-directory))
 
 ;; @see http://www.emacswiki.org/emacs/PosTip
 (require 'pos-tip nil t)
@@ -43,7 +45,11 @@
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
 
 ;; デフォルトの補完候補
-(set-default 'ac-sources '(ac-source-abbrev ac-source-words-in-same-mode-buffers ac-source-yasnippet))
+(set-default 'ac-sources '(ac-source-yasnippet
+                           ac-source-dictionary
+                           ac-source-abbrev
+                           ac-source-words-in-same-mode-buffers
+                           ))
 
 ;; 対象の全てで補完を有効にする
 (global-auto-complete-mode t)
@@ -153,13 +159,6 @@
             ;; 末尾に追加
             ;;(push 'ac-source-etags ac-sources)
             (setq ac-sources (append ac-sources '(ac-source-etags)))
-            ))
-;; python hook
-(add-hook 'python-mode-hook
-          (lambda ()
-            (make-local-variable 'ac-sources)
-            ;; 末尾に追加
-            ;;(setq ac-sources (append ac-sources '(ac-source-etags)))
             ))
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()

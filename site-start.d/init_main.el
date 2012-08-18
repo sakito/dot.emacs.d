@@ -68,7 +68,8 @@
 ;;; プログラミング関連
 (require 'init_flymake)
 ;;; Pythonの設定
-(require 'init_python-mode)
+(require 'init_python)
+;(require 'init_python-mode)
 ;; vsc and scm
 (require 'init_scm)
 ;; diff
