@@ -95,6 +95,13 @@
                (lisp-mode . ["cl.lisp" my-template])
                ) auto-insert-alist))
 
+;; Shell
+(setq auto-insert-alist
+      (nconc '(
+               ("\\.sh$" . ["shell.sh" my-template])
+               (sh-mode . ["shell.sh" my-template])
+               ) auto-insert-alist))
+
 ;;(add-to-list 'auto-insert-alist '(emacs-lisp-mode  . "skelton.el"))
 ;;(add-to-list 'auto-insert-alist '(python-mode . "python.py"))
 
