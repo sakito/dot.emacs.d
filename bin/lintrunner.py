@@ -183,7 +183,7 @@ class Pep8Runner(LintRunner):
     #     'W291', 'WO232'])
     sane_default_ignore_codes = set([
         'E501',  # line too long
-        ])
+    ])
     output_matcher = re.compile(
         r'(?P<filename>[^:]+):'
         r'(?P<line_number>[^:]+):'
@@ -198,7 +198,9 @@ class Pep8Runner(LintRunner):
 
     @property
     def run_flags(self):
-        return '--repeat', '--ignore=' + ','.join(self.operative_ignore_codes)
+        #return ('--repeat',
+        #        '--ignore=' + ','.join(self.operative_ignore_codes))
+        return ('--repeat')
 
 
 class PyflakesRunner(LintRunner):
