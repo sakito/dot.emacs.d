@@ -33,6 +33,7 @@ portinstall:
 	sudo port install gauche slib
 	sudo port install ccl lisp-hyperspec
 	sudo port install subversion +bash_completion +mod_dav_svn +tools +unicode_path
+	sudo port install subversion-python27bindings
 	sudo port install readline
 	sudo port install jpeg
 	sudo port install lcms
@@ -44,6 +45,6 @@ pipinstall:
 	python virtualenv.py --distribute -p /usr/local/bin/python ${HOME}/local
 	source ${HOME}/local/bin/activate
 	easy_install readline
-	echo "/opt/subversion/lib/svn-python" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
+	echo "/opt/local/lib/svn-python2.7" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
 	pip -r requirements.txt
 
