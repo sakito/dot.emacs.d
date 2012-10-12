@@ -36,7 +36,6 @@
     )
   )
 
-
 (defun flex-autopair-python-mode-setup ()
   (setq flex-autopair-default-conditions flex-autopair-python-conditions)
   (flex-autopair-reload-conditions)
@@ -45,11 +44,11 @@
 (add-hook 'python-mode-hook
           'flex-autopair-python-mode-setup)
 
-
 (require 'key-combo)
 (key-combo-load-default)
 (defvar key-combo-python-default
   '((","  . ", ")
+    ("#"  . (key-combo-execute-orignal "# " "### "))
     ("="  . (" = " " == "))
     ("=>" . " => ")
     ("+" . (" + " " += 1"))
@@ -61,12 +60,15 @@
     (">=" . " >= ")
     ("%"  . " % ")
     ("%="  . " %= ")
-    ("!" . key-combo-execute-orignal)
+    ("!" . (key-combo-execute-orignal))
     ("!="  . " != " )
     ("*"  . " * " )
     ("*="  . " *= " )
     ("<" . (key-combo-execute-orignal))
     ("<=" . " <= ")
+    ("\"" . (key-combo-execute-orignal "\"\"\"\n\"\"\""))
+    ("'" . (key-combo-execute-orignal))
+    ("''" . "'''\n'''")
     ))
 
 (key-combo-define-hook 'python-mode-hook
