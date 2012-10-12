@@ -378,14 +378,14 @@ The type returned can be `comment', `string' or `paren'."
   (nth 8 (syntax-ppss)))
 
 (define-obsolete-function-alias
-  'python-info-ppss-context #'python-syntax-context "24.2")
+  'python-info-ppss-context #'python-syntax-context "24.3")
 
 (define-obsolete-function-alias
-  'python-info-ppss-context-type #'python-syntax-context-type "24.2")
+  'python-info-ppss-context-type #'python-syntax-context-type "24.3")
 
 (define-obsolete-function-alias
   'python-info-ppss-comment-or-string-p
-  #'python-syntax-comment-or-string-p "24.2")
+  #'python-syntax-comment-or-string-p "24.3")
 
 (defvar python-font-lock-keywords
   ;; Keywords
@@ -497,52 +497,69 @@ The type returned can be `comment', `string' or `paren'."
      (1 font-lock-variable-name-face nil nil))))
 
 (defconst python-syntax-propertize-function
-  ;; Make outer chars of matching triple-quote sequences into generic
-  ;; string delimiters.  Fixme: Is there a better way?
-  ;; First avoid a sequence preceded by an odd number of backslashes.
   (syntax-propertize-rules
-   (;; ¡Backrefs don't work in syntax-propertize-rules!
-    (concat "\\(?:\\([RUru]\\)[Rr]?\\|^\\|[^\\]\\(?:\\\\.\\)*\\)" ;Prefix.
-            "\\(?:\\('\\)'\\('\\)\\|\\(?2:\"\\)\"\\(?3:\"\\)\\)")
-    (3 (ignore (python-quote-syntax))))))
+   ((rx
+     (or (and
+          ;; Match even number of backslashes.
+          (or (not (any ?\\ ?\' ?\")) point) (* ?\\ ?\\)
+          ;; Match single or triple quotes of any kind.
+          (group (or  "\"" "\"\"\"" "'" "'''")))
+         (and
+          ;; Match odd number of backslashes.
+          (or (not (any ?\\)) point) ?\\ (* ?\\ ?\\)
+          ;; Followed by even number of equal quotes.
+          (group (or  "\"\"" "\"\"\"\"" "''" "''''")))))
+    (0 (ignore (python-syntax-stringify))))))
 
-(defun python-quote-syntax ()
-  "Put `syntax-table' property correctly on triple quote.
-Used for syntactic keywords.  N is the match number (1, 2 or 3)."
-  ;; Given a triple quote, we have to check the context to know
-  ;; whether this is an opening or closing triple or whether it's
-  ;; quoted anyhow, and should be ignored.  (For that we need to do
-  ;; the same job as `syntax-ppss' to be correct and it seems to be OK
-  ;; to use it here despite initial worries.)  We also have to sort
-  ;; out a possible prefix -- well, we don't _have_ to, but I think it
-  ;; should be treated as part of the string.
+(defsubst python-syntax-count-quotes (quote-char &optional point limit)
+  "Count number of quotes around point (max is 3).
+QUOTE-CHAR is the quote char to count.  Optional argument POINT is
+the point where scan starts (defaults to current point) and LIMIT
+is used to limit the scan."
+  (let ((i 0))
+    (while (and (< i 3)
+                (or (not limit) (< (+ point i) limit))
+                (eq (char-after (+ point i)) quote-char))
+      (incf i))
+    i))
 
-  ;; Test cases:
-  ;;  ur"""ar""" x='"' # """
-  ;; x = ''' """ ' a
-  ;; '''
-  ;; x '"""' x """ \"""" x
-  (save-excursion
-    (goto-char (match-beginning 0))
-    (let ((syntax (save-match-data (syntax-ppss))))
-      (cond
-       ((eq t (nth 3 syntax))           ; after unclosed fence
-        ;; Consider property for the last char if in a fenced string.
-        (goto-char (nth 8 syntax))  ; fence position
-        (skip-chars-forward "uUrR") ; skip any prefix
-        ;; Is it a matching sequence?
-        (if (eq (char-after) (char-after (match-beginning 2)))
-            (put-text-property (match-beginning 3) (match-end 3)
-                               'syntax-table (string-to-syntax "|"))))
-       ((match-end 1)
-        ;; Consider property for initial char, accounting for prefixes.
-        (put-text-property (match-beginning 1) (match-end 1)
-                           'syntax-table (string-to-syntax "|")))
-       (t
-        ;; Consider property for initial char, accounting for prefixes.
-        (put-text-property (match-beginning 2) (match-end 2)
-                           'syntax-table (string-to-syntax "|"))))
-      )))
+(defun python-syntax-stringify ()
+  "Put `syntax-table' property correctly on single/triple quotes."
+  (let* ((num-quotes
+          (let ((n (length (or (match-string-no-properties 1)
+                               (match-string-no-properties 2)))))
+            ;; This corrects the quote count when matching odd number
+            ;; of backslashes followed by even number of quotes.
+            (or (and (= 1 (logand n 1)) n) (1- n))))
+         (ppss (prog2
+                   (backward-char num-quotes)
+                   (syntax-ppss)
+                 (forward-char num-quotes)))
+         (string-start (and (not (nth 4 ppss)) (nth 8 ppss)))
+         (quote-starting-pos (- (point) num-quotes))
+         (quote-ending-pos (point))
+         (num-closing-quotes
+          (and string-start
+               (python-syntax-count-quotes
+                (char-before) string-start quote-starting-pos))))
+    (cond ((and string-start (= num-closing-quotes 0))
+           ;; This set of quotes doesn't match the string starting
+           ;; kind. Do nothing.
+           nil)
+          ((not string-start)
+           ;; This set of quotes delimit the start of a string.
+           (put-text-property quote-starting-pos (1+ quote-starting-pos)
+                              'syntax-table (string-to-syntax "|")))
+          ((= num-quotes num-closing-quotes)
+           ;; This set of quotes delimit the end of a string.
+           (put-text-property (1- quote-ending-pos) quote-ending-pos
+                              'syntax-table (string-to-syntax "|")))
+          ((> num-quotes num-closing-quotes)
+           ;; This may only happen whenever a triple quote is closing
+           ;; a single quoted string. Add string delimiter syntax to
+           ;; all three quotes.
+           (put-text-property quote-starting-pos quote-ending-pos
+                              'syntax-table (string-to-syntax "|"))))))
 
 (defvar python-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -588,10 +605,10 @@ It makes underscores and dots word constituent chars.")
   :safe 'booleanp)
 
 (define-obsolete-variable-alias
-  'python-indent 'python-indent-offset "24.2")
+  'python-indent 'python-indent-offset "24.3")
 
 (define-obsolete-variable-alias
-  'python-guess-indent 'python-indent-guess-indent-offset "24.2")
+  'python-guess-indent 'python-indent-guess-indent-offset "24.3")
 
 (defvar python-indent-current-level 0
   "Current indentation level `python-indent-line-function' is using.")
@@ -897,16 +914,27 @@ possible indentation levels and saves it in the variable
 `python-indent-levels'.  Afterwards it sets the variable
 `python-indent-current-level' correctly so offset is equal
 to (`nth' `python-indent-current-level' `python-indent-levels')"
-  (if (or (and (eq this-command 'indent-for-tab-command)
-               (eq last-command this-command))
-          force-toggle)
-      (if (not (equal python-indent-levels '(0)))
-          (python-indent-toggle-levels)
-        (python-indent-calculate-levels))
-    (python-indent-calculate-levels))
-  (beginning-of-line)
-  (delete-horizontal-space)
-  (indent-to (nth python-indent-current-level python-indent-levels))
+  (or
+   (and (or (and (eq this-command 'indent-for-tab-command)
+                 (eq last-command this-command))
+            force-toggle)
+        (not (equal python-indent-levels '(0)))
+        (or (python-indent-toggle-levels) t))
+   (python-indent-calculate-levels))
+  (let* ((starting-pos (point-marker))
+         (indent-ending-position
+          (+ (line-beginning-position) (current-indentation)))
+         (follow-indentation-p
+          (or (bolp)
+              (and (<= (line-beginning-position) starting-pos)
+                   (>= indent-ending-position starting-pos))))
+         (next-indent (nth python-indent-current-level python-indent-levels)))
+    (unless (= next-indent (current-indentation))
+      (beginning-of-line)
+      (delete-horizontal-space)
+      (indent-to next-indent)
+      (goto-char starting-pos))
+    (and follow-indentation-p (back-to-indentation)))
   (python-info-closing-block-message))
 
 (defun python-indent-line-function ()
@@ -1808,13 +1836,13 @@ there for compatibility with CEDET.")
     (get-buffer-process proc-buffer-name)))
 
 (define-obsolete-function-alias
-  'python-proc 'python-shell-internal-get-or-create-process "24.2")
+  'python-proc 'python-shell-internal-get-or-create-process "24.3")
 
 (define-obsolete-variable-alias
-  'python-buffer 'python-shell-internal-buffer "24.2")
+  'python-buffer 'python-shell-internal-buffer "24.3")
 
 (define-obsolete-variable-alias
-  'python-preoutput-result 'python-shell-internal-last-output "24.2")
+  'python-preoutput-result 'python-shell-internal-last-output "24.3")
 
 (defun python-shell-send-string (string &optional process msg)
   "Send STRING to inferior Python PROCESS.
@@ -1822,10 +1850,13 @@ When MSG is non-nil messages the first line of STRING."
   (interactive "sPython command: ")
   (let ((process (or process (python-shell-get-or-create-process)))
         (lines (split-string string "\n" t)))
-    (when msg
-      (message (format "Sent: %s..." (nth 0 lines))))
+    (and msg (message "Sent: %s..." (nth 0 lines)))
     (if (> (length lines) 1)
-        (let* ((temp-file-name (make-temp-file "py"))
+        (let* ((temporary-file-directory
+                (if (file-remote-p default-directory)
+                    (concat (file-remote-p default-directory) "/tmp")
+                  temporary-file-directory))
+               (temp-file-name (make-temp-file "py"))
                (file-name (or (buffer-file-name) temp-file-name)))
           (with-temp-file temp-file-name
             (insert string)
@@ -1836,31 +1867,45 @@ When MSG is non-nil messages the first line of STRING."
                 (string-match "\n[ \t].*\n?$" string))
         (comint-send-string process "\n")))))
 
+;; Shell output catching stolen from gud-gdb
+(defvar python-shell-fetch-lines-in-progress nil)
+(defvar python-shell-fetch-lines-string nil)
+(defvar python-shell-fetched-lines nil)
+
+(defun python-shell-fetch-lines-filter (string)
+  "Filter used to read the list of lines output by a command.
+STRING is the output to filter."
+  (setq string (concat python-shell-fetch-lines-string string))
+  (while (string-match "\n" string)
+    (push (substring string 0 (match-beginning 0))
+          python-shell-fetched-lines)
+    (setq string (substring string (match-end 0))))
+  (if (equal (string-match comint-prompt-regexp string) 0)
+      (progn
+        (setq python-shell-fetch-lines-in-progress nil)
+        string)
+    (progn
+      (setq python-shell-fetch-lines-string string)
+      "")))
+
 (defun python-shell-send-string-no-output (string &optional process msg)
   "Send STRING to PROCESS and inhibit output.
 When MSG is non-nil messages the first line of STRING.  Return
 the output."
-  (let* ((output-buffer "")
-         (process (or process (python-shell-get-or-create-process)))
-         (comint-preoutput-filter-functions
-          (append comint-preoutput-filter-functions
-                  '(ansi-color-filter-apply
-                    (lambda (string)
-                      (setq output-buffer (concat output-buffer string))
-                      ""))))
-         (inhibit-quit t))
+  (let ((process (or process (python-shell-get-or-create-process)))
+        (comint-preoutput-filter-functions
+         '(python-shell-fetch-lines-filter))
+        (python-shell-fetch-lines-in-progress t)
+        (inhibit-quit t))
     (or
      (with-local-quit
        (python-shell-send-string string process msg)
-       (accept-process-output process)
-       (replace-regexp-in-string
-        (if (> (length python-shell-prompt-output-regexp) 0)
-            (format "\n*%s$\\|^%s\\|\n$"
-                    python-shell-prompt-regexp
-                    (or python-shell-prompt-output-regexp ""))
-          (format "\n*$\\|^%s\\|\n$"
-                  python-shell-prompt-regexp))
-        "" output-buffer))
+       (while python-shell-fetch-lines-in-progress
+         (accept-process-output process))
+       (prog1
+           (mapconcat #'identity
+                      (reverse python-shell-fetched-lines) "\n")
+         (setq python-shell-fetched-lines nil)))
      (with-current-buffer (process-buffer process)
        (comint-interrupt-subjob)))))
 
@@ -1877,10 +1922,10 @@ Returns the output.  See `python-shell-send-string-no-output'."
          (python-shell-internal-get-or-create-process) nil)))
 
 (define-obsolete-function-alias
-  'python-send-receive 'python-shell-internal-send-string "24.2")
+  'python-send-receive 'python-shell-internal-send-string "24.3")
 
 (define-obsolete-function-alias
-  'python-send-string 'python-shell-internal-send-string "24.2")
+  'python-send-string 'python-shell-internal-send-string "24.3")
 
 (defun python-shell-send-region (start end)
   "Send the region delimited by START and END to inferior Python process."
@@ -1889,19 +1934,18 @@ Returns the output.  See `python-shell-send-string-no-output'."
 
 (defun python-shell-send-buffer (&optional arg)
   "Send the entire buffer to inferior Python process.
-
-With prefix ARG include lines surrounded by \"if __name__ == '__main__':\""
+With prefix ARG allow execution of code inside blocks delimited
+by \"if __name__== '__main__':\""
   (interactive "P")
   (save-restriction
     (widen)
-    (python-shell-send-region
-     (point-min)
-     (or (and
-          (not arg)
-          (save-excursion
-            (re-search-forward (python-rx if-name-main) nil t))
-          (match-beginning 0))
-         (point-max)))))
+    (let ((str (buffer-substring (point-min) (point-max))))
+      (and
+       (not arg)
+       (setq str (replace-regexp-in-string
+                  (python-rx if-name-main)
+                  "if __name__ == '__main__ ':" str)))
+      (python-shell-send-string str))))
 
 (defun python-shell-send-defun (arg)
   "Send the current defun to inferior Python process.
@@ -1932,8 +1976,14 @@ FILE-NAME."
   (interactive "fFile to send: ")
   (let* ((process (or process (python-shell-get-or-create-process)))
          (temp-file-name (when temp-file-name
-                           (expand-file-name temp-file-name)))
-         (file-name (or (expand-file-name file-name) temp-file-name)))
+                           (expand-file-name
+                            (or (file-remote-p temp-file-name 'localname)
+                                temp-file-name))))
+         (file-name (or (when file-name
+                          (expand-file-name
+                           (or (file-remote-p file-name 'localname)
+                               file-name)))
+                        temp-file-name)))
     (when (not file-name)
       (error "If FILE-NAME is nil then TEMP-FILE-NAME must be non-nil"))
     (python-shell-send-string
@@ -1953,11 +2003,10 @@ FILE-NAME."
   "Send all setup code for shell.
 This function takes the list of setup code to send from the
 `python-shell-setup-codes' list."
-  (let ((msg "Sent %s")
-        (process (get-buffer-process (current-buffer))))
+  (let ((process (get-buffer-process (current-buffer))))
     (dolist (code python-shell-setup-codes)
       (when code
-        (message (format msg code))
+        (message "Sent %s" code)
         (python-shell-send-string
          (symbol-value code) process)))))
 
@@ -2371,7 +2420,7 @@ the if condition."
   :safe 'booleanp)
 
 (define-obsolete-variable-alias
-  'python-use-skeletons 'python-skeleton-autoinsert "24.2")
+  'python-use-skeletons 'python-skeleton-autoinsert "24.3")
 
 (defvar python-skeleton-available '()
   "Internal list of available skeletons.")
