@@ -52,8 +52,8 @@
 ;; rst-mode
 (require 'init_rst)
 ;; smartchr
-;(require 'init_smartchr)
-(require 'init_key-combo)
+(require 'init_smartchr)
+;; (require 'init_key-combo)
 ;; migemo
 (require 'init_cmigemo)
 ;;; Elscreen
@@ -147,6 +147,7 @@
 (require 'init_go)
 (require 'init_viewer)
 (require 'init_keychord)
+(require 'init_pyregexp)
 
 ;;; private 設定
 (require 'init_private)

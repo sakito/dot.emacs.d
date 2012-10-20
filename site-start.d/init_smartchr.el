@@ -48,6 +48,10 @@
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"" "\"\"\"`!!'\"\"\"")))
   (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'")))
   (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd "#") (smartchr '("# " "### " "#")))
+  (local-set-key (kbd "=") (smartchr '("=" " = " " == ")))
+  (local-set-key (kbd "+") (smartchr '("+" " + " " += 1 ")))
+  (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1 ")))
   )
 
 (defun smartchr-custom-keybindings-rst ()
@@ -79,7 +83,7 @@
   (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
   (local-set-key (kbd "[") (smartchr '("[`!!']" "[")))
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
-  (local-set-key (kbd ";") (smartchr '(";;" ";")))
+  (local-set-key (kbd ";") (smartchr '(";; " ";")))
   (local-set-key (kbd ">") (smartchr '(">" " -> ")))
   )
 
