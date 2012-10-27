@@ -1,6 +1,6 @@
 ;;; ob-eval.el --- org-babel functions for external code evaluation
 
-;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research, comint
@@ -64,8 +64,8 @@ STDERR with `org-babel-eval-error-notify'."
 		    (buffer-string)))
 
 (defun org-babel-shell-command-on-region (start end command
-				      &optional output-buffer replace
-				      error-buffer display-error-buffer)
+						&optional output-buffer replace
+						error-buffer display-error-buffer)
   "Execute COMMAND in an inferior shell with region as input.
 
 Fixes bugs in the emacs 23.1.1 version of `shell-command-on-region'

@@ -1,6 +1,6 @@
 ;;; org-xoxo.el --- XOXO export for Org-mode
 
-;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2012  Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -49,7 +49,7 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
   (with-current-buffer (get-buffer buffer)
     (let* ((pos (point))
 	   (opt-plist (org-combine-plists (org-default-export-plist)
-					(org-infile-export-plist)))
+					  (org-infile-export-plist)))
 	   (filename (concat (file-name-as-directory
 			      (org-export-directory :xoxo opt-plist))
 			     (file-name-sans-extension
