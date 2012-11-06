@@ -122,7 +122,7 @@ class PylintRunner(LintRunner):
         #"I0011",  # Warning locally suppressed using disable-msg
         #"I0012",  # Warning locally suppressed using disable-msg
         #"W0511",  # FIXME/TODO
-        #"W0142",  # *args or **kwargs magic.
+        'W0142',  # *args or **kwargs magic.
         'R0904',  # Too many public methods
         'R0903',  # Too few public methods
         'R0201',  # Method could be a function
