@@ -73,10 +73,13 @@ source ${HOME}/local/bin/activate
 export WORKON_HOME=${HOME}/.virtualenvs
 #source ${HOME}/local/bin/virtualenvwrapper.sh
 export PIP_RESPECT_VIRTUALENV=true
+if [ -d ${HOME}/python/OpenCV-2.4.2/build/lib ];then
+    export PYTHONPATH=$PYTHONPATH:${HOME}/python/OpenCV-2.4.2/lib
+fi
 
 # mysql
-#export PATH=/usr/local/mysql/bin:${PATH}
-#export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
+export PATH=/usr/local/mysql/bin:${PATH}
+export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 
 # LaTeX
 export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
@@ -597,7 +600,7 @@ function hgflow() {
         # hgflow -s -n -m"test" t3
     else
         shift $((OPTIND -1))
-        ARGS=$*
+        ARGS=${*}
         echo "「hg flow ${FLAG_B} ${FLAG_S} ${ARGS} -m \"${MSG}\"」yes or no? "
         read yes_no
         if [ ${yes_no} = "yes" ]; then
@@ -610,12 +613,12 @@ function hgflow() {
 
 function hgfopen() {
     # hgfopen 3
-    hgflow -s -n -m "refs #$*" t{$*}
+    hgflow -s -n -m "refs #$*" t${*}
 }
 
 function hgfclose() {
     # hgfclose 3
-    hgflow -f -n -m "close #$*" t{$*}
+    hgflow -f -n -m "close #$*" t${*}
 }
 
 function hgfrelease() {
@@ -624,6 +627,19 @@ function hgfrelease() {
     hgflow -f -r -m "release $*" "$*"
     command hg flow develop
 }
+
+function hgfreo() {
+    # hgfreo v1.0
+    hgflow -s -r -m "release $*" "$*"
+}
+
+function hgfrec() {
+    # hgfrec v1.0
+    hgflow -f -r -m "release $*" "$*"
+    command hg flow develop
+}
+
+
 
 #-----------------------------------------------------------------
 # エイリアス設定
