@@ -88,7 +88,8 @@
 (set-frame-font "September-14")
 (set-fontset-font nil
                   'unicode
-                  (font-spec :family "IPAGothic")
+                  ;(font-spec :family "IPAGothic")
+                  (font-spec :family "September")
                   nil
                   'append)
 ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
