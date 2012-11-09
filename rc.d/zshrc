@@ -350,15 +350,16 @@ autoload -Uz compinit; compinit
 
 ## キャッシュの設定
 # 補完をキャッシュ
-zstyle ':completion:*' use-cache on
-# キャッシュファイル位置
-zstyle ':completion:*' cache-path ~/var/zsh/zsh_completion.cache
+zstyle ':completion:*' use-cache true
 # 補完時一部のblobを省略して高速化
 zstyle ':completion:*' accept-exact '*(N)'
+# キャッシュファイル位置
+zstyle ':completion:*' cache-path ~/var/zsh/zsh_completion.cache
 
 ## 補完設定
+# 補完をデバッグする場合は ^xh
 # 補完表示を全てする
-zstyle ':completion:*' verbose 'yes'
+zstyle ':completion:*' verbose true
 # 補完の機能を拡張
 zstyle ':completion:*' completer _expand _oldlist _complete _match _prefix _approximate _list _history
 # 補完候補で入力された文字でまず補完してみて、補完不可なら大文字小文字を変換して補完する
@@ -376,7 +377,7 @@ zstyle ':completion:*:descriptions' format "%{$fg[yellow]%}'completing %B%d%b'%f
 zstyle ':completion:*:corrections' format "%{$fg[yellow]%}'%B%d '%{$fg[red]%}'(errors: %e)%b'%f"
 
 # 補完説明を表示する
-zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:options' description true
 # sudo でも補完の対象とする
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
 # kill 補完で実行されるコマンドを指定
@@ -639,7 +640,21 @@ function hgfrec() {
     command hg flow develop
 }
 
-
+# python
+function pjson {
+    if [ $# -gt 0 ];
+    then
+        for arg in $@
+        do
+            if [ -f $arg ];
+            then
+                less $arg | python -m json.tool
+            else
+                echo "$arg" | python -m json.tool
+            fi
+        done
+    fi
+}
 
 #-----------------------------------------------------------------
 # エイリアス設定
