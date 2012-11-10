@@ -48,10 +48,10 @@
 ;;; バックアップファイルの保存位置指定[2002/03/02]
 ;; !path!to!file-name~ で保存される
 (setq backup-directory-alist
-      '(
-        ("^/etc/" . (expand-file-name "var/etc" user-emacs-directory))
-        ("." . (expand-file-name "var/emacs" user-emacs-directory))
-        ))
+      (list
+       (cons "^/etc/" (expand-file-name "var/etc" user-emacs-directory))
+       (cons "." (expand-file-name "var/emacs" user-emacs-directory))
+       ))
 
 ;; emacsclient を利用するためにサーバ起動
 ;; サーバが起動していた場合は先に起動していた方を優先
