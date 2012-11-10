@@ -50,7 +50,8 @@
   "Convert the document to a HTML file and launch a preview program."
   (interactive)
   (let* ((tmp-filename "/tmp/out.html")
-         (command (format "rst2html.py --template ~/.emacs.d/etc/rst/blog_template.txt --stylesheet-path ~/.emacs.d/etc/rst/sourcecode.css %s %s && %s %s"
+         (command (format "rst2html.py --template %s/etc/rst/blog_template.txt --stylesheet-path %s/etc/rst/sourcecode.css %s %s && %s %s"
+                          user-emacs-directory user-emacs-directory
                           buffer-file-name tmp-filename
                           rst-html-program tmp-filename)))
     (start-process-shell-command "rst-html-preview" nil command)

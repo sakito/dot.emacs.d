@@ -27,6 +27,7 @@
 ;; womanの設定ファイル
 
 ;;; Code:
+(require 'woman)
 
 ;; M-x woman
 ;; @see http://centaur.maths.qmw.ac.uk/Emacs/WoMan/
@@ -37,7 +38,8 @@
                       "/sw/share/man" "/usr/share/man/ja_JP.ujis"))
 
 ;; 初回起動が遅いので cache 作成。 際作成はC-u M-x woman
-(setq woman-cache-filename (expand-file-name "~/.emacs.d/var/woman_cache"))
+(setq woman-cache-filename
+      (expand-file-name "var/woman_cache" user-emacs-directory))
 
 ;; 新しく frame は作らない。
 (setq woman-use-own-frame nil)

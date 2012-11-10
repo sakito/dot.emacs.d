@@ -50,7 +50,8 @@
 
 (eval-after-load "rng-loc"
   '(progn
-     (add-to-list 'rng-schema-locating-files (expand-file-name "etc/schema/schemas.xml" user-emacs-directory))
+     (add-to-list 'rng-schema-locating-files
+                  (expand-file-name "etc/schema/schemas.xml" user-emacs-directory))
      ))
 
 (provide 'init_nxml)

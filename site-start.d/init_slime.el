@@ -148,7 +148,8 @@
 ;; @see http://www.uuhaus.de/software/cltl2.el
 ;; @see http://d.hatena.ne.jp/kitokitoki/20100912/p1
 (require 'cltl2)
-(setq cltl2-root-url (concat  "file://" (expand-file-name user-emacs-directory) "share/cltl/"))
+(setq cltl2-root-url
+      (concat  "file://" (expand-file-name "share/cltl/" user-emacs-directory)))
 
 ;; cltl2 を w3m で見る
 (defadvice cltl2-lookup (around cltl2-lookup-by-w3m () activate)
@@ -285,8 +286,10 @@
 
 ;; slime scratch を保存する
 (require 'slime-scratch-log)
-(setq slsl-slime-scratch-log-file (expand-file-name "var/slime-scratch.log" user-emacs-directory))
-(setq slsl-prev-slime-scratch-string-file (expand-file-name "var/slime-scratch-prev.log" user-emacs-directory))
+(setq slsl-slime-scratch-log-file
+      (expand-file-name "var/slime-scratch.log" user-emacs-directory))
+(setq slsl-prev-slime-scratch-string-file
+      (expand-file-name "var/slime-scratch-prev.log" user-emacs-directory))
 
 ;; slime-scratch
 (defun skt:slime-scratch ()

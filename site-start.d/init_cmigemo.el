@@ -27,7 +27,8 @@
 (setq migemo-command "cmigemo")
 (setq migemo-options '("-q" "--emacs" "-i" "\a"))
 ;; migemo-dict のパスを指定
-(setq migemo-dictionary "~/.emacs.d/etc/migemo/utf-8/migemo-dict")
+(setq migemo-dictionary
+      (expand-file-name "etc/migemo/utf-8/migemo-dict" user-emacs-directory))
 (setq migemo-user-dictionary nil)
 (setq migemo-regex-dictionary nil)
 

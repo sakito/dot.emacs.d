@@ -42,7 +42,8 @@
 ;; (ac-config-default)
 
 ;; 辞書ディレクトリの設定
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
+(add-to-list 'ac-dictionary-directories
+             (expand-file-name "lisp/auto-complete/dict" user-emacs-directory))
 
 ;; デフォルトの補完候補
 (set-default 'ac-sources '(ac-source-yasnippet
@@ -88,8 +89,7 @@
 
 ;; ソートファイルの保存場所を変更
 (setq ac-comphist-file
-      (expand-file-name (concat user-emacs-directory
-                                "/var/ac-comphist.dat")))
+      (expand-file-name "var/ac-comphist.dat" user-emacs-directory))
 
 ;; @see http://nschum.de/src/emacs/company-mode/
 ;; @see http://github.com/buzztaiki/auto-complete/blob/master/ac-company.el

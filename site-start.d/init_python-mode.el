@@ -30,8 +30,10 @@
 
 ;;; Code:
 
-(setenv "PYTHONSTARTUP" (expand-file-name "~/.emacs.d/rc.d/pythonrc.py"))
-(setenv "PYTHONPATH" (expand-file-name "~/local/lib/python2.7/site-packages"))
+(setenv "PYTHONSTARTUP"
+        (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
+(setenv "PYTHONPATH"
+        (expand-file-name "~/local/lib/python2.7/site-packages"))
 
 (autoload 'python-mode "python-mode" "Python editing mode." t)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
@@ -128,7 +130,8 @@
 
 ;; @see http://tic-tacs.blogspot.com/2012/01/emacsauto-complete-pycompletepython.html
 (eval-after-load "pymacs"
-  '(add-to-list 'pymacs-load-path "~/.emacs.d/lisp/python-mode"))
+  '(add-to-list 'pymacs-load-path
+                (expand-file-name "lisp/python-mode" user-emacs-directory)))
 (add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
 ;; auto-completeでpycompleteを渡すための設定
 (defvar ac-source-pycomplete

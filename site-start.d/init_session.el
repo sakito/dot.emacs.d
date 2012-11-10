@@ -46,8 +46,7 @@
   (setq session-set-file-name-exclude-regexp
         "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.cache\\|\\.howm-kyes")
   (setq session-save-file
-        (expand-file-name (concat user-emacs-directory
-                                  "/var/session/session.cache")))
+        (expand-file-name "var/session/session.cache" user-emacs-directory))
   ;; 30 分で自動保存
   (defvar my-timer-for-session-save-session (run-at-time t (* 30 60) 'session-save-session))
   (add-hook 'after-init-hook 'session-initialize))

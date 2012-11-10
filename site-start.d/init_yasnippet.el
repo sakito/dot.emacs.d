@@ -30,7 +30,8 @@
 (require 'yasnippet)
 
 ;; snippet のディレクトリを設定
-(setq yas/root-directory "~/.emacs.d/etc/snippets")
+(setq yas/root-directory
+      (expand-file-name "etc/snippets" user-emacs-directory))
 ;; 複数ディレクトリの場合は以下のようにする
 ;; (setq yas/root-directory '("~/.emacs.d/lisp/yasnippet-0.6.1c/snippets"
 ;;                            "~/.emacs.d/etc/snippets"))

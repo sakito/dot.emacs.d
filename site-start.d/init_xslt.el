@@ -48,7 +48,8 @@
 
 ;;; XSLT-process
 ;; http://xslt-process.sourceforge.net/
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/xslt-process-2.2/lisp"))
+(add-to-list 'load-path
+             (expand-file-name "lisp/xslt-process-2.2/lisp" user-emacs-directory))
 (autoload 'xslt-process-mode "xslt-process" "Emacs XSLT processing" t)
 (autoload 'xslt-process-install-docbook "xslt-process"
   "Register the DocBook package with XSLT-process" t)

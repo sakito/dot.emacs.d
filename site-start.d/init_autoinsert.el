@@ -34,7 +34,8 @@
 
 ;; テンプレートとなるファイルがあるディレクトリ
 ;; 末尾に"/"が必要なので注意
-(setq auto-insert-directory "~/.emacs.d/etc/autoinsert/")
+(setq auto-insert-directory
+      (expand-file-name "etc/autoinsert/" user-emacs-directory))
 
 ;; 質問しないで auto-insertを実行する
 (setq auto-insert-query nil)

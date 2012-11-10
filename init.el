@@ -2,7 +2,7 @@
 
 ;;init.el -- Emacs init setting elisp file
 
-;; Copyright (C) 2010  sakito
+;; Copyright (C) 2010-2012 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -39,13 +39,15 @@
   (defvar user-emacs-directory (expand-file-name "~/.emacs.d/")))
 
 ;; 引数を load-path へ追加
-;; normal-top-level-add-subdirs-to-load-path はディレクトリ中の中で
-;; [A-Za-z] で開始する物だけ追加するので、追加したくない物は . や _ を先頭に付与しておけばロードしない
+;; normal-top-level-add-subdirs-to-load-path はディレクトリ中で
+;; [A-Za-z] で開始する物だけ追加する。
+;; 追加したくない物は . や _ を先頭に付与しておけばロードしない
 ;; dolist は Emacs 21 から標準関数なので積極的に利用して良い
 (defun add-to-load-path (&rest paths)
   (let (path)
     (dolist (path paths paths)
-      (let ((default-directory (expand-file-name (concat user-emacs-directory path))))
+      (let ((default-directory
+              (expand-file-name (concat user-emacs-directory path))))
         (add-to-list 'load-path default-directory)
         (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
             (normal-top-level-add-subdirs-to-load-path))))))
@@ -54,7 +56,8 @@
 (add-to-load-path "lisp"
                   ;; 変更したり、自作の Emacs Lisp
                   "local-lisp"
-                  ;; private 内には自分専用の物がはいっている。依存は private 内で完結するようにしている
+                  ;; private 内には自分専用の物がはいっている
+                  ;; 依存は private 内で完結するようにしている
                   "private"
                   ;; 初期設定ファイル
                   "site-start.d")
@@ -115,23 +118,32 @@
  )
 
 ;; custom-file
-(setq custom-file (expand-file-name "private/customize.el" user-emacs-directory))
+(setq custom-file
+      (expand-file-name "private/customize.el" user-emacs-directory))
 
 ;; 終了時バイトコンパイル
 (add-hook 'kill-emacs-query-functions
           (lambda ()
-            (if (file-newer-than-file-p (concat user-emacs-directory "init.el") (concat user-emacs-directory "init.elc"))
-                (byte-compile-file (concat user-emacs-directory "init.el")))
-            (byte-recompile-directory (concat user-emacs-directory "local-lisp") 0)
-            (byte-recompile-directory (concat user-emacs-directory "private") 0)
-            (byte-recompile-directory (concat user-emacs-directory "site-start.d") 0)
+            (if (file-newer-than-file-p
+                 (expand-file-name "init.el" user-emacs-directory)
+                 (expand-file-name "init.elc" user-emacs-directory))
+                (byte-compile-file
+                 (expand-file-name "init.el" user-emacs-directory)))
+            (byte-recompile-directory
+             (expand-file-name "local-lisp" user-emacs-directory) 0)
+            (byte-recompile-directory
+             (expand-file-name "private" user-emacs-directory) 0)
+            (byte-recompile-directory
+             (expand-file-name "site-start.d" user-emacs-directory) 0)
             ))
 
 ;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
 (when (or emacs23-p emacs24-p)
   (defun message-startup-time ()
     (message "Emacs loaded in %dms"
-             (/ (- (+ (third after-init-time) (* 1000000 (second after-init-time)))
-                   (+ (third before-init-time) (* 1000000 (second before-init-time))))
+             (/ (- (+ (third after-init-time)
+                      (* 1000000 (second after-init-time)))
+                   (+ (third before-init-time)
+                      (* 1000000 (second before-init-time))))
                 1000)))
   (add-hook 'after-init-hook 'message-startup-time))

@@ -49,8 +49,8 @@
 ;; !path!to!file-name~ で保存される
 (setq backup-directory-alist
       '(
-        ("^/etc/" . "~/.emacs.d/var/etc")
-        ("." . "~/.emacs.d/var/emacs")
+        ("^/etc/" . (expand-file-name "var/etc" user-emacs-directory))
+        ("." . (expand-file-name "var/emacs" user-emacs-directory))
         ))
 
 ;; emacsclient を利用するためにサーバ起動

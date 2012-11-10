@@ -26,8 +26,10 @@
 (require 'python)
 
 ;; env
-(setenv "PYTHONSTARTUP" (expand-file-name "~/.emacs.d/rc.d/pythonrc.py"))
-(setenv "PYTHONPATH" (expand-file-name "~/local/lib/python2.7/site-packages"))
+(setenv "PYTHONSTARTUP"
+        (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
+(setenv "PYTHONPATH"
+        (expand-file-name "~/local/lib/python2.7/site-packages"))
 
 ;; mode
 (add-to-list 'auto-mode-alist '("\\.cgi\\'" . python-mode))
@@ -78,7 +80,8 @@
 ;; 補完
 ;; @see http://tic-tacs.blogspot.com/2012/01/emacsauto-complete-pycompletepython.html
 (eval-after-load "pymacs"
-  '(add-to-list 'pymacs-load-path "~/.emacs.d/lisp/python-mode"))
+  '(add-to-list 'pymacs-load-path
+                (expand-file-name "lisp/python-mode" user-emacs-directory)))
 (add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
 
 ;; auto-complete

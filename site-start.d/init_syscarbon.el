@@ -30,12 +30,12 @@
 ;; 基本的にデバッグ時しか起動しない
 (setq debug-on-error t)
 
-(load "~/.emacs.d/lisp/ac/popup.el")
-(load "~/.emacs.d/lisp/ac/auto-complete.el")
-(load "~/.emacs.d/lisp/ac/auto-complete-config.el")
-(load "~/.emacs.d/lisp/ac/company.el")
-(load "~/.emacs.d/lisp/ac/company-xcode.el")
-(load "~/.emacs.d/lisp/ac/ac-company.el")
+(load (expand-file-name "lisp/ac/popup.el" user-emacs-directory))
+(load (expand-file-name "lisp/ac/auto-complete.el" user-emacs-directory))
+(load (expand-file-name "lisp/ac/auto-complete-config.el" user-emacs-directory))
+(load (expand-file-name "lisp/ac/company.el" user-emacs-directory))
+(load (expand-file-name "lisp/ac/company-xcode.el" user-emacs-directory))
+(load (expand-file-name "lisp/ac/ac-company.el" user-emacs-directory))
 
 ;; objc の設定
 (require 'init_ac)

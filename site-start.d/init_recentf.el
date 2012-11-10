@@ -28,7 +28,8 @@
 ;; @see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
 (require 'recentf-ext)
 ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
-(setq recentf-save-file (expand-file-name "var/recentf.cache" user-emacs-directory))
+(setq recentf-save-file
+      (expand-file-name "var/recentf.cache" user-emacs-directory))
 
 ;; @see http://masutaka.net/chalow/2011-10-30-2.html
 (defvar my-recentf-list-prev nil)

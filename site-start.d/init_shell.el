@@ -62,7 +62,7 @@
              ;; 実行する shell の設定
              (setq multi-term-program shell-file-name)
              ;; default-directory が存在しなかった場合に開くディレクトリ
-             (setq multi-term-default-dir "~/.emacs.d")
+             (setq multi-term-default-dir user-emacs-directory)
              ;; 一部キーが取られるので無視設定
              ;; デフォルトは '("C-z" "C-x" "C-c" "C-h" "C-y" "<ESC>")
              (add-to-list 'term-unbind-key-list '"M-x")
