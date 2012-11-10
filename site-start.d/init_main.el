@@ -128,7 +128,7 @@
 (require 'init_po)
 ;; w3m
 (require 'init_w3m)
-;; navi2ch 常時利用はしないことにしました
+;; navi2ch
 (require 'init_navi2ch)
 ;; irc
 ;; (require 'init_irc)
@@ -144,7 +144,9 @@
 (require 'init_pyregexp)
 
 ;;; private 設定
+(require 'init_modeline)
 (require 'init_private)
+(require 'init_adhoc)
 
 (provide 'init_main)
-;;end emacs23.el
+;;end init_main.el
