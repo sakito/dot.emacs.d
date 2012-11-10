@@ -160,7 +160,10 @@
 (setq anything-allow-skipping-current-buffer nil)
 
 ;; M-yでkill-ringの内容をanythingする
-(global-set-key (kbd "M-y") 'anything-show-kill-ring)
+;;(global-set-key (kbd "M-y") 'anything-show-kill-ring)
+(require 'popup-kill-ring)
+(setq popup-kill-ring-item-size-max 1000)
+(global-set-key (kbd "M-y") 'popup-kill-ring)
 
 ;;; anything-c-moccurの設定
 ;; see http://d.hatena.ne.jp/IMAKADO/20080724/1216882563
