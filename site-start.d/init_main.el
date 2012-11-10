@@ -142,6 +142,7 @@
 (require 'init_viewer)
 (require 'init_keychord)
 (require 'init_pyregexp)
+(require 'init_expand-region)
 
 ;;; private 設定
 (require 'init_modeline)

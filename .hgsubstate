@@ -1,3 +1,5 @@
+12472db6496b255937d024416c881c8e1f71ac87 local-lisp/expand-region
+23d684160dd24201ad0a1147478b984df1b238ca local-lisp/mark-multiple
 39e26ca01fabcaa6f20d4638f56f9866a82f2b1f rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh
 68482454cf9dfb89e53bf1ab6fa713cae5693ae0 rc.d/zsh.d/plugins/zaw
