@@ -1,8 +1,8 @@
 ;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
 
-;;emacs23.el -- emacs23 init setting elisp file
+;;init_main.el -- init main setting elisp file
 
-;; Copyright (C) 2009-2010  sakito
+;; Copyright (C) 2009-2012 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -83,8 +83,6 @@
 (require 'init_gauche)
 ;;; OCaml
 (require 'init_ocaml)
-;;; JDEE
-;(require 'init_jdee)
 ;;;; sql-mode
 (require 'init_sql)
 ;;; mmm-mode
@@ -112,7 +110,6 @@
 ;;(require 'init_sdic)
 ;; Dictionary.app 呼びだし
 (require 'init_adic)
-(define-key global-map "\C-cw" 'ite-dict-func)
 ;; AUC TeX
 ;; (require 'init_auctex)
 ;; htmlhelperの設定
@@ -127,10 +124,8 @@
 (require 'init_haskell)
 ;; php-mode
 (require 'init_php)
-
-(autoload 'po-mode "po-mode" "Major mode for translators when they edit PO files." t)
-(eval-after-load 'po-mode '(load "gb-po-mode"))
-
+;; po-mode
+(require 'init_po)
 ;; w3m
 (require 'init_w3m)
 ;; navi2ch 常時利用はしないことにしました
@@ -139,7 +134,6 @@
 ;; (require 'init_irc)
 
 (require 'init_speedbar)
-
 (require 'init_org)
 (require 'init_slime)
 (require 'init_calendar)

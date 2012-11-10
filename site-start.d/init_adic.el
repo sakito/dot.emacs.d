@@ -32,7 +32,7 @@
   (setq w_edit (selected-window))
   (setq w_dict (split-window w_edit (- (window-height) 15)))
   (setq w_gross (split-window w_dict nil t))
-  
+
   ;
   ;(insert word "\n")
   ;(start-process "dict-process" tmpbuf "dict.py" word)
@@ -136,7 +136,7 @@
     ;         (url-hexify-string (buffer-substring-no-properties beg end))))
 ))
 
-
+(define-key global-map "\C-cw" 'ite-dict-func)
 
 (provide 'init_adic)
 ;;; init_adic.el ends here

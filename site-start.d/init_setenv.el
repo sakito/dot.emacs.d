@@ -35,7 +35,6 @@
                "/usr/sbin"
                "/bin"
                "/usr/bin"
-               "/sw/bin"
                "/opt/local/bin"
                "/usr/local/bin"
                (expand-file-name "~/bin")
@@ -46,7 +45,12 @@
     (setenv "PATH" (concat dir ":" (getenv "PATH")))
     (setq exec-path (append (list dir) exec-path))))
 
-(setenv "MANPATH" (concat "/usr/local/man:/usr/share/man:/Developer/usr/share/man:/sw/share/man" (getenv "MANPATH")))
+(setenv "MANPATH"
+        (concat "/usr/local/man:/usr/share/man:"
+                "/Developer/usr/share/man:"
+                "/Applications/Xcode.app/Contents/Developer/usr/share/man:"
+                "/opt/local/share/man:"
+                (getenv "MANPATH")))
 
 (setenv "JAVA_OPTS" "-Dfile.encoding=UTF-8")
 
