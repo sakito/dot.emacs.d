@@ -84,12 +84,17 @@
                 (expand-file-name "lisp/python-mode" user-emacs-directory)))
 (add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
 
-;; auto-complete
-(defun ac-python-mode-setup ()
-  (setq ac-sources (append ;;'(ac-source-python)
-                           ac-sources)))
-(add-hook 'python-mode-hook 'ac-python-mode-setup)
+;; jedi
+(require 'jedi)
 
+;; auto-complete
+;(defun ac-python-mode-setup ()
+;  (setq ac-sources (append ;;'(ac-source-python)
+;                    ac-sources)))
+;(add-hook 'python-mode-hook 'ac-python-mode-setup)
+(add-hook 'python-mode-hook 'jedi:ac-setup)
+
+;; 独自関数
 (defun skt:python-import-modules-from-buffer ()
   (interactive)
   (with-current-buffer (current-buffer)
