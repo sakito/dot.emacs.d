@@ -33,6 +33,9 @@
 ;; 常時デバッグ状態
 (setq debug-on-error t)
 
+;; cl 利用前提
+(eval-when-compile (require 'cl))
+
 ;; Emacs 設定ディレクトリを設定。Emacs 22以下用
 ;; Emacs 23.1 以上では user-emacs-directory 変数が用意されているのでそれを利用
 (unless (boundp 'user-emacs-directory)
@@ -115,6 +118,7 @@
  (mac-p (require 'init_main))
  (carbon-p (require 'init_syscarbon))
  (ns-p (require 'init_sysns))
+ (t (require 'init_main))
  )
 
 ;; custom-file
