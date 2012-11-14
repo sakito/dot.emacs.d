@@ -27,6 +27,21 @@
 ;; 
 
 ;;; Code:
+
+;; byte-recompile
+(defun skt:byte-recompile ()
+  "ディレクトリ内の el ファイルをバイトコンパイル"
+  (interactive)
+  (byte-recompile-directory
+   (expand-file-name "local-lisp" user-emacs-directory) 0)
+  (byte-recompile-directory
+   (expand-file-name "lisp" user-emacs-directory) 0)
+  (byte-recompile-directory
+   (expand-file-name "private" user-emacs-directory) 0)
+  (byte-recompile-directory
+   (expand-file-name "site-start.d" user-emacs-directory) 0)
+  )
+
 ;;; 時間を挿入する
 ;; time-stamp.el [2002/02/24]
 ;; 更新日を挿入する

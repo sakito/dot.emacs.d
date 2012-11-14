@@ -134,10 +134,6 @@
                 (byte-compile-file
                  (expand-file-name "init.el" user-emacs-directory) 0))
             (byte-recompile-directory
-             (expand-file-name "local-lisp" user-emacs-directory) 0)
-            (byte-recompile-directory
-             (expand-file-name "private" user-emacs-directory) 0)
-            (byte-recompile-directory
              (expand-file-name "site-start.d" user-emacs-directory) 0)
             ))
 
