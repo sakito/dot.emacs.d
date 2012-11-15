@@ -146,8 +146,8 @@
 
 ;;; private 設定
 (require 'init_modeline)
-(require 'init_private)
-(require 'init_adhoc)
+(when mac-p
+  (require 'init_private))
 
 (provide 'init_main)
 ;;end init_main.el

@@ -87,7 +87,7 @@
         anything-c-source-files-in-current-dir+
         anything-c-source-extended-command-history
         anything-c-source-emacs-commands
-        anything-c-source-kill-ring
+        ;; anything-c-source-kill-ring
         anything-c-source-bookmarks
 ;;        anything-c-source-buffer-not-found
 ;;        anything-c-source-mac-spotlight
