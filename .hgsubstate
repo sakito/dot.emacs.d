@@ -1,8 +1,9 @@
 0f006c2c703d2cba8635db90a58bdc65eaa6703f local-lisp/ctable
 bfec8e17414e5debf0418f362ea7fc60e38abc38 local-lisp/deferred
-152e6e10a79b56ebc7568054589cf6c3c44595c7 local-lisp/epc
+73bbbdea70f264a37b8332ca7816670107dfe92f local-lisp/epc
 12472db6496b255937d024416c881c8e1f71ac87 local-lisp/expand-region
-afb0a8f1bd23396587b86dfd3e0a19be4df7a667 local-lisp/jedi
+55d128749cc070551a1624a4508d1c4f6d76f7cf local-lisp/flex-autopair
+4ab982c1f72737bf88f753bf53c6ce024264416d local-lisp/jedi
 23d684160dd24201ad0a1147478b984df1b238ca local-lisp/mark-multiple
 39e26ca01fabcaa6f20d4638f56f9866a82f2b1f rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh
