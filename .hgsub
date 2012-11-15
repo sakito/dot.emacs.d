@@ -7,4 +7,5 @@ local-lisp/deferred = [git]git://github.com/kiwanami/emacs-deferred.git
 local-lisp/ctable = [git]git://github.com/kiwanami/emacs-ctable.git
 local-lisp/epc = [git]git://github.com/kiwanami/emacs-epc.git
 local-lisp/jedi = [git]git://github.com/tkf/emacs-jedi.git
+local-lisp/key-combo = [git]git://github.com/uk-ar/key-combo.git
 local-lisp/flex-autopair = [git]git://github.com/uk-ar/flex-autopair.git
