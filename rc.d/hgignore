@@ -36,3 +36,4 @@ target/*
 dist/*
 .tox/*
 .cache/*
+.lock-waf_darwin_build

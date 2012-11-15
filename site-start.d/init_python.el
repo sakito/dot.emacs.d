@@ -67,6 +67,7 @@
                           (file-name-directory buffer-file-name))))
         (list "lintrunner.exe" (list local-file))))
     (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
+    (add-to-list 'flymake-allowed-file-name-masks '("wscript$" flymake-python-init))
     (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
 
 ;; Pymacs
