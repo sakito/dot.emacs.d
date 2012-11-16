@@ -398,7 +398,7 @@ zstyle ':completion:*' recent-dirs-insert both
 # plugin
 #-----------------------------------------------------------------
 # rm -f ~/.zcompdump; compinit
-fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions $fpath)
+fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
 
 #unsetopt auto_remove_slash
 unsetopt sh_word_split

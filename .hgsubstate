@@ -4,9 +4,9 @@ bfec8e17414e5debf0418f362ea7fc60e38abc38 local-lisp/deferred
 73bbbdea70f264a37b8332ca7816670107dfe92f local-lisp/epc
 12472db6496b255937d024416c881c8e1f71ac87 local-lisp/expand-region
 55d128749cc070551a1624a4508d1c4f6d76f7cf local-lisp/flex-autopair
-4ab982c1f72737bf88f753bf53c6ce024264416d local-lisp/jedi
+4ed6ea940a6dee305ca0387434392212b99c6e9a local-lisp/jedi
 5c9a8fce47a6cdba1876f9cd301f0b96aa8dfd2f local-lisp/key-combo
 23d684160dd24201ad0a1147478b984df1b238ca local-lisp/mark-multiple
-39e26ca01fabcaa6f20d4638f56f9866a82f2b1f rc.d/zsh.d/completions
+c9d9512df479075b1540aff41e157e2b4062f4db rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh
 68482454cf9dfb89e53bf1ab6fa713cae5693ae0 rc.d/zsh.d/plugins/zaw
