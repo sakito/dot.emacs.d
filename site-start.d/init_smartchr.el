@@ -29,7 +29,6 @@
 
 ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
 (defun smartchr-custom-keybindings ()
-;;  (local-set-key (kbd "=") (smartchr '(" = " " == "  "="))) この設定は結構不便
   ;; !! がカーソルの位置
   (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
   (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -38,6 +37,7 @@
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
   (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'")))
   (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd ";") (smartchr '(";; " ";")))
   )
 
 (defun smartchr-custom-keybindings-py ()
@@ -46,12 +46,12 @@
   (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
   (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"" "\"\"\"`!!'\"\"\"")))
-  (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'")))
+  (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'" "\'\'\'`!!'\'\'\'")))
   (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
   (local-set-key (kbd "#") (smartchr '("# " "### " "#")))
-  (local-set-key (kbd "=") (smartchr '("=" " = " " == ")))
-  (local-set-key (kbd "+") (smartchr '("+" " + " " += 1 ")))
-  (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1 ")))
+  (local-set-key (kbd "=") (smartchr '(" = " " == " "=")))
+  (local-set-key (kbd "+") (smartchr '(" + " " += 1 " "+")))
+  (local-set-key (kbd "-") (smartchr '(" - " " -= 1 " "-" )))
   )
 
 (defun smartchr-custom-keybindings-rst ()
@@ -61,6 +61,7 @@
   (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
   (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd ".") (smartchr '("." ".. ")))
   )
 
 (defun smartchr-custom-keybindings-objc ()
@@ -108,12 +109,12 @@
               'nxml-mode-hook
               'js2-mode-hook
               'lisp-mode-hook
+              'emacs-lisp-mode-hook
               'sql-mode-hook
               ))
   (add-hook hook 'smartchr-custom-keybindings))
 
 (dolist (hook (list
-              'emacs-lisp-mode-hook
               'makefile-mode-hook
               ))
   (add-hook hook 'skelton-custom-keybindigs))
