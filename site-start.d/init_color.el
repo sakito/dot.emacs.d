@@ -78,59 +78,72 @@
 ;; japanese-jisx0213.2004-1 = japanese-jisx0213-a + japanese-jisx0213-1
 ;; japanese-jisx0213-1 = japanese-jisx0208 のほぼ上位互換
 ;; japanese-jisx0213-2 = code-offset #x150000
-;; japanese-jisx0212 = code-offset #x148000 
+;; japanese-jisx0212 = code-offset #x148000
 ;; japanese-jisx0208 = code-offset #x140000
 (when mac-p
-(set-face-attribute 'default
-                    nil
-                    :family "September"
-                    :height 140)
-(set-frame-font "September-14")
-(set-fontset-font nil
-                  'unicode
-                  ;(font-spec :family "IPAGothic")
-                  (font-spec :family "September")
-                  nil
-                  'append)
-;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
-;; http://apagreekkeys.org/NAUdownload.html
-(set-fontset-font nil
-                  'greek-iso8859-7
-                  (font-spec :family "New Athena Unicode")
-                  nil
-                  'prepend)
-;; 一部の文字を September にする
-;; 記号         3000-303F http://www.triggertek.com/r/unicode/3000-303F
-;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
-;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
-(set-fontset-font nil
-                  '( #x3000 .  #x30ff)
-                  (font-spec :family "September")
-                  nil
-                  'prepend)
-;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
-(set-fontset-font nil
-                  '( #xff00 .  #xffef)
-                  (font-spec :family "September")
-                  nil
-                  'prepend)
-)
-
-;; 等幅のフォントセットを幾つか作成予定
-(when (find-font (font-spec :family "Ricty"))
-  ;; http://save.sys.t.u-tokyo.ac.jp/~yusa/fonts/ricty.html
-  ;; (add-to-list 'default-frame-alist '(font . "Ricty-16"))
-  )
-
-(when (find-font (font-spec :family "Menlo"))
-  ;; ヒラギノ 角ゴ ProN + Menlo
-  (create-fontset-from-ascii-font "Menlo-14" nil "menlokakugo")
-  (set-fontset-font "fontset-menlokakugo"
+  (set-face-attribute 'default
+                      nil
+                      :family "September"
+                      :height 140)
+  (set-frame-font "September-14")
+  (set-fontset-font nil
                     'unicode
-                    (font-spec :family "Hiragino Kaku Gothic ProN" :size 16))
-  ;; 確認用 (set-frame-font "fontset-menlokakugo")
-  ;; (add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))  ;; 実際に設定する場合
+                    ;; (font-spec :family "IPAGothic")
+                    (font-spec :family "September")
+                    nil
+                    'append)
+  ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
+  ;; http://apagreekkeys.org/NAUdownload.html
+  (set-fontset-font nil
+                    'greek-iso8859-7
+                    (font-spec :family "New Athena Unicode")
+                    nil
+                    'prepend)
+  ;; 一部の文字を September にする
+  ;; 記号         3000-303F http://www.triggertek.com/r/unicode/3000-303F
+  ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
+  ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
+  (set-fontset-font nil
+                    '( #x3000 .  #x30ff)
+                    (font-spec :family "September")
+                    nil
+                    'prepend)
+  ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
+  (set-fontset-font nil
+                    '( #xff00 .  #xffef)
+                    (font-spec :family "September")
+                    nil
+                    'prepend)
+
+  ;; その他サンプル設定
+  (when (find-font (font-spec :family "Menlo"))
+    ;; ヒラギノ 角ゴ ProN + Menlo
+    (create-fontset-from-ascii-font "Menlo-14" nil "menlokakugo")
+    (set-fontset-font "fontset-menlokakugo"
+                      'unicode
+                      (font-spec :family "Hiragino Kaku Gothic ProN" :size 16))
+    ;; 確認用 (set-frame-font "fontset-menlokakugo")
+    ;; (add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))  ;; 実際に設定する場合
+    )
   )
+
+;; linux では Ricty を利用している
+(when linux-p
+  (when (find-font (font-spec :family "Ricty"))
+    ;; http://save.sys.t.u-tokyo.ac.jp/~yusa/fonts/ricty.html
+    (set-face-attribute 'default
+                        nil
+                        :family "Ricty"
+                        :height 140)
+    (add-to-list 'default-frame-alist '(font . "Ricty-14"))
+    (set-fontset-font nil
+                      'unicode
+                      (font-spec :family "Ricty")
+                      nil
+                      'append)
+    ;; (set-frame-font "Ricty-16:weight=normal:slant=normal")
+    ;; (set-frame-font "Aicty-14:weight=normal:slant=normal")
+    ))
 
 
 ;; フォントロックの設定
@@ -200,11 +213,13 @@
      (cond
       (mac-p
        (require 'color-theme-dark)
-       (color-theme-dark)
-       )
+       (color-theme-dark))
       (windows-p
        (require 'color-theme-ntemacs)
        (color-theme-ntemacs))
+      (t
+       (require 'color-theme-dark)
+       (color-theme-dark))
       )))
 
 ;; face を調査するための関数
