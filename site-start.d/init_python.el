@@ -34,6 +34,7 @@
 ;; mode
 (add-to-list 'auto-mode-alist '("\\.cgi\\'" . python-mode))
 (add-to-list 'auto-mode-alist '("\\.wsgi\\'" . python-mode))
+(add-to-list 'auto-mode-alist '("wscript" . python-mode))
 
 (setq
   python-shell-interpreter "ipython"
@@ -46,6 +47,9 @@
     "';'.join(module_completion('''%s'''))\n"
   python-shell-completion-string-code
     "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+
+;; cython
+(require 'cython-mode)
 
 ;; pep8
 ;; pip install pep8
