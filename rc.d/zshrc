@@ -676,6 +676,7 @@ alias emacs='emacs -nw'
 #alias ccl=ccl64
 alias hgpush="hg push --new-branch"
 #alias hgflow="hg flow"
+alias pipin="pip install -U"
 
 # http://d.hatena.ne.jp/mollifier/20101227/p1
 autoload -Uz zmv
