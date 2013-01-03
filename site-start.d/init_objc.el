@@ -88,13 +88,17 @@
 
 ;; flymake
 ;;(defvar xcode:gccver "4.2")
-(defvar xcode:sdkver "5.1")
+(defvar xcode:sdkver "6.0")
 (defvar xcode:sdkpath "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
 (defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneSimulator" xcode:sdkver ".sdk"))
 ;;(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc-" xcode:gccver))
-(defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/clang"))
+;; (defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/clang"))
+(defvar flymake-objc-compiler "/usr/bin/clang")
 ;;(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-x" "objective-c" "-std=c99"))
-(defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99" "-isysroot" xcode:sdk))
+;; (defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99" "-isysroot" xcode:sdk))
+(defvar flymake-objc-compile-default-options (list "-fsyntax-only" "-x" "objective-c" "-std=gnu99" "-Wreturn-type"
+                                                   "-Wparentheses" "-Wswitch" "-Wno-unused-parameter" "-Wunused-variable" "-Wunused-value"
+                                                   "-isysroot" xcode:sdk))
 (defvar flymake-last-position nil)
 (defcustom flymake-objc-compile-options '("-I.")
   "Compile option for objc check."
@@ -126,8 +130,8 @@
             (define-key c-mode-base-map (kbd "C-c o") 'ff-find-other-file)
             (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
             (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
-            (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
-                (flymake-mode t))
+            ;; (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+            ;;     (flymake-mode t))
             ;; (which-function-mode t)
           ))
 
