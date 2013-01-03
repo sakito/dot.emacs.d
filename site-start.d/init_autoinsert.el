@@ -44,6 +44,7 @@
 (defvar template-replacements-alists
   '(
     ("%file%"             . (lambda () (file-name-nondirectory (buffer-file-name))))
+    ("%module%"           . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
     ;;("%time%"             . (lambda () (format-time-string "%Y-%m-%d %k:%M:%S" (current-time))))
     ("%time%"             . (lambda () (format-time-string "%Y-%m-%d 00:00:00" (current-time))))
     ("%year%"             . (lambda () (format-time-string "%Y" (current-time))))
@@ -101,6 +102,13 @@
       (nconc '(
                ("\\.sh$" . ["shell.sh" my-template])
                (sh-mode . ["shell.sh" my-template])
+               ) auto-insert-alist))
+
+;; Erlang
+(setq auto-insert-alist
+      (nconc '(
+               ("\\.erl$" . ["erl.erl" my-template])
+               (erlang-mode . ["erl.erl" my-template])
                ) auto-insert-alist))
 
 ;;(add-to-list 'auto-insert-alist '(emacs-lisp-mode  . "skelton.el"))
