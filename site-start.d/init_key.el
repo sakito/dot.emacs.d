@@ -28,11 +28,8 @@
 
 ;;; Code:
 
-(if (eq window-system 'x)
-    (progn
-      (global-set-key "\C-w" 'kill-ring-save)
-      (global-set-key "\M-w" 'kill-region)
-      ))
+(global-set-key (kbd "C-w") 'kill-ring-save)
+(global-set-key (kbd "M-w") 'kill-region)
 
 ;; カーソル移動に追随してウィンドウを移動する
 ;; (defadvice previous-line
