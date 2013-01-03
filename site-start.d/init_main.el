@@ -131,7 +131,7 @@
 ;; navi2ch
 (require 'init_navi2ch)
 ;; irc
-;; (require 'init_irc)
+(require 'init_irc)
 
 (require 'init_speedbar)
 (require 'init_org)
@@ -143,6 +143,7 @@
 (require 'init_keychord)
 (require 'init_pyregexp)
 (require 'init_expand-region)
+(require 'init_erlang)
 
 ;;; private 設定
 (require 'init_modeline)
