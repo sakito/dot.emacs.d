@@ -27,28 +27,29 @@
 (toggle-scroll-bar nil)
 
 (require 'linum)
-;;フックにかける
-(dolist (hook (list
-               'c-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'java-mode-hook
-               'js2-mode-hook
-               'haskell-mode-hook
-               'sh-mode-hook
-               'python-mode-hook
-               'ess-mode-hook
-               'inferior-ess-mode-hook
-               'lua-mode-hook
-               'scala-mode-hook
-               'haskell-mode-hook
-               'css-mode-hook
-               'makefile-mode-hook
-               'rst-mode-hook
-               ))
-  (add-hook hook '(lambda ()
-                    (linum-mode 1))))
+(global-linum-mode t)
+;; フックにかける
+;; (dolist (hook (list
+;;                'c-mode-hook
+;;                'emacs-lisp-mode-hook
+;;                'lisp-interaction-mode-hook
+;;                'lisp-mode-hook
+;;                'java-mode-hook
+;;                'js2-mode-hook
+;;                'haskell-mode-hook
+;;                'sh-mode-hook
+;;                'python-mode-hook
+;;                'ess-mode-hook
+;;                'inferior-ess-mode-hook
+;;                'lua-mode-hook
+;;                'scala-mode-hook
+;;                'haskell-mode-hook
+;;                'css-mode-hook
+;;                'makefile-mode-hook
+;;                'rst-mode-hook
+;;                ))
+;;   (add-hook hook '(lambda ()
+;;                     (linum-mode 1))))
 
 ;; 表示フォーマット
 (setq linum-format "%04d")

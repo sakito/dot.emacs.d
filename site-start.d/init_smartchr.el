@@ -49,8 +49,8 @@
   (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
   (local-set-key (kbd "#") (smartchr '("# " "### " "#")))
   (local-set-key (kbd "=") (smartchr '("=" " == " " = ")))
-  (local-set-key (kbd "+") (smartchr '(" + " " += 1 " "+")))
-  (local-set-key (kbd "-") (smartchr '(" - " " -= 1 " "-" )))
+  (local-set-key (kbd "+") (smartchr '("+" " + " " += 1")))
+  (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
   )
 
 (defun smartchr-custom-keybindings-rst ()
@@ -85,6 +85,16 @@
   (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
   (local-set-key (kbd ";") (smartchr '(";; " ";")))
   (local-set-key (kbd ">") (smartchr '(">" " -> ")))
+  )
+
+(defun smartchr-custom-keybindings-erlang ()
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+  (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+  (local-set-key (kbd "%") (smartchr '("%% " "%")))
+  (local-set-key (kbd ">") (smartchr '(">" " ->\n")))
+  (local-set-key (kbd "<") (smartchr '("<" " <- ")))
   )
 
 (defun skelton-custom-keybindigs ()
@@ -124,6 +134,7 @@
 (add-hook 'objc-mode-hook 'smartchr-custom-keybindings-objc)
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
 (add-hook 'scala-mode-hook 'smartchr-custom-keybindings-scala)
+(add-hook 'erlang-mode-hook 'smartchr-custom-keybindings-erlang)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here

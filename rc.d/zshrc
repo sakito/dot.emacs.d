@@ -656,6 +656,14 @@ function pjson {
     fi
 }
 
+# Erlang
+function ercrun {
+    if [ $# -gt 0 ];
+    then
+        erl -noshell -s $@ -s init stop
+    fi
+}
+
 #-----------------------------------------------------------------
 # エイリアス設定
 #-----------------------------------------------------------------
@@ -672,11 +680,16 @@ alias s=source
 alias x=start
 alias j=jobs
 alias reload="source ~/.zshrc"
+
+# emacs
 alias emacs='emacs -nw'
-#alias ccl=ccl64
+
+# python
 alias hgpush="hg push --new-branch"
-#alias hgflow="hg flow"
 alias pipin="pip install -U"
+
+# Erlang
+alias ercall="erlc +export_all"
 
 # http://d.hatena.ne.jp/mollifier/20101227/p1
 autoload -Uz zmv
