@@ -1,6 +1,7 @@
 d44b6f1e6f9f79f152e3661742e1129ea6094c86 local-lisp/auto-complete
 0f006c2c703d2cba8635db90a58bdc65eaa6703f local-lisp/ctable
 bfec8e17414e5debf0418f362ea7fc60e38abc38 local-lisp/deferred
+c34bae549d5f971663db5d494182da3a27978d1b local-lisp/distel
 73bbbdea70f264a37b8332ca7816670107dfe92f local-lisp/epc
 12472db6496b255937d024416c881c8e1f71ac87 local-lisp/expand-region
 55d128749cc070551a1624a4508d1c4f6d76f7cf local-lisp/flex-autopair

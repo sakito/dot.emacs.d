@@ -10,3 +10,4 @@ local-lisp/jedi = [git]git://github.com/tkf/emacs-jedi.git
 local-lisp/key-combo = [git]git://github.com/uk-ar/key-combo.git
 local-lisp/flex-autopair = [git]git://github.com/uk-ar/flex-autopair.git
 local-lisp/auto-complete = [git]git://github.com/auto-complete/auto-complete.git
+local-lisp/distel = [git]git://github.com/jixiuf/distel.git
