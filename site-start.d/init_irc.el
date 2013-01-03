@@ -39,13 +39,15 @@
         ("freenode" :host "irc.freenode.net" :coding utf-8)))
 (setq riece-startup-server-list '("freenode"))
 (setq riece-startup-channel-list
-      '("#CodeRepos freenode"))
+      '("#riakjp freenode"))
+
+;; (add-to-list 'riece-addons 'riece-skk-kakutei)
 
 ;(setq liece-intl-catalogue-directory "/usr/local/share/riece/")
-(setq 
- riece-window-style-directory   "/usr/local/share/emacs/site-lisp/riece"
- riece-icon-directory           "/usr/local/share/emacs/site-lisp/riece"
- )
+;; (setq
+;;  riece-window-style-directory   "/usr/local/share/emacs/site-lisp/riece"
+;;  riece-icon-directory           "/usr/local/share/emacs/site-lisp/riece"
+;;  )
 
 ;(setq liece-server "irc.tokyo.wide.ad.jp")
 
