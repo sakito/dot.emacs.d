@@ -30,9 +30,18 @@
 ;; デフォルトのフレーム設定
 ;; ディスプレイサイズによって分離する試み 途中
 (cond
- ;; 1920 * 1200 ディスプレイ
  ;; デュアルだったりトリプルだったりするので width の方は条件に入れてない
  ;; 設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する
+ ((= (display-pixel-height) 1440)
+  (setq default-frame-alist
+        (append (list
+                 '(width . 200)
+                 '(height . 80)
+                 '(top . 100)
+                 '(left . 650)
+                 )
+                default-frame-alist)))
+ ;; 1920 * 1200 ディスプレイ
  ((= (display-pixel-height) 1200)
   (setq default-frame-alist
         (append (list
