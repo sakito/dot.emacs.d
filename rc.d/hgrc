@@ -18,6 +18,7 @@ progress=
 #hgsubversion=
 hgsubversion = ~/lib/python/hgsubversion/hgsubversion
 flow = ~/.emacs.d/share/python/hgflow.py
+hgshelve= ~/.emacs.d/share/python/hgshelve.py
 rebase=
 histedit=
 [diff]
