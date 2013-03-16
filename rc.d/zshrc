@@ -687,6 +687,10 @@ alias emacs='emacs -nw'
 # python
 alias hgpush="hg push --new-branch"
 alias pipin="pip install -U"
+alias ipython="ipython -i -c '%doctest_mode' --pylab"
+
+# port
+alias portup="sudo port -v selfupdate; port outdated;"
 
 # Erlang
 alias ercall="erlc +export_all"

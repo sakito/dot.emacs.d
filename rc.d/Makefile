@@ -38,6 +38,7 @@ portinstall:
 	sudo port install jpeg
 	sudo port install lcms
 	sudo port install rlwrap
+	sudo port install webp
 
 # no test sorry
 pipinstall:
