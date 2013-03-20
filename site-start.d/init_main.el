@@ -127,19 +127,19 @@
 ;; po-mode
 (require 'init_po)
 ;; w3m
-(require 'init_w3m)
+;; (require 'init_w3m)
 ;; navi2ch
-(require 'init_navi2ch)
+;; (require 'init_navi2ch)
 ;; irc
-(require 'init_irc)
+;; (require 'init_irc)
 
 (require 'init_speedbar)
 (require 'init_org)
-(require 'init_slime)
+;; (require 'init_slime)
 (require 'init_calendar)
 (require 'init_linum)
 (require 'init_go)
-(require 'init_viewer)
+;; (require 'init_viewer)
 (require 'init_keychord)
 (require 'init_pyregexp)
 (require 'init_expand-region)
