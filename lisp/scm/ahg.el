@@ -1,6 +1,6 @@
 ;;; ahg.el --- Alberto's Emacs interface for Mercurial (Hg)
 
-;; Copyright (C) 2008-2011 Alberto Griggio
+;; Copyright (C) 2008-2013 Alberto Griggio
 
 ;; Author: Alberto Griggio <agriggio@users.sourceforge.net>
 ;; URL: https://bitbucket.org/agriggio/ahg
@@ -2773,42 +2773,52 @@ about which are currently applied."
     (and node (caddr (ewoc-data node)))))
 
 
-(defun ahg-mq-patches-goto-patch (force)
+(defun ahg-mq-patches-goto-patch ()
   "Puts the patch at point in the patch list buffer on top of the
 stack of applied patches."
-  (interactive "P")
+  (interactive)
   (let* ((patch (ahg-mq-patches-patch-at-point))
-         (ok (and patch (ahg-y-or-n-p (format "Go to patch %s? " patch)))))
+         (ok (and patch (ahg-y-or-n-p (format "Go to patch %s? " patch))))
+         (force (and ok (ahg-uncommitted-changes-p)
+                     (ahg-y-or-n-p "Overwrite local changes? "))))
     (when ok
       (ahg-qgoto patch force))))
 
 
-(defun ahg-mq-patches-moveto-patch (force)
+(defun ahg-mq-patches-moveto-patch ()
   "Like `ahg-mq-patches-goto-patch', but reorder patch series and
 apply only the given patch."
-  (interactive "P")
+  (interactive)
   (let* ((patch (ahg-mq-patches-patch-at-point))
-         (ok (and patch (ahg-y-or-n-p (format "Move to patch %s? " patch)))))
+         (ok (and patch (ahg-y-or-n-p (format "Move to patch %s? " patch))))
+         (force (and ok (ahg-uncommitted-changes-p)
+                     (ahg-y-or-n-p "Overwrite local changes? "))))
     (when ok
       (ahg-qmove patch force))))
 
 
-(defun ahg-mq-patches-switchto-patch (force)
+(defun ahg-mq-patches-switchto-patch ()
   "Pop all applied patches and move to the given patch."
-  (interactive "P")
+  (interactive)
   (let* ((patch (ahg-mq-patches-patch-at-point))
-         (ok (and patch (ahg-y-or-n-p (format "Switch to patch %s? " patch)))))
+         (ok (and patch (ahg-y-or-n-p (format "Switch to patch %s? " patch))))
+         (force (and ok (ahg-uncommitted-changes-p)
+                     (ahg-y-or-n-p "Overwrite local changes? "))))
     (when ok
       (ahg-qswitch patch force))))
 
 
-(defun ahg-mq-patches-apply-patch (force)
+(defun ahg-mq-patches-apply-patch ()
   "Apply the given patch to the working copy, without modifying the repository."
-  (interactive "P")
+  (interactive)
   (let* ((patch (ahg-mq-patches-patch-at-point))
          (ok (and patch
                   (ahg-y-or-n-p
-                   (format "Apply patch %s to the working copy? " patch)))))
+                   (format "Apply patch %s to the working copy? " patch))))
+         (force (and
+                 ok (ahg-uncommitted-changes-p)
+                 (ahg-y-or-n-p
+                  "Working copy contains local changes, proceed anyway? "))))
     (when ok
       (ahg-qapply patch force))))
 
@@ -2826,7 +2836,7 @@ apply only the given patch."
   (save-window-excursion
     (select-window (posn-window (event-end event)) t)
     (goto-char (posn-point (event-end event)))
-    (ahg-mq-patches-goto-patch nil)))
+    (ahg-mq-patches-goto-patch)))
 
 
 (defun ahg-mq-patches-delete-patch ()
@@ -2885,7 +2895,12 @@ so that filename completion works on patch names."
                     (when (= (ahg-call-process "parents"
                                                (list "--template" "{node} ")
                                                (list "-R" root)) 0)
-                      (split-string (buffer-string))))))
+                      (split-string (buffer-string)))))
+         (addremove (with-temp-buffer
+                      (or (not (= (ahg-call-process "status"
+                                                    (list "-a" "-d" "-r")
+                                                    (list "-R" root)) 0))
+                          (> (buffer-size) 0)))))
     (cond (isthere
            ;; we don't want to overwrite old backups
            (error
@@ -2898,6 +2913,9 @@ so that filename completion works on patch names."
             (if (null parents)
                 "could not in determine parents of working dir, aborting"
               "uncommitted merge detected, aborting")))
+          (addremove
+           ;; pending additions/deletions are not supported
+           (error "pending additions and/or deletions detected, aborting"))
           (t
            ;; create the patch
            (let ((patchbuf (generate-new-buffer "*aHg-record*")))
