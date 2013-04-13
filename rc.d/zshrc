@@ -345,8 +345,6 @@ export LS_COLORS='di=36:ln=37；45:so=32:pi=33:ex=37;41:bd=34;46:cd=34;43:su=30;
 #-----------------------------------------------------------------
 # 補完無視ファイル設定
 fignore=(.o .dvi .aux .toc - \~)
-# 補完の利用設定
-autoload -Uz compinit; compinit
 
 ## キャッシュの設定
 # 補完をキャッシュ
@@ -399,6 +397,8 @@ zstyle ':completion:*' recent-dirs-insert both
 #-----------------------------------------------------------------
 # rm -f ~/.zcompdump; compinit
 fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
+# 補完の利用設定
+autoload -Uz compinit; compinit
 
 #unsetopt auto_remove_slash
 unsetopt sh_word_split
@@ -687,7 +687,7 @@ alias emacs='emacs -nw'
 # python
 alias hgpush="hg push --new-branch"
 alias pipin="pip install -U"
-alias ipython="ipython -i -c '%doctest_mode' --pylab"
+alias ipython="ipython -i -c '%doctest_mode' --pylab=osx "
 
 # port
 alias portup="sudo port -v selfupdate; port outdated;"
