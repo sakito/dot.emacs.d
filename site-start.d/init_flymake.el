@@ -26,7 +26,7 @@
 
 ;; flymakeを設定
 (require 'flymake)
-(require 'flymake_fringe)
+;; (require 'flymake_fringe)
 
 ;; flymake 起動頻度 初期値:0.5
 (setq-default flymake-no-changes-timeout '3)
