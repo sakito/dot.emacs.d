@@ -28,6 +28,7 @@
 ;;  @see http://www.morishima.net/~naoto/j/software/elscreen/
 ;(load "elscreen" "ElScreen" t)
 (require 'elscreen)
+(elscreen-start)
 (setq dnd-open-file-other-window nil)
 ;(require 'elscreen-dnd)
 ;(load "elscreen-wl" "ElScreen WL" t)
