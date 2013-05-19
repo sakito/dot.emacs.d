@@ -23,3 +23,6 @@ private/*
 *.o
 *.c
 elpa/*
+.gitignore
+.gitmodules
+.travis.yml
