@@ -380,6 +380,8 @@ zstyle ':completion:*:options' description true
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
 # kill 補完で実行されるコマンドを指定
 zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
+# SCP での補完を抑止
+zstyle ':completion:*:complete:scp:*:files' command command -
 
 # URLをコピペした時にエスケープ対象文字を自動エスケープする
 #autoload -Uz url-quote-magic
@@ -690,7 +692,8 @@ alias pipin="pip install -U"
 alias ipython="ipython -i -c '%doctest_mode' --pylab=osx "
 
 # port
-alias portup="sudo port -v selfupdate; port outdated;"
+alias portup="sudo port -v selfupdate; port outdated; pip list -o;"
+alias portout="sudo port upgrade -u outdated"
 
 # Erlang
 alias ercall="erlc +export_all"
@@ -703,7 +706,7 @@ alias zmv='noglob zmv -W'
 alias -g V="| /usr/share/vim/vim73/macros/less.sh"
 
 # 自分に依存した設定
-alias sakuradiary="~/bin/scp_diary.command"
+alias sakuradiary="~/Sites/sakitojp/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
 alias easy_install64="env ARCHFLAGS='-Os -arch x86_64 -fno-common' easy_install -UZ "
 
