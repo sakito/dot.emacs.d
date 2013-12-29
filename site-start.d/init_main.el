@@ -141,9 +141,10 @@
 (require 'init_go)
 ;; (require 'init_viewer)
 (require 'init_keychord)
-(require 'init_pyregexp)
+;; (require 'init_pyregexp)
 (require 'init_expand-region)
 (require 'init_erlang)
+(require 'init_web-mode)
 
 ;;; private 設定
 (require 'init_modeline)

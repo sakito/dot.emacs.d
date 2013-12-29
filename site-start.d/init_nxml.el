@@ -30,7 +30,7 @@
 ;;; Code:
 
 (add-to-list 'auto-mode-alist
-             '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|svg\\|xhtml\\|html\\|jsp\\|php\\)\\'" . nxml-mode))
+             '("\\.\\(xml\\|xsl\\|rng\\|sdoc\\|svg\\|xhtml\\|jsp\\|php\\)\\'" . nxml-mode))
 
 (eval-after-load "nxml-mode"
   '(progn
