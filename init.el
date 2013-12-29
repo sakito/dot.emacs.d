@@ -147,4 +147,3 @@
                       (* 1000000 (second before-init-time))))
                 1000)))
   (add-hook 'after-init-hook 'message-startup-time))
-(put 'upcase-region 'disabled nil)
