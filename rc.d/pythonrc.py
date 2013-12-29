@@ -40,11 +40,4 @@ else:
         del rlcompleter
     del readline
 
-    try:
-        import fancycompleter
-        fancycompleter.interact()
-        del fancycompleter
-    except ImportError:
-        print("Module fancycompleter not available.")
-
 del os
