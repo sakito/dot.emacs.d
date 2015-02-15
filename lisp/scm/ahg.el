@@ -1,6 +1,6 @@
 ;;; ahg.el --- Alberto's Emacs interface for Mercurial (Hg)
 
-;; Copyright (C) 2008-2013 Alberto Griggio
+;; Copyright (C) 2008-2014 Alberto Griggio
 
 ;; Author: Alberto Griggio <agriggio@users.sourceforge.net>
 ;; URL: https://bitbucket.org/agriggio/ahg
@@ -35,6 +35,7 @@
   (require 'cl))
 (require 'grep)
 (require 'dired)
+(require 'vc-annotate)
 
 ;;-----------------------------------------------------------------------------
 ;; ahg-version
@@ -60,6 +61,9 @@
                       ["Commit Current File" ahg-commit-cur-file t]
                       ["View Changes of Current File" ahg-diff-cur-file t]
                       ["View Change Log of Current File" ahg-log-cur-file t]
+                      ["Annotate Current File" ahg-annotate-cur-file t]
+                      ["Revert Current File" ahg-revert-cur-file t]
+                      ["Remove Current File" ahg-rm-cur-file t]
                       ["Grep the Working Directory" ahg-manifest-grep t]
                       ["--" nil nil]
                       ("Mercurial Queues"
@@ -93,6 +97,9 @@
     (define-key map "h" 'ahg-command-help)
     (define-key map "c" 'ahg-commit-cur-file)
     (define-key map "=" 'ahg-diff-cur-file)
+    (define-key map "a" 'ahg-annotate-cur-file)
+    (define-key map "r" 'ahg-revert-cur-file)
+    (define-key map "R" 'ahg-rm-cur-file)
     (define-key map "f" 'ahg-manifest-grep)
     (define-key map (kbd "C-l") 'ahg-log-cur-file)
     (define-key map "Q"
@@ -186,6 +193,10 @@ when calling hg. This might not always work."
 For `nil' the default file is used."
   :group 'ahg :type 'string)
 
+(defcustom ahg-summary-remote nil
+  "If true, pass --remote to summary command used by ahg-status"
+  :group 'ahg :type 'boolean)
+
 (defface ahg-status-marked-face
   '((default (:inherit font-lock-preprocessor-face)))
   "Face for marked files in aHg status buffers." :group 'ahg)
@@ -238,6 +249,14 @@ For `nil' the default file is used."
   '((default (:inherit font-lock-keyword-face)))
   "Face for tags and branches in aHg log buffers." :group 'ahg)
 
+(defface ahg-log-phase-draft-face
+  '((default (:inherit font-lock-preprocessor-face)))
+  "Face for draft phase in aHg log buffers." :group 'ahg)
+
+(defface ahg-log-phase-secret-face
+  '((default (:inherit font-lock-comment-face)))
+  "Face for secret phase in aHg log buffers." :group 'ahg)
+
 (defface ahg-short-log-user-face
   '((default (:inherit font-lock-type-face)))
   "Face for user field in aHg short log buffers." :group 'ahg)
@@ -267,6 +286,8 @@ For `nil' the default file is used."
 (defvar ahg-log-field-face 'ahg-log-field-face)
 (defvar ahg-log-branch-face 'ahg-log-branch-face)
 (defvar ahg-log-revision-face 'ahg-log-revision-face)
+(defvar ahg-log-phase-draft-face 'ahg-log-phase-draft-face)
+(defvar ahg-log-phase-secret-face 'ahg-log-phase-secret-face)
 (defvar ahg-short-log-user-face 'ahg-short-log-user-face)
 (defvar ahg-header-line-face 'ahg-header-line-face)
 (defvar ahg-header-line-root-face 'ahg-header-line-root-face)
@@ -318,8 +339,15 @@ the current dir is not under hg."
 (defun ahg-summary-info (root)
   (with-temp-buffer
     (let ((status (let ((default-directory (file-name-as-directory root)))
-                    (ahg-call-process "summary" nil))))
-      (if (= status 0)
+                    (ahg-call-process 
+                     "summary" 
+                     (when ahg-summary-remote (list "--remote"))))))
+      ;; failure could mean the summary command wasn't available
+      ;; it could also mean communication with the remote repo was unsuccesful
+      ;; If we can find the word "update: " in the output, we'll assume it
+      ;; failed connecting to remote repo, but rest of summary is there.
+      (if (or (= status 0) 
+              (and ahg-summary-remote (re-search-backward "^update: " nil t)))
           (buffer-substring-no-properties (point-min) (1- (point-max)))
         ;; if hg summary is not available, fall back to hg identify
         (ahg-identify root)))))
@@ -383,6 +411,7 @@ Commands:
   (define-key ahg-status-mode-map "h" 'ahg-command-help)
   (define-key ahg-status-mode-map "$" 'ahg-status-shell-command)
   (define-key ahg-status-mode-map "F" 'ahg-status-dired-find)
+  (define-key ahg-status-mode-map "d" 'ahg-status-delete)
   (let ((showmap (make-sparse-keymap)))
     (define-key showmap "s" 'ahg-status-show-default)
     (define-key showmap "A" 'ahg-status-show-all)
@@ -435,6 +464,7 @@ Commands:
     ["Add/Remove" ahg-status-addremove [:keys "A" :active t]]
     ["Add to .hgignore" ahg-status-add-to-hgignore [:keys "I" :active t]]
     ["Undo" ahg-status-undo [:keys "U" :active t]]
+    ["Delete" ahg-status-delete [:keys "d" :active t]]
     ["Hg Command" ahg-status-do-command [:keys "!" :active t]]
     ["Shell Command" ahg-status-shell-command [:keys "$" :active t]]
     ["--" nil nil]
@@ -594,10 +624,10 @@ the singleton list with the node at point."
                  (list (ewoc-data n))))))
       marked)))
 
-(defun ahg-status-commit ()
+(defun ahg-status-commit (&optional logmsg)
   (interactive)
   (let ((files (ahg-status-get-marked nil)))
-    (ahg-commit (mapcar 'cddr files))))
+    (ahg-commit (mapcar 'cddr files) nil logmsg)))
 
 (defun ahg-status-commit-amend ()
   (interactive)
@@ -736,6 +766,22 @@ the file on the current line."
   (interactive)
   (ahg-status-diff t))
 
+
+(defun ahg-status-delete ()
+  (interactive)
+  (let ((files (ahg-status-get-marked 'cur)))
+    (if files
+	(if (ahg-y-or-n-p 
+	     (if (> (length files) 1)
+		 (format "Delete %d files? " (length files))
+	       (format "Delete %s? " (cddar files))))
+	    (progn
+	      (mapc 'delete-file (mapcar 'cddr files))
+	      (ahg-status-refresh))
+	  (message "delete aborted!"))
+      (message "0 files selected, nothing deleted"))))
+
+
 (defun ahg-status-undo ()
   (interactive)
   (let ((files (ahg-status-get-marked nil)))
@@ -754,6 +800,68 @@ the file on the current line."
                (ahg-show-error process)))))
       (message "hg revert aborted"))))                         
 
+(defun ahg-revert-cur-file ()
+  "Reverts the current file"
+  (interactive)
+  (cond ((buffer-file-name)
+	 (if (ahg-y-or-n-p (concat "Revert " (buffer-file-name)))
+	     (ahg-generic-command 
+	      "revert" (list (buffer-file-name))
+              (lambda (process status)
+                (if (string= status "finished\n")
+                    (revert-buffer nil t))))
+           (message "hg revert aborted")))))
+
+(defun ahg-rm-cur-file ()
+  "Runs hg rm on the current file, and kills the current buffer"
+  (interactive)
+  (when (buffer-file-name)
+    (lexical-let ((buffer (current-buffer)))
+      (if (ahg-y-or-n-p (concat "hg rm " (buffer-file-name)))
+          (ahg-generic-command 
+           "rm" (list (buffer-file-name))
+           (lambda (process status)
+             (if (string= status "finished\n")
+                 (kill-buffer buffer))))
+        (message "hg rm aborted")))))
+
+(defun ahg-status-merge ()
+  "Runs hg merge on the repo.  Called when user clicks on or presses RET on 
+the `merge' text in the status view. See propertize-summary-info below." 
+  (interactive)
+  (lexical-let ((status-buffer (current-buffer))
+                (merge-buffer 
+                 (get-buffer-create
+                  (concat "*hg merge: " (ahg-root)))))
+    (pop-to-buffer merge-buffer)
+    (ahg-generic-command 
+     "merge" nil
+     (lambda (process status)
+       (if (string= status "finished\n")
+           (progn
+             (pop-to-buffer status-buffer)
+             (ahg-status-refresh)
+             (ahg-status-commit "Merge"))
+         (ahg-show-error process)))
+     merge-buffer)))
+
+(defun propertize-summary-info (summary)
+  "If the repo is in need of a merge, then the summary info will contain the
+text `heads (merge)'.  This function makes that text active, so that clicking
+it or pressing RET on it will initiate a merge."
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-1] 'ahg-status-merge)
+    (define-key map (kbd "RET") 'ahg-status-merge)
+    (replace-regexp-in-string 
+     "heads (merge)" 
+     (concat "heads " 
+             (propertize 
+              "(merge)" 
+              'mouse-face 'highlight 
+              'help-echo "Run hg merge"
+              'face 'info-xref
+              'keymap map))
+     summary)))
 
 (defun ahg-get-status-ewoc (root)
   "Returns an *hg status* buffer for ROOT. The buffer's major mode is
@@ -765,7 +873,7 @@ ahg-status, and it has an ewoc associated with it."
                  (propertize root 'face ahg-header-line-root-face) "\n"))
         (footer (concat "\n"
                         (make-string (1- (window-width (selected-window))) ?-)
-                        "\n" (ahg-summary-info root))))
+                        "\n" (propertize-summary-info (ahg-summary-info root)))))
     (with-current-buffer buf
       (erase-buffer)
       (let ((ew (ewoc-create 'ahg-status-pp
@@ -977,6 +1085,7 @@ Uses find-dired to get them into nicely."
 ;;-----------------------------------------------------------------------------
 
 (defvar ahg-update-to-rev-get-revision-function nil)
+(defvar ahg-update-to-rev-check-bookmarks nil)
 
 (defun ahg-update-to-rev (rev force)
   "Update to the given revision. If force is non-nil, pass -C
@@ -989,17 +1098,29 @@ flag to hg update."
                             t))))
      (list (and ans rev) overw)))
   (when rev
-    (ahg-generic-command
-     "update" (if force (list "-C" "-r" rev) (list "-r" rev))
-     (lexical-let ((aroot default-directory)
-                   (rev rev))
-       (lambda (process status)
-         (if (string= status "finished\n")
-             (progn
-               (ahg-status-maybe-refresh aroot)
-               (message "Updated to revision %s" rev)
-               (kill-buffer (process-buffer process)))
-           (ahg-show-error process)))))))
+    (let ((args (if force (list "-C" "-r" rev) (list "-r" rev))))
+      ;; check if there is a bookmark
+      (when ahg-update-to-rev-check-bookmarks
+        (let* ((bmarks (ahg-get-bookmarks rev))
+               (n (length bmarks)))
+          (cond ((= n 1)
+                 (let ((bm (car bmarks)))
+                   (message "Activating bookmark %s" bm)
+                   (setq args (if force (list "-C" bm) (list bm)))))
+                ((> n 1)
+                 (message "Warning: more than 1 bookmark at rev %s, not making any of them active" rev)))))
+      (ahg-generic-command
+       "update" args
+       (lexical-let ((aroot default-directory)
+                     (rev rev)
+                     (refresh (symbol-function 'ahg-status-maybe-refresh)))
+         (lambda (process status)
+           (if (string= status "finished\n")
+               (progn
+                 (funcall refresh aroot)
+                 (message "Updated to revision %s" rev)
+                 (kill-buffer (process-buffer process)))
+             (ahg-show-error process))))))))
 
 
 ;;-----------------------------------------------------------------------------
@@ -1171,7 +1292,8 @@ do nothing."
 (defun ahg-short-log-update-to-rev ()
   (interactive)
   (let ((ahg-update-to-rev-get-revision-function
-         'ahg-short-log-revision-at-point))
+         'ahg-short-log-revision-at-point)
+        (ahg-update-to-rev-check-bookmarks t))
     (call-interactively 'ahg-update-to-rev)))
 
 
@@ -1301,7 +1423,10 @@ a prefix argument, prompts also for EXTRA-FLAGS."
   '(("^hg \\<[a-z]+\\> for" . ahg-header-line-face)
     ("^hg \\<[a-z]+\\> for \\(.*\\)" 1 ahg-header-line-root-face)
     ("^changeset:" . ahg-log-field-face)
+    ("^svn:" . ahg-log-field-face)
+    ("^phase:" . ahg-log-field-face)
     ("^tag:" . ahg-log-field-face)
+    ("^bookmark:" . ahg-log-field-face)
     ("^user:" . ahg-log-field-face)
     ("^date:" . ahg-log-field-face)
     ("^summary:" . ahg-log-field-face)
@@ -1310,7 +1435,9 @@ a prefix argument, prompts also for EXTRA-FLAGS."
     ("^parent:" . ahg-log-field-face)
     ("^description:" . ahg-log-field-face)
     ("^\\(changeset\\|parent\\): +\\(.+\\)$" 2 ahg-log-revision-face)
-    ("^\\(tag\\|branch\\): +\\(.+\\)$" 2 ahg-log-branch-face)
+    ("^\\(tag\\|branch\\|bookmark\\): +\\(.+\\)$" 2 ahg-log-branch-face)
+    ("^phase: +\\(draft\\)$" 1 ahg-log-phase-draft-face)
+    ("^phase: +\\(secret\\)$" 1 ahg-log-phase-secret-face)
     ("^user: +\\(.+\\)$" 1 ahg-short-log-user-face)
     ("^date: +\\(.+\\)$" 1 ahg-short-log-date-face)
     )
@@ -1411,7 +1538,7 @@ buffer, do nothing."
 (defvar ahg-dir-name-for-log-command nil)
 
 (defconst ahg-log-style-map
-  "changeset = \"{rev}:{node|short}\\n{branches}\\n{tags}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n\"
+  "changeset = \"{rev}:{node|short}\\n{svnrev}\\n{phase}\\n{branches}\\n{tags}\\n{bookmarks}\\n{parents}\\n{author}\\n{date|date}\\n{files}\\n\\t{desc|tabindent}\\n\"
 file = \"{file}\\n\"
 ")
 
@@ -1462,9 +1589,12 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                       (delete-file ahgstyle))
                   (ahg-show-error process))))
             buffer
+            nil nil nil nil nil nil nil
+            ; use-temp-file because the output can be large.  
+            ; Considerable speed improvement.
+            t 
             )))
       )))
-      
 
 (defvar ahg-log-file-line-map
   (let ((map (make-sparse-keymap)))
@@ -1523,15 +1653,26 @@ a prefix argument, prompts also for EXTRA-FLAGS."
   (let ((inhibit-read-only t))
     (labels ((next () (beginning-of-line) (forward-line 1)))
       (while (not (eobp))
-        ;; first line, changeset
+        ;; changeset
         (insert "changeset:   ")
         (next)
-        ;; second line, branch
+        ;; svn rev
+        (if (looking-at "^$")
+            (delete-char 1)
+          (insert "svn:         ")
+          (next))
+        ;; phase
+        (if (looking-at "^public$")
+            (let ((kill-whole-line t))
+              (kill-line))
+          (insert "phase:       ")
+          (next))
+        ;; branch
         (if (looking-at "^$")
             (delete-char 1)
           (insert "branch:      ")
           (next))
-        ;; third line, tags
+        ;; tags
         (if (looking-at "^$")
             (delete-char 1) ;; remove empty line
           ;; otherwise, insert a "tag: " entry for each entry in the list
@@ -1540,7 +1681,16 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                 (kill-whole-line t))
             (kill-line)
             (mapc (lambda (tag) (insert "tag:         " tag "\n")) tags)))
-        ;; fourth line, parents
+        ;; bookmarks
+        (if (looking-at "^$")
+            (delete-char 1) ;; remove empty line
+          ;; otherwise, insert a "bookmark: " entry for each entry in the list
+          (let ((tags (split-string (buffer-substring-no-properties
+                                     (point-at-bol) (point-at-eol))))
+                (kill-whole-line t))
+            (kill-line)
+            (mapc (lambda (tag) (insert "bookmark:    " tag "\n")) tags)))
+        ;; parents
         (if (looking-at "^$")
             (delete-char 1) 
           (let ((parents (split-string (buffer-substring-no-properties
@@ -1548,13 +1698,13 @@ a prefix argument, prompts also for EXTRA-FLAGS."
                 (kill-whole-line t))
             (kill-line)
             (mapc (lambda (p) (insert "parent:      " p "\n")) parents)))
-        ;; fifth line, user
+        ;; user
         (insert "user:        ")
         (next)
-        ;; sixth line, date
+        ;; date
         (insert "date:        ")
         (next)
-        ;; seventh line, files, until an empty line is found
+        ;; files, until an empty line is found
         (unless (looking-at "^$")
           (set-text-properties (point-at-bol) (point-at-eol)
                                (list 'mouse-face 'highlight
@@ -1596,7 +1746,8 @@ prompts also for extra flags."
 
 (defun ahg-log-update-to-rev ()
   (interactive)
-  (let ((ahg-update-to-rev-get-revision-function 'ahg-log-revision-at-point))
+  (let ((ahg-update-to-rev-get-revision-function 'ahg-log-revision-at-point)
+        (ahg-update-to-rev-check-bookmarks t))
     (call-interactively 'ahg-update-to-rev)))
 
 ;;-----------------------------------------------------------------------------
@@ -1611,17 +1762,17 @@ prompts also for extra flags."
     ("^\\([+|@o\\\\/ -]\\)+[0-9]+  \\([0-9a-f]+\\)" 2 ahg-log-revision-face)
     ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  \\([^ ]+\\)"
      2 ahg-short-log-date-face)
-    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  \\([^ ]+\\)" 2
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  \\([^ ]+\\) " 2
      ahg-short-log-user-face)
-    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\(\\[[^]]+\\]\\)"
-     2 ahg-log-branch-face) ;; tags
-    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\(\\[\\]\\)" 2
-     ahg-invisible-face) ;; empty tags
-    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  [^ ]+ \\(([^)]+)\\)$"
-     2 ahg-log-branch-face) ;; branches
-    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  [^ ]+ \\(()\\)$" 2
-     ahg-invisible-face) ;; empty branches    
-    )
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\(draft\\)"
+     2 ahg-log-phase-draft-face)
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\(secret\\)"
+     2 ahg-log-phase-secret-face)
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\(draft  \\|secret  \\)?\\([([{].+\\)[.]$"
+     3 ahg-log-branch-face) ;; tags, bookmarks, branches
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  [^ ]+  [^ ]+  \\([([{].+\\)[.]$"
+     2 ahg-log-branch-face) ;; tags, bookmarks, branches
+    ("^\\([+|@o\\\\/ -]\\)+[0-9]+  [0-9a-f]+  .*\\([.]\\)$" 2 ahg-invisible-face))
   "Keywords in `ahg-glog-mode' mode.")
 
 (define-derived-mode ahg-glog-mode special-mode "ahg-glog"
@@ -1723,7 +1874,7 @@ a prefix argument, prompts also for EXTRA-FLAGS."
     (setq command-list
           (append command-list
                   (list "--template"
-                        "{rev}  {node|short}  {date|shortdate}  {author|user}  [{tags}] ({branches})\\n  {desc|firstline}\\n\\n")
+                        "{rev}  {node|short}  {date|shortdate}  {author|user}  {ifeq(phase, 'public', '', '{phase}  ')}{if(tags, '[{tags}]  ')}{if(bookmarks, '\\{{bookmarks}}  ')}{if(branches, '({branches})')}.\\n  {desc|firstline}\\n\\n")
                   (when extra-flags (split-string extra-flags))))
     (when ahg-file-list-for-log-command
       (setq command-list (append command-list ahg-file-list-for-log-command)))
@@ -1757,12 +1908,48 @@ a prefix argument, prompts also for EXTRA-FLAGS."
 
 (defun ahg-glog-update-to-rev ()
   (interactive)
-  (let ((ahg-update-to-rev-get-revision-function 'ahg-glog-revision-at-point))
-    (call-interactively 'ahg-update-to-rev)))
+  (let ((ahg-update-to-rev-get-revision-function 'ahg-glog-revision-at-point)
+        (ahg-update-to-rev-check-bookmarks t))
+    (lexical-let ((refresh 'ahg-status-maybe-refresh)
+                  (buf (current-buffer)))
+      (flet
+          ((ahg-status-maybe-refresh (root)
+                (let ((inhibit-read-only t))
+                   (save-excursion
+                     (goto-char (point-min))
+                     (let ((cont
+                            (re-search-forward ahg-glog-start-regexp nil t)))
+                     (while cont
+                       (beginning-of-line)
+                       (if (re-search-forward "@" cont t)
+                           (progn
+                             (setq cont nil)
+                             (replace-match "o"))
+                         (end-of-line)
+                         (setq cont
+                               (re-search-forward ahg-glog-start-regexp
+                                                  nil t))))))
+                   (save-excursion
+                     (beginning-of-line)
+                     (re-search-forward "o")
+                     (replace-match "@")))
+                (funcall refresh root)))
+        (call-interactively 'ahg-update-to-rev)))))
 
 ;;-----------------------------------------------------------------------------
 ;; hg diff
 ;;-----------------------------------------------------------------------------
+
+(defun ahg-remove-^M ()
+  "Remove ^M at end of line in the whole buffer.  This is done in ahg-diff-mode
+so that extra ^M's are not added when applying hunks with C-c C-a.  Plus it 
+is a lot more readable without the ^M's getting in the way."
+  (save-match-data
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward (concat (char-to-string 13) "$") 
+                                (point-max) t)
+        (replace-match "")))))
 
 (define-derived-mode ahg-diff-mode diff-mode "aHg Diff"
   "Special Diff mode for aHg buffers.
@@ -1771,6 +1958,8 @@ Commands:
 \\{ahg-diff-mode-map}
 "
   (put 'ahg-diff-mode 'mode-class 'special)
+  ; Remove trailing ^M's.  Without this, ^M's are inserted when applying hunks.
+  (ahg-remove-^M)
   (toggle-read-only t)
   (save-excursion
     (goto-char (point-min))
@@ -1821,7 +2010,43 @@ Commands:
                                  (ahg-diff-mode)
                                  (goto-char (point-min)))
                              (ahg-show-error process)))
-                         buffer)))
+                         buffer
+                         nil nil nil nil nil nil nil
+                         ; use-temp-file because the output can be large.  
+                         ; Considerable speed improvement.
+                         t 
+                         )))
+
+(defun ahg-diff-c (r &optional files)
+  "runs hg diff -c (show changes in revision)"
+  (interactive)
+  (let ((buffer (get-buffer-create "*aHg diff*"))
+        (command-list (list "-c" r))
+        (curdir default-directory))
+    (with-current-buffer buffer
+      (setq default-directory (file-name-as-directory curdir)))
+    (when ahg-diff-use-git-format
+      (setq command-list (cons "--git" command-list)))
+    (when files
+      (setq command-list (append command-list files)))
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (ahg-push-window-configuration)))
+    (ahg-generic-command "diff" command-list
+                         (lambda (process status)
+                           (if (string= status "finished\n")
+                               (progn
+                                 (pop-to-buffer (process-buffer process))
+                                 (ahg-diff-mode)
+                                 (goto-char (point-min)))
+                             (ahg-show-error process)))
+                         buffer
+                         nil nil nil nil nil nil nil
+                         ; use-temp-file because the output can be large.  
+                         ; Considerable speed improvement.
+                         t 
+                         )))
 
 (defun ahg-diff-cur-file (ask-other-rev)
   (interactive "P")
@@ -1836,36 +2061,299 @@ Commands:
         (t (message "hg diff: no file found, aborting."))))
 
 ;;-----------------------------------------------------------------------------
+;; hg annotate
+;;-----------------------------------------------------------------------------
+
+(defun ahg-annotate-cur-file ()
+  "Runs hg annotate on the current file."
+  (interactive)
+  (ahg-annotate)
+)
+
+(defun ahg-annotate (&optional file rev line)
+  "Run hg annotate on the supplied file and rev.  If no file is given, use the 
+current buffer.  If no rev is given, use the current rev.  Lines are colored 
+according to their revision, and revision descriptions are shown as tooltips.
+
+The line parameter specifies where to position the point in the annotated file.
+If line is not specified, the current line number in the current buffer is
+used.
+"
+  (lexical-let ((file (or file (buffer-file-name)))
+                (rev rev)
+                (line (or line (line-number-at-pos))))
+    (when file
+      (lexical-let ((buffer (get-buffer-create
+                             (concat "*hg annotate: " 
+                                     (when rev (concat "-r " rev " ") ) 
+                                     file "*" ))))
+        (with-current-buffer buffer
+          (unless (equal major-mode 'fundamental-mode)
+            (fundamental-mode))
+          (setq buffer-read-only nil)
+          (erase-buffer)
+          (ahg-push-window-configuration)
+          (put (make-local-variable 'ahg-annotate-cur-file) 
+               'permanent-local t)
+          (set 'ahg-annotate-current-file file)
+          (put (make-local-variable 'ahg-annotate-max-revision) 
+               'permanent-local t)
+          (put (make-local-variable 'ahg-changeset-descriptions) 
+               'permanent-local t))
+      
+        
+        ;; We're actually going to run two commands.  We'll run hg log to get
+        ;; the revision descriptions, and then run hg annotate.  After that, 
+        ;; we'll colorize and show descriptions as tooltips
+        
+        (ahg-generic-command
+         "log" 
+         (append
+          (list  "--template" "{rev} {desc|firstline))}\\n" file)
+          (when rev (list "-r" (concat rev ":0" )))
+          )
+         (lambda (process status)
+           
+           (if (string= status "finished\n")
+               (with-current-buffer buffer
+                 (goto-char (point-min))
+                 (set 'ahg-annotate-max-revision 
+                      (let ((rev (word-at-point)))
+                        (if rev (string-to-number (word-at-point)) 0)))
+                 (goto-char (point-max))
+                 (forward-line -1)
+                 (set 'ahg-annotate-min-revision 
+                      (let ((rev (word-at-point)))
+                        (if rev (string-to-number (word-at-point)) 0)))
+                 (goto-char (point-min))
+                 (setq ahg-changeset-descriptions (make-hash-table))
+                 (while (not (eobp))
+                   (let ((rev (word-at-point)))
+                     (when rev
+                       (setq rev (string-to-number (word-at-point)))
+                       (forward-word)
+                       (puthash rev 
+                                (buffer-substring-no-properties (point)
+                                                                (point-at-eol))
+                                ahg-changeset-descriptions))
+                     (forward-line)))
+                 (erase-buffer)
+                 (ahg-generic-command
+                  "annotate" 
+                  (append 
+                   (list "-undl" file)
+                   (when rev (list "-r" rev)))
+                  
+                  (lambda (process status)
+                    (if (string= status "finished\n")
+                        (progn
+                          (pop-to-buffer buffer)
+                          ;; Reformat dates to make more room for the file 
+                          ;; contents
+                          (while (re-search-forward (concat
+                           "\\(^ *[^ ]+ +[0-9]+\\) [^ ]+ \\([^ ]+\\) "
+                           "\\([0-9][0-9]\\) [0-9][0-9]:[0-9][0-9]:[0-9][0-9] "
+                           "[0-9][0-9]\\([0-9][0-9]\\) [^:]+: *\\([0-9]+\\)") 
+                                                    nil t)
+                            (let ((aline (match-string 5)))
+                              (replace-match "\\1 \\3-\\2-\\4")
+                              (let ((end (point)))
+                                (beginning-of-line)
+                                (put-text-property (point) end 
+                                                   'ahg-line-number aline))))
+                          (goto-line line)
+                          (unless (equal major-mode 'ahg-annotate-mode)
+                            (ahg-annotate-mode))
+                          (setq buffer-read-only t)
+                          )
+                      (ahg-show-error process)))
+                  buffer
+                  nil nil nil nil nil nil nil
+                  t 
+                  ))
+             (ahg-show-error process)))
+         buffer
+         nil nil nil nil nil nil nil
+         ; use-temp-file because the output can be large.  
+         ; Considerable speed improvement.
+         t 
+         )))))
+
+;; Adapted from vc-annotate-mode
+(define-derived-mode ahg-annotate-mode special-mode "Annotate"
+  "Major mode for output buffers of the `ahg-annotate-cur-file' command.
+Commands:
+\\{ahg-annotate-mode-map}
+"
+  (buffer-disable-undo) ;; Undo not needed here
+  ;; Frob buffer-invisibility-spec so that if it is originally a naked t,
+  ;; it will become a list, to avoid initial annotations being invisible.
+  (add-to-invisibility-spec 'foo)
+  (remove-from-invisibility-spec 'foo)
+  (set (make-local-variable 'truncate-lines) t)
+  (set (make-local-variable 'font-lock-defaults)
+       '(ahg-annotate-font-lock-keywords t))
+  (when (fboundp 'hack-dir-local-variables-non-file-buffer)
+    (hack-dir-local-variables-non-file-buffer))
+
+  (define-key ahg-annotate-mode-map "=" 'ahg-annotate-diff)
+  (define-key ahg-annotate-mode-map "l" 'ahg-annotate-log)
+  (define-key ahg-annotate-mode-map "a" 'ahg-annotate-annotate)
+  (define-key ahg-annotate-mode-map "u" 'ahg-annotate-uncover)
+  (define-key ahg-annotate-mode-map "q" 'ahg-buffer-quit)
+  (easy-menu-add ahg-annotate-mode-menu ahg-annotate-mode-map))
+
+(easy-menu-define ahg-annotate-mode-menu ahg-annotate-mode-map "aHg Annotate"
+  '("aHg Annotate"
+    ["Diff Line's Revision" ahg-annotate-diff [:keys "=" :active t]]
+    ["Log Line's Revision" ahg-annotate-log [:keys "l" :active t]]
+    ["Annotate Line's Revision" ahg-annotate-annotate [:keys "a" :active t]]
+    ["Uncover Line" ahg-annotate-uncover [:keys "u" :active t]]
+    ["Quit" ahg-buffer-quit [:keys "q" :active t]]))
+
+;; Adapted from vc-annotate-font-lock-keywords
+(defconst ahg-annotate-font-lock-keywords
+  ;; The fontification is done by ahg-annotate-lines instead of font-lock.
+  '((ahg-annotate-lines)))
+
+;; Borrowed from vc-annotate-lines, optimized it
+(defun ahg-annotate-lines (limit)
+  "Iterates over each line.  When it hits the end or the revision changes, it
+applies the group of preceding lines having the same revision."
+  (let ((start (point)) lastrev rev)
+    (while (< (point) limit)
+      (forward-word 2) ;; go to revision column
+      (let ((rev (current-word)))
+        (when (and (not (equal rev lastrev)) lastrev)
+          (beginning-of-line)
+          (ahg-annotate-region start (setq start (point)) lastrev))
+        (setq lastrev rev))
+      (forward-line))
+    (ahg-annotate-region start (point) lastrev))
+  nil)
+
+(defun ahg-annotate-region (start end rev)
+  "Sets properties on a group of lines belonging to the same revision.
+It sets a color corresponding to the revision.  It also sets a tooltip that 
+displays the changeset description.
+
+Colors range from purple for old revisions to red for recent revisions."
+  (setq rev (string-to-number rev))
+  (let* ((color (ahg-hsv-to-hex 
+                 (* .7 ; Using .7 here omits the ambiguous pinks
+                    (/ (- ahg-annotate-max-revision (float rev)) 
+                       (max 1 ; avoid divide by zero with this
+                            (- ahg-annotate-max-revision 
+                               ahg-annotate-min-revision))))
+                 .9 .9))
+         ;; substring from index 1 to remove any leading `#' in the name
+         (face-name (concat "ahg-annotate-face-"
+                            (if (string-equal
+                                 (substring color 0 1) "#")
+                                (substring color 1)
+                              color)))
+         ;; Make the face if not done.
+         (face (or (intern-soft face-name)
+                   (let ((tmp-face (make-face (intern face-name))))
+                     (set-face-foreground tmp-face color)
+                     (when vc-annotate-background
+                       (set-face-background tmp-face
+                                            vc-annotate-background))
+                     tmp-face))))	; Return the face
+    (put-text-property start end 'face face)
+    (put-text-property start end 'help-echo 
+                       (gethash rev ahg-changeset-descriptions ))))
+
+;;; Helper functions for commands in ahg-annotate-mode
+(defun ahg-annotate-revision-at-line ()
+  "Return the revision of the current line.  It is located in the second word in
+the line"
+  (save-excursion
+     (beginning-of-line)
+     (forward-word 2)
+     (word-at-point)))
+
+(defun ahg-annotate-line-at-line ()
+  "Return the line number at the first appearance of the current line.  It is 
+stored in a text property."
+  (save-excursion
+     (beginning-of-line)
+     (string-to-number (get-text-property (point) 'ahg-line-number))))
+
+;;; Commands that can be invoked in ahg-annotate-mode
+(defun ahg-annotate-log ()
+  "See the changeset log for the revision at the current line in the
+annotation."
+  (interactive)
+  (ahg-log 
+   (ahg-annotate-revision-at-line)
+   nil))
+
+(defun ahg-annotate-diff ()
+  "Display a complete diff of the revision at the current line in the
+annotation."
+  (interactive)
+  (ahg-diff-c 
+   (ahg-annotate-revision-at-line)
+   (list ahg-annotate-current-file)
+   ))
+
+(defun ahg-annotate-uncover ()
+  "See the annotated revision just prior to the revision your cursor is on.
+Lets you step back in time for that line."
+  (interactive)
+  (let ((prior-rev 
+         (1-
+          (string-to-number 
+           (ahg-annotate-revision-at-line)))))
+    (if (< prior-rev 0)
+        (message "Already at revision zero")
+      (ahg-annotate 
+       ahg-annotate-current-file 
+       (number-to-string prior-rev)
+       (ahg-annotate-line-at-line)))))
+
+(defun ahg-annotate-annotate ()
+  "See the annotated file using the revision your cursor is on."
+  (interactive)
+  (ahg-annotate 
+   ahg-annotate-current-file 
+   (ahg-annotate-revision-at-line)
+   (ahg-annotate-line-at-line)))
+
+;;-----------------------------------------------------------------------------
 ;; hg command
 ;;-----------------------------------------------------------------------------
 
 (defun ahg-complete-command-name (command)
   (with-temp-buffer
     (let ((process-environment (cons "LANG=" process-environment)))
-      (if (= (ahg-call-process "debugcomplete") 0)
+      (if (= (ahg-call-process "debugcomplete" (list command)) 0)
           ;; first, we try the built-in autocompletion of mercurial
           (let (out)
             (goto-char (point-min))
             (while (not (eobp))
               (setq out
                     (cons
-                     (buffer-substring-no-properties
-                      (point-at-bol) (point-at-eol))
+                     (concat (buffer-substring-no-properties
+                              (point-at-bol) (point-at-eol)) " ")
                      out))
               (forward-line 1))
-            (if out (nreverse out) (list command)))
+            (if out (nreverse out) (list (concat command " "))))
         ;; if this fails, we return the string itself as a match
-        (list command)))))
+        (list (concat command " "))))))
 
 (defvar ahg-complete-command-directory-for-filename-completion nil)
 
 (defun ahg-complete-command (command)
   ;; we split the string, and treat the last word as a filename
   (let* ((idx (string-match "\\([^ ]+\\)$" command))
+         (cmd (if idx (substring command idx) ""))
          (matches
-          (cond ((= idx 0) (ahg-complete-command-name command))
+          (cond ((string-match "^-.*$" cmd) (list cmd))
+                ((= idx 0) (ahg-complete-command-name command))
                 ((and (= idx 5) (string= (substring command 0 idx) "help "))
-                 (ahg-complete-command-name (substring command idx)))
+                 (ahg-complete-command-name cmd))
                 (t
                  (let ((default-directory
                          (or
@@ -2009,11 +2497,12 @@ that buffer is refreshed instead.)"
                           (ahg-dynamic-completion-table
                            ahg-complete-command-name))))
   (let ((buffer (get-buffer-create "*hg help*"))
-        (oldcols (getenv "COLUMNS")))
+        (oldcols (getenv "COLUMNS"))
+        (ahg-i18n t))
     (with-current-buffer buffer (let ((inhibit-read-only t)) (erase-buffer)))
     (setenv "COLUMNS" (format "%s" (window-width (selected-window))))
     (ahg-generic-command
-     "help" (list command)
+     "help" (split-string command)
      (lambda (process status)
        (if (string= status "finished\n")
            (progn
@@ -2037,6 +2526,10 @@ that buffer is refreshed instead.)"
 (defvar ahg-manifest-grep-pattern-history nil
   "History for patterns of `ahg-manifest-grep'.")
 
+(defun ahg-grep-regexp-quote (s)
+  (replace-regexp-in-string "[()]" (lambda (m) (concat "\\\\" m))
+                            (regexp-quote s)))
+
 (defun ahg-manifest-grep (pattern glob)
   "Search for grep-like pattern in the working directory, considering only
 the files under version control."
@@ -2044,10 +2537,10 @@ the files under version control."
    (list
     (let* ((default
              (cond ((and mark-active transient-mark-mode)
-                    (regexp-quote (buffer-substring (region-beginning)
-                                                    (region-end))))
+                    (ahg-grep-regexp-quote (buffer-substring (region-beginning)
+                                                             (region-end))))
                    ((symbol-at-point)
-                    (regexp-quote (format "%s" (symbol-at-point))))
+                    (ahg-grep-regexp-quote (format "%s" (symbol-at-point))))
                    (t (car ahg-manifest-grep-pattern-history))))
            (input (read-string
                    (if default
@@ -3173,21 +3666,34 @@ patch editing functionalities provided by Emacs."
                                               filterfunc
                                               is-interactive
                                               global-opts
-                                              no-hgplain)
+                                              no-hgplain
+                                              use-temp-file) 
   "Executes then given hg command, with the given
 arguments. SENTINEL is a sentinel function. BUFFER is the
-destination buffer. If nil, a new buffer will be used."
+destination buffer. If nil, a new buffer will be used.
+
+If use-temp-file is not nil, then the command's output is written 
+to a temp file via a shell redirect (>).  Once the process is done, 
+the contents are loaded into the buffer.  This greatly speeds things
+up for commands with potentially large output such as annotate or 
+diff on large files.
+"
   (unless buffer (setq buffer (generate-new-buffer "*ahg-command*")))
   (with-current-buffer buffer
     (setq mode-line-process
           (list (concat ":" (propertize "%s" 'face '(:foreground "#DD0000"))))))
   (unless no-show-message (message "aHg: executing hg '%s' command..." command))
   (let ((lang (getenv "LANG"))
-        retprocess)
+        retprocess
+        (temp-file (if use-temp-file (make-temp-file "ahg" ))))
     (unless no-hgplain (setenv "HGPLAIN" "1"))
     (unless ahg-i18n (setenv "LANG"))
+    (when (and (not use-shell) use-temp-file)
+      (setq args (mapcar 'shell-quote-argument args)))
     (let ((process
-           (apply (if use-shell 'start-process-shell-command 'start-process)
+           (apply (if (or use-shell use-temp-file) 
+                      'start-process-shell-command 
+                    'start-process)
                   (concat "*ahg-command-" command "*") buffer
                   ahg-hg-command
                   (append
@@ -3196,18 +3702,26 @@ destination buffer. If nil, a new buffer will be used."
                    (when is-interactive
                      (list "--config" "ui.interactive=1"))
                    global-opts
-                   (list command) args))))
+                   (list command) args 
+                   (when use-temp-file
+                     (list " > " (concat "'" temp-file "'" ) " 2>&1 "))))))
       (when ahg-subprocess-coding-system
         (set-process-coding-system process ahg-subprocess-coding-system))
       (set-process-sentinel
        process
        (lexical-let ((sf sentinel)
                      (cmd command)
-                     (no-show-message no-show-message))
+                     (no-show-message no-show-message)
+                     (temp-file temp-file))
          (lambda (p s)
            (unless no-show-message
              (message "aHg: executing hg '%s' command...done"
                       cmd))
+           (if temp-file
+               (with-current-buffer (process-buffer p)
+                 (let ((inhibit-read-only t))
+                   (insert-file-contents temp-file)
+                   (delete-file temp-file))))
            (setq mode-line-process nil)
            (funcall sf p s))))
       (set-process-filter process filterfunc)
@@ -3343,6 +3857,55 @@ Commands:
   (unless root
     (setq root (ahg-root)))
   (expand-file-name pth (file-name-as-directory root)))
+
+;; adapted from hexrgb-hsv-to-hex in hexrgb.el
+;; Copyright (C) 2004-2014, Drew Adams, all rights reserved.
+;; licensed under the GPL
+(defun ahg-hsv-to-hex (hue saturation value)
+  (let (red green blue int-hue fract pp qq tt ww)
+    (if (< saturation 1.0e-8)
+        (setq red    value
+              green  value
+              blue   value)             ; Gray
+      (setq hue      (* hue 6.0)        ; Sectors: 0 to 5
+            int-hue  (floor hue)
+            fract    (- hue int-hue)
+            pp       (* value (- 1 saturation))
+            qq       (* value (- 1 (* saturation fract)))
+            ww       (* value (- 1 (* saturation (- 1 (- hue int-hue))))))
+      (case int-hue
+        ((0 6) (setq red    value
+                     green  ww
+                     blue   pp))
+        (1 (setq red    qq
+                 green  value
+                 blue   pp))
+        (2 (setq red    pp
+                 green  value
+                 blue   ww))
+        (3 (setq red    pp
+                 green  qq
+                 blue   value))
+        (4 (setq red    ww
+                 green  pp
+                 blue   value))
+        (otherwise (setq red    value
+                         green  pp
+                         blue   qq))))
+    (flet ((int-to-hex (int) (substring (format "%04X" int) (- 4)))
+           (scale (x) (floor (* x 65535.0))))
+      (concat "#"
+              (int-to-hex (scale red))
+              (int-to-hex (scale green))
+              (int-to-hex (scale blue))))))
+
+(defun ahg-get-bookmarks (rev)
+  (with-temp-buffer
+    (let ((process-environment (cons "LANG=" process-environment)))
+      (if (= (ahg-call-process "log"
+                               (list "-r" rev "--template" "{bookmarks}")) 0)
+          (split-string (buffer-string))
+        nil))))
 
 ;;-----------------------------------------------------------------------------
 ;; log-edit related functions
