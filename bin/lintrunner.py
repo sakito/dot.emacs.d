@@ -19,8 +19,8 @@ class LintRunner(object):
     sane_default_ignore_codes = set([])
     command = None
     output_matcher = None
-    #flymake: ("\\(.*\\) at \\([^ \n]+\\) line \\([0-9]+\\)[,.\n]" 2 3 nil 1)
-    #or in non-retardate: r'(.*) at ([^ \n]) line ([0-9])[,.\n]'
+    # flymake: ("\\(.*\\) at \\([^ \n]+\\) line \\([0-9]+\\)[,.\n]" 2 3 nil 1)
+    # or in non-retardate: r'(.*) at ([^ \n]) line ([0-9])[,.\n]'
     output_format = "%(level)s %(error_type)s%(error_number)s:" \
                     "%(description)s at %(filename)s line %(line_number)s."
 
@@ -117,16 +117,17 @@ class PylintRunner(LintRunner):
         'C0301',  # Line to long
         'C0103',  # Naming convention
         'C0111',  # Missing Docstring
-        #"E1002",  # Use super on old-style class
-        #"W0232",  # No __init__
-        #"I0011",  # Warning locally suppressed using disable-msg
-        #"I0012",  # Warning locally suppressed using disable-msg
-        #"W0511",  # FIXME/TODO
+        # "E1002",  # Use super on old-style class
+        # "W0232",  # No __init__
+        # "I0011",  # Warning locally suppressed using disable-msg
+        # "I0012",  # Warning locally suppressed using disable-msg
+        # "W0511",  # FIXME/TODO
         'W0142',  # *args or **kwargs magic.
         'R0904',  # Too many public methods
         'R0903',  # Too few public methods
         'R0201',  # Method could be a function
-        #"W0141",  # Used built in function map
+        # "W0141",  # Used built in function map
+        'W1202',  # logging-format-interpolation
         ])
 
     @staticmethod
@@ -142,7 +143,7 @@ class PylintRunner(LintRunner):
         return ('--output-format', 'parseable',
                 '--include-ids', 'y',
                 '--reports', 'n',
-                #'--errors-only',
+                # '--errors-only',
                 '-d ' + ','.join(self.operative_ignore_codes))
 
 
@@ -161,7 +162,7 @@ class PycheckerRunner(LintRunner):
 
     @staticmethod
     def fixup_data(_line, data):
-        #XXX: doesn't seem to give the level
+        # XXX: doesn't seem to give the level
         data['level'] = 'WARNING'
         return data
 
@@ -198,7 +199,7 @@ class Pep8Runner(LintRunner):
 
     @property
     def run_flags(self):
-        #return ('--repeat',
+        # return ('--repeat',
         #        '--ignore=' + ','.join(self.operative_ignore_codes))
         return ('')
 
@@ -246,19 +247,19 @@ def main():
     options, args = parser.parse_args()
 
     for runnerclass in (
-        #PycheckerRunner,
-        Pep8Runner,
-        PylintRunner,
-        #PyflakesRunner,
-        #CompilerRunner,
-        ):
+            # PycheckerRunner,
+            Pep8Runner,
+            PylintRunner,
+            # PyflakesRunner,
+            # CompilerRunner,
+    ):
         runner = runnerclass(virtualenv=options.virtualenv,
                              ignore_codes=options.ignore_codes)
         try:
             if args is not None and len(args) > 0:
                 runner.run(args[0])
         except Exception:
-            #print >> sys.stdout, '{0} FAILED'.format(runner)
+            # print >> sys.stdout, '{0} FAILED'.format(runner)
             print 'ERROR : {0} failed to run at {1} line 1.'.format(
                 runner.__class__.__name__, args[0])
 
