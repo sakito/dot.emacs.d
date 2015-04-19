@@ -34,9 +34,10 @@
 ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
 (setq vc-follow-symlinks t)
 
-;; log-edit で SETUP が動作しないようにする
-;; SETUP が動作しないとファイル名もでないので現在は停止中
-;; (setq log-edit-setup-invert t)
+;; log-edit で メッセージの挿入を停止
+(add-hook 'log-edit-hook '(log-edit-insert-cvs-template
+                           log-edit-insert-changelog
+                           log-edit-show-files))
 
 ;; hg
 ;; @see http://bitbucket.org/agriggio/ahg/src/tip/ahg.el

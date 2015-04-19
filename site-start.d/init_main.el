@@ -25,6 +25,18 @@
 ;; 環境における設定
 ;; 個人的に重要な物を上になるべく配置
 
+;; Emacs 24.4 で ad-advised-definition-p が削除された対応
+;; sr-speedbar.el からコピー
+(if (not (fboundp 'ad-advised-definition-p))
+    (defun ad-advised-definition-p (definition)
+      "Return non-nil if DEFINITION was generated from advice information."
+      (if (or (ad-lambda-p definition)
+              (macrop definition)
+              (ad-compiled-p definition))
+          (let ((docstring (ad-docstring definition)))
+            (and (stringp docstring)
+                 (get-text-property 0 'dynamic-docstring-function docstring))))))
+
 ;;; Code:
 
 ;; 環境変数

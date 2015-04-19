@@ -104,24 +104,62 @@
   ;; (setq mac-pass-option-to-system nil)
 
   ;;コマンドキーをMetaキーとして利用
-  (setq mac-command-key-is-meta t)
+  ;; (setq mac-command-key-is-meta t)
+  (if (eq mac-option-modifier nil)
+      (progn
+        (setq mac-option-modifier 'meta)
+        (setq mac-command-modifier 'hyper)
+        )
+    (progn
+      (setq mac-option-modifier nil)
+      (setq mac-command-modifier 'meta)
+      )
+    )
   ;; (setq mac-command-key-is-meta nil)
   ;; (setq ns-command-modifier (quote meta))
 
   ;; システムの IM を無視する
   (setq mac-use-input-method-on-system nil)
   ;; 起動したら US にする
-  (add-hook 'after-init-hook 'mac-change-language-to-us)
+  ;; (add-hook 'after-init-hook 'mac-change-language-to-us)
   ;; minibuffer 内は US にする
-  (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
-  (mac-translate-from-yen-to-backslash)
+  (mac-auto-ascii-mode t)
+  ;; (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
+
   ;; 入力モードを英語に変更
-  (setq mac-ts-script-language-on-focus '(0 . 0))
+  ;; (setq mac-ts-script-language-on-focus '(0 . 0))
 
   ;; smooth scroll を on
   (setq mac-mouse-wheel-smooth-scroll t)
 
-  
+  ;; 円マークをバックスラッシュに変換
+  ;; inline_patch からコピー
+  ;; (C) Taiichi Hashimoto <taiichi2@mac.com>
+  (defun mac-translate-from-yen-to-backslash ()
+    ;; Convert yen to backslash for JIS keyboard.
+    (interactive)
+
+    (define-key global-map [165] nil)
+    (define-key global-map [2213] nil)
+    (define-key global-map [3420] nil)
+    (define-key global-map [67109029] nil)
+    (define-key global-map [67111077] nil)
+    (define-key global-map [8388773] nil)
+    (define-key global-map [134219941] nil)
+    (define-key global-map [75497596] nil)
+    (define-key global-map [201328805] nil)
+    (define-key function-key-map [165] [?\\])
+    (define-key function-key-map [2213] [?\\]) ;; for Intel
+    (define-key function-key-map [3420] [?\\]) ;; for PowerPC
+    (define-key function-key-map [67109029] [?\C-\\])
+    (define-key function-key-map [67111077] [?\C-\\])
+    (define-key function-key-map [8388773] [?\M-\\])
+    (define-key function-key-map [134219941] [?\M-\\])
+    (define-key function-key-map [75497596] [?\C-\M-\\])
+    (define-key function-key-map [201328805] [?\C-\M-\\])
+    )
+  (mac-translate-from-yen-to-backslash)
+
 )
 
 (provide 'init_key)
