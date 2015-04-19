@@ -278,10 +278,13 @@ return either nil, or a string, which is the root directory of that file's repos
 (defvar agrep-source-local nil)
 (defvar agrep-waiting-source nil
   "`anything' sources to get together in `agrep-sentinel'.")
+(defvar agrep-proc-tmpfile-alist nil)
 (defun agrep-do-grep (command pwd)
   "Insert result of COMMAND. The current directory is PWD.
 GNU grep is expected for COMMAND. The grep result is colorized."
-  (let ((process-environment process-environment))
+  (let ((process-environment process-environment)
+        proc
+        (tmpfile (make-temp-file "agrep-")))
     (when (eq grep-highlight-matches t)
       ;; Modify `process-environment' locally bound in `call-process-shell-command'.
       (setenv "GREP_OPTIONS" (concat (getenv "GREP_OPTIONS") " --color=always"))
@@ -291,11 +294,11 @@ GNU grep is expected for COMMAND. The grep result is colorized."
       (setenv "GREP_COLORS" "mt=01;31:fn=:ln=:bn=:se=:ml=:cx=:ne"))
     (set (make-local-variable 'agrep-source-local) (anything-get-current-source))
     (add-to-list 'agrep-waiting-source agrep-source-local)
-    (set-process-sentinel
-     (start-process "anything-grep" (current-buffer)
-                    anything-grep-sh-program "-c"
-                    (format "cd %s; %s" pwd command))
-     'agrep-sentinel)))
+    (setq proc (start-process "anything-grep" (current-buffer)
+                              anything-grep-sh-program "-c"
+                              (format "cd %s; %s > %s" pwd command tmpfile)))
+    (push (cons proc tmpfile) agrep-proc-tmpfile-alist)
+    (set-process-sentinel proc 'agrep-sentinel)))
 
 (defvar agrep-do-after-minibuffer-exit nil)
 (defun agrep-minibuffer-exit-hook ()
@@ -318,9 +321,14 @@ GNU grep is expected for COMMAND. The grep result is colorized."
 (defun agrep-sentinel (proc stat)
   (with-current-buffer (process-buffer proc)
     (setq agrep-waiting-source (delete agrep-source-local agrep-waiting-source))
+    (let ((tmpfile (assoc-default proc agrep-proc-tmpfile-alist)))
+      (insert-file-contents tmpfile)
+      (goto-char 1)
+      (delete-file tmpfile))
     (agrep-fontify))
   (unless agrep-waiting-source
     ;; call anything
+    (setq agrep-proc-tmpfile-alist nil)
     (agrep-show
      (lambda ()
        (let ((anything-quit-if-no-candidate (lambda () (message "No matches"))))
@@ -367,7 +375,7 @@ Its contents is fontified grep result."
                (expand-file-name (substring file-line-content
                                             0 (match-beginning 0))
                                  (anything-attr 'pwd))))
-    (goto-line (string-to-number (match-string 1 file-line-content))))
+    (anything-goto-line (string-to-number (match-string 1 file-line-content))))
   (run-hooks 'anything-grep-goto-hook))
 
 ;; (@* "simple grep interface")
@@ -476,7 +484,7 @@ does the actual work, based of the type of SCM tool that you're using."
                   default grep-command)
               nil nil 'grep-history
               (if current-prefix-arg nil default))))))
-  (anything-grep command (agrep-repository-root buffer-file-name)))
+  (anything-grep command (agrep-repository-root (or buffer-file-name default-directory))))
 
 (defun anything-grep-repository (&optional query)
   "Do `anything-grep' from predefined location.
