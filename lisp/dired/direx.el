@@ -133,6 +133,12 @@
 (defmethod direx:tree-equals (x y)
   (eq x y))
 
+(defgeneric direx:tree-status (tree)
+  "Returns a status of TREE in string.")
+
+(defmethod direx:tree-status (tree)
+  "")
+
 (defclass direx:node (direx:tree)
   ())
 
@@ -176,6 +182,8 @@ descendants. You may add a heuristic method for speed.")
    (open :accessor direx:item-open)))
 
 (defgeneric direx:generic-find-item (item not-this-window))
+
+(defgeneric direx:generic-view-item (item not-this-window))
 
 (defgeneric direx:generic-display-item (item))
 
@@ -278,17 +286,19 @@ mouse-2: find this node in other window"))
   (unless (direx:item-children item)
     (direx:item-insert-children item)))
 
-(defun* direx:item-delete (item &key recursive)
+(defun* direx:item-delete (item)
   (let* ((overlay (direx:item-overlay item))
          (start (overlay-start overlay))
          (end (overlay-end overlay))
          (buffer-read-only nil))
     (delete-region start end)
-    (delete-overlay overlay)
-    (when (and recursive
-               (not (direx:item-leaf-p item)))
-      (dolist (child (direx:item-children item))
-        (direx:item-delete child :recursive t)))))
+    (delete-overlay overlay)))
+
+(defun direx:item-delete-recursively (item)
+  (direx:item-delete item)
+  (unless (direx:item-leaf-p item)
+    (dolist (child (direx:item-children item))
+      (direx:item-delete-recursively child))))
 
 (defun direx:item-change-icon (item new-icon)
   (let ((buffer-read-only nil))
@@ -336,6 +346,11 @@ mouse-2: find this node in other window"))
   (unless (direx:item-open item)
     (direx:item-expand item)))
 
+(defun direx:item-expand-recursively (item)
+  (direx:item-expand item)
+  (dolist (child (direx:item-children item))
+    (direx:item-expand-recursively child)))
+
 (defun direx:item-collapse (item)
   (unless (direx:item-leaf-p item)
     (setf (direx:item-open item) nil)
@@ -351,7 +366,7 @@ mouse-2: find this node in other window"))
       (direx:item-collapse item)
     (direx:item-expand item)))
 
-(defun* direx:item-refresh (item &key recursive)
+(defmethod direx:item-refresh ((item direx:item))
   (when (and (not (direx:item-leaf-p item))
              (direx:item-children item))
     (loop with point = (overlay-end (direx:item-overlay item))
@@ -370,15 +385,17 @@ mouse-2: find this node in other window"))
           collect new-child into new-children
           finally
           (dolist (old-child old-children)
-            (direx:item-delete old-child :recursive t))
-          (setf (direx:item-children item) new-children)
-          (when recursive
-            (dolist (new-child new-children)
-              (direx:item-refresh new-child :recursive t))))))
+            (direx:item-delete-recursively old-child))
+          (setf (direx:item-children item) new-children))))
+
+(defun direx:item-refresh-recursively (item)
+  (direx:item-refresh item)
+  (dolist (child (direx:item-children item))
+    (direx:item-refresh-recursively child)))
 
 (defun* direx:item-refresh-parent (item &key recursive)
   (direx:awhen (direx:item-parent item)
-    (direx:item-refresh it :recursive recursive)))
+    (direx:item-refresh-recursively it)))
 
 
 
@@ -394,6 +411,20 @@ mouse-2: find this node in other window"))
   (or (eq x y)
       (and (typep y 'direx:file)
            (equal (direx:file-full-name x) (direx:file-full-name y)))))
+
+(defmethod direx:tree-status ((file direx:file))
+  (let* ((filename (direx:file-full-name file))
+         (dired-actual-switches "-la")
+         (file-list (list (if (direx:regular-file-item-p file)
+                              (file-name-nondirectory filename)
+                            (direx:directory-basename filename))))
+         (default-directory (direx:directory-dirname filename)))
+    (with-temp-buffer
+      (dired-insert-directory default-directory
+                              dired-actual-switches
+                              file-list)
+      (goto-char (point-min))
+      (buffer-substring-no-properties (point) (line-end-position)))))
 
 (defclass direx:regular-file (direx:file direx:leaf)
   ())
@@ -440,6 +471,12 @@ mouse-2: find this node in other window"))
     (define-key map (kbd "C") 'direx:do-copy-files)
     (define-key map (kbd "D") 'direx:do-delete-files)
     (define-key map (kbd "+") 'direx:create-directory)
+    (define-key map (kbd "M") 'direx:do-chmod-file)
+    (define-key map (kbd "L") 'direx:do-load-file)
+    (define-key map (kbd "B") 'direx:do-byte-compile-file)
+    (define-key map (kbd "G") 'direx:do-chgrp)
+    (define-key map (kbd "O") 'direx:do-chown)
+    (define-key map (kbd "T") 'direx:do-touch)
     map))
 
 (defun direx:do-rename-file ()
@@ -485,6 +522,94 @@ mouse-2: find this node in other window"))
     (direx:item-refresh-parent item)
     (direx:move-to-item-name-part item)))
 
+(defun direx:do-chmod-file ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (file-name-nondirectory (direx:file-full-name file)))
+         (orig-modes (file-modes filename))
+         (modes (read-string (format "Change mode of %s to: " filename)))
+         (new-modes (if (string-match "^[0-7]+" modes)
+                        (string-to-number modes 8)
+                      (file-modes-symbolic-to-number modes orig-modes))))
+    (set-file-modes filename new-modes)))
+
+(defun direx:do-load-file ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (direx:file-full-name file))
+         (failure nil))
+    (when (y-or-n-p (format "Load %s?" (file-name-nondirectory filename)))
+      (condition-case err
+          (load filename nil nil t)
+        (error (setq failure err)))
+      (when failure
+        (message "Load error for %s:\n%s\n" file failure)))))
+
+(defun direx:do-byte-compile-file ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (direx:file-full-name file))
+         (dest-file (byte-compile-dest-file filename))
+         (failure nil))
+    (when (y-or-n-p (format "Byte-Compile %s?" (file-name-nondirectory filename)))
+      (condition-case err
+          (save-excursion (byte-compile-file filename))
+        (error (setq failure err)))
+      (or (file-exists-p dest-file)
+          (setq failure t))
+      (if failure
+          (error "Byte compile error for %s\n%s\n" filename failure)
+        (progn
+          (direx:item-refresh-parent item)
+          (direx:next-item))))))
+
+(defun direx:exec-command (program args)
+  (unless (executable-find program)
+    (error "Command '%s' not found" program))
+  (with-temp-buffer
+    (unless (zerop (apply 'call-process program nil t nil args))
+      (message "%s" (replace-regexp-in-string "[\r\n]+\\'" ""
+                                              (buffer-string))))))
+
+(defun direx:do-chxxx (program attr filename)
+  (let* ((prompt (format "Change %s of %s to: "
+                         attr (file-name-nondirectory filename)))
+         (new-attr (read-string prompt))
+         (args (list new-attr filename)))
+    (direx:exec-command program args)))
+
+(defun direx:do-chgrp ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (direx:file-full-name file)))
+    (direx:do-chxxx "chgrp" "Group" filename)))
+
+(defun direx:do-chown ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (direx:file-full-name file)))
+    (direx:do-chxxx "chown" "Owner" filename)))
+
+(defun direx:do-touch ()
+  (interactive)
+  (let* ((item (direx:item-at-point!))
+         (file (direx:item-tree item))
+         (filename (direx:file-full-name file))
+         (default (format-time-string "%Y%m%d%H%M.%S"
+                                      (nth 5 (file-attributes filename))))
+         (prompt (format "Change Timestamp of %s to (default now): "
+                         (file-name-nondirectory filename)))
+         (new-time (read-string prompt))
+         (args (if (string= new-time "")
+                   (list filename)
+                 (list "-t" new-time filename))))
+    (direx:exec-command "touch" args)))
+
 (defclass direx:regular-file-item (direx:file-item)
   ())
 
@@ -493,6 +618,12 @@ mouse-2: find this node in other window"))
     (if not-this-window
         (find-file-other-window filename)
       (find-file filename))))
+
+(defmethod direx:generic-view-item ((item direx:regular-file-item) not-this-window)
+  (let ((filename (direx:file-full-name (direx:item-tree item))))
+    (if not-this-window
+        (view-file-other-window filename)
+      (view-file filename))))
 
 (defmethod direx:generic-display-item ((item direx:regular-file-item))
   (let ((filename (direx:file-full-name (direx:item-tree item))))
@@ -562,12 +693,24 @@ mouse-2: find this node in other window"))
 (defun direx:buffer-list ()
   (remove-if-not 'direx:buffer-live-p (buffer-list)))
 
-(defun direx:make-buffer (root)
+(defgeneric direx:make-buffer (root))
+
+(defmethod direx:make-buffer ((root direx:tree))
   (let ((buffer (generate-new-buffer (direx:tree-name root))))
     (with-current-buffer buffer
       (direx:direx-mode)
-      (setq default-directory (direx:file-full-name root)))
+      (setq default-directory (direx:file-full-name root))
+      (setq-local revert-buffer-function 'direx:revert-buffer))
     buffer))
+
+(defmethod direx:make-buffer ((dir direx:directory))
+  (with-current-buffer (call-next-method)
+    (set (make-local-variable 'dired-directory)
+         (direx:file-full-name dir))
+    (current-buffer)))
+
+(defun direx:revert-buffer (ignore-auto noconfirm)
+  (direx:refresh-whole-tree))
 
 (defun direx:make-buffer-for-root (root)
   (let ((buffer (direx:make-buffer root)))
@@ -636,7 +779,7 @@ mouse-2: find this node in other window"))
 
 (defun direx:previous-item (&optional arg)
   (interactive "p")
-  (direx:next-item (if (or (null arg) (> arg 0)) -1 1)))
+  (direx:next-item (if (null arg) -1 (- arg))))
 
 (defun direx:up-item-1 (item)
   (loop with parent = (direx:item-parent item)
@@ -687,9 +830,13 @@ mouse-2: find this node in other window"))
 
 (defun direx:refresh-whole-tree (&optional item)
   (interactive)
-  (setq item (or item (direx:item-at-point!)))
-  (direx:item-refresh (direx:item-root item) :recursive t)
+  (setq item (or item (direx:item-at-point) direx:root-item))
+  (direx:item-refresh-recursively (direx:item-root item))
   (direx:move-to-item-name-part item))
+
+(defun direx:echo-item ()
+  (interactive)
+  (message "%s" (direx:tree-status (direx:item-tree (direx:item-at-point)))))
 
 (defun direx:find-item (&optional item)
   (interactive)
@@ -700,6 +847,16 @@ mouse-2: find this node in other window"))
   (interactive)
   (setq item (or item (direx:item-at-point!)))
   (direx:generic-find-item item t))
+
+(defun direx:view-item (&optional item)
+  (interactive)
+  (setq item (or item (direx:item-at-point!)))
+  (direx:generic-view-item item nil))
+
+(defun direx:view-item-other-window (&optional item)
+  (interactive)
+  (setq item (or item (direx:item-at-point!)))
+  (direx:generic-view-item item t))
 
 (defun direx:display-item (&optional item)
   "Open ITEM at point without changing focus."
@@ -712,14 +869,38 @@ mouse-2: find this node in other window"))
   (setq item (or item (direx:item-at-point!)))
   (if (direx:item-leaf-p item)
       (direx:find-item item)
-    (direx:item-toggle item)
-    (direx:move-to-item-name-part item)))
+    (direx:toggle-item item)))
 
-(defun direx:toggle-item ()
+(defun direx:expand-item (&optional item)
   (interactive)
-  (let ((item (direx:item-at-point!)))
-    (direx:item-toggle item)
-    (direx:move-to-item-name-part item)))
+  (setq item (or item (direx:item-at-point!)))
+  (direx:item-expand item)
+  (let ((children (direx:item-children item)))
+    (when (and (= (length children) 1)
+               (direx:item-node-p (car children)))
+      ;; Also expands the sub directory
+      (direx:expand-item (car children))))
+  (direx:move-to-item-name-part item))
+
+(defun direx:expand-item-recursively (&optional item)
+  (interactive)
+  (setq item (or item (direx:item-at-point!)))
+  (direx:item-expand-recursively item)
+  (direx:move-to-item-name-part item))
+
+(defun direx:collapse-item (&optional item)
+  (interactive)
+  (setq item (or item (direx:item-at-point!)))
+  (direx:item-collapse item)
+  (direx:move-to-item-name-part item))
+
+(defun direx:toggle-item (&optional item)
+  (interactive)
+  (setq item (or item (direx:item-at-point!)))
+  (if (direx:item-open item)
+      (direx:collapse-item item)
+    (direx:expand-item item))
+  (direx:move-to-item-name-part item))
 
 (defun direx:mouse-1 (event)
   (interactive "e")
@@ -748,19 +929,22 @@ mouse-2: find this node in other window"))
     (define-key map (kbd "C-M-<left>")  'direx:up-item)
     (define-key map (kbd "C-M-d")       'direx:down-item)
     (define-key map (kbd "C-M-<right>") 'direx:up-item)
+    (define-key map (kbd "e")           'direx:echo-item)
     (define-key map (kbd "f")           'direx:find-item)
     (define-key map (kbd "o")           'direx:find-item-other-window)
+    (define-key map (kbd "v")           'direx:view-item)
+    (define-key map (kbd "V")           'direx:view-item-other-window)
     (define-key map (kbd "C-o")         'direx:display-item)
     (define-key map (kbd "RET")         'direx:maybe-find-item)
     (define-key map (kbd "TAB")         'direx:toggle-item)
     (define-key map (kbd "i")           'direx:toggle-item)
-    (define-key map (kbd "q")           'quit-window)
+    (define-key map (kbd "E")           'direx:expand-item-recursively)
     (define-key map (kbd "g")           'direx:refresh-whole-tree)
     (define-key map [mouse-1]           'direx:mouse-1)
     (define-key map [mouse-2]           'direx:mouse-2)
     map))
 
-(define-derived-mode direx:direx-mode nil "Direx"
+(define-derived-mode direx:direx-mode special-mode "Direx"
   ""
   (set (make-local-variable 'direx:root-item) nil)
   (setq buffer-read-only t
@@ -815,10 +999,12 @@ mouse-2: find this node in other window"))
     (direx:maybe-goto-current-buffer-item buffer)
     buffer))
 
+;;;###autoload
 (defun direx:jump-to-directory ()
   (interactive)
   (switch-to-buffer (direx:jump-to-directory-noselect)))
 
+;;;###autoload
 (defun direx:jump-to-directory-other-window ()
   (interactive)
   (switch-to-buffer-other-window (direx:jump-to-directory-noselect)))
