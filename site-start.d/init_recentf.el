@@ -59,12 +59,16 @@ do nothing. And suppress the output from `message' and
     ad-do-it))
 
 ;; 自動クリーニングを停止 recentf-cleanup
+;; tramp や 外部ディスクを利用している場合停止しておかないと面倒な動作になる
 (setq recentf-auto-cleanup 'never)
+
 ;; anything で便利なので履歴の保存量を多少多めにしておく
 (setq recentf-max-saved-items 1000)
-;; 保存ファイルのの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
+
+;; 保存ファイルの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
 (add-to-list 'recentf-keep 'file-remote-p)
 (add-to-list 'recentf-keep 'file-readable-p)
+
 ;; 除外ファイル
 (setq recentf-exclude
       '("\\.elc$"
@@ -74,11 +78,13 @@ do nothing. And suppress the output from `message' and
         ".howm-keys$"
         "^/var/folders/"
         "^/tmp/"))
-;; Emacs 終了時に cleanup
-(add-hook 'kill-emacs-query-functions 'recentf-cleanup)
 
-;; 30分で自動保存
-(defvar my-timer-for-recentf-save-list (run-at-time t (* 30 60) 'recentf-save-list))
+;; Emacs 終了時の cleanup
+;; clean up は必要になったら手動で実施する事
+;; (add-hook 'kill-emacs-query-functions 'recentf-cleanup)
+
+;; 未使用時間30秒で自動保存
+(run-with-idle-timer 30 t 'recentf-save-list)
 (recentf-mode 1)
 
 (provide 'init_recentf)
