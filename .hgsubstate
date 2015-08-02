@@ -8,6 +8,7 @@ f14ba9ab2765fa0848896c96f39b6985e154782a local-lisp/expand-region
 0ebf7523a3957a71630043a8907d69470bbd870c local-lisp/jedi
 5c9a8fce47a6cdba1876f9cd301f0b96aa8dfd2f local-lisp/key-combo
 f6a53c7c5283d640ae718f4548b0fda78877a375 local-lisp/mark-multiple
+46632ab9652dacad56fd961cd6def25a015170ae local-lisp/popup-el
 c9d9512df479075b1540aff41e157e2b4062f4db rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh
 68482454cf9dfb89e53bf1ab6fa713cae5693ae0 rc.d/zsh.d/plugins/zaw
