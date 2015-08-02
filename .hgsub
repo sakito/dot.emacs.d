@@ -12,3 +12,4 @@ local-lisp/flex-autopair = [git]git://github.com/uk-ar/flex-autopair.git
 local-lisp/auto-complete = [git]git://github.com/auto-complete/auto-complete.git
 local-lisp/distel = [git]git://github.com/jixiuf/distel.git
 local-lisp/popup-el = [git]git://github.com/auto-complete/popup-el.git
+local-lisp/fuzzy-el = [git]git://github.com/auto-complete/fuzzy-el.git
