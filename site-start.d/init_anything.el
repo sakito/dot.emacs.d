@@ -83,7 +83,7 @@
         ;; anything-c-source-buffers+-howm-title
         anything-c-source-buffers-list
         anything-c-source-file-name-history
-        anything-c-howm-recent
+        anything-c-source-howm-recent
         anything-c-source-files-in-current-dir+
         anything-c-source-extended-command-history
         anything-c-source-emacs-commands
