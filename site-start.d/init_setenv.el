@@ -37,6 +37,7 @@
                "/usr/bin"
                "/opt/local/bin"
                "/usr/local/bin"
+               "/usr/texbin"
                (expand-file-name "~/bin")
                (expand-file-name "~/local/bin")
                (expand-file-name "bin" user-emacs-directory)
