@@ -36,8 +36,8 @@
   (setq default-frame-alist
         (append (list
                  '(width . 200)
-                 '(height . 80)
-                 '(top . 100)
+                 '(height . 60)
+                 '(top . 30)
                  '(left . 650)
                  )
                 default-frame-alist)))
@@ -93,8 +93,9 @@
   (set-face-attribute 'default
                       nil
                       :family "September"
-                      :height 140)
-  (set-frame-font "September-14")
+                      :height 180)
+  ;; (set-frame-font "September-14")
+  (set-frame-font "September-18")
   (set-fontset-font nil
                     'unicode
                     ;; (font-spec :family "IPAGothic")
