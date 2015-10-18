@@ -29,24 +29,28 @@
 (setenv "PYTHONSTARTUP"
         (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
 (setenv "PYTHONPATH"
-        (expand-file-name "~/local/lib/python2.7/site-packages"))
+        (expand-file-name "~/local/py35/lib/python3.5/site-packages"))
 
 ;; mode
 (add-to-list 'auto-mode-alist '("\\.cgi\\'" . python-mode))
 (add-to-list 'auto-mode-alist '("\\.wsgi\\'" . python-mode))
 (add-to-list 'auto-mode-alist '("wscript" . python-mode))
 
+;; (executable-find "ipython")
 (setq
-  python-shell-interpreter "ipython"
-  python-shell-interpreter-args "-i --pylab --colors=Linux"
-  python-shell-prompt-regexp "In \\[[0-9]+\\]: "
-  python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-  python-shell-completion-setup-code
-    "from IPython.core.completerlib import module_completion"
-  python-shell-completion-module-string-code
-    "';'.join(module_completion('''%s'''))\n"
-  python-shell-completion-string-code
-    "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+ python-shell-interpreter "ipython"
+ python-shell-interpreter-args ""
+ ;; python-shell-interpreter-args "-i --pylab --colors=Linux"
+ ;; python-shell-interpreter-args "--matplotlib=osx --colors=Linux"
+ python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+ python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+ python-shell-completion-setup-code
+ "from IPython.core.completerlib import module_completion"
+ ;; python-shell-completion-module-string-code
+ python-shell-completion-string-code
+ "';'.join(module_completion('''%s'''))\n"
+ python-shell-completion-string-code
+ "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
 
 ;; cython
 (require 'cython-mode)
@@ -69,7 +73,8 @@
              (local-file (file-relative-name
                           temp-file
                           (file-name-directory buffer-file-name))))
-        (list "lintrunner.exe" (list local-file))))
+        ;; (list "lintrunner.exe" (list local-file))))
+        (list "lintrunner.py" (list local-file))))
     (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
     (add-to-list 'flymake-allowed-file-name-masks '("wscript$" flymake-python-init))
     (add-hook 'python-mode-hook (lambda () (flymake-mode t))))

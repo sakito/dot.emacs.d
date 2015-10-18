@@ -39,7 +39,7 @@
                "/usr/local/bin"
                "/usr/texbin"
                (expand-file-name "~/bin")
-               (expand-file-name "~/local/bin")
+               (expand-file-name "~/local/py35/bin")
                (expand-file-name "bin" user-emacs-directory)
                ))
   (when (and (file-exists-p dir) (not (member dir exec-path)))

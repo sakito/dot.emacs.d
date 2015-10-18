@@ -3,7 +3,7 @@
 import os
 import re
 import sys
-import compiler
+# import compiler
 
 from subprocess import Popen, PIPE
 
@@ -62,25 +62,28 @@ class LintRunner(object):
             fixed_data.update(cls.fixup_data(line, m.groupdict()))
             fixed_data['description'] = (
                 cls.__name__ + ' ' + fixed_data['description'])
-            print cls.output_format % fixed_data
+            print(cls.output_format % fixed_data)
         else:
-            print >> sys.stderr, "Line is broken: %s %s" % (cls, line)
+            # print >> sys.stderr, "Line is broken: %s %s" % (cls, line)
+            print("Line is broken: %s %s" % (cls, line), file=sys.stderr)
 
     def run(self, filename):
         args = [self.command]
         args.extend(self.run_flags)
         args.append(filename)
-        process = Popen(args, stdout=PIPE, stderr=PIPE, env=self.env)
-        for line in process.stdout:
-            self.process_output(line)
+        with Popen(args, stdout=PIPE, stderr=PIPE,
+                   env=self.env, universal_newlines=True) as process:
+            for line in process.stdout.readlines():
+                self.process_output(line)
 
 
 class CompilerRunner(LintRunner):
     def run(self, filename):
         error_args = None
         try:
-            compiler.parseFile(filename)
-        except (SyntaxError, Exception), e:
+            # compiler.parseFile(filename)
+            compile(filename)
+        except (SyntaxError, Exception) as e:
             error_args = e.args
         if error_args:
             self.process_output(filename, error_args)
@@ -96,7 +99,7 @@ class CompilerRunner(LintRunner):
         fixed_data['filename'] = filename
         fixed_data['description'] = args[0]
 
-        print cls.output_format % fixed_data
+        print(cls.output_format % fixed_data)
 
 
 class PylintRunner(LintRunner):
@@ -201,7 +204,7 @@ class Pep8Runner(LintRunner):
     def run_flags(self):
         # return ('--repeat',
         #        '--ignore=' + ','.join(self.operative_ignore_codes))
-        return ('')
+        return ''
 
 
 class PyflakesRunner(LintRunner):
@@ -260,8 +263,10 @@ def main():
                 runner.run(args[0])
         except Exception:
             # print >> sys.stdout, '{0} FAILED'.format(runner)
-            print 'ERROR : {0} failed to run at {1} line 1.'.format(
-                runner.__class__.__name__, args[0])
+            print('ERROR : {0} failed to run at {1} line 1.'.format(
+                runner.__class__.__name__, args[0]))
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == '__main__':
