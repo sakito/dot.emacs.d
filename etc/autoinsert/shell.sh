@@ -1,2 +1,2 @@
-#/bin/bin/env zsh
+#!/bin/env zsh
 
