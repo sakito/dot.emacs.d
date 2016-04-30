@@ -72,12 +72,14 @@
 (require 'init_elscreen)
 ;; dired
 (require 'init_dired)
+;; wgrep
+(require 'init_wgrep)
 ;; moccur
 (require 'init_moccur)
 ;; auto-complete
 (require 'init_ac)
 ;; eldoc
-(require 'init_eldoc)
+;; (require 'init_eldoc)
 ;;; プログラミング関連
 (require 'init_flymake)
 ;;; Pythonの設定
@@ -85,6 +87,8 @@
 ;(require 'init_python-mode)
 ;; vsc and scm
 (require 'init_scm)
+;; git
+(require 'init_magit)
 ;; diff
 (require 'init_diff)
 ; woman は mac で動作しない
@@ -92,9 +96,9 @@
 ;;;; mode-info
 (require 'init_modeinfo)
 ;;; Gaucheの設定
-(require 'init_gauche)
+;; (require 'init_gauche)
 ;;; OCaml
-(require 'init_ocaml)
+;; (require 'init_ocaml)
 ;;;; sql-mode
 (require 'init_sql)
 ;;; mmm-mode
@@ -104,8 +108,8 @@
 ;; c
 (require 'init_c)
 ;; objc
-(when mac-p
-  (require 'init_objc))
+;; (when mac-p
+;;   (require 'init_objc))
 ;; yasnippet
 (require 'init_yasnippet)
 ;; javascript-mode
@@ -121,7 +125,7 @@
 ;; sdicの設定
 ;;(require 'init_sdic)
 ;; Dictionary.app 呼びだし
-(require 'init_adic)
+;; (require 'init_adic)
 ;; AUC TeX
 ;; (require 'init_auctex)
 ;; htmlhelperの設定
@@ -131,13 +135,13 @@
 ;; nxml-mode
 (require 'init_nxml)
 ;; scala-mode
-(require 'init_scala)
+;; (require 'init_scala)
 ;; haskel-mode
-(require 'init_haskell)
+;; (require 'init_haskell)
 ;; php-mode
-(require 'init_php)
+;; (require 'init_php)
 ;; po-mode
-(require 'init_po)
+;; (require 'init_po)
 ;; w3m
 ;; (require 'init_w3m)
 ;; navi2ch
@@ -150,12 +154,12 @@
 ;; (require 'init_slime)
 (require 'init_calendar)
 (require 'init_linum)
-(require 'init_go)
+;; (require 'init_go)
 ;; (require 'init_viewer)
-(require 'init_keychord)
+;; (require 'init_keychord)
 ;; (require 'init_pyregexp)
-(require 'init_expand-region)
-(require 'init_erlang)
+;; (require 'init_expand-region)
+;; (require 'init_erlang)
 (require 'init_web-mode)
 
 ;;; private 設定
