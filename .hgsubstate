@@ -8,7 +8,7 @@ d748db81e72c7b0dd11ea802bf96034c57c7b534 local-lisp/epc
 f14ba9ab2765fa0848896c96f39b6985e154782a local-lisp/expand-region
 55d128749cc070551a1624a4508d1c4f6d76f7cf local-lisp/flex-autopair
 534d723ad2e06322ff8d9bd0ba4863d243f698e7 local-lisp/fuzzy-el
-0ebf7523a3957a71630043a8907d69470bbd870c local-lisp/jedi
+b576cef1e8751b6ceb7532e2ab833b551fc46860 local-lisp/js2-mode
 5c9a8fce47a6cdba1876f9cd301f0b96aa8dfd2f local-lisp/key-combo
 f6a53c7c5283d640ae718f4548b0fda78877a375 local-lisp/mark-multiple
 f17ae16e57ef16964ee97a1e20e44fd6f0510ddb local-lisp/ob-objc-el

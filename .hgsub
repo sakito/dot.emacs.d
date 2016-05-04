@@ -16,3 +16,4 @@ local-lisp/anything-howm = [git]git://github.com/mori-dev/anything-howm.git
 local-lisp/ob-objc-el = [git]git://gist.github.com/568534.git
 local-lisp/elscreen = [git]git://github.com/knu/elscreen.git
 local-lisp/pos-tip = [git]git://github.com/tjarvstrand/pos-tip.git
+local-lisp/js2-mode = [git]git://github.com/mooz/js2-mode.git
