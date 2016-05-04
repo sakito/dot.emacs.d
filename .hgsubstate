@@ -4,10 +4,13 @@ dcdac782de2108aa07891bc9e22e8c1973b1fd76 local-lisp/anything-howm
 23edc3128e9d1e522ee926de3aa2b5927d674ca4 local-lisp/deferred
 a07e49a9dd58418a575e7220c5e8c2b354d6a4ba local-lisp/distel
 e918ae9ebb5a09c577cedd80b7557aa4a6682272 local-lisp/elscreen
+edc264067b1b4e695e689cab4fd429f605ceef8e local-lisp/emacs-helm-ag
 d748db81e72c7b0dd11ea802bf96034c57c7b534 local-lisp/epc
 f14ba9ab2765fa0848896c96f39b6985e154782a local-lisp/expand-region
 55d128749cc070551a1624a4508d1c4f6d76f7cf local-lisp/flex-autopair
 534d723ad2e06322ff8d9bd0ba4863d243f698e7 local-lisp/fuzzy-el
+3c344979f1df0d1a5cc913674e56c4d45c346134 local-lisp/helm-descbinds
+afb1089d6a0dc9a63bc2aa1df19d80830cc33c6a local-lisp/helm-flymake
 b576cef1e8751b6ceb7532e2ab833b551fc46860 local-lisp/js2-mode
 5c9a8fce47a6cdba1876f9cd301f0b96aa8dfd2f local-lisp/key-combo
 f6a53c7c5283d640ae718f4548b0fda78877a375 local-lisp/mark-multiple
