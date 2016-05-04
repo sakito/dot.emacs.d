@@ -54,7 +54,8 @@
 ;; キー設定
 (require 'init_key)
 ;; anything
-(require 'init_anything)
+;; (require 'init_anything)
+(require 'init_helm)
 ;; popwin
 (require 'init_popwin)
 ;; 独自関数
@@ -75,7 +76,7 @@
 ;; wgrep
 (require 'init_wgrep)
 ;; moccur
-(require 'init_moccur)
+;; (require 'init_moccur)
 ;; auto-complete
 (require 'init_ac)
 ;; eldoc

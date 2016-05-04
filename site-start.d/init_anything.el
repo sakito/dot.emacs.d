@@ -167,30 +167,31 @@
 
 ;;; anything-c-moccurの設定
 ;; see http://d.hatena.ne.jp/IMAKADO/20080724/1216882563
-(require 'anything-c-moccur)
+;; (require 'anything-c-moccur)
 (setq
  ;;`anything-idle-delay'
  anything-c-moccur-anything-idle-delay 0.2
  ;; `anything-c-moccur-dmoccur'などのコマンドでバッファの情報をハイライトする
- anything-c-moccur-higligt-info-line-flag t
+;;  anything-c-moccur-higligt-info-line-flag t
  ;; 現在選択中の候補の位置を他のwindowに表示する
- anything-c-moccur-enable-auto-look-flag t
+;;  anything-c-moccur-enable-auto-look-flag t
  ;; `anything-c-moccur-occur-by-moccur'の起動時にポイントの位置の単語を初期パターンにする
- anything-c-moccur-enable-initial-pattern t)
+ ;;  anything-c-moccur-enable-initial-pattern t
+ )
 
 ;; バッファ内検索
-(global-set-key (kbd "M-o") 'anything-c-moccur-occur-by-moccur)
+;; (global-set-key (kbd "M-o") 'anything-c-moccur-occur-by-moccur)
 ;;ディレクトリ
 ;(global-set-key (kbd "C-M-o") 'anything-c-moccur-dmoccur)
 ;; grep
 (require 'anything-grep)
 ;;(global-set-key (kbd "C-M-o") 'moccur-grep)
 ;;(global-set-key (kbd "C-M-o") 'anything-grep)
-(global-set-key (kbd "C-M-o") 'moccur-grep-find)
+;; (global-set-key (kbd "C-M-o") 'moccur-grep-find)
 ;; dired
-(add-hook 'dired-mode-hook
-          '(lambda ()
-             (local-set-key (kbd "O") 'anything-c-moccur-dired-do-moccur-by-moccur)))
+;; (add-hook 'dired-mode-hook
+;;           '(lambda ()
+;;              (local-set-key (kbd "O") 'anything-c-moccur-dired-do-moccur-by-moccur)))
 
 ;; anything-grep-by-name
 (setq anything-grep-alist
