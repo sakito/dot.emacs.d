@@ -296,6 +296,13 @@ USA
       `(anything-file-name ((t (:foreground ,yellow1))))
       `(anything-candidate-number ((t (:background ,orange2 :foreground ,color-bg3))))
 
+      ;; helm
+      ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
+      `(helm-file-name ((t (:foreground ,yellow1))))
+      `(helm-buffer-file ((t (:foreground ,yellow1))))
+      `(helm-ff-file ((t (:foreground ,yellow1))))
+      `(helm-candidate-number ((t (:background ,orange2 :foreground ,color-bg3))))
+
       ;; 変更点のハイライト
       `(highlight-changes ((t (:foreground nil :background ,color-bg0))))
       `(highlight-changes-delete ((t (:foreground nil :background ,color-bg1))))
