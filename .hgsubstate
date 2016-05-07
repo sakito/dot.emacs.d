@@ -17,6 +17,7 @@ f6a53c7c5283d640ae718f4548b0fda78877a375 local-lisp/mark-multiple
 f17ae16e57ef16964ee97a1e20e44fd6f0510ddb local-lisp/ob-objc-el
 46632ab9652dacad56fd961cd6def25a015170ae local-lisp/popup-el
 09597a77affbb948f9cf970d8a6aa4ff7e52542b local-lisp/pos-tip
+e46ddd05c8d3a6e4cbcc11b62aa275e5de66f475 local-lisp/psession
 97e04eb77154234d946064a573762bcd72219f75 local-lisp/ptel
 c9d9512df479075b1540aff41e157e2b4062f4db rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh

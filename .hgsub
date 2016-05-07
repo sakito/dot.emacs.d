@@ -21,3 +21,4 @@ local-lisp/ptel = [git]git://github.com/bling/pt.el.git
 local-lisp/helm-descbinds = [git]git://github.com/emacs-helm/helm-descbinds.git
 local-lisp/emacs-helm-ag = [git]git://github.com/syohex/emacs-helm-ag.git
 local-lisp/helm-flymake = [git]git://github.com/tam17aki/helm-flymake.git
+local-lisp/psession = [git]git://github.com/thierryvolpiatto/psession.git
