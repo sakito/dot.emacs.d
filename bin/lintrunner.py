@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE
 
 PYLINT_COMMAND = "pylint"
 PYCHECKER_COMMAND = "pychecker"
-PEP8_COMMAND = "pep8"
+PYCODESTYLE_COMMAND = "pycodestyle"
 PYFLAKES_COMMAND = "pyflakes"
 
 
@@ -174,14 +174,14 @@ class PycheckerRunner(LintRunner):
         return '--no-deprecated', '--only', '-#0'
 
 
-class Pep8Runner(LintRunner):
-    """ Run pep8.py, producing flymake readable output.
+class PycodestyleRunner(LintRunner):
+    """ Run pycodestyle.py, producing flymake readable output.
     The raw output looks like:
       spiders/structs.py:3:80: E501 line too long (80 characters)
       spiders/structs.py:7:1: W291 trailing whitespace
       spiders/structs.py:25:33: W602 deprecated form of raising exception
       spiders/structs.py:51:9: E301 expected 1 blank line, found 0 """
-    command = PEP8_COMMAND
+    command = PYCODESTYLE_COMMAND
     # sane_default_ignore_codes = set([
     #     'RW29', 'W391',
     #     'W291', 'WO232'])
@@ -251,7 +251,7 @@ def main():
 
     for runnerclass in (
             # PycheckerRunner,
-            Pep8Runner,
+            PycodestyleRunner,
             PylintRunner,
             # PyflakesRunner,
             # CompilerRunner,
