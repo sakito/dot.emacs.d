@@ -36,7 +36,7 @@
              ;(c-set-style "ellemtel")
              (c-set-style "cc-mode")
              ; 基本オフセット
-             ;(c-basic-offset . 4)
+             (setq c-basic-offset 2)
              ; コメント行のオフセット
              ;(c-comment-only-line-of . 0)
              ; 全自動インデントを有効
@@ -63,7 +63,7 @@
 ;; ffapの設定
 ;;(ffap-bindings)
 (setq ffap-c-path
-      '("/usr/include" "/usr/local/include"))
+      '("/opt/local/include" "/usr/include" "/usr/local/include"))
 ;; 新規ファイルの場合には確認する
 (setq ffap-newfile-prompt t)
 ;; ffap-kpathsea-expand-path で展開するパスの深さ
