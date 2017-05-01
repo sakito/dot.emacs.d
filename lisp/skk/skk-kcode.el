@@ -7,9 +7,7 @@
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-kcode.el,v 1.109 2013/08/18 02:29:37 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2013/08/18 02:29:37 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -466,9 +464,7 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
 	     (char2-s (cadr sjis))
 	     (char-data (skk-tankan-get-char-data char))
 	     (anno (skk-tankan-get-char-annotation char))
-	     (unicode (cond ((eval-when-compile
-			       (and (featurep 'emacs)
-				    (>= emacs-major-version 23)))
+	     (unicode (cond ((eval-when-compile (featurep 'emacs))
 			     (concat ", "
 				     (propertize "UNICODE:" 'face
 						 'skk-display-code-prompt-face)
@@ -482,6 +478,7 @@ To find a character in `%s', type 7/8 bits JIS code (00nn),\
 						 'skk-display-code-prompt-face)
 				     (format "U+%04x" (char-to-ucs char))))
 
+			    ;; Mule-UCS
 			    ((and (eval-when-compile (fboundp 'encode-char))
 				  (fboundp 'encode-char)
 				  (encode-char char 'ucs))

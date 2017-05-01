@@ -4,9 +4,7 @@
 
 ;; Author: SKK Development Team <skk@ring.gr.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-vars.el,v 1.467 2014/10/18 21:24:59 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2014/10/18 21:24:59 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -38,14 +36,6 @@
   (defvar emacs-beta-version)
   (defvar mule-version))
 
-;; *** 2012.1.15 $B:o=|(B ***
-;; (eval-and-compile
-;;   ;; XEmacs $B$N<1JL$O(B (featurep 'xemacs) $B$rMQ$$$k!#(BGNU Emacs $B$K$D$$$F$O(B
-;;   ;; Emacs 21 $B$,(B `emacs' feature $B$r(B provide $B$7$J$$$N$G0J2<$rMQ$$$k!#(B
-;;   ;; Emacs 21 $B%5%]!<%H=*N;8e$O(B (featurep 'emacs) $B$,$h$$$H;W$o$l$k!#(B
-;;   (defconst skk-running-gnu-emacs (or (featurep 'emacs)
-;; 				      (string-match "^GNU" (emacs-version)))))
-
 ;; Functions needed prior to loading skk-macs.el.
 (when (eval-when-compile (featurep 'emacs))
   (defsubst find-coding-system (obj)
@@ -55,9 +45,8 @@
 
 (defun skk-find-window-system ()
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
-    ;; GNU Emacs 23 or later
+   ((eval-when-compile (featurep 'emacs))
+    ;; GNU Emacs
     (let ((frames (frame-list))
 	  val)
       (while (and (not val) frames)
@@ -69,7 +58,7 @@
 	      frames (cdr frames)))
       val))
    (t
-    ;; Emacs 22 and XEmacs
+    ;; XEmacs
     window-system)))
 
 ;;;###autoload
@@ -293,7 +282,7 @@
 $B$?$@$7!"%?!<%_%J%k$G(B Emacs $B$rMxMQ$7$F$$$k>l9g$OH=Dj$G$-$:!"(B
 $B%f!<%6$N0U?^$H9g$o$J$$$+$b$7$l$J$$$N$G!"$3$N%*%W%7%g%s$+(B
 `frame-background-mode' $B$r$"$i$+$8$a@_Dj$7$F$*$/$3$H$,K>$^$7$$!#(B
-$B$3$N%*%W%7%g%s$O(B ~/.skk $B$K@_Dj$7$F$bH?1G$5$l$J$$!#(B~/.emacs $B$+(B
+$B$3$N%*%W%7%g%s$O(B ~/.skk $B$K@_Dj$7$F$bH?1G$5$l$J$$!#(B~/.emacs.d/init.el $B$+(B
 \\[customize] $B$K$F!"(BSKK $B$,FI$_9~$^$l$kA0$K@_Dj$9$k$3$H$,I,MW!#(B"
   :type '(choice (const dark)
 		 (const light)
@@ -316,10 +305,10 @@
 			     (expand-file-name "init" skk-user-directory)
 			   (convert-standard-filename "~/.skk"))
   "*SKK $B$N=i4|@_Dj$r5-=R$9$k%U%!%$%kL>!#(BSKK $B$r5/F0$7$?:G=i$N0lEY$@$1FI$_(B
-$B9~$^$l$k!#$3$N%U%!%$%k$K5-=R$9$kBe$o$j$K(B ~/.emacs $B$K(B SKK $B$N3F<o=i4|@_Dj$r(B
+$B9~$^$l$k!#$3$N%U%!%$%k$K5-=R$9$kBe$o$j$K(B ~/.emacs.d/init.el $B$K(B SKK $B$N3F<o=i4|@_Dj$r(B
 $B5-=R$9$k$3$H$b2DG=$@$,!"8e<T$N>l9g$O(B \\[skk-restart] $B$G$OH?1G$5$l$J$$!#(B
 
-~/.emacs $B$G(B $BJQ?t(B `skk-byte-compile-init-file' $B$r@_Dj$9$k$3$H$G(B `skk-init-file' $B$r(B
+~/.emacs.d/init.el $B$G(B $BJQ?t(B `skk-byte-compile-init-file' $B$r@_Dj$9$k$3$H$G(B `skk-init-file' $B$r(B
 $B<+F0E*$K%P%$%H%3%s%Q%$%k$9$k$3$H$b2DG=!#(B"
   ;;"*Name of the SKK initialization file.
   ;;From skk.el 9.x on all customization may be done in ~/.emacs."
@@ -591,9 +580,9 @@ C-0 SPC $B$G;HMQ$5$l$k(B"
   ;; $B8=:_$N<BAu$K$Y$C$?$j$J@bL@$ONI$/$J$$$+$b(B
   "*$B<-=q%P%C%U%!$N%3!<%G%#%s%0%7%9%F%`!#(B
 $B4pK\E*$K$O(B coding system $BL>$r;XDj$9$k!#(B
-$B$?$@$7J8;zNs(B \"euc\", \"ujis\", \"sjis\", \"jis\" $B$N;XDj$b0l1~<u$1IU$1$k!#(B
-nil $B$N>l9g(B \"euc\" $B$HF1$807$$$K$J$k!#(B
-$B8D?M<-=q$O$3$N%3!<%G%#%s%0%7%9%F%`$GJ]B8$5$l$k!#(B"
+$BJ8;zNs(B \"euc\", \"ujis\", \"sjis\", \"jis\" $B$N;XDj$b<u$1IU$1$k(B (`skk-coding-system-alist')$B!#(B
+$B%G%U%)%k%H$O(B nil $B$G$"$j!"<-=q%P%C%U%!$N%3!<%G%#%s%0%7%9%F%`$O(B euc-jis-2004 $B$H$J$k(B (`skk-find-coding-system')$B!#(B
+$B8D?M<-=q$b$3$N%3!<%G%#%s%0%7%9%F%`$GJ]B8$5$l$k!#(B"
   :type '(radio coding-system
 		(radio :tag "$B%3!<%I$NDL>N(B"
 		       (const "euc")
@@ -636,11 +625,12 @@ nil $B$G$"$l$P!"(B1 $B9T$KJ#?t$N8uJd$,$"$C$F$b(B 1 $B8uJd$H$7$F?t$($k!#(B"
   :group 'skk-private)
 
 (defcustom skk-search-excluding-word-pattern-function nil
-  "*$B8D?M<-=q$K<h$j9~$^$J$$J8;zNs$N%Q%?!<%s$r8!:w$9$k>r7o$r;XDj$9$k!#(B
-$B$3$NJQ?t$K$O0z?t(B 1 $B8D$N4X?t!JKt$O4X?t$N%j%9%H!K$rBeF~$9$k$3$H$H$7!"BeF~$7(B
-$B$?4X?t$O3NDj$7$?J8;zNs$r0z?t$K(B `skk-update-jisyo-p' $BFb$G(B `funcall' $B$5$l$k!#(B
+  "*$B!V!H8D?M<-=q$K<h$j9~$^$J$$J8;zNs$N%Q%?!<%s!I$r8!:w$9$k>r7o!W$r;XDj$9$k!#(B
+$B$3$NJQ?t$K$O!"0z?t#18D$N4X?t!JKt$O4X?t$N%j%9%H!K$rBeF~$9$k!#(B
+$BBeF~$7$?4X?t$O!"3NDj$7$?J8;zNs$r0z?t$K(B `skk-update-jisyo-p' $BFb$G(B `funcall' $B$5$l$k!#(B
+$B$3$NJQ?t$N%G%U%)%k%H$O(B nil $B$G$"$k$?$a!"4X?t(B `skk-update-jisyo-p' $B$O(B t $B$rJV$9!#(B
 
-$B4pK\E*$K$3$NJQ?t$O%U%C%/JQ?t$G$"$j!"$=$NCM$r@_Dj$7$?$$>l9g$K$O(B `add-hook'
+$B4pK\E*$K!"$3$NJQ?t$O%U%C%/JQ?t$G$"$j!"$=$NCM$r@_Dj$7$?$$>l9g$K$O(B `add-hook'
 $B$GDI2C$9$k$+(B `remove-hook' $B$G:o=|$9$k!#(B
 
 SKK $B$G$O!"$+$J4A;zJQ49!&3NDj$r9T$C$?J8;zNs$OA4$F8D?M<-=q$K<h$j9~$^$l$k$,!"(B
@@ -668,12 +658,12 @@ SKK $B$G$O!"$+$J4A;zJQ49!&3NDj$r9T$C$?J8;zNs$OA4$F8D?M<-=q$K<h$j9~$^$l$k$,!"(B
 		    (not (string-match \"^[^$B!<%!(B-$B%s$!(B-$B$s(B]+$\"
                                        skk-henkan-key))))))
 
-$B$+$J4A;zJQ49$K$h$C$F%+%?%+%J$r5a$a$?$$$,!"8D?M<-=q$K$O%+%?%+%J$N$_$N8uJd(B
-$B$r<h$j9~$_$?$/$J$$!"$J$I!"8D?M<-=q$,I,MW0J>e$KKD$l$k$N$rM^$($kL\E*$K;HMQ(B
-$B$G$-$k!#(B
+$B!V$+$J4A;zJQ49$K$h$C$F%+%?%+%J$r5a$a$?$$$,!"8D?M<-=q$K$O%+%?%+%J$N$_$N8u(B
+$BJd$r<h$j9~$_$?$/$J$$!W$J$I!"8D?M<-=q$,I,MW0J>e$KKD$l$k$N$rM^$($kL\E*$K;H(B
+$BMQ$G$-$k!#(B
 
-$B$J$*!"8D?M<-=q$K<h$j9~$^$J$$8+=P$78l$K$D$$$F$OJd40$,8z$+$J$$$N$GCm0U$9$k(B
-$B$3$H!#(B"
+$B$J$*!"8D?M<-=q$K<h$j9~$^$J$$8+=P$78l$K$D$$$F$O!"Jd40$,8z$+$J$$$N$GCm0U$9(B
+$B$k$3$H!#(B"
   :type 'hook
   :group 'skk-private)
 
@@ -1074,7 +1064,7 @@ NEXT-STATE $B$K>uBV$r0\$7$?$&$($G!"F~NOBT$A>uBV$H$J$k!#(B
 	...
 	))
 
-$B>e5-$N$h$&$K(B `.emacs' $B$^$?$O(B `skk-init-file' $B$K$F@_Dj$9$k$3$H$,$G$-$k!#(B
+$B>e5-$N$h$&$K(B `~/.emacs.d/init.el' $B$^$?$O(B `skk-init-file' $B$K$F@_Dj$9$k$3$H$,$G$-$k!#(B
 
 $B$3$NJQ?t$O!"I8=`$G$O(B
 
@@ -1282,6 +1272,12 @@ ASCII $B?t;z$ND>8e$G$"$l$P!"D92;(B($B!<(B)$B$O(B `-' $B$X!"6gE@(B($B!#
   :type 'character
   :group 'skk-henkan)
 
+(defcustom skk-show-candidates-nth-henkan-char 5
+  "*`skk-henkan-show-candidates' $B$r8F$S=P$9$^$G$N(B `skk-start-henkan-char' $B$rBG80$9$k2s?t!#(B
+2 $B0J>e$N@0?t$G$"$kI,MW!#(B"
+  :type 'integer
+  :group 'skk-henkan)
+
 (defcustom skk-previous-candidate-keys (list "x" "\C-p")
   "*`skk-previous-candidate' $B$r3dEv$F$k%-!<!#(B
 $B$3$NJQ?t$K$O%-!<$rI=$9%*%V%8%'%/%H$N%j%9%H$r;XDj$9$k!#(B
@@ -1452,8 +1448,12 @@ nil $B$G$"$l$P!"Aw$j2>L>$r4^$a$?8+=P$78l$r$=$N$^$^;D$7$F"&%b!<%I$KF~$k!#(B
   :type 'boolean
   :group 'skk-henkan)
 
-(defcustom skk-henkan-show-candidates-rows 1
-  "*$BJQ498uJd72$NI=<(9T?t!#(B"
+(make-obsolete-variable 'skk-henkan-show-candidates-rows
+			'skk-henkan-number-to-display-candidates
+			"DDSKK 16.2")
+
+(defcustom skk-henkan-number-to-display-candidates 7
+  "*$BJQ498uJd$rI=<($9$k8D?t!#(B"
   :type 'integer
   :group 'skk-henkan)
 
@@ -1489,6 +1489,12 @@ nil $B$G$"$l$P!"Aw$j2>L>$r4^$a$?8+=P$78l$r$=$N$^$^;D$7$F"&%b!<%I$KF~$k!#(B
 	(cdr (assoc 'left-fringe (frame-parameters)))
 	(cdr (assoc 'right-fringe (frame-parameters))))
   "skk $B5/F0;~$N(B fringe $B$NI}(B")
+
+(defcustom skk-candidate-buffer-delete-other-windows t
+  "*nil $B$G$"$l$P!"(B\"*$B8uJd(B*$B%P%C%U%!(B\" $BI=<($HF1;~$KB>$N(B window $B$r0l;~HsI=<($H$9$k(B."
+  :type 'boolean
+  :group 'skk-henkan
+  :group 'skk-visual)
 
 (defcustom skk-search-katakana nil
   "*$B$+$J$rC1=c$K%+%?%+%JJQ49$7$?8uJd$rI=<($9$k$+$I$&$+$r7h$a$k%*%W%7%g%s!#(B
@@ -1775,7 +1781,7 @@ nil $B$G$"$l$P!"JQ495Z$S8D?M<-=q$K4X$9$kE}7W$r<h$i$J$$!#(B"
 nil $B$G$"$l$P!"(B`skk-init-file' $B$H$=$N%P%$%H%3%s%Q%$%k:Q$_%U%!%$%k$rHf3S$7$F(B
 `skk-init-file' $B$NJ}$,?7$7$$$H$-$O!"$=$N%P%$%H%3%s%Q%$%k:Q%U%!%$%k$r>C$9!#(B
 
-$B$3$NJQ?t$O(B ~/.emacs $B$G@_Dj$9$k$3$H!#(B"
+$B$3$NJQ?t$O(B ~/.emacs.d/init.el $B$G@_Dj$9$k$3$H!#(B"
   :type 'boolean
   :group 'skk-misc)
 
@@ -2155,17 +2161,18 @@ o $B8uJd0lMw$rI=<($9$k$H$-(B ($B8uJd$NJ8;zNs$N8e$m$K%"%N%F!<%7%g%s$,IU2C$5$l$
 
 ;;; -- Internal constants and variables of skk.el
 (defconst skk-coding-system-alist
-  (cond ((and (featurep 'emacs)
-	      (>= emacs-major-version 23))
+  (cond ((featurep 'emacs)
 	 '(("euc" . euc-jis-2004)
 	   ("ujis" . euc-jis-2004)
 	   ("sjis". japanese-shift-jis-2004)
 	   ("jis" . iso-2022-jp-3)))
-	((featurep 'jisx0213)
+
+	((featurep 'jisx0213)		; Mule-UCS
 	 '(("euc" . euc-jisx0213)
 	   ("ujis" . euc-jisx0213)
 	   ("sjis". shift_jisx0213)
 	   ("jis" . iso-2022-jp-3-strict)))
+
 	(t
 	 '(("euc" . euc-japan)
 	   ("ujis" . euc-japan)
@@ -2210,7 +2217,7 @@ o $B8uJd0lMw$rI=<($9$k$H$-(B ($B8uJd$NJ8;zNs$N8e$m$K%"%N%F!<%7%g%s$,IU2C$5$l$
 
 (defconst skk-default-jisx0208-latin-vector
   ;; note that skk-jisx0208-latin-vector is a user variable.
-  ;; skk.el $B%m!<%IA0$K(B .emacs $B$J$I$G!"(Bskk-jisx0208-latin-vector $B$NJL$NCM$r%f!<(B
+  ;; skk.el $B%m!<%IA0$K(B ~/.emacs.d/init.el $B$J$I$G!"(Bskk-jisx0208-latin-vector $B$NJL$NCM$r%f!<(B
   ;; $B%6!<$,D>@\=q$$$?$j!"(Bskk.el $B%m!<%I8e$K$3$NCM$r(B aset $B$GD>@\$$$8$C$?$j$7$J(B
   ;; $B$1$l$P(B default-value $B$G(B skk-jisx0208-latin-vector $B$K%"%/%;%9$9$k$3$H$G(B
   ;; skk-default-jisx0208-latin-vector $B$NCM$rJ];}$9$k$3$H$b$G$-$h$&$,!"$=$l$O(B
@@ -2841,17 +2848,10 @@ nil $B$,;XDj$5$l$?>l9g$O!"%-!<%\!<%I$N%?%$%W$N0c$$$r5[<}$9$k3dEv$F$r9T$$$^$;$s!
 
 (defcustom skk-annotation-browse-key "\C-o"
   "*$B%"%N%F!<%7%g%s$r(B URL $B$H8+Pv$7$F%V%i%&%:$9$k%-!<!#(B
-$B$3$N%-!<$r%?%$%W$9$k$H!"8=:_I=<(Cf$N%"%N%F!<%7%g%s$r4X?t(B `skk-annotation-browser-function' $B$KEO$9!#(B"
+$B$3$N%-!<$r%?%$%W$9$k$H!"8=:_I=<(Cf$N%"%N%F!<%7%g%s$r4X?t(B `browse-url' $B$KEO$9!#(B"
   :type (if (get 'key-sequence 'widget-type)
 	    'key-sequence
 	  'sexp)
-  :group 'skk-annotation)
-
-(defcustom skk-annotation-browser-function (if (functionp 'eww-browse-url)
-					       'eww-browse-url
-					     'browse-url)
-  "*$B;HMQ$9$k4X?t$r%7%s%\%k$G;XDj$9$k!#(B 'browse-url $BKt$O(B 'eww-browse-url."
-  :type 'function
   :group 'skk-annotation)
 
 (defcustom skk-annotation-function nil
@@ -3004,8 +3004,7 @@ Apple OS X $B$G$OI8=`$N!V<-=q!W$rMxMQ$G$-$k!#(B"
 (defvar skkannot-py-buffer nil)
 
 (defvar skkannot-url-installed-p
-  (if (and (featurep 'emacs)
-	   (>= emacs-major-version 22))
+  (if (featurep 'emacs)
       t
     'untested))
 
@@ -3329,9 +3328,9 @@ kakutei-first $B$rA*$s$@;~$O!"(B\"$B$7$s$j(Bn\" $B$rJd40$9$k$H!"(B
   '((skk-comp-by-history)
     (skk-comp-from-jisyo skk-jisyo)
     (skk-look-completion))
-  "*$BJd40%W%m%0%i%`$N%j%9%H!#(B
+  "*$BJd404X?t!"Jd40BP>]$N<-=q$r7hDj$9$k$?$a$N%j%9%H!#(B
 $B%j%9%H$NMWAG$O!"(B`skk-comp-first' $B$,(B t $B$G$"$k;~$K(B
-$B?75,Jd408uJd72$N@8@.$r3+;O$7!"(B1$B2s$NI>2A$K$D$-(B 1$B$D$N8uJd$rJV$9(B S $B<0!#(B"
+$B?75,Jd408uJd72$N@8@.$r3+;O$7!"#12s$NI>2A$K$D$-#1$D$N8uJd$rJV$9(B S $B<0!#(B"
   :type '(repeat (sexp))
   :group 'skk-comp)
 
@@ -3490,6 +3489,7 @@ server completion $B$,<BAu$5$l$F$*$i$:!"$+$DL5H?1~$J<-=q%5!<%PBP:v!#(B")
     (cdr (assq 'cursor-color (frame-parameters (selected-frame))))))
   "*SKK $B%b!<%I$N%*%U$r<($9%+!<%=%k?'!#(B
 `skk-use-color-cursor' $B$,(B non-nil $B$N$H$-$K;HMQ$5$l$k!#(B"
+  :type 'string
   :group 'skk-cursor)
 
 (defcustom skk-cursor-hiragana-color (if (eq skk-background-mode 'light)
@@ -5393,6 +5393,15 @@ then filename of the English version will be \"SKK.tut.E\".")
      (:inherit default)))
   "*inline $B8~$1$NGX7J?'(B"
   :group 'skk-visual)
+
+;;; skk-get related.
+(defvar skk-get-jisyo-directory "~/.emacs.d/skk-get-jisyo"
+  ;; (expand-file-name "../../../skk" data-directory)
+  "`skk-get'$B$NJ]B8@h(B")
+
+;;; skk-search-web related.
+(defvar skk-use-search-web nil
+  "*Non-nil $B$G$"$l$P!"(Bskk-search-web $B$rM-8z$K$9$k(B.")
 
 ;; XXX workaround
 ;; face $B$N(B property $B$,0lIt$N>u67$GH?1G$5$l$J$$$3$H$KBP=h(B

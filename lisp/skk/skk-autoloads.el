@@ -1,6 +1,6 @@
 ;;; skk-autoloads.el --- autoload settings for SKK  -*- coding: iso-2022-jp -*-
 
-;; This file was generated automatically by SKK-MK at Wed Feb 11 15:28:22 2015.
+;; This file was generated automatically by SKK-MK at Mon May  1 16:50:44 2017.
 
 ;; This file is part of Daredevil SKK.
 
@@ -22,7 +22,7 @@
 ;;; Code:
 
 
-;;;### (autoloads nil "skk-viper" "skk-viper.el" (20242 31010 0 0))
+;;;### (autoloads nil "skk-viper" "skk-viper.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-viper.el
 
 (autoload 'skk-viper-normalize-map "skk-viper" "\
@@ -32,7 +32,7 @@
 
 ;;;***
 
-;;;### (autoloads nil "skk-jisx0213" "skk-jisx0213.el" (19542 57953
+;;;### (autoloads nil "skk-jisx0213" "skk-jisx0213.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-jisx0213.el
 
@@ -43,7 +43,7 @@
 
 ;;;***
 
-;;;### (autoloads nil "skk-emacs" "skk-emacs.el" (21551 12402 0 0))
+;;;### (autoloads nil "skk-emacs" "skk-emacs.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-emacs.el
 
 (autoload 'skk-emacs-prepare-menu "skk-emacs" "\
@@ -71,7 +71,7 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "ccc" "ccc.el" (20611 49971 0 0))
+;;;### (autoloads nil "ccc" "ccc.el" (22714 20160 0 0))
 ;;; Generated autoloads from ccc.el
 
 (autoload 'ccc-setup "ccc" "\
@@ -79,16 +79,14 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 
 \(fn)" nil nil)
 
-(autoload 'update-buffer-local-frame-params "ccc" "\
+(autoload 'ccc-update-buffer-local-frame-params "ccc" "\
 
 
 \(fn &optional BUFFER)" nil nil)
 
-(add-hook 'after-init-hook (lambda nil (when window-system (ccc-setup))))
-
 ;;;***
 
-;;;### (autoloads nil "context-skk" "context-skk.el" (20722 33356
+;;;### (autoloads nil "context-skk" "context-skk.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from context-skk.el
 
@@ -100,7 +98,7 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 
 (custom-autoload 'context-skk-context-check-hook "context-skk" t)
 
-(defvar context-skk-custumize-functions '(context-skk-customize-kutouten) "\
+(defvar context-skk-customize-functions '(context-skk-customize-kutouten) "\
 *skk $B$K$h$kF~NO3+;OD>A0$K!"F~NO$r%+%9%?%^%$%:$9$k4X?t$rEPO?$9$k!#(B
 $B4X?t$O0J2<$N7A<0$N%G!<%?$rMWAG$H$9$k%j%9%H$rJV$9$b$N$H$9$k(B: 
 
@@ -110,7 +108,7 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 $BFC$K$=$N>l$G%+%9%?%^%$%:$9$Y$-JQ?t$,$J$$>l9g(B `nil' $B$rJV$;$PNI$$!#(B
 $B4X?t$K$O2?$b0z?t$,EO$5$l$J$$!#(B")
 
-(custom-autoload 'context-skk-custumize-functions "context-skk" t)
+(custom-autoload 'context-skk-customize-functions "context-skk" t)
 
 (defvar context-skk-programming-mode '(ada-mode antlr-mode asm-mode autoconf-mode awk-mode c-mode objc-mode java-mode idl-mode pike-mode cperl-mode delphi-mode f90-mode fortran-mode icon-mode idlwave-mode inferior-lisp-mode lisp-mode m4-mode makefile-mode metafont-mode modula-2-mode octave-mode pascal-mode perl-mode prolog-mode ps-mode postscript-mode ruby-mode scheme-mode sh-mode simula-mode tcl-mode vhdl-mode emacs-lisp-mode) "\
 *context-skk $B$K$F!V%W%m%0%i%_%s%0%b!<%I!W$H8+Pv$9%b!<%I$N%j%9%H(B")
@@ -140,7 +138,7 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-abbrev" "skk-abbrev.el" (20722 33356 0
+;;;### (autoloads nil "skk-abbrev" "skk-abbrev.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-abbrev.el
 
@@ -151,8 +149,8 @@ GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-annotation" "skk-annotation.el" (21563
-;;;;;;  24536 0 0))
+;;;### (autoloads nil "skk-annotation" "skk-annotation.el" (22714
+;;;;;;  20160 0 0))
 ;;; Generated autoloads from skk-annotation.el
 
 (autoload 'skk-annotation-get "skk-annotation" "\
@@ -252,7 +250,7 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 
 ;;;***
 
-;;;### (autoloads nil "skk-auto" "skk-auto.el" (19945 34559 0 0))
+;;;### (autoloads nil "skk-auto" "skk-auto.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-auto.el
 
 (autoload 'skk-okuri-search-1 "skk-auto" "\
@@ -267,7 +265,7 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 
 ;;;***
 
-;;;### (autoloads nil "skk-cdb" "skk-cdb.el" (19847 49686 0 0))
+;;;### (autoloads nil "skk-cdb" "skk-cdb.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-cdb.el
 
 (autoload 'skk-search-cdb-jisyo "skk-cdb" "\
@@ -277,7 +275,7 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 
 ;;;***
 
-;;;### (autoloads nil "skk-comp" "skk-comp.el" (20963 16654 0 0))
+;;;### (autoloads nil "skk-comp" "skk-comp.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-comp.el
 
 (autoload 'skk-comp-start-henkan "skk-comp" "\
@@ -432,7 +430,7 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-cursor" "skk-cursor.el" (20722 33356 0
+;;;### (autoloads nil "skk-cursor" "skk-cursor.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-cursor.el
 
@@ -453,7 +451,7 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-cus" "skk-cus.el" (20240 11454 0 0))
+;;;### (autoloads nil "skk-cus" "skk-cus.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-cus.el
 
 (autoload 'skk-customize-group-skk "skk-cus" "\
@@ -478,7 +476,7 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-dcomp" "skk-dcomp.el" (20722 33356 0 0))
+;;;### (autoloads nil "skk-dcomp" "skk-dcomp.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-dcomp.el
 
 (autoload 'skk-dcomp-marked-p "skk-dcomp" "\
@@ -498,7 +496,7 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-develop" "skk-develop.el" (21085 14812
+;;;### (autoloads nil "skk-develop" "skk-develop.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-develop.el
 
@@ -511,11 +509,16 @@ mail-user-agent $B$r@_Dj$9$k$3$H$K$h$j9%$_$N%a!<%k%$%s%?!<%U%'%$%9$r;HMQ$9$k$3$
 
 \(fn)" t nil)
 
+(autoload 'skk-get "skk-develop" "\
+DIR.
+
+\(fn DIR)" t nil)
+
 (add-hook 'before-init-hook (lambda nil (eval-after-load "font-lock" '(set (if (boundp 'lisp-el-font-lock-keywords-2) 'lisp-el-font-lock-keywords-2 'lisp-font-lock-keywords-2) (nconc (list (list (concat "(\\(\\(skk-\\)?def\\(" "\\(un-cond\\|subst-cond\\|advice\\|" "macro-maybe\\|alias-maybe\\|un-maybe\\)\\|" "\\(var\\|localvar\\)" "\\)\\)\\>" "[ 	'(]*" "\\(\\sw+\\)?") '(1 font-lock-keyword-face) '(6 (cond ((match-beginning 4) font-lock-function-name-face) ((match-beginning 5) font-lock-variable-name-face)) nil t))) (list (list (concat "(" (regexp-opt '("skk-save-point" "skk-with-point-move" "skk-loop-for-buffers") t) "\\>") '(1 font-lock-keyword-face))) (list (list "(\\(skk-error\\)\\>" '(1 font-lock-warning-face))) (symbol-value (if (boundp 'lisp-el-font-lock-keywords-2) 'lisp-el-font-lock-keywords-2 'lisp-font-lock-keywords-2))))) (put 'skk-deflocalvar 'doc-string-elt 3) (put 'skk-defadvice 'doc-string-elt 3)))
 
 ;;;***
 
-;;;### (autoloads nil "skk-gadget" "skk-gadget.el" (20750 16734 0
+;;;### (autoloads nil "skk-gadget" "skk-gadget.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-gadget.el
 
@@ -662,7 +665,7 @@ NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$&!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-inline" "skk-inline.el" (21006 7809 0
+;;;### (autoloads nil "skk-inline" "skk-inline.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-inline.el
 
@@ -673,7 +676,7 @@ NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$&!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-isearch" "skk-isearch.el" (21108 36305
+;;;### (autoloads nil "skk-isearch" "skk-isearch.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-isearch.el
 
@@ -703,7 +706,7 @@ Hook function called when skk isearch is done.
 
 ;;;***
 
-;;;### (autoloads nil "skk-jisx0201" "skk-jisx0201.el" (20722 33356
+;;;### (autoloads nil "skk-jisx0201" "skk-jisx0201.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-jisx0201.el
 
@@ -730,7 +733,7 @@ SKK $B$N%b!<%I$r(B JIS X 0201 $B%b!<%I$KJQ99$9$k!#(B
 ;;;***
 
 ;;;### (autoloads nil "skk-jisyo-edit-mode" "skk-jisyo-edit-mode.el"
-;;;;;;  (20809 11009 0 0))
+;;;;;;  (22714 20160 0 0))
 ;;; Generated autoloads from skk-jisyo-edit-mode.el
 
 (autoload 'skk-jisyo-edit-mode "skk-jisyo-edit-mode" "\
@@ -765,7 +768,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-kakasi" "skk-kakasi.el" (20130 9048 0
+;;;### (autoloads nil "skk-kakasi" "skk-kakasi.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-kakasi.el
 
@@ -884,7 +887,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-kcode" "skk-kcode.el" (21008 12689 0 0))
+;;;### (autoloads nil "skk-kcode" "skk-kcode.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-kcode.el
 
 (autoload 'skk-input-by-code-or-menu "skk-kcode" "\
@@ -905,7 +908,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-leim" "skk-leim.el" (20518 14470 0 0))
+;;;### (autoloads nil "skk-leim" "skk-leim.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-leim.el
 
 (autoload 'skk-activate "skk-leim" "\
@@ -934,7 +937,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-look" "skk-look.el" (20722 33356 0 0))
+;;;### (autoloads nil "skk-look" "skk-look.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-look.el
 
 (autoload 'skk-look "skk-look" "\
@@ -973,7 +976,7 @@ words $B%U%!%$%k$K$"$kA4$F$N8+=P$7$rJV$9!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-macs" "skk-macs.el" (20820 12199 0 0))
+;;;### (autoloads nil "skk-macs" "skk-macs.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-macs.el
 
 (put 'skk-defadvice 'lisp-indent-function 'defun)
@@ -982,7 +985,7 @@ words $B%U%!%$%k$K$"$kA4$F$N8+=P$7$rJV$9!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-num" "skk-num.el" (21551 12402 0 0))
+;;;### (autoloads nil "skk-num" "skk-num.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-num.el
 
 (autoload 'skk-num-compute-henkan-key "skk-num" "\
@@ -1053,7 +1056,7 @@ type4 $B$N?tCM:FJQ49$,9T$o$l$?$H$-$O!"?tCM<+?H$rJV$7!"$=$l0J30$N?tCMJQ49(B
 ;;;***
 
 ;;;### (autoloads nil "skk-server-completion" "skk-server-completion.el"
-;;;;;;  (20722 33356 0 0))
+;;;;;;  (22714 20160 0 0))
 ;;; Generated autoloads from skk-server-completion.el
 
 (autoload 'skk-server-completion-search "skk-server-completion" "\
@@ -1070,7 +1073,7 @@ Server completion $B$KBP1~$7$?<-=q%5!<%P$rMxMQ$9$kJd40%W%m%0%i%`!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-server" "skk-server.el" (20152 22069 0
+;;;### (autoloads nil "skk-server" "skk-server.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-server.el
 
@@ -1100,7 +1103,7 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-show-mode" "skk-show-mode.el" (21016 37443
+;;;### (autoloads nil "skk-show-mode" "skk-show-mode.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-show-mode.el
 
@@ -1111,7 +1114,53 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-tankan" "skk-tankan.el" (20635 38961 0
+;;;### (autoloads nil "skk-study" "skk-study.el" (22714 20160 0 0))
+;;; Generated autoloads from skk-study.el
+
+(autoload 'skk-study-search "skk-study" "\
+$B3X=,%G!<%?$r;2>H$7$F(B ENTRY $B$r2C9)$7!"4XO"@-$N$"$k8l$NM%@h=g0L$r>e$2$FJV$9!#(B
+
+\(fn HENKAN-BUFFER MIDASI OKURIGANA ENTRY)" nil nil)
+
+(autoload 'skk-study-update "skk-study" "\
+MIDASI $B$H(B WORD $B$K$D$$$F(B `skk-study-data-ring' $B$N:G=i$N4XO"8l$r4XO"IU$1$F3X=,$9$k!#(B
+
+\(fn HENKAN-BUFFER MIDASI OKURIGANA WORD PURGE)" nil nil)
+
+(autoload 'skk-study-save "skk-study" "\
+$B3X=,7k2L$r(B `skk-study-file' $B$XJ]B8$9$k!#(B
+$B%*%W%7%g%J%k0z?t$N(B NOMSG $B$,(B non-nil $B$G$"$l$P!"J]B8%a%C%;!<%8$rI=<($7$J$$!#(B
+
+\(fn &optional NOMSG)" t nil)
+
+(autoload 'skk-study-switch-current-theme "skk-study" "\
+$B%+%l%s%H%P%C%U%!$KBP$7$F(B skk-study $B$N3X=,%F!<%^(B THEME $B$r@_Dj$9$k!#(B
+$B3X=,%F!<%^L>(B THEME $B$K$OG$0U$NJ8;zNs$r;XDj$G$-$k!#(B
+$B%+%l%s%H%P%C%U%!$K3X=,%F!<%^$,@_Dj$5$l$J$$$H$-$O!"3X=,%F!<%^(B
+\"general\" $B$KBP$7$F3X=,$,9T$o$l$k!#(B
+
+\(fn THEME)" t nil)
+
+(autoload 'skk-study-remove-theme "skk-study" "\
+skk-study $B$N3X=,%F!<%^(B THEME $B$r:o=|$9$k!#(B
+
+\(fn THEME)" t nil)
+
+(autoload 'skk-study-copy-theme "skk-study" "\
+skk-study $B$N3X=,%F!<%^(B FROM $B$r(B TO $B$K%3%T!<$9$k!#(B
+TO $B$N4{B8%G!<%?$OGK2u$5$l$k!#(B
+
+\(fn FROM TO)" t nil)
+
+(autoload 'skk-study-read "skk-study" "\
+`skk-study-file' $B$+$i3X=,7k2L$rFI$_9~$`!#(B
+$B%*%W%7%g%J%k0z?t$N(B FORCE $B$,(B non-nil $B$G$"$l$P!"GK4~$N3NG'$r$7$J$$!#(B
+
+\(fn &optional NOMSG FORCE)" t nil)
+
+;;;***
+
+;;;### (autoloads nil "skk-tankan" "skk-tankan.el" (22714 20160 0
 ;;;;;;  0))
 ;;; Generated autoloads from skk-tankan.el
 
@@ -1137,7 +1186,7 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 
 ;;;***
 
-;;;### (autoloads nil "skk-tut" "skk-tut.el" (21530 58832 0 0))
+;;;### (autoloads nil "skk-tut" "skk-tut.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-tut.el
 
 (autoload 'skk-tutorial "skk-tut" "\
@@ -1148,7 +1197,7 @@ You can select English version by \\[universal-argument] \\[skk-tutorial].
 
 ;;;***
 
-;;;### (autoloads nil "skk-vars" "skk-vars.el" (21570 55979 0 0))
+;;;### (autoloads nil "skk-vars" "skk-vars.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk-vars.el
 
 (put 'skk-deflocalvar 'lisp-indent-function 'defun)
@@ -1165,7 +1214,7 @@ Emacs $B$N5/F0$=$N$b$N$OCY$/$J$k$,!"(BDDSKK $B$N=i2s5/F0$rAa$/$9$k$3$H$,$G$-$
 
 ;;;***
 
-;;;### (autoloads nil "skk-version" "skk-version.el" (21618 14685
+;;;### (autoloads nil "skk-version" "skk-version.el" (22714 20160
 ;;;;;;  0 0))
 ;;; Generated autoloads from skk-version.el
 
@@ -1178,7 +1227,7 @@ the codename.
 
 ;;;***
 
-;;;### (autoloads nil "skk" "skk.el" (21569 64346 0 0))
+;;;### (autoloads nil "skk" "skk.el" (22714 20160 0 0))
 ;;; Generated autoloads from skk.el
 
 (autoload 'skk-mode "skk" "\
@@ -1279,53 +1328,41 @@ Emacs $B5/F0;~$K$"$i$+$8$a(B SKK $B$r8F$V$3$H$G(B SKK $B$N1~Ez$rB.$/$9$k!#
 
 \(fn)" nil nil)
 
-(add-hook 'after-init-hook (lambda nil (when (and (symbol-value 'init-file-user) skk-preload) (skk-preload))) t)
+(add-hook 'after-init-hook (lambda nil (when (and (symbol-value 'init-file-user) skk-preload) (skk-preload) (message "SKK preload...done")) (when (and (not (featurep 'xemacs)) window-system) (ccc-setup))) t)
 
 ;;;***
 
-;;;### (autoloads nil "skk-study" "skk-study.el" (20809 11009 0 0))
-;;; Generated autoloads from skk-study.el
+;;;### (autoloads nil "tar-util" "tar-util.el" (22714 20160 0 0))
+;;; Generated autoloads from tar-util.el
 
-(autoload 'skk-study-search "skk-study" "\
-$B3X=,%G!<%?$r;2>H$7$F(B ENTRY $B$r2C9)$7!"4XO"@-$N$"$k8l$NM%@h=g0L$r>e$2$FJV$9!#(B
+(autoload 'tar-make-descriptor "tar-util" "\
+BUFFER is made by function `tar-raw-buffer'.
+Return list like `tar-parse-info', See `tar-mode'.
+this function is based on `tar-summarize-buffer'.
 
-\(fn HENKAN-BUFFER MIDASI OKURIGANA ENTRY)" nil nil)
+\(fn BUFFER)" nil nil)
 
-(autoload 'skk-study-update "skk-study" "\
-MIDASI $B$H(B WORD $B$K$D$$$F(B `skk-study-data-ring' $B$N:G=i$N4XO"8l$r4XO"IU$1$F3X=,$9$k!#(B
+(autoload 'tar-file-descriptor "tar-util" "\
+Return descriptor Structure for match FILE in BUFFER.
+BUFFER is made by function `tar-raw-buffer'.
 
-\(fn HENKAN-BUFFER MIDASI OKURIGANA WORD PURGE)" nil nil)
+\(fn BUFFER FILE)" nil nil)
 
-(autoload 'skk-study-save "skk-study" "\
-$B3X=,7k2L$r(B `skk-study-file' $B$XJ]B8$9$k!#(B
-$B%*%W%7%g%J%k0z?t$N(B NOMSG $B$,(B non-nil $B$G$"$l$P!"J]B8%a%C%;!<%8$rI=<($7$J$$!#(B
+(autoload 'tar-raw-buffer "tar-util" "\
+ARCHIVE is path to tar archive.
+Return buffer object.
 
-\(fn &optional NOMSG)" t nil)
+\(fn ARCHIVE)" nil nil)
 
-(autoload 'skk-study-switch-current-theme "skk-study" "\
-$B%+%l%s%H%P%C%U%!$KBP$7$F(B skk-study $B$N3X=,%F!<%^(B THEME $B$r@_Dj$9$k!#(B
-$B3X=,%F!<%^L>(B THEME $B$K$OG$0U$NJ8;zNs$r;XDj$G$-$k!#(B
-$B%+%l%s%H%P%C%U%!$K3X=,%F!<%^$,@_Dj$5$l$J$$$H$-$O!"3X=,%F!<%^(B
-\"general\" $B$KBP$7$F3X=,$,9T$o$l$k!#(B
+(autoload 'tar-list-files "tar-util" "\
+ARCHIVE is path to tar archive.
 
-\(fn THEME)" t nil)
+\(fn ARCHIVE)" nil nil)
 
-(autoload 'skk-study-remove-theme "skk-study" "\
-skk-study $B$N3X=,%F!<%^(B THEME $B$r:o=|$9$k!#(B
+(autoload 'tar-salvage-file "tar-util" "\
+Salvage SALVAGEFILE in ARCHIVE, and save to SAVEFILE.
 
-\(fn THEME)" t nil)
-
-(autoload 'skk-study-copy-theme "skk-study" "\
-skk-study $B$N3X=,%F!<%^(B FROM $B$r(B TO $B$K%3%T!<$9$k!#(B
-TO $B$N4{B8%G!<%?$OGK2u$5$l$k!#(B
-
-\(fn FROM TO)" t nil)
-
-(autoload 'skk-study-read "skk-study" "\
-`skk-study-file' $B$+$i3X=,7k2L$rFI$_9~$`!#(B
-$B%*%W%7%g%J%k0z?t$N(B FORCE $B$,(B non-nil $B$G$"$l$P!"GK4~$N3NG'$r$7$J$$!#(B
-
-\(fn &optional NOMSG FORCE)" t nil)
+\(fn ARCHIVE SALVAGEFILE SAVEFILE)" nil nil)
 
 ;;;***
 (provide 'skk-autoloads)

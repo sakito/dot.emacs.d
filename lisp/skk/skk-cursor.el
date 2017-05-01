@@ -5,9 +5,7 @@
 
 ;; Author: Masatake YAMATO <masata-y@is.aist-nara.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-cursor.el,v 1.46 2013/01/13 09:45:48 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2013/01/13 09:45:48 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -47,7 +45,7 @@
   (cond ((eval-when-compile (featurep 'xemacs))
 	 (frame-property (selected-frame) 'cursor-color))
 	(t
-	 (frame-cursor-color))))
+	 (ccc-frame-cursor-color))))
 
 ;;;###autoload
 (defun skk-cursor-current-color ()
@@ -89,8 +87,8 @@
 			   (skk-cursor-current-color))
 		       (current-buffer)))
    (t
-    (when default-cursor-color
-      (set-buffer-local-cursor-color
+    (when ccc-default-cursor-color
+      (ccc-set-buffer-local-cursor-color
        (or color
 	   (skk-cursor-current-color)))))))
 
@@ -99,8 +97,8 @@
   (cond ((eval-when-compile (featurep 'xemacs))
 	 (skk-cursor-set))
 	(t
-	 (when default-cursor-color
-	   (set-cursor-color-buffer-local nil)))))
+	 (when ccc-default-cursor-color
+	   (ccc-set-cursor-color-buffer-local nil)))))
 
 ;; advices.
 (when (eval-when-compile (featurep 'xemacs))

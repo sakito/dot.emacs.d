@@ -7,9 +7,7 @@
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-tut.el,v 1.94 2014/09/18 14:01:52 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2014/09/18 14:01:52 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -101,7 +99,7 @@
     (skk-henkan-okuri-strictly . nil)
     (skk-henkan-overlay-priority . 600)
     (skk-henkan-show-candidates-keys . '(?a ?s ?d ?f ?j ?k ?l))
-    (skk-henkan-show-candidates-rows . 1)
+    (skk-henkan-number-to-display-candidates . 7)
     (skk-show-candidates-always-pop-to-buffer . nil)
     (skk-henkan-strict-okuri-precedence . nil)
     (skk-previous-candidate-keys
@@ -282,7 +280,8 @@
      . '(?A ?B ?C ?D ?E ?F ?G ?H ?I ?J ?K ?M ?N ?O ?P ?R ?S ?T ?U ?V ?W ?Y ?Z))
     (skk-share-private-jisyo . nil)
     (skk-special-midashi-char-list . '(?> ?< ??))
-    (skk-start-henkan-key . " ")
+    (skk-start-henkan-char . ?\040)
+    (skk-show-candidates-nth-henkan-char . 5)
     (skk-try-completion-char . ?\011)
     (skk-update-jisyo-function . 'skktut-update-jisyo)
     (skk-use-color-cursor . (and window-system
@@ -297,7 +296,7 @@
     (skk-show-tooltip . nil)
     (skk-show-inline . nil)
     (skk-show-annotation . nil)
-    (skk-kcode-charset . (if (featurep 'jisx0213)
+    (skk-kcode-charset . (if (featurep 'jisx0213) ; Mule-UCS
 			     (quote japanese-jisx0208)
 			   skk-kcode-charset))
     (skk-kcode-method . (if (featurep 'emacs)

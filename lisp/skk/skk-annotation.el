@@ -5,10 +5,8 @@
 
 ;; Author: NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-annotation.el,v 1.241 2014/10/13 05:15:04 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
 ;; Created: Oct. 27, 2000.
-;; Last Modified: $Date: 2014/10/13 05:15:04 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -396,14 +394,12 @@
 	(let ((minibuf-p (skk-in-minibuffer-p))
 	      event window)
 	  (skk-annotation-insert annotation)
-	  (cond (minibuf-p
-		 (if (setq window (get-buffer-window (skk-minibuffer-origin)))
-		     (select-window window)
-		   (other-window 1))
-		 (unless (eq (next-window) (selected-window))
-		   (delete-other-windows)))
-		(t
-		 (split-window-vertically)))
+	  (when minibuf-p
+	    (if (setq window (get-buffer-window (skk-minibuffer-origin)))
+		(select-window window)
+	      (other-window 1))
+	    (unless (eq (next-window) (selected-window))
+	      (delete-other-windows)))
 	  ;;
 	  (skk-fit-window (display-buffer skk-annotation-buffer))
 	  (when minibuf-p
@@ -776,7 +772,7 @@ NO-PREVIOUS-ANNOTATION を指定 (\\[Universal-Argument] \\[skk-annotation-ad
 			  (setq exit t)
 			  (apply (car url) (cdr url)))
 			 (t
-			  (funcall skk-annotation-browser-function url))))
+			  (browse-url url))))
 		 (skk-message "注釈のソースをブラウズしています..."
 			      "Browsing originals for the current notes..."))
 		(t
@@ -1043,10 +1039,7 @@ information etc.  If PROC is non-nil, check the buffer for that process."
 	(font-lock-mode 0)
 	(set-buffer-multibyte t)
 	(skk-process-kill-without-query (get-buffer-process (current-buffer)))
-	(set-buffer-file-coding-system
-	 (if (eval-when-compile (<= emacs-major-version 22))
-	     'emacs-mule
-	   'utf-8-emacs))
+	(set-buffer-file-coding-system 'utf-8-emacs)
 	(set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix)
 	;;
 	(skkannot-py-send-command "import DictionaryServices")
@@ -1832,17 +1825,21 @@ wgCategories.+\\(曖昧さ回避\\|[Dd]isambiguation\\).+$" nil t)))
        word)))))
 
 (defun skkannot-url-installed-p ()
+  ;; skkannot-url-installed-p の初期値は skk-vars.el で定義
+  ;;  - featurep 'emacs なら t
+  ;;  - 以外は 'untested
   (when (eq skkannot-url-installed-p 'untested)
-    ;; GNU Emacs 22 以降以外で URL パッケージをテストする
+    ;; GNU Emacs 以外で URL パッケージをテストする
     (cond
      ((and (featurep 'xemacs)
 	   (= emacs-major-version 21)
 	   (= emacs-minor-version 4)
-	   (not (featurep 'un-define)))
-      ;; XEmacs 21.4 で Mule-UCS もない場合
+	   (not (featurep 'un-define)))	; Mule-UCS
+      ;; XEmacs 21.4 かつ Mule-UCS 未インストールの場合
       (setq skkannot-url-installed-p nil))
+
      (t
-      ;; Emacs 21 と XEmacs
+      ;; 上記以外
       (defadvice url-hexify-string (around multibyte-char activate)
 	(setq ad-return-value
 	      (mapconcat (lambda (byte)

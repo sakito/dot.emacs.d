@@ -4,9 +4,7 @@
 
 ;; Author: NAKAJIMA Mikio <minakaji@namazu.org>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-version.el,v 1.79 2014/11/23 19:45:33 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2014/11/23 19:45:33 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -32,9 +30,20 @@
   (require 'skk-macs))
 
 (put 'skk-version 'product-name "Daredevil SKK")
-(put 'skk-version 'version-string "15.2")
-(put 'skk-version 'codename "Oshamambe") ; See also `READMEs/CODENAME.ja'
-(put 'skk-version 'codename-ja "長万部")
+(put 'skk-version 'version-string
+     (let ((ver "16.2")
+	   (mepla "mepla")
+	   (path (catch 'exit
+		   (dolist (p load-path)
+		     ;; ;; ~/.emacs.d/elpa/ddskk-20150107.409/
+		     (when (string-match "ddskk-[0-9]+\.[0-9]+" p)
+		       (throw 'exit p))))))
+       (if path
+	   (format "%s/%s-%s" ver mepla
+			(car (cdr (split-string path "ddskk-"))))
+	 ver)))
+(put 'skk-version 'codename "Warabitai") ; See also `READMEs/CODENAME.ja'
+(put 'skk-version 'codename-ja "蕨岱")
 
 ;;;###autoload
 (defun skk-version (&optional without-codename)

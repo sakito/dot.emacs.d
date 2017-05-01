@@ -4,9 +4,7 @@
 
 ;; Author: NAKAJIMA Mikio <minakaji@namazu.org>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-look.el,v 1.45 2013/01/13 09:45:48 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2013/01/13 09:45:48 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -28,9 +26,9 @@
 ;;; Commentary:
 
 ;; <How to work>
-;; .skk か .emacs で `skk-use-look' を t にセットしてこれを評価して下さい。その
-;; 後 skk-mode を立ち上げるか、M-x skk-restart すると、 下記のような芸当が可能
-;; になります。
+;; ~/.skk か ~/.emacs.d/init.el で `skk-use-look' を t にセットしてこれを
+;; 評価して下さい。その後 skk-mode を立ち上げるか、M-x skk-restart すると、
+;; 下記のような芸当が可能になります。
 ;;
 ;; (1)英単語を補完ができます。
 ;;

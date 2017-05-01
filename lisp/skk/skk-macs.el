@@ -4,9 +4,7 @@
 ;; Copyright (C) 1993-2000 Free Software Foundation, Inc.
 
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-macs.el,v 1.199 2013/03/28 11:55:19 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2013/03/28 11:55:19 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -40,16 +38,6 @@
   (require 'skk-vars))
 
 ;;;; macros
-
-(when (eval-when-compile (and (featurep 'emacs)
-			      (= emacs-major-version 22)))
-  (defmacro ignore-errors (&rest body)
-    "Execute BODY; if an error occurs, return nil.
-Otherwise, return result of last form in BODY."
-    `(condition-case nil
-	 (progn
-	   ,@body)
-       (error nil))))
 
 (defmacro skk-defadvice (function &rest everything-else)
   "Defines a piece of advice for FUNCTION (a symbol).
@@ -199,15 +187,6 @@ MARKER が nil だったら、新規マーカーを作って代入する。"
 	       )
 	 (move-overlay ,object ,start ,end))))))
 
-(defmacro skk-cannot-be-undone (&rest body)
-  `(let ((buffer-undo-list t)
-	 ;;buffer-read-only
-	 (modified (buffer-modified-p)))
-     (unwind-protect
-	 (progn
-	   ,@body)
-       (set-buffer-modified-p modified))))
-
 ;;;###autoload
 (put 'skk-loop-for-buffers 'lisp-indent-function 1)
 (defmacro skk-loop-for-buffers (buffers &rest body)
@@ -232,7 +211,7 @@ MARKER が nil だったら、新規マーカーを作って代入する。"
 	 `(called-interactively-p ,kind))
 
 	(t
-	 ;; GNU Emacs 22 and 23.1
+	 ;; GNU Emacs 23.1
 	 ;; `called-interactively-p' takes no argument and is equivalent
 	 ;; to (called-interactively-p 'any) in later Emacs versions.
 	 `(if (eq ,kind 'interactive)
@@ -271,31 +250,18 @@ MARKER が nil だったら、新規マーカーを作って代入する。"
 	(t
 	 `(facep ,face))))
 
+(defmacro skk-help-make-usage (symbol arglist)
+  (cond ((fboundp 'help--make-usage)
+	 ;; GNU Emacs 25.1 から
+	 `(help--make-usage ,symbol ,arglist))
+
+	(t
+	 ;; GNU Emacs 24.1 まで
+	 `(help-make-usage ,symbol ,arglist))))
 
 ;;; functions.
 ;; version dependent
 ;; Many functions are derived from emu (APEL).
-
-(when (eval-when-compile (and (featurep 'emacs)
-			      (= emacs-major-version 22)))
-  ;; GNU Emacs 22 まで
-  ;; . char-valid-p is a built-in function in `C source code'.
-  ;;     (char-valid-p OBJECT &optional GENERICP)
-  ;;   Return t if OBJECT is a valid normal character.
-  ;;   If optional arg GENERICP is non-nil, also return t if OBJECT is
-  ;;   a valid generic character.
-  (defalias 'characterp 'char-valid-p)
-
-  ;; GNU Emacs 23 から
-  ;; . char-valid-p is an alias for `characterp' in `mule.el'.
-  ;;     (char-valid-p OBJECT &optional IGNORE)
-  ;;   This function is obsolete since 23.1;
-  ;;   use `characterp' instead.
-
-  ;; . characterp is a built-in function in `C source code'.
-  ;;     (characterp OBJECT &optional IGNORE)
-  ;;   Return non-nil if OBJECT is a character.
-  )
 
 (when (eval-when-compile (featurep 'emacs))
   ;; int-char() が出現するのは skk-compute-henkan-lists() のみ
@@ -469,38 +435,43 @@ but the contents viewed as characters do change.
 	 (x-display-color-p)))))
 
 (defun skk-char-to-unibyte-string (char)
+  ;; Warning: `string-make-unibyte' is an obsolete function (as of 26.1).
+  ;;          use `encode-coding-string'.
+
   (ignore-errors
     (cond
-     ((eval-when-compile (and (featurep 'emacs)
-			      (>= emacs-major-version 23)))
-      ;; GNU Emacs 23.1 or later
-      (string-make-unibyte (char-to-string char)))
+     ;; XEmacs
+     ((eval-when-compile (featurep 'xemacs))
+      (char-to-string char))
+     ;; GNU Emacs 26 から
+     ((eval-when-compile (>= emacs-major-version 26))
+      (encode-coding-string (char-to-string char) 'us-ascii))
+     ;;  GNU Emacs 25 まで
      (t
-      (char-to-string char)))))
+      (string-make-unibyte (char-to-string char))))))
 
 (defun skk-ascii-char-p (char)
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
-    ;; GNU Emacs 23.1 or later
+   ((eval-when-compile (featurep 'emacs))
+    ;; GNU Emacs
     (eq (char-charset char skk-charset-list) 'ascii))
+   ;; XEmacs
    (t
     (eq (char-charset char) 'ascii))))
 
 (defun skk-jisx0208-p (char)
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
-    ;; GNU Emacs 23.1 or later
+   ((eval-when-compile (featurep 'emacs))
+    ;; GNU Emacs
     (eq (char-charset char skk-charset-list) 'japanese-jisx0208))
+   ;; XEmacs
    (t
     (eq (char-charset char) 'japanese-jisx0208))))
 
 (defun skk-jisx0213-p (char)
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
-    ;; GNU Emacs 23.1 or later
+   ((eval-when-compile (featurep 'emacs))
+    ;; GNU Emacs
     (memq (char-charset char skk-charset-list)
 	  '(japanese-jisx0213-1
 	    japanese-jisx0213.2004-1
@@ -513,8 +484,7 @@ but the contents viewed as characters do change.
 (defun skk-split-char (ch)
   ;; http://mail.ring.gr.jp/skk/200908/msg00006.html
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
+   ((eval-when-compile (featurep 'emacs))
     ;; C の split-char() と同様の機能だが、char-charset() の呼出しにおいて
     ;; 文字集合の選択肢を skk-charset-list に含まれるものに制限する。
     ;; これは例えば、japanese-jisx0208 の文字が unicode-bmp に属する、
@@ -529,16 +499,18 @@ but the contents viewed as characters do change.
 	(setq code (lsh code -8))
 	(setq dimension (1- dimension)))
       (cons charset val)))
+
+   ;; XEmacs
    (t
-    ;; Emacs 22 および XEmacs
     (split-char ch))))
 
 (defun skk-char-charset (ch &optional restriction)
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
-    ;; GNU Emacs 23.1 or later
+   ((eval-when-compile (featurep 'emacs))
+    ;; GNU Emacs
     (char-charset ch restriction))
+
+   ;; XEmacs
    (t
     (char-charset ch))))
 
@@ -629,14 +601,12 @@ BUFFER defaults to the current buffer."
 
 (defun skk-region-active-p ()
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
+   ((eval-when-compile (featurep 'emacs))
     (use-region-p))
+
+   ;; XEmacs
    ((eval-when-compile (featurep 'xemacs))
-    (region-active-p))
-   (t
-    ;; GNU Emacs 22.
-    (and transient-mark-mode mark-active))))
+    (region-active-p))))
 
 (put 'skk-bind-last-command-char 'lisp-indent-function 1)
 (defmacro skk-bind-last-command-char (char &rest body)
@@ -948,8 +918,7 @@ BUFFER defaults to the current buffer."
 対して emacs-mule の encoded string に変換して比較する。
 比較の結果 str1 < str2 ならば t を返す。"
   (cond
-   ((eval-when-compile (and (featurep 'emacs)
-			    (>= emacs-major-version 23)))
+   ((eval-when-compile (featurep 'emacs))
     ;; Emacs with coding system utf-8-emacs
     (skk-string-lessp-in-coding-system str1 str2 'emacs-mule))
    (t
@@ -1022,8 +991,8 @@ BUFFER defaults to the current buffer."
 
 (defun skk-find-coding-system (code)
   "CODE が、Emacs が解釈する coding-system シンボル表現であればそのまま返し、
-文字列であれば 連想リスト `skk-coding-system-alist' を用いてシンボル表現へ変換する。
-これら以外（nil を含む）であれば シンボル euc-jisx0213 を返す。"
+文字列であれば連想リスト `skk-coding-system-alist' を用いてシンボル表現へ変換する。
+これら以外（nil を含む）であればシンボル euc-jis-2004 を返す。"
   (cond ((and code
 	      (or (and (fboundp 'coding-system-p) ; GNU Emacs
 		       (coding-system-p code))

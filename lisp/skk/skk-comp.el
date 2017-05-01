@@ -6,9 +6,7 @@
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
 ;; Maintainer: SKK Development Team <skk@ring.gr.jp>
-;; Version: $Id: skk-comp.el,v 1.94 2013/07/15 00:23:42 skk-cvs Exp $
 ;; Keywords: japanese, mule, input method
-;; Last Modified: $Date: 2013/07/15 00:23:42 $
 
 ;; This file is part of Daredevil SKK.
 
@@ -483,7 +481,8 @@ NOT-ABBREV-ONLY を指定する事で常に有効となる。"
   (let ((smart-find-file-path (or path smart-find-file-path))
 	results files)
     (unless (string= key "")
-      (setq results (smart-find-file-all key))
+      (setq results (if (fboundp 'smart-find-file-all)
+			(smart-find-file-all key)))
       (while results
 	(if (string-match skk-smart-find-ignored-file-regexp
 			  (car results))
