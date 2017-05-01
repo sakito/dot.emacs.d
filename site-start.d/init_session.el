@@ -28,32 +28,29 @@
 
 ;; session
 ;; @see http://emacs-session.sourceforge.net/
-;; (when (require 'session nil t)
-;;   ;; 前回のカーソル位置、開いたファイル履歴等を記憶
-;;   (setq session-initialize '(de-saveplace session keys menus places)
-;;         session-globals-include '((kill-ring 500)
-;;                                   (session-file-alist 500 t)
-;;                                   (file-name-history 10000))
-;;         ;; 保存時でなく閉じた時のカーソル位置を記憶する
-;;         session-undo-check -1)
-;;   ;; 記憶容量を倍に設定しておく
-;;   (setq session-globals-max-size 2048)
-;;   (setq session-save-print-spec '(t nil 40000))
-;;   (setq session-globals-max-string 2048)
-;;   (setq session-registers-max-string 2048)
-;;   ;; ミニバッファ履歴リストの長さ制限を無くす
-;;   (setq history-length t)
-;;   ;; session で無視するファイル設定
-;;   (setq session-set-file-name-exclude-regexp
-;;         "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.cache\\|\\.howm-kyes")
-;;   (setq session-save-file
-;;         (expand-file-name "var/session/session.cache" user-emacs-directory))
-;;   ;; 30 分で自動保存
-;;   (defvar my-timer-for-session-save-session (run-at-time t (* 30 60) 'session-save-session))
-;;   (add-hook 'after-init-hook 'session-initialize))
-
-(autoload 'psession-mode "psession.el")
-(psession-mode 1)
+(when (require 'session nil t)
+  ;; 前回のカーソル位置、開いたファイル履歴等を記憶
+  (setq session-initialize '(de-saveplace session keys menus places)
+        session-globals-include '((kill-ring 500)
+                                  (session-file-alist 500 t)
+                                  (file-name-history 10000))
+        ;; 保存時でなく閉じた時のカーソル位置を記憶する
+        session-undo-check -1)
+  ;; 記憶容量を倍に設定しておく
+  (setq session-globals-max-size 2048)
+  (setq session-save-print-spec '(t nil 40000))
+  (setq session-globals-max-string 2048)
+  (setq session-registers-max-string 2048)
+  ;; ミニバッファ履歴リストの長さ制限を無くす
+  (setq history-length t)
+  ;; session で無視するファイル設定
+  (setq session-set-file-name-exclude-regexp
+        "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.cache\\|\\.howm-kyes")
+  (setq session-save-file
+        (expand-file-name "var/session/session.cache" user-emacs-directory))
+  ;; 30 分で自動保存
+  (defvar my-timer-for-session-save-session (run-at-time t (* 30 60) 'session-save-session))
+  (add-hook 'after-init-hook 'session-initialize))
 
 ;; minibuffer history から重複を排除する
 (defun minibuffer-delete-duplicate ()
