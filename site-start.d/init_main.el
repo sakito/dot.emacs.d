@@ -102,8 +102,6 @@
 ;; (require 'init_ocaml)
 ;;;; sql-mode
 (require 'init_sql)
-;;; mmm-mode
-(require 'init_mmm)
 ;;; smart-compie
 (require 'init_smartcompile)
 ;; c
