@@ -25,6 +25,7 @@
 
 ;;; Code:
 (require 'helm-config)
+;; (setq ad-redefinition-action 'accept)  ;; redefin が気になる場合は設定
 (helm-mode +1)
 
 ;; session の利用を優先するため、emacs終了時にhelmの履歴を保存しない
