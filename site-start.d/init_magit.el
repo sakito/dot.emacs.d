@@ -24,6 +24,8 @@
 ;; https://github.com/magit/magit
 
 ;;; Code:
+(require 'dash)
+(require 'with-editor)
 (require 'magit)
 
 (provide 'init_magit)

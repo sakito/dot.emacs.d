@@ -1,6 +1,6 @@
-;;; magit-utils.el --- various utilities  -*- lexical-binding: t -*-
+;;; magit-utils.el --- various utilities  -*- lexical-binding: t; coding: utf-8 -*-
 
-;; Copyright (C) 2010-2016  The Magit Project Contributors
+;; Copyright (C) 2010-2017  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -43,6 +43,7 @@
 
 (eval-when-compile (require 'ido))
 (declare-function ido-completing-read+ 'ido-completing-read+)
+(declare-function Info-get-token 'info)
 
 (defvar magit-wip-before-change-mode)
 
@@ -56,11 +57,50 @@ turn on `helm-mode' and leave this option set to the default
 value.  However, if you prefer to not use `helm-mode' but still
 want Magit to use Helm for completion, you can set this option to
 `helm--completing-read-default'."
-  :group 'magit
+  :group 'magit-essentials
   :type '(radio (function-item magit-builtin-completing-read)
                 (function-item magit-ido-completing-read)
                 (function-item helm--completing-read-default)
                 (function :tag "Other")))
+
+(defcustom magit-no-confirm-default nil
+  "A list of commands which should just use the default choice.
+
+Many commands let the user choose the target they act on offering
+a sensible default as default choice.  If you think that that
+default is so sensible that it should always be used without even
+offering other choices, then add that command here.
+
+Commands have to explicitly support this option.  Currently only
+these commands do:
+  `magit-branch'
+  `magit-branch-and-checkout'
+  `magit-branch-orphan'
+  `magit-worktree-branch'
+    For these four commands `magit-branch-read-upstream-first'
+    must be non-nil, or adding them here has no effect.
+  `magit-branch-rename'
+  `magit-tag'"
+  :package-version '(magit . "2.9.0")
+  :group 'magit-miscellaneous
+  :type '(list :convert-widget custom-hook-convert-widget)
+  :options '(magit-branch
+             magit-branch-and-checkout
+             magit-branch-orphan
+             magit-branch-rename
+             magit-worktree-branch
+             magit-tag))
+
+(defconst magit--confirm-actions
+  '((const reverse)           (const discard)
+    (const rename)            (const resurrect)
+    (const trash)             (const delete)
+    (const abort-rebase)
+    (const abort-merge)       (const merge-dirty)
+    (const drop-stashes)      (const resect-bisect)
+    (const kill-process)      (const delete-unmerged-branch)
+    (const stage-all-changes) (const unstage-all-changes)
+    (const safe-with-wip)))
 
 (defcustom magit-no-confirm nil
   "A list of symbols for actions Magit should not confirm, or t.
@@ -109,6 +149,10 @@ Sequences:
   `reset-bisect' Aborting (known to Git as \"resetting\") a
   bisect operation loses all information collected so far.
 
+  `abort-rebase' Aborting a rebase throws away all already
+  modified commits, but it's possible to restore those from the
+  reflog.
+
   `abort-merge' Aborting a merge throws away all conflict
   resolutions which has already been carried out by the user.
 
@@ -152,21 +196,59 @@ Global settings:
   this mode is enabled then `safe-with-wip' has the same effect
   as adding all of these symbols individually."
   :package-version '(magit . "2.1.0")
-  :group 'magit
-  :type '(choice (const :tag "No confirmation needed" t)
-                 (set (const reverse)           (const discard)
-                      (const rename)            (const resurrect)
-                      (const trash)             (const delete)
-                      (const abort-merge)       (const merge-dirty)
-                      (const drop-stashes)      (const resect-bisect)
-                      (const kill-process)      (const delete-unmerged-branch)
-                      (const stage-all-changes) (const unstage-all-changes)
-                      (const safe-with-wip))))
+  :group 'magit-essentials
+  :group 'magit-commands
+  :type `(choice (const :tag "Always require confirmation" nil)
+                 (const :tag "Never require confirmation" t)
+                 (set   :tag "Require confirmation only for"
+                        ,@magit--confirm-actions)))
+
+(defcustom magit-slow-confirm '(drop-stashes)
+  "Whether to ask user \"y or n\" or \"yes or no\" questions.
+
+When this is nil, then `y-or-n-p' is used when the user has to
+confirm a potentially destructive action.  When this is t, then
+`yes-or-no-p' is used instead.  If this is a list of symbols
+identifying actions, then `yes-or-no-p' is used for those,
+`y-or-no-p' for all others.  The list of actions is the same as
+for `magit-no-confirm' (which see)."
+  :package-version '(magit . "2.9.0")
+  :group 'magit-miscellaneous
+  :type `(choice (const :tag "Always ask \"yes or no\" questions" t)
+                 (const :tag "Always ask \"y or n\" questions" nil)
+                 (set   :tag "Ask \"yes or no\" questions only for"
+                        ,@magit--confirm-actions)))
+
+(defcustom magit-no-message nil
+  "A list of messages Magit should not display.
+
+Magit displays most echo area messages using `message', but a few
+are displayed using `magit-message' instead, which takes the same
+arguments as the former, FORMAT-STRING and ARGS.  `magit-message'
+forgoes printing a message if any member of this list is a prefix
+of the respective FORMAT-STRING.
+
+If Magit prints a message which causes you grief, then please
+first investigate whether there is another option which can be
+used to suppress it.  If that is not the case, then ask the Magit
+maintainers to start using `magit-message' instead of `message'
+in that case.  We are not proactively replacing all uses of
+`message' with `magit-message', just in case someone *might* find
+some of these messages useless.
+
+Messages which can currently be suppressed using this option are:
+* \"Turning on magit-auto-revert-mode...\""
+  :package-version '(magit . "2.8.0")
+  :group 'magit-miscellaneous
+  :type '(repeat string))
 
 (defcustom magit-ellipsis ?…
-  "Character used to abbreviate text."
+  "Character used to abbreviate text.
+
+Currently this is used to abbreviate author names in the margin
+and in process buffers to elide `magit-git-global-arguments'."
   :package-version '(magit . "2.1.0")
-  :group 'magit-modes
+  :group 'magit-miscellaneous
   :type 'character)
 
 (defcustom magit-update-other-window-delay 0.2
@@ -183,8 +265,25 @@ this option controls for how long.  For optimal experience you
 might have to adjust this delay and/or the keyboard repeat rate
 and delay of your graphical environment or operating system."
   :package-version '(magit . "2.3.0")
-  :group 'magit-modes
+  :group 'magit-miscellaneous
   :type 'number)
+
+(defcustom magit-view-git-manual-method 'info
+  "How links to Git documentation are followed from Magit's Info manuals.
+
+`info'  Follow the link to the node in the `gitman' Info manual
+        as usual.  Unfortunately that manual is not installed by
+        default on some platforms, and when it is then the nodes
+        look worse than the actual manpages.
+
+`man'   View the respective man-page using the `man' package.
+
+`woman' View the respective man-page using the `woman' package."
+  :package-version '(magit . "2.9.0")
+  :group 'magit-miscellaneous
+  :type '(choice (const :tag "view info manual" info)
+                 (const :tag "view manpage using `man'" man)
+                 (const :tag "view manpage using `woman'" woman)))
 
 ;;; User Input
 
@@ -315,6 +414,15 @@ This is similar to `read-string', but
            ',(mapcar 'car clauses))
      ,@(--map `(,(car it) ,@(cddr it)) clauses)))
 
+(defun magit-y-or-n-p (prompt &optional action)
+  "Ask user a \"y or n\" or a \"yes or no\" question using PROMPT.
+Which kind of question is used depends on whether
+ACTION is a member of option `magit-slow-confirm'."
+  (if (or (eq magit-slow-confirm t)
+          (and action (member action magit-slow-confirm)))
+      (yes-or-no-p prompt)
+    (y-or-n-p prompt)))
+
 (cl-defun magit-confirm (action &optional prompt prompt-n (items nil sitems))
   (declare (indent defun))
   (setq prompt-n (format (concat (or prompt-n prompt) "? ") (length items))
@@ -332,9 +440,9 @@ This is similar to `read-string', but
                                    unstage-all-changes))))))
          (or (not sitems) items))
         ((not sitems)
-         (y-or-n-p prompt))
+         (magit-y-or-n-p prompt action))
         ((= (length items) 1)
-         (and (y-or-n-p prompt) items))
+         (and (magit-y-or-n-p prompt action) items))
         ((> (length items) 1)
          (let ((buffer (get-buffer-create " *Magit Confirm*")))
            (with-current-buffer buffer
@@ -343,7 +451,7 @@ This is similar to `read-string', but
                            '((window-height . fit-window-to-buffer)))
               (lambda (window _value)
                 (with-selected-window window
-                  (unwind-protect (and (y-or-n-p prompt-n) items)
+                  (unwind-protect (and (magit-y-or-n-p prompt-n action) items)
                     (when (window-live-p window)
                       (quit-restore-window window 'kill)))))
               (dolist (item items)
@@ -362,6 +470,29 @@ This is similar to `read-string', but
   (let ((prompt (symbol-name action)))
     (replace-regexp-in-string
      "-" " " (concat (upcase (substring prompt 0 1)) (substring prompt 1)))))
+
+;;; Debug Utilities
+
+;;;###autoload
+(defun magit-emacs-Q-command ()
+  (interactive)
+  (let ((cmd (mapconcat
+              #'shell-quote-argument
+              `(,(concat invocation-directory invocation-name)
+                "-Q" "--eval" "(setq debug-on-error t)"
+                ,@(cl-mapcan
+                   (lambda (dir) (list "-L" dir))
+                   (delete-dups
+                    (mapcar (lambda (lib)
+                              (file-name-directory (locate-library lib)))
+                            '("magit" "magit-popup" "with-editor"
+                              "git-commit" "dash"))))
+                ;; Avoid Emacs bug#16406 by using full path.
+                "-l" ,(file-name-sans-extension (locate-library "magit")))
+              " ")))
+    (message "Uncustomized Magit command saved to kill-ring, %s"
+             "please run it in a terminal.")
+    (kill-new cmd)))
 
 ;;; Text Utilities
 
@@ -405,7 +536,14 @@ Unless optional argument KEEP-EMPTY-LINES is t, trim all empty lines."
       (insert-file-contents file)
       (split-string (buffer-string) "\n" (not keep-empty-lines)))))
 
-;;; Kludges
+;;; Missing from Emacs
+
+(defun magit-kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
+
+;;; Kludges for Emacs Bugs
 
 (defun magit-file-accessible-directory-p (filename)
   "Like `file-accessible-directory-p' but work around an Apple bug.
@@ -414,10 +552,125 @@ and https://github.com/magit/magit/issues/2295."
   (and (file-directory-p filename)
        (file-accessible-directory-p filename)))
 
-;;; magit-utils.el ends soon
+;;; Kludges for Incompatible Modes
+
+(defvar whitespace-mode)
+
+(defun whitespace-dont-turn-on-in-magit-mode ()
+  "Prevent `whitespace-mode' from being turned on in Magit buffers.
+Because `whitespace-mode' uses font-lock and Magit does not,
+they are not compatible.  See `magit-diff-paint-whitespace'
+for an alternative."
+  (when (derived-mode-p 'magit-mode)
+    (setq whitespace-mode nil)
+    (user-error
+     "Whitespace-Mode isn't compatible with Magit.  %s"
+     "See `magit-diff-paint-whitespace' for an alternative.")))
+
+(advice-add 'whitespace-turn-on :before
+            'whitespace-dont-turn-on-in-magit-mode)
+
+;;; Kludges for Custom
+
+(defun magit-custom-initialize-reset (symbol exp)
+  "Initialize SYMBOL based on EXP.
+Set the symbol, using `set-default' (unlike
+`custom-initialize-reset' which uses the `:set' function if any.)
+The value is either the symbol's current value
+ (as obtained using the `:get' function), if any,
+or the value in the symbol's `saved-value' property if any,
+or (last of all) the value of EXP."
+  (set-default-toplevel-value
+   symbol
+   (condition-case nil
+       (let ((def (default-toplevel-value symbol))
+             (getter (get symbol 'custom-get)))
+         (if getter (funcall getter symbol) def))
+     (error
+      (eval (let ((sv (get symbol 'saved-value)))
+              (if sv (car sv) exp)))))))
+
+(defun magit-hook-custom-get (symbol)
+  (if (symbol-file symbol 'defvar)
+      (default-toplevel-value symbol)
+    ;;
+    ;; Called by `custom-initialize-reset' on behalf of `symbol's
+    ;; `defcustom', which is being evaluated for the first time to
+    ;; set the initial value, but there's already a default value,
+    ;; which most likely was stablished by one or more `add-hook'
+    ;; calls.
+    ;;
+    ;; We combine the `standard-value' and the current value, while
+    ;; preserving the order established by `:options', and return
+    ;; the result of that to be used as the "initial" default value.
+    ;;
+    (let ((standard (eval (car (get symbol 'standard-value))))
+          (current (default-toplevel-value symbol))
+          (value nil))
+      (dolist (fn (get symbol 'custom-options))
+        (when (or (memq fn standard)
+                  (memq fn current))
+          (push fn value)))
+      (dolist (fn current)
+        (unless (memq fn value)
+          (push fn value)))
+      (nreverse value))))
+
+;;; Kludges for Info Manuals
+
+;;;###autoload
+(defun Info-follow-nearest-node--magit-gitman (fn &optional fork)
+  (if magit-view-git-manual-method
+      (let ((node (Info-get-token
+                   (point) "\\*note[ \n\t]+"
+                   "\\*note[ \n\t]+\\([^:]*\\):\\(:\\|[ \n\t]*(\\)?")))
+        (if (and node (string-match "^(gitman)\\(.+\\)" node))
+            (pcase magit-view-git-manual-method
+              (`man   (require 'man)
+                      (man (match-string 1 node)))
+              (`woman (require 'woman)
+                      (woman (match-string 1 node)))
+              (_
+               (user-error "Invalid value for `magit-view-git-documentation'")))
+          (funcall fn fork)))
+    (funcall fn fork)))
+
+;;;###autoload
+(advice-add 'Info-follow-nearest-node :around
+            'Info-follow-nearest-node--magit-gitman)
+
+;;;###autoload
+(defun org-man-export--magit-gitman (fn link description format)
+  (if (and (eq format 'texinfo)
+           (string-match-p "\\`git" link))
+      (replace-regexp-in-string "%s" link "
+@ifinfo
+@ref{%s,,,gitman,}.
+@end ifinfo
+@ifhtml
+@html
+the <a href=\"http://git-scm.com/docs/%s\">%s(1)</a> manpage.
+@end html
+@end ifhtml
+@iftex
+the %s(1) manpage.
+@end iftex
+")
+    (funcall fn link description format)))
+
+;;;###autoload
+(advice-add 'org-man-export :around
+            'org-man-export--magit-gitman)
+
+;;; Miscellaneous
+
+(defun magit-message (format-string &rest args)
+  "Display a message at the bottom of the screen, or not.
+Like `message', except that if the users configured option
+`magit-no-message' to prevent the message corresponding to
+FORMAT-STRING to be displayed, then don't."
+  (unless (--first (string-prefix-p it format-string) magit-no-message)
+    (apply #'message format-string args)))
+
 (provide 'magit-utils)
-;; Local Variables:
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
 ;;; magit-utils.el ends here
