@@ -1,6 +1,6 @@
 ;;; helm-font --- Font and ucs selection for Helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@
               (setq helm-xfonts-cache
                     (x-list-fonts "*")))
             ;; Save current font so it can be restored in cleanup
-            (setq helm-previous-font (cdr (assoc 'font (frame-parameters)))))
+            (setq helm-previous-font (cdr (assq 'font (frame-parameters)))))
     :candidates 'helm-xfonts-cache
     :action '(("Copy font to kill ring" . (lambda (elm)
                                             (kill-new elm)))
@@ -193,7 +193,7 @@ Only math* symbols are collected."
 (provide 'helm-font)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

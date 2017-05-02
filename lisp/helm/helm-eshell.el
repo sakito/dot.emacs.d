@@ -1,6 +1,6 @@
 ;;; helm-eshell.el --- pcomplete and eshell completion for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,6 +43,12 @@
 (defgroup helm-eshell nil
   "Helm eshell completion and history."
   :group 'helm)
+
+
+(defcustom helm-eshell-fuzzy-match nil
+  "Enable fuzzy matching in `helm-esh-pcomplete' when non--nil."
+  :group 'helm-eshell
+  :type 'boolean)
 
 
 (defvar helm-eshell-history-map
@@ -222,7 +228,8 @@ The function that call this should set `helm-ec-target' to thing at point."
                          (car (last (ignore-errors
                                       (pcomplete-parse-arguments))))))
              (with-helm-show-completion beg end
-               (or (helm :sources (helm-make-source "Eshell completions" 'helm-esh-source)
+               (or (helm :sources (helm-make-source "Eshell completions" 'helm-esh-source
+                                    :fuzzy-match helm-eshell-fuzzy-match)
                          :buffer "*helm pcomplete*"
                          :keymap helm-esh-completion-map
                          :resume 'noresume
@@ -257,7 +264,7 @@ The function that call this should set `helm-ec-target' to thing at point."
 (provide 'helm-eshell)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

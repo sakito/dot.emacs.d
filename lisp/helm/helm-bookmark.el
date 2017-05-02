@@ -1,6 +1,6 @@
 ;;; helm-bookmark.el --- Helm for Emacs regular Bookmarks. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 (require 'cl-lib)
 (require 'bookmark)
 (require 'helm)
+(require 'helm-lib)
 (require 'helm-help)
 (require 'helm-types)
 (require 'helm-utils)
@@ -30,6 +31,8 @@
 (declare-function message-buffers "message.el")
 (declare-function addressbook-set-mail-buffer-1 "ext:addressbook-bookmark.el"
                   (&optional bookmark-name append cc))
+(declare-function addressbook-bookmark-set-1 "ext:addressbook-bookmark.el" (&optional contact))
+(declare-function helm-browse-project "helm-files" (arg))
 
 
 (defgroup helm-bookmark nil
@@ -42,15 +45,14 @@
   :type 'boolean)
 
 (defcustom helm-bookmark-default-filtered-sources
-  (append '(helm-source-bookmark-files&dirs
+  (append '(helm-source-bookmark-org
+            helm-source-bookmark-files&dirs
             helm-source-bookmark-helm-find-files
             helm-source-bookmark-info
             helm-source-bookmark-gnus
             helm-source-bookmark-man
             helm-source-bookmark-images
             helm-source-bookmark-w3m)
-          (and (locate-library "addressbook-bookmark")
-               (list 'helm-source-bookmark-addressbook))
           (list 'helm-source-bookmark-uncategorized
                 'helm-source-bookmark-set))
   "List of sources to use in `helm-filtered-bookmarks'."
@@ -137,6 +139,11 @@
 
 (defface helm-bookmark-file
     '((t (:foreground "Deepskyblue2")))
+  "Face used for file bookmarks."
+  :group 'helm-bookmark)
+
+(defface helm-bookmark-file-not-found
+    '((t (:foreground "Slategray4")))
   "Face used for file bookmarks."
   :group 'helm-bookmark)
 
@@ -284,8 +291,8 @@ BOOKMARK is a bookmark name or a bookmark record."
 (defun helm-bookmark-image-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK bookmarks an image file."
   (if (stringp bookmark)
-      (assoc 'image-type (assoc bookmark bookmark-alist))
-    (assoc 'image-type bookmark)))
+      (assq 'image-type (assq bookmark bookmark-alist))
+    (assq 'image-type bookmark)))
 
 (defun helm-bookmark-file-p (bookmark)
   "Return non-nil if BOOKMARK bookmarks a file or directory.
@@ -294,6 +301,11 @@ This excludes bookmarks of a more specific kind (Info, Gnus, and W3m)."
   (let* ((filename   (bookmark-get-filename bookmark))
          (isnonfile  (equal filename helm-bookmark--non-file-filename))) 
     (and filename (not isnonfile) (not (bookmark-get-handler bookmark)))))
+
+(defun helm-bookmark-org-file-p (bookmark)
+  (let* ((filename (bookmark-get-filename bookmark)))
+    (or (string-suffix-p ".org" filename t)
+        (string-suffix-p ".org_archive" filename t))))
 
 (defun helm-bookmark-helm-find-files-p (bookmark)
   "Return non-nil if BOOKMARK bookmarks a `helm-find-files' session.
@@ -310,7 +322,8 @@ BOOKMARK is a bookmark name or a bookmark record."
 
 (defun helm-bookmark-uncategorized-bookmark-p (bookmark)
   "Return non--nil if BOOKMARK match no known category."
-  (cl-loop for pred in '(helm-bookmark-addressbook-p
+  (cl-loop for pred in '(helm-bookmark-org-file-p
+                         helm-bookmark-addressbook-p
                          helm-bookmark-gnus-bookmark-p
                          helm-bookmark-w3m-bookmark-p
                          helm-bookmark-woman-man-bookmark-p
@@ -411,6 +424,19 @@ than `w3m-browse-url' use it."
             (helm-init-candidates-in-buffer
                 'global (helm-bookmark-man-setup-alist)))))
 
+;;; Org files
+;;
+(defun helm-bookmark-org-setup-alist ()
+  "Specialized filter function for Org file bookmarks."
+  (helm-bookmark-filter-setup-alist 'helm-bookmark-org-file-p))
+
+(defvar helm-source-bookmark-org
+  (helm-make-source " Bookmarked Org files" 'helm-source-filtered-bookmarks
+    :init (lambda ()
+            (bookmark-maybe-load-default-file)
+            (helm-init-candidates-in-buffer
+                'global (helm-bookmark-org-setup-alist)))))
+
 ;;; Gnus
 ;;
 (defun helm-bookmark-gnus-setup-alist ()
@@ -456,8 +482,44 @@ than `w3m-browse-url' use it."
   "Specialized filter function for `helm-find-files' bookmarks."
   (helm-bookmark-filter-setup-alist 'helm-bookmark-helm-find-files-p))
 
+(defun helm-bookmark-browse-project (candidate)
+  "Run `helm-browse-project' from action."
+  (with-helm-default-directory
+      (bookmark-get-filename candidate)
+      (helm-browse-project nil)))
+
+(defun helm-bookmark-run-browse-project ()
+  "Run `helm-bookmark-browse-project' from keyboard."
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'helm-bookmark-browse-project)))
+(put 'helm-bookmark-run-browse-project 'helm-only t)
+
+(defvar helm-bookmark-find-files-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-bookmark-map)
+    (define-key map (kbd "C-c o")   'ignore)
+    (define-key map (kbd "C-x C-d") 'helm-bookmark-run-browse-project)
+    map))
+
+(defclass helm-bookmark-override-inheritor (helm-source) ())
+
+(defmethod helm--setup-source ((source helm-bookmark-override-inheritor))
+  ;; Ensure `helm-source-in-buffer' method is called.
+  (call-next-method)
+  (setf (slot-value source 'action)
+        (helm-append-at-nth
+         (remove '("Jump to BM other window" . helm-bookmark-jump-other-window)
+                 helm-type-bookmark-actions)
+         '(("Browse project" . helm-bookmark-browse-project)) 1))
+  (setf (slot-value source 'keymap) helm-bookmark-find-files-map))
+
+(defclass helm-bookmark-find-files-class (helm-source-filtered-bookmarks
+                                          helm-bookmark-override-inheritor)
+  ())
+
 (defvar helm-source-bookmark-helm-find-files
-  (helm-make-source "Bookmark helm-find-files sessions" 'helm-source-filtered-bookmarks
+  (helm-make-source "Bookmark helm-find-files sessions" 'helm-bookmark-find-files-class
       :init (lambda ()
               (bookmark-maybe-load-default-file)
               (helm-init-candidates-in-buffer
@@ -481,18 +543,53 @@ than `w3m-browse-url' use it."
 ;;; Addressbook.
 ;;
 ;;
+(defun helm-bookmark--addressbook-search-mail (pattern)
+  (helm-awhile (next-single-property-change (point) 'email)
+    (goto-char it)
+    (end-of-line)
+    (when (string-match pattern
+                        (get-text-property
+                         0 'email (buffer-substring
+                                   (point-at-bol) (point-at-eol))))
+      (cl-return
+       (+ (point) (match-end 0))))))
+
+(defun helm-bookmark--addressbook-search-group (pattern)
+  (helm-awhile (next-single-property-change (point) 'group)
+    (goto-char it)
+    (end-of-line)
+    (when (string-match pattern
+                        (get-text-property
+                         0 'group (buffer-substring
+                                   (point-at-bol) (point-at-eol))))
+      (cl-return
+       (+ (point) (match-end 0))))))
+
 (defclass helm-bookmark-addressbook-class (helm-source-in-buffer)
   ((init :initform (lambda ()
                      (require 'addressbook-bookmark nil t)
                      (bookmark-maybe-load-default-file)
                      (helm-init-candidates-in-buffer
                          'global
-                       (helm-bookmark-addressbook-setup-alist))))
+                       (cl-loop for b in (helm-bookmark-addressbook-setup-alist)
+                                collect (propertize b
+                                                    'email (bookmark-prop-get b 'email)
+                                                    'group (bookmark-prop-get b 'group))))))
+   (search :initform '(helm-bookmark--addressbook-search-group
+                       helm-bookmark--addressbook-search-mail))
    (persistent-action :initform
                       (lambda (candidate)
                         (let ((bmk (helm-bookmark-get-bookmark-from-name
                                     candidate)))
-                          (bookmark--jump-via bmk 'switch-to-buffer))))
+                          (if (and (get-buffer-window addressbook-buffer-name 'visible)
+                                   (string= bmk (with-current-buffer addressbook-buffer-name
+                                                  (save-excursion
+                                                    (search-forward "^Name: " nil t)
+                                                    (car (addressbook-get-contact-data))))))
+                              (kill-buffer addressbook-buffer-name)
+                              (when (buffer-live-p (get-buffer addressbook-buffer-name))
+                                (kill-buffer addressbook-buffer-name))
+                              (bookmark--jump-via bmk 'switch-to-buffer)))))
    (persistent-help :initform "Show contact - Prefix with C-u to append")
    (mode-line :initform (list "Contact(s)" helm-mode-line-string))
    (filtered-candidate-transformer :initform
@@ -505,13 +602,11 @@ than `w3m-browse-url' use it."
          (bookmark      (helm-bookmark-get-bookmark-from-name
                          (car contacts)))
          (append   (message-buffers)))
-    (addressbook-set-mail-buffer-1 bookmark append)
+    (addressbook-set-mail-buffer-1 bookmark append cc)
     (helm-aif (cdr contacts)
-        (progn
-          (when cc (addressbook-set-mail-buffer-1 (car it) nil cc))
-          (cl-loop for bmk in (cdr it) do
-                   (addressbook-set-mail-buffer-1
-                    (helm-bookmark-get-bookmark-from-name bmk) 'append cc))))))
+        (cl-loop for bmk in it do
+                 (addressbook-set-mail-buffer-1
+                  (helm-bookmark-get-bookmark-from-name bmk) 'append cc)))))
 
 (defun helm-bookmark-addressbook-setup-alist ()
   "Specialized filter function for addressbook bookmarks."
@@ -519,6 +614,16 @@ than `w3m-browse-url' use it."
 
 (defvar helm-source-bookmark-addressbook
   (helm-make-source "Bookmark Addressbook" 'helm-bookmark-addressbook-class))
+
+(defvar helm-source-addressbook-set
+  (helm-build-dummy-source "Addressbook add contact"
+    :filtered-candidate-transformer
+    (lambda (_candidates _source)
+      (list (or (and (not (string= helm-pattern ""))
+                     helm-pattern)
+                "Enter a contact name to record")))
+    :action (lambda (candidate)
+              (addressbook-bookmark-set-1 candidate))))
 
 ;;; Transformer
 ;;
@@ -589,6 +694,16 @@ than `w3m-browse-url' use it."
                                     (and (not (file-remote-p isfile))
                                          (file-directory-p isfile))))
                            (propertize trunc 'face 'helm-bookmark-directory
+                                       'help-echo isfile))
+                          ( ;; Non existing files.
+                           (and isfile
+                                ;; Be safe and call `file-exists-p'
+                                ;; only if file is not remote or
+                                ;; remote but connected.
+                                (or (and (file-remote-p isfile)
+                                         (not (file-remote-p isfile nil t)))
+                                    (not (file-exists-p isfile))))
+                           (propertize trunc 'face 'helm-bookmark-file-not-found
                                        'help-echo isfile))
                           ( ;; regular files
                            t
@@ -683,7 +798,7 @@ words from the buffer into the new bookmark name."
   "Jump to bookmark from keyboard."
   (interactive)
   (with-helm-alive-p
-    (helm-exit-and-execute-action 'bookmark-jump-other-window)))
+    (helm-exit-and-execute-action 'helm-bookmark-jump-other-window)))
 (put 'helm-bookmark-run-jump-other-window 'helm-only t)
 
 (defun helm-bookmark-run-delete ()
@@ -720,7 +835,7 @@ e.g prepended with *."
 (defun helm-filtered-bookmarks ()
   "Preconfigured helm for bookmarks (filtered by category).
 Optional source `helm-source-bookmark-addressbook' is loaded
-only if external library addressbook-bookmark.el is available."
+only if external addressbook-bookmark package is installed."
   (interactive)
   (helm :sources helm-bookmark-default-filtered-sources
         :prompt "Search Bookmark: "
@@ -728,10 +843,22 @@ only if external library addressbook-bookmark.el is available."
         :default (list (thing-at-point 'symbol)
                        (buffer-name helm-current-buffer))))
 
+;;;###autoload
+(defun helm-addressbook-bookmarks ()
+  "Preconfigured helm for addressbook bookmarks.
+Need addressbook-bookmark package as dependencie."
+  (interactive)
+  (helm :sources '(helm-source-bookmark-addressbook
+                   helm-source-addressbook-set)
+        :prompt "Search Contact: "
+        :buffer "*helm addressbook*"
+        :default (list (thing-at-point 'symbol)
+                       (buffer-name helm-current-buffer))))
+
 (provide 'helm-bookmark)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

@@ -1,6 +1,6 @@
 ;;; helm-regexp.el --- In buffer regexp searching and replacement for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 (require 'helm)
 (require 'helm-help)
 (require 'helm-utils)
-(require 'helm-plugin)
 
 (declare-function helm-mm-split-pattern "helm-multi-match")
 
@@ -83,7 +82,6 @@ Any other non--nil value update after confirmation."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "M-<down>") 'helm-goto-next-file)
     (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
-    (define-key map (kbd "C-w")      'helm-yank-text-at-point)
     (define-key map (kbd "C-c o")    'helm-moccur-run-goto-line-ow)
     (define-key map (kbd "C-c C-o")  'helm-moccur-run-goto-line-of)
     (define-key map (kbd "C-x C-s")  'helm-moccur-run-save-buffer)
@@ -140,7 +138,7 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
     :persistent-action #'helm-regexp-persistent-action
     :persistent-help "Show this line"
     :multiline t
-    :matchplugin nil
+    :multimatch nil
     :requires-pattern 2
     :mode-line "Press TAB to select action."
     :action '(("Kill Regexp as sexp" . helm-kill-regexp-as-sexp)
@@ -154,8 +152,9 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
     (propertize
      (cl-loop with ln = (format "%5d: %s" (1- (line-number-at-pos s)) line)
            for i from 0 to (1- (/ (length matches) 2))
-           concat (format "\n         %s'%s'" (format "Group %d: " i)
-                          (match-string i))
+           if (match-string i)
+           concat (format "\n%s%s'%s'"
+                          (make-string 10 ? ) (format "Group %d: " i) it)
            into ln1
            finally return (concat ln ln1))
      'helm-realvalue s)))
@@ -165,7 +164,7 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
   (helm-highlight-current-line))
 
 (defun helm-regexp-kill-new (input)
-  (kill-new input)
+  (kill-new (substring-no-properties input))
   (message "Killed: %s" input))
 
 
@@ -192,7 +191,14 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
       'global
     (cl-loop with buffers = (helm-attr 'moccur-buffers)
              for buf in buffers
-             for bufstr = (with-current-buffer buf (buffer-string))
+             for bufstr = (with-current-buffer buf
+                            ;; A leading space is needed to allow helm
+                            ;; searching the first line of buffer
+                            ;; (#1725).
+                            (concat (if (memql (char-after (point-min))
+                                               '(? ?\t ?\n))
+                                        "" " ")
+                                    (buffer-string)))
              do (add-text-properties
                  0 (length bufstr)
                  `(buffer-name ,(buffer-name (get-buffer buf)))
@@ -214,7 +220,8 @@ i.e Don't replace inside a word, regexp is surrounded with \\bregexp\\b."
                                  'buffer-name)
               (save-restriction
                 (narrow-to-region (or (previous-single-property-change
-                                       (point) 'buffer-name) 1)
+                                       (point) 'buffer-name)
+                                      (point-at-bol 2))
                                   (or (next-single-property-change
                                        (if (= beg end)
                                            (helm-moccur--next-or-previous-char)
@@ -242,20 +249,21 @@ arg METHOD can be one of buffer, buffer-other-window, buffer-other-frame."
       (buffer              (switch-to-buffer buf))
       (buffer-other-window (switch-to-buffer-other-window buf))
       (buffer-other-frame  (switch-to-buffer-other-frame buf)))
-    (helm-goto-line lineno)
-    ;; Move point to the nearest matching regexp from bol.
-    (cl-loop for reg in split-pat
-          when (save-excursion
-                 (condition-case _err
-                     (if helm-migemo-mode
-                         (helm-mm-migemo-forward reg (point-at-eol) t)
-                       (re-search-forward reg (point-at-eol) t))
-                   (invalid-regexp nil)))
-          collect (match-beginning 0) into pos-ls
-          finally (when pos-ls (goto-char (apply #'min pos-ls))))
-    (when mark
-      (set-marker (mark-marker) (point))
-      (push-mark (point) 'nomsg))))
+    (with-current-buffer buf
+      (helm-goto-line lineno)
+      ;; Move point to the nearest matching regexp from bol.
+      (cl-loop for reg in split-pat
+               when (save-excursion
+                      (condition-case _err
+                          (if helm-migemo-mode
+                              (helm-mm-migemo-forward reg (point-at-eol) t)
+                              (re-search-forward reg (point-at-eol) t))
+                        (invalid-regexp nil)))
+               collect (match-beginning 0) into pos-ls
+               finally (when pos-ls (goto-char (apply #'min pos-ls))))
+      (when mark
+        (set-marker (mark-marker) (point))
+        (push-mark (point) 'nomsg)))))
 
 (defun helm-moccur-persistent-action (candidate)
   (helm-moccur-goto-line candidate)
@@ -440,12 +448,12 @@ Same as `helm-moccur-goto-line' but go in new frame."
 (defun helm-moccur-mode-goto-line ()
   (interactive)
   (helm-aif (get-text-property (point) 'helm-realvalue)
-    (helm-moccur-goto-line it)))
+    (progn (helm-moccur-goto-line it) (helm-match-line-cleanup-pulse))))
 
 (defun helm-moccur-mode-goto-line-ow ()
   (interactive)
   (helm-aif (get-text-property (point) 'helm-realvalue)
-    (helm-moccur-goto-line-ow it)))
+    (progn (helm-moccur-goto-line-ow it) (helm-match-line-cleanup-pulse))))
 
 (defun helm-moccur-mode-goto-line-ow-forward-1 (arg)
   (condition-case nil
@@ -638,7 +646,7 @@ The prefix arg can be set before calling
 (provide 'helm-regexp)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

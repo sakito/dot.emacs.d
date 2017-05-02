@@ -1,6 +1,6 @@
 ;;; helm-types.el --- Helm types classes and methods. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 ~ 2016  Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2015 ~ 2017  Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
 ;; URL: http://github.com/emacs-helm/helm
@@ -79,8 +79,9 @@
           helm-transform-file-cache))
   (setf (slot-value source 'candidate-transformer)
         '(helm-skip-boring-files
-          helm-highlight-files
           helm-w32-pathname-transformer))
+  (setf (slot-value source 'filtered-candidate-transformer)
+        'helm-highlight-files)
   (setf (slot-value source 'help-message) 'helm-generic-file-help-message)
   (setf (slot-value source 'mode-line) (list "File(s)" helm-mode-line-string))
   (setf (slot-value source 'keymap) helm-generic-files-map))
@@ -115,7 +116,8 @@
   (setf (slot-value source 'keymap) helm-bookmark-map)
   (setf (slot-value source 'mode-line) (list "Bookmark(s)" helm-mode-line-string))
   (setf (slot-value source 'help-message) 'helm-bookmark-help-message)
-  (setf (slot-value source 'migemo) t))
+  (setf (slot-value source 'migemo) t)
+  (setf (slot-value source 'follow) 'never))
 
 
 ;; Buffers
@@ -132,9 +134,8 @@
    'helm-switch-to-buffers-other-window
    "Switch to buffer other frame `C-c C-o'"
    'switch-to-buffer-other-frame
-   (lambda () (and (locate-library "elscreen")
-                   "Display buffer in Elscreen"))
-   'helm-find-buffer-on-elscreen
+   "Browse project from buffer"
+   'helm-buffers-browse-project
    "Query replace regexp `C-M-%'"
    'helm-buffer-query-replace-regexp
    "Query replace `M-%'" 'helm-buffer-query-replace
@@ -272,7 +273,7 @@
 (provide 'helm-types)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

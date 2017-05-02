@@ -1,6 +1,6 @@
 ;;; helm-dabbrev.el --- Helm implementation of dabbrev. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 ;;; Code:
 
 (require 'helm)
+(require 'helm-lib)
 (require 'helm-help)
 (require 'helm-elisp) ; For show-completion.
 
@@ -41,6 +42,12 @@ Have no effect when `helm-dabbrev-always-search-all' is non--nil."
   :group 'helm-dabbrev
   :type 'integer)
 
+(defcustom helm-dabbrev-candidates-number-limit 500
+  "Maximum number of candidates to collect before stopping.
+Higher this number is slower the computation of candidates will be."
+  :group 'helm-dabbrev
+  :type 'integer)
+
 (defcustom helm-dabbrev-ignored-buffers-regexps
   '("\\*helm" "\\*Messages" "\\*Echo Area" "\\*Buffer List")
   "List of regexps matching names of buffers that helm-dabbrev should not check."
@@ -58,8 +65,7 @@ When nil all buffers are considered related to `current-buffer'."
   :group 'helm-dabbrev
   :type 'function)
 
-(defcustom helm-dabbrev-major-mode-assoc
-  '((emacs-lisp-mode . lisp-interaction-mode))
+(defcustom helm-dabbrev-major-mode-assoc nil 
   "Major mode association alist.
 This allow helm-dabbrev searching in buffers with the associated `major-mode'.
 e.g \(emacs-lisp-mode . lisp-interaction-mode\)
@@ -107,7 +113,7 @@ but the initial search for all candidates in buffer(s)."
 (defvar helm-dabbrev--exclude-current-buffer-flag nil)
 (defvar helm-dabbrev--cache nil)
 (defvar helm-dabbrev--data nil)
-(defvar helm-dabbrev--regexp "\\s-\\|\t\\|[(\[\{\"'`=<$;.]\\|\\s\\\\|^")
+(defvar helm-dabbrev--regexp "\\s-\\|\t\\|[(\[\{\"'`=<$;,@.]\\|\\s\\\\|^")
 (cl-defstruct helm-dabbrev-info dabbrev limits iterator)
 
 
@@ -120,37 +126,8 @@ but the initial search for all candidates in buffer(s)."
         collect buf))
 
 (defun helm-dabbrev--same-major-mode-p (start-buffer)
-  ;; START-BUFFER is the current-buffer where we start searching.
-  ;; Determine the major-mode of START-BUFFER as `cur-maj-mode'.
-  ;; Each time the loop go in another buffer we try to find if its
-  ;; `major-mode' is:
-  ;; - same as the `cur-maj-mode'
-  ;; - derived from `cur-maj-mode'
-  ;; - have an assoc entry (major-mode . cur-maj-mode)
-  ;; - have an rassoc entry (cur-maj-mode . major-mode)
-  ;; - check if one of these entries inherit from another one in
-  ;;   `helm-dabbrev-major-mode-assoc'.
-  (let* ((cur-maj-mode  (with-current-buffer start-buffer major-mode))
-         (c-assoc-mode  (assq cur-maj-mode helm-dabbrev-major-mode-assoc))
-         (c-rassoc-mode (rassq cur-maj-mode helm-dabbrev-major-mode-assoc))
-         (o-assoc-mode  (assq major-mode helm-dabbrev-major-mode-assoc))
-         (o-rassoc-mode (rassq major-mode helm-dabbrev-major-mode-assoc))
-         (cdr-c-assoc-mode (cdr c-assoc-mode))
-         (cdr-o-assoc-mode (cdr o-assoc-mode)))
-    (or (eq major-mode cur-maj-mode)
-        (derived-mode-p cur-maj-mode)
-        (or (eq cdr-c-assoc-mode major-mode)
-            (eq (car c-rassoc-mode) major-mode)
-            (eq (cdr (assq cdr-c-assoc-mode helm-dabbrev-major-mode-assoc))
-                major-mode)
-            (eq (car (rassq cdr-c-assoc-mode helm-dabbrev-major-mode-assoc))
-                major-mode))
-        (or (eq cdr-o-assoc-mode cur-maj-mode)
-            (eq (car o-rassoc-mode) cur-maj-mode)
-            (eq (cdr (assq cdr-o-assoc-mode helm-dabbrev-major-mode-assoc))
-                cur-maj-mode)
-            (eq (car (rassq cdr-o-assoc-mode helm-dabbrev-major-mode-assoc))
-                cur-maj-mode)))))
+  "Decide if current-buffer is related to START-BUFFER."
+  (helm-same-major-mode-p start-buffer helm-dabbrev-major-mode-assoc))
 
 (defun helm-dabbrev--collect (str limit ignore-case all)
   (let* ((case-fold-search ignore-case)
@@ -232,7 +209,7 @@ but the initial search for all candidates in buffer(s)."
   (with-current-buffer (current-buffer)
     (let* ((dabbrev-get (lambda (str all-bufs)
                             (helm-dabbrev--collect
-                             str helm-candidate-number-limit
+                             str helm-dabbrev-candidates-number-limit
                              (cl-case helm-dabbrev-case-fold-search
                                (smart (helm-set-case-fold-search-1 abbrev))
                                (t helm-dabbrev-case-fold-search))
@@ -348,7 +325,7 @@ but the initial search for all candidates in buffer(s)."
 (provide 'helm-dabbrev)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

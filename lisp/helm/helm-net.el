@@ -1,6 +1,6 @@
 ;;; helm-net.el --- helm browse url and search web. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -96,11 +96,6 @@ This is a format string, don't forget the `%s'."
   :type 'string
   :group 'helm-net)
 
-(defcustom helm-wikipedia-follow-delay 2
-  "Delay before wikipedia summary popup."
-  :type 'number
-  :group 'helm-net)
-
 (defcustom helm-search-suggest-action-youtube-url
   "http://www.youtube.com/results?aq=f&search_query=%s"
   "The Youtube search url.
@@ -192,7 +187,7 @@ Can be \"-new-tab\" (default) or \"-new-window\"."
                               (point-min) (point-max)))
                         'CompleteSuggestion)
    for i in result-alist collect
-   (cdr (cl-caadr (assoc 'suggestion i)))))
+   (cdr (cl-caadr (assq 'suggestion i)))))
 
 (defun helm-google-suggest-fetch (input)
   "Fetch suggestions for INPUT from XML buffer."
@@ -321,9 +316,9 @@ Can be \"-new-tab\" (default) or \"-new-window\"."
 (defun helm-wikipedia--parse-summary ()
   (goto-char (point-min))
   (when (search-forward "{" nil t)
-    (let ((result (cdr (assoc '*
-                              (assoc 'text
-                                     (assoc 'parse
+    (let ((result (cdr (assq '*
+                              (assq 'text
+                                     (assq 'parse
                                             (json-read-from-string
                                              (buffer-substring-no-properties
                                               (1- (point)) (point-max)))))))))
@@ -359,10 +354,9 @@ Can be \"-new-tab\" (default) or \"-new-window\"."
                                 helm-search-suggest-action-wikipedia-url
                                 candidate))))
     :persistent-action #'helm-wikipedia-persistent-action
+    :persistent-help "show summary"
     :volatile t
     :keymap helm-map
-    :follow 1
-    :follow-delay helm-wikipedia-follow-delay
     :requires-pattern 3))
 
 
@@ -413,12 +407,13 @@ and not be prompted to kill firefox process.
 NOTE: Probably not supported on some systems (e.g Windows)."
   (interactive (list (read-string "URL: " (browse-url-url-at-point))
                      nil))
+  (setq url (browse-url-encode-url url))
   (let ((process-environment (browse-url-process-environment)))
     (call-process-shell-command
      (format "(%s %s %s &)"
              browse-url-firefox-program
              helm-browse-url-firefox-new-window
-             url))))
+             (shell-quote-argument url)))))
 
 (defun helm-browse-url-chromium (url &optional _ignore)
   "Browse URL with google chrome browser."
@@ -518,7 +513,7 @@ NOTE: Probably not supported on some systems (e.g Windows)."
 (provide 'helm-net)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

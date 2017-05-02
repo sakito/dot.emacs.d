@@ -1,6 +1,6 @@
 ;;; helm-utils.el --- Utilities Functions for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -198,6 +198,9 @@ In this case last position is added to the register
     ("&shy;"    . 173)) ;; ­
 
   "Table of html character entities and values.")
+
+(defvar helm-find-many-files-after-hook nil
+  "Hook that run at end of `helm-find-many-files'.")
 
 ;;; Faces.
 ;;
@@ -210,16 +213,6 @@ In this case last position is added to the register
     '((t (:inherit isearch)))
   "Face used to highlight item matched in a selected line."
   :group 'helm-faces)
-
-
-;; CUA workaround
-(defadvice cua-delete-region (around helm-avoid-cua activate)
-  (ignore-errors ad-do-it))
-
-(defadvice copy-region-as-kill (around helm-avoid-cua activate)
-  (if cua-mode
-      (ignore-errors ad-do-it)
-    ad-do-it))
 
 
 ;;; Utils functions
@@ -276,10 +269,13 @@ Default is `helm-current-buffer'."
   "Goto LINENO opening only outline headline if needed.
 Animation is used unless NOANIM is non--nil."
   (helm-log-run-hook 'helm-goto-line-before-hook)
+  (helm-match-line-cleanup)
+  (with-helm-current-buffer
+    (unless helm-yank-point (setq helm-yank-point (point))))
   (goto-char (point-min))
   (helm-goto-char (point-at-bol lineno))
   (unless noanim
-    (helm-highlight-current-line nil nil nil nil 'pulse)))
+    (helm-highlight-current-line)))
 
 (defun helm-save-pos-to-register-before-jump ()
   "Save current buffer position to `helm-save-pos-before-jump-register'.
@@ -373,7 +369,8 @@ from its directory."
                          (eq major-mode 'org-agenda-mode))
                        org-directory
                        (expand-file-name org-directory))
-                  (with-current-buffer buf default-directory)))
+                  (with-current-buffer buf
+                    (expand-file-name default-directory))))
          ;; imenu (marker).
          (marker
           (or (buffer-file-name (marker-buffer (cdr sel)))
@@ -383,9 +380,9 @@ from its directory."
                   (if (and ffap-url-regexp
                            (string-match ffap-url-regexp it))
                       it (expand-file-name it))
-                default-directory))
-         ((or (file-remote-p sel)
-              (file-exists-p sel))
+                (expand-file-name default-directory)))
+         ((and (stringp sel) (or (file-remote-p sel)
+                                 (file-exists-p sel)))
           (expand-file-name sel))
          ;; Grep.
          ((and grep-line (file-exists-p (car grep-line)))
@@ -393,39 +390,41 @@ from its directory."
          ;; Occur.
          (grep-line
           (with-current-buffer (get-buffer (car grep-line))
-            (or (buffer-file-name) default-directory)))
+            (expand-file-name (or (buffer-file-name) default-directory))))
          ;; Url.
-         ((and ffap-url-regexp (string-match ffap-url-regexp sel)) sel)
+         ((and (stringp sel) ffap-url-regexp (string-match ffap-url-regexp sel)) sel)
          ;; Default.
-         (t default-preselection))))))
+         (t (expand-file-name default-preselection)))))))
 (put 'helm-quit-and-find-file 'helm-only t)
 
 (defun helm-generic-sort-fn (s1 s2)
   "Sort predicate function for helm candidates.
 Args S1 and S2 can be single or \(display . real\) candidates,
 that is sorting is done against real value of candidate."
-  (let* ((pattern (regexp-quote helm-pattern))
-         (reg1  (concat "\\_<" pattern "\\_>"))
-         (reg2  (concat "\\_<" pattern))
+  (let* ((qpattern (regexp-quote helm-pattern))
+         (reg1  (concat "\\_<" qpattern "\\_>"))
+         (reg2  (concat "\\_<" qpattern))
          (reg3  helm-pattern)
-         (split (split-string pattern))
+         (split (helm-mm-split-pattern helm-pattern))
          (str1  (if (consp s1) (cdr s1) s1))
          (str2  (if (consp s2) (cdr s2) s2))
          (score (lambda (str r1 r2 r3 lst)
-                    (+ (if (string-match (concat "\\`" pattern) str) 1 0)
+                    (+ (if (string-match (concat "\\`" qpattern) str) 1 0)
                        (cond ((string-match r1 str) 5)
-                             ((and (string-match " " pattern)
-                                   (string-match (concat "\\_<" (car lst)) str)
+                             ((and (string-match " " qpattern)
+                                   (string-match
+                                    (concat "\\_<" (regexp-quote (car lst))) str)
                                    (cl-loop for r in (cdr lst)
                                             always (string-match r str))) 4)
-                             ((and (string-match " " pattern)
-                                   (cl-loop for r in lst always (string-match r str))) 3)
+                             ((and (string-match " " qpattern)
+                                   (cl-loop for r in lst
+                                            always (string-match r str))) 3)
                              ((string-match r2 str) 2)
                              ((string-match r3 str) 1)
                              (t 0)))))
          (sc1 (funcall score str1 reg1 reg2 reg3 split))
          (sc2 (funcall score str2 reg1 reg2 reg3 split)))
-    (cond ((or (zerop (string-width pattern))
+    (cond ((or (zerop (string-width qpattern))
                (and (zerop sc1) (zerop sc2)))
            (string-lessp str1 str2))
           ((= sc1 sc2)
@@ -436,10 +435,10 @@ that is sorting is done against real value of candidate."
   "Extract hostname from an incomplete tramp file name.
 Return nil on valid file name remote or not."
   (let* ((str (helm-basename fname))
-         (split (split-string str ":"))
-         (meth (car (member (car split) (mapcar 'car tramp-methods))))) 
-    (when (and meth (<= (length split) 2))
-      (cadr split))))
+         (split (split-string str ":" t))
+         (meth (car (member (car split)
+                            (helm-ff-get-tramp-methods))))) 
+    (when meth (car (last split)))))
 
 (cl-defun helm-file-human-size (size &optional (kbsize helm-default-kbsize))
   "Return a string showing SIZE of a file in human readable form.
@@ -515,34 +514,34 @@ you have in `file-attributes'."
                       :inode       inode
                       :device-num  device-num)))
          (modes (helm-split-mode-file-attributes (cl-getf all :mode))))
-    (cond (type (cl-getf all :type))
-          (links (cl-getf all :links))
-          (uid   (cl-getf all :uid))
-          (gid   (cl-getf all :gid))
+    (cond (type        (cl-getf all :type))
+          (links       (cl-getf all :links))
+          (uid         (cl-getf all :uid))
+          (gid         (cl-getf all :gid))
           (access-time (cl-getf all :access-time))
-          (modif-time (cl-getf all :modif-time))
-          (status (cl-getf all :status))
-          (size (cl-getf all :size))
-          (mode (cl-getf all :mode))
-          (gid-change (cl-getf all :gid-change))
-          (inode (cl-getf all :inode))
-          (device-num (cl-getf all :device-num))
-          (dired
-           (concat
-            (helm-split-mode-file-attributes (cl-getf all :mode) t) " "
-            (number-to-string (cl-getf all :links)) " "
-            (cl-getf all :uid) ":"
-            (cl-getf all :gid) " "
-            (if human-size
-                (helm-file-human-size (cl-getf all :size))
-              (int-to-string (cl-getf all :size))) " "
-              (cl-getf all :modif-time)))
+          (modif-time  (cl-getf all :modif-time))
+          (status      (cl-getf all :status))
+          (size        (cl-getf all :size))
+          (mode        (cl-getf all :mode))
+          (gid-change  (cl-getf all :gid-change))
+          (inode       (cl-getf all :inode))
+          (device-num  (cl-getf all :device-num))
+          (dired       (concat
+                        (helm-split-mode-file-attributes
+                         (cl-getf all :mode) t) " "
+                        (number-to-string (cl-getf all :links)) " "
+                        (cl-getf all :uid) ":"
+                        (cl-getf all :gid) " "
+                        (if human-size
+                            (helm-file-human-size (cl-getf all :size))
+                            (int-to-string (cl-getf all :size))) " "
+                        (cl-getf all :modif-time)))
           (human-size (helm-file-human-size (cl-getf all :size)))
-          (mode-type (cl-getf modes :mode-type))
+          (mode-type  (cl-getf modes :mode-type))
           (mode-owner (cl-getf modes :user))
           (mode-group (cl-getf modes :group))
           (mode-other (cl-getf modes :other))
-          (t (append all modes)))))
+          (t          (append all modes)))))
 
 (defun helm-split-mode-file-attributes (str &optional string)
   "Split mode file attributes STR into a proplist.
@@ -591,53 +590,80 @@ If STRING is non--nil return instead a space separated string."
 (defvar helm-match-line-overlay nil)
 (defvar helm--match-item-overlays nil)
 
-(defun helm-highlight-current-line (&optional start end buf face pulse)
+(defun helm-highlight-current-line (&optional start end buf face)
   "Highlight and underline current position"
   (let* ((start (or start (line-beginning-position)))
          (end (or end (1+ (line-end-position))))
-         (start-match (if (or (null helm-highlight-matches-around-point-max-lines)
-                              (zerop helm-highlight-matches-around-point-max-lines))
-                          start
-                        (save-excursion
-                          (forward-line
-                           (- helm-highlight-matches-around-point-max-lines))
-                          (point-at-bol))))
-         (end-match   (if (or (null helm-highlight-matches-around-point-max-lines)
-                              (zerop helm-highlight-matches-around-point-max-lines))
-                          end
-                        (save-excursion
-                          (forward-line
-                           helm-highlight-matches-around-point-max-lines)
-                          (point-at-eol))))
+         start-match end-match
          (args (list start end buf)))
+    ;; Highlight the current line.
     (if (not helm-match-line-overlay)
         (setq helm-match-line-overlay (apply 'make-overlay args))
       (apply 'move-overlay helm-match-line-overlay args))
     (overlay-put helm-match-line-overlay
                  'face (or face 'helm-selection-line))
-    (catch 'empty-line
-      (cl-loop with ov
-               for r in (helm-remove-if-match
-                         "\\`!" (split-string helm-input))
-               do (save-excursion
-                    (goto-char start-match)
-                    (while (condition-case _err
-                               (if helm-migemo-mode
-                                   (helm-mm-migemo-forward r end-match t)
-                                 (re-search-forward r end-match t))
-                             (invalid-regexp nil))
-                      (let ((s (match-beginning 0))
-                            (e (match-end 0)))
-                        (if (= s e)
-                            (throw 'empty-line nil)
-                          (push (setq ov (make-overlay s e))
-                                helm--match-item-overlays)
-                          (overlay-put ov 'face 'helm-match-item)
-                          (overlay-put ov 'priority 1)))))))
-    (recenter)
-    (when pulse
-      (sit-for 0.3)
-      (helm-match-line-cleanup))))
+    ;; Now highlight matches only if we are in helm session, we are
+    ;; maybe coming from helm-grep-mode or helm-moccur-mode buffers.
+    (when helm-alive-p
+      (if (or (null helm-highlight-matches-around-point-max-lines)
+              (zerop helm-highlight-matches-around-point-max-lines))
+          (setq start-match start
+                end-match   end)
+          (setq start-match
+                (save-excursion
+                  (forward-line
+                   (- helm-highlight-matches-around-point-max-lines))
+                  (point-at-bol))
+                  end-match
+                  (save-excursion
+                    (forward-line
+                     helm-highlight-matches-around-point-max-lines)
+                    (point-at-bol))))
+      (catch 'empty-line
+        (cl-loop with ov
+                 for r in (helm-remove-if-match
+                           "\\`!" (helm-mm-split-pattern
+                                   (if (with-helm-buffer
+                                         ;; Needed for highlighting AG matches.
+                                         (assq 'pcre (helm-get-current-source)))
+                                       (helm--translate-pcre-to-elisp helm-input)
+                                       helm-input)))
+                 do (save-excursion
+                      (goto-char start-match)
+                      (while (condition-case _err
+                                 (if helm-migemo-mode
+                                     (helm-mm-migemo-forward r end-match t)
+                                     (re-search-forward r end-match t))
+                               (invalid-regexp nil))
+                        (let ((s (match-beginning 0))
+                              (e (match-end 0)))
+                          (if (= s e)
+                              (throw 'empty-line nil)
+                              (push (setq ov (make-overlay s e))
+                                    helm--match-item-overlays)
+                              (overlay-put ov 'face 'helm-match-item)
+                              (overlay-put ov 'priority 1))))))))
+    (recenter)))
+
+(defun helm--translate-pcre-to-elisp (regexp)
+  "Should translate pcre REGEXP to elisp regexp.
+Assume regexp is a pcre based regexp."
+  (with-temp-buffer
+    (insert " " regexp " ")
+    (goto-char (point-min))
+    (save-excursion
+      ;; match (){}| unquoted
+      (helm-awhile (and (re-search-forward "\\([(){}|]\\)" nil t)
+                        (match-string 1))
+        (let ((pos (match-beginning 1)))
+          (if (eql (char-before pos) ?\\)
+              (delete-region pos (1- pos))
+              (replace-match (concat "\\" it) t t nil 1)))))
+    ;; match \s or \S
+    (helm-awhile (and (re-search-forward "\\S\\?\\(\\s\\[sS]\\)[^-]" nil t)
+                      (match-string 1))
+      (replace-match (concat it "-") t t nil 1))
+    (buffer-substring (1+ (point-min)) (1- (point-max)))))
 
 (defun helm-match-line-cleanup ()
   (when helm-match-line-overlay
@@ -645,6 +671,10 @@ If STRING is non--nil return instead a space separated string."
     (setq helm-match-line-overlay nil))
   (when helm--match-item-overlays
     (mapc 'delete-overlay helm--match-item-overlays)))
+
+(defun helm-match-line-cleanup-maybe ()
+  (when (helm-empty-buffer-p)
+    (helm-match-line-cleanup)))
 
 (defun helm-match-line-update ()
   (when helm-match-line-overlay
@@ -657,8 +687,13 @@ If STRING is non--nil return instead a space separated string."
              (eq helm-split-window-state 'vertical))
     (set-window-text-height (helm-window) helm-resize-on-pa-text-height)))
 
+(defun helm-match-line-cleanup-pulse ()
+  (run-with-timer 0.3 nil #'helm-match-line-cleanup))
+
+(add-hook 'helm-after-update-hook 'helm-match-line-cleanup-maybe)
 (add-hook 'helm-after-persistent-action-hook 'helm-persistent-autoresize-hook)
 (add-hook 'helm-cleanup-hook 'helm-match-line-cleanup)
+(add-hook 'helm-after-action-hook 'helm-match-line-cleanup-pulse)
 (add-hook 'helm-after-persistent-action-hook 'helm-match-line-update)
 
 ;;; Popup buffer-name or filename in grep/moccur/imenu-all.
@@ -678,15 +713,16 @@ If STRING is non--nil return instead a space separated string."
              (member (assoc-default 'name (helm-get-current-source))
                      helm-sources-using-help-echo-popup))
     (setq helm--show-help-echo-timer
-          (run-with-idle-timer
+          (run-with-timer
            1 nil
            (lambda ()
-             (with-helm-window
-               (helm-aif (get-text-property (point-at-bol) 'help-echo)
-                   (popup-tip (concat " " (abbreviate-file-name it))
-                              :around nil
-                              :point (save-excursion
-                                       (end-of-visual-line) (point))))))))))
+             (save-selected-window
+               (with-helm-window
+                 (helm-aif (get-text-property (point-at-bol) 'help-echo)
+                     (popup-tip (concat " " (abbreviate-file-name it))
+                                :around nil
+                                :point (save-excursion
+                                         (end-of-visual-line) (point)))))))))))
 
 ;;;###autoload
 (define-minor-mode helm-popup-tip-mode
@@ -695,10 +731,10 @@ If STRING is non--nil return instead a space separated string."
   (require 'popup)
   (if helm-popup-tip-mode
       (progn
-        (add-hook 'helm-update-hook 'helm-show-help-echo) ; Needed for async sources.
+        (add-hook 'helm-after-update-hook 'helm-show-help-echo) ; Needed for async sources.
         (add-hook 'helm-move-selection-after-hook 'helm-show-help-echo)
         (add-hook 'helm-cleanup-hook 'helm-cancel-help-echo-timer))
-      (remove-hook 'helm-update-hook 'helm-show-help-echo)
+      (remove-hook 'helm-after-update-hook 'helm-show-help-echo)
       (remove-hook 'helm-move-selection-after-hook 'helm-show-help-echo)
       (remove-hook 'helm-cleanup-hook 'helm-cancel-help-echo-timer)))
 
@@ -746,8 +782,11 @@ directory, open this directory."
       (find-file remote-path))))
 
 (defun helm-find-many-files (_ignore)
+  "Simple action that run `find-file' on marked candidates.
+Run `helm-find-many-files-after-hook' at end"
   (let ((helm--reading-passwd-or-string t))
-    (mapc 'find-file (helm-marked-candidates))))
+    (mapc 'find-file (helm-marked-candidates))
+    (helm-log-run-hook 'helm-find-many-files-after-hook)))
 
 (defun helm-read-repeat-string (prompt &optional count)
   "Prompt as many time PROMPT is not empty.
@@ -771,8 +810,9 @@ If COUNT is non--nil add a number after each prompt."
         (when (re-search-forward url-regexp nil t)
           (setq url (match-string 0)))
         (when (re-search-forward bmk-regexp nil t)
-          (setq title (funcall helm-html-decode-entities-function
-                               (match-string 1))))
+          (setq title (url-unhex-string
+                       (funcall helm-html-decode-entities-function
+                               (match-string 1)))))
         (push (cons title url) bookmarks-alist)
         (forward-line)))
     (nreverse bookmarks-alist)))
@@ -800,7 +840,7 @@ When unable to decode ENTITY returns nil."
 (provide 'helm-utils)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:

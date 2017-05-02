@@ -1,6 +1,6 @@
 ;;; helm-org.el --- Helm for org headlines and keywords completion -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2016 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ Note this have no effect in `helm-org-in-buffer-headings'."
 
 (defcustom helm-org-headings-actions
   '(("Go to heading" . helm-org-goto-marker)
-    ("Open in indirect buffer `C-RET'" . helm-org--open-heading-in-indirect-buffer)
-    ("Refile to this heading `C-w`''" . helm-org-heading-refile)
-    ("Insert link to this heading `C-l`''" . helm-org-insert-link-to-heading-at-marker))
+    ("Open in indirect buffer `C-c i'" . helm-org--open-heading-in-indirect-buffer)
+    ("Refile current or marked heading to selection `C-c w`" . helm-org-heading-refile)
+    ("Insert link to this heading `C-c l`" . helm-org-insert-link-to-heading-at-marker))
   "Default actions alist for
   `helm-source-org-headings-for-files'."
   :group 'helm-org
@@ -100,19 +100,19 @@ Note this have no effect in `helm-org-in-buffer-headings'."
   (set-window-prev-buffers nil (append (cdr (window-prev-buffers))
                                        (car (window-prev-buffers)))))
 
-(defun helm-org--run-open-heading-in-indirect-buffer ()
+(defun helm-org-run-open-heading-in-indirect-buffer ()
   "Open selected Org heading in an indirect buffer."
   (interactive)
   (with-helm-alive-p
     (helm-exit-and-execute-action #'helm-org--open-heading-in-indirect-buffer)))
-(put 'helm-org--run-open-heading-in-indirect-buffer 'helm-only t)
+(put 'helm-org-run-open-heading-in-indirect-buffer 'helm-only t)
 
 (defvar helm-org-headings-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
-    (define-key map (kbd "<C-return>") 'helm-org--run-open-heading-in-indirect-buffer)
-    (define-key map (kbd "C-w") 'helm-org-heading-refile)
-    (define-key map (kbd "C-l") 'helm-org-insert-link-to-heading-at-marker)
+    (define-key map (kbd "C-c i") 'helm-org-run-open-heading-in-indirect-buffer)
+    (define-key map (kbd "C-c w") 'helm-org-run-heading-refile)
+    (define-key map (kbd "C-c l") 'helm-org-run-insert-link-to-heading-at-marker)
     map)
   "Keymap for `helm-source-org-headings-for-files'.")
 
@@ -128,6 +128,7 @@ Note this have no effect in `helm-org-in-buffer-headings'."
              (helm-aif (get-text-property 0 'helm-real-display candidate)
                  it
                candidate))))
+   (help-message :initform 'helm-org-headings-help-message)
    (action :initform 'helm-org-headings-actions)
    (keymap :initform 'helm-org-headings-map)))
 
@@ -172,7 +173,10 @@ Note this have no effect in `helm-org-in-buffer-headings'."
                                   (apply old-fn args)))))
       (save-excursion
         (save-restriction
-          (widen)
+          (unless (and (bufferp filename)
+                       (buffer-base-buffer filename))
+            ;; Only widen direct buffers, not indirect ones.
+            (widen))
           (unless parents (goto-char (point-min)))
           ;; clear cache for new version of org-get-outline-path
           (and (boundp 'org-outline-path-cache)
@@ -218,17 +222,47 @@ Note this have no effect in `helm-org-in-buffer-headings'."
         (org-insert-link
          file-name (concat "file:" file-name "::*" heading-name))))))
 
+(defun helm-org-run-insert-link-to-heading-at-marker ()
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action
+     'helm-org-insert-link-to-heading-at-marker)))
+
 (defun helm-org-heading-refile (marker)
-  (save-selected-window
-    (when (eq major-mode 'org-agenda-mode)
-      (org-agenda-switch-to))
-    (org-cut-subtree)
-    (let ((target-level (with-current-buffer (marker-buffer marker)
-                          (goto-char (marker-position marker))
-                          (org-current-level))))
-      (helm-org-goto-marker marker)
-      (org-end-of-subtree t t)
-      (org-paste-subtree (+ target-level 1)))))
+  "Refile current heading or marked to MARKER.
+The current heading is the heading where cursor was
+before entering helm session, it will be used unless
+you mark a candidate, in this case helm will go to this marked
+candidate in org buffer and refile this candidate to MARKER.
+NOTE that of course if you have marked more than one candidate,
+all the subsequent candidates will be ignored."
+  (let ((mkd (with-helm-buffer
+               (and helm-marked-candidates
+                    (car (helm-marked-candidates))))))
+    (save-selected-window
+      (when (eq major-mode 'org-agenda-mode)
+        (org-agenda-switch-to))
+      (when mkd (helm-org-goto-marker mkd))
+      (org-cut-subtree)
+      (let ((target-level (with-current-buffer (marker-buffer marker)
+                            (goto-char (marker-position marker))
+                            (org-current-level))))
+        (helm-org-goto-marker marker)
+        (org-end-of-subtree t t)
+        (org-paste-subtree (+ target-level 1))))))
+
+(defun helm-org-in-buffer-preselect ()
+  (if (org-on-heading-p)
+      (buffer-substring-no-properties (point-at-bol) (point-at-eol))
+      (save-excursion
+        (outline-previous-visible-heading 1)
+        (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+
+(defun helm-org-run-heading-refile ()
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'helm-org-heading-refile)))
+(put 'helm-org-run-heading-refile 'helm-only t)
 
 ;;;###autoload
 (defun helm-org-agenda-files-headings ()
@@ -243,10 +277,11 @@ Note this have no effect in `helm-org-in-buffer-headings'."
 (defun helm-org-in-buffer-headings ()
   "Preconfigured helm for org buffer headings."
   (interactive)
-  (let ((helm-org-show-filename nil))
+  (let (helm-org-show-filename helm-org-format-outline-path)
     (helm :sources (helm-source-org-headings-for-files
                     (list (current-buffer)))
           :candidate-number-limit 99999
+          :preselect (helm-org-in-buffer-preselect)
           :truncate-lines helm-org-truncate-lines
           :buffer "*helm org inbuffer*")))
 
@@ -311,7 +346,7 @@ current heading."
 (provide 'helm-org)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not cl-functions obsolete)
+;; byte-compile-warnings: (not obsolete)
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
