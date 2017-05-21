@@ -139,7 +139,7 @@
             ))
 
 ;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
-(when (or emacs23-p emacs24-p)
+(when (or emacs23-p emacs24-p emacs25-p)
   (defun message-startup-time ()
     (message "Emacs loaded in %dms"
              (/ (- (+ (third after-init-time)
