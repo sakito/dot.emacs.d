@@ -81,29 +81,29 @@
   (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
 
 ;; Pymacs
-(require 'pymacs)
-(autoload 'pymacs-apply "pymacs")
-(autoload 'pymacs-call "pymacs")
-(autoload 'pymacs-eval "pymacs" nil t)
-(autoload 'pymacs-exec "pymacs" nil t)
-(autoload 'pymacs-load "pymacs" nil t)
+;; (require 'pymacs)
+;; (autoload 'pymacs-apply "pymacs")
+;; (autoload 'pymacs-call "pymacs")
+;; (autoload 'pymacs-eval "pymacs" nil t)
+;; (autoload 'pymacs-exec "pymacs" nil t)
+;; (autoload 'pymacs-load "pymacs" nil t)
 
 ;; 補完
 ;; @see http://tic-tacs.blogspot.com/2012/01/emacsauto-complete-pycompletepython.html
-(eval-after-load "pymacs"
-  '(add-to-list 'pymacs-load-path
-                (expand-file-name "lisp/python-mode" user-emacs-directory)))
-(add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
+;; (eval-after-load "pymacs"
+;;   '(add-to-list 'pymacs-load-path
+;;                 (expand-file-name "lisp/python-mode" user-emacs-directory)))
+;; (add-hook 'python-mode-hook '(lambda () (require 'pycomplete)))
 
 ;; jedi
-(require 'jedi)
+;; (require 'jedi)
 
 ;; auto-complete
 ;(defun ac-python-mode-setup ()
 ;  (setq ac-sources (append ;;'(ac-source-python)
 ;                    ac-sources)))
 ;(add-hook 'python-mode-hook 'ac-python-mode-setup)
-(add-hook 'python-mode-hook 'jedi:ac-setup)
+;; (add-hook 'python-mode-hook 'jedi:ac-setup)
 
 ;; 独自関数
 (defun skt:python-import-modules-from-buffer ()
@@ -136,6 +136,10 @@
     (local-set-key (kbd "C-c !") 'run-python)
     (local-set-key (kbd "C-c C-i") 'skt:python-import-modules-from-buffer)
     (local-set-key (kbd "C-c C-c") 'skt:python-shell-send-file)
+
+    ;; 動作
+    '(lambda ()
+       (electric-indent-local-mode -1))
     ))
 (add-hook 'python-mode-hook 'skt:python-mode-hook)
 
