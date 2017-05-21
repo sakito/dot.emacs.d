@@ -20,6 +20,7 @@ f17ae16e57ef16964ee97a1e20e44fd6f0510ddb local-lisp/ob-objc-el
 09597a77affbb948f9cf970d8a6aa4ff7e52542b local-lisp/pos-tip
 e46ddd05c8d3a6e4cbcc11b62aa275e5de66f475 local-lisp/psession
 97e04eb77154234d946064a573762bcd72219f75 local-lisp/ptel
+979b021077655ca38749a60c9752c0817e8fd93e local-lisp/shackle
 c9d9512df479075b1540aff41e157e2b4062f4db rc.d/zsh.d/completions
 5b6fb4ab0b4ecd37924f8cb9c496b65a8c983d58 rc.d/zsh.d/plugins/auto-fu.zsh
 68482454cf9dfb89e53bf1ab6fa713cae5693ae0 rc.d/zsh.d/plugins/zaw
