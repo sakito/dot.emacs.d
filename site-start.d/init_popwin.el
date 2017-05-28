@@ -32,7 +32,7 @@
 (setq popwin:special-display-config
       (append '(
                 ("\\*anything" :regexp t :height 20)
-                ("\\*helm" :regexp t :height 20)
+                ;; ("\\*helm" :regexp t :height 20)
                 ;;("*anything for files*" :height 20)
                 ;;("*anything help*" :height 20)
                 ("*Compile-Log*" :height 10 :noselect t)

@@ -57,7 +57,8 @@
 ;; (require 'init_anything)
 (require 'init_helm)
 ;; popwin
-(require 'init_popwin)
+;; (require 'init_popwin)
+(require 'init_shackle)
 ;; 独自関数
 (require 'init_function)
 ;;; SKK
