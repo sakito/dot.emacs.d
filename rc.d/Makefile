@@ -9,17 +9,17 @@ all:
 dotfiles:
 	ln -s ${CWD}/hgignore ${HOME}/.hgignore
 	ln -s ${CWD}/pip ${HOME}/.pip
-	ln -s ${CWD}/screenrc ${HOME}/.screenrc
+	#ln -s ${CWD}/screenrc ${HOME}/.screenrc
 	ln -s ${CWD}/zlogin ${HOME}/.zlogin
 	ln -s ${CWD}/hgrc ${HOME}/.hgrc
 	ln -s ${CWD}/pythonrc.py ${HOME}/.pythonrc.py
 	ln -s ${CWD}/tmux.conf ${HOME}/.tmux.conf
 	ln -s ${CWD}/zshrc ${HOME}/.zshrc
-	ln -s ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
-	[ -d ${HOME}/.buildout ] || mkdir ${HOME}/.buildout
-	cp ${CWD}/buildout/default.cfg ${HOME}/.buildout
-	echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg
-	echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
+	#ln -s ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
+	#[ -d ${HOME}/.buildout ] || mkdir ${HOME}/.buildout
+	#cp ${CWD}/buildout/default.cfg ${HOME}/.buildout
+	#echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg
+	#echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
 
 portinstall:
 	sudo port install nkf wget lftp libxml2 libxslt w3m apg

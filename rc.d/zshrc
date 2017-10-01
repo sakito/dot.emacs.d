@@ -31,7 +31,7 @@ isemacs(){
 # 環境変数
 #-----------------------------------------------------------------
 #SHELL=/bin/zsh
-isdarwin && export SHELL=/opt/local/bin/zsh
+isdarwin && export SHELL=/usr/local/bin/zsh
 
 export PREFIX=/usr/local
 #export EXEC_PREFIX=/usr/local/bin
@@ -68,13 +68,13 @@ isdarwin && export PATH=/opt/local/bin:${PATH}
 #export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}
 export PYTHONSTARTUP="${HOME}/.pythonrc.py"
 export VIRTUAL_ENV_DISABLE_PROMPT=true
-source ${HOME}/local/bin/activate
+source ${HOME}/opt/py36/bin/activate
 #export PYTHONPATH=${HOME}/local/lib/python2.7/site-packages
 export WORKON_HOME=${HOME}/.virtualenvs
 #source ${HOME}/local/bin/virtualenvwrapper.sh
 export PIP_RESPECT_VIRTUALENV=true
 if [ -d ${HOME}/python/OpenCV-2.4.2/build/lib ];then
-    export PYTHONPATH=$PYTHONPATH:${HOME}/python/OpenCV-2.4.2/lib
+    export PYTHONPATH=$PYTHONPATH:${HOME}/local/OpenCV-2.4.2/lib
 fi
 
 # mysql
@@ -82,23 +82,27 @@ export PATH=/usr/local/mysql/bin:${PATH}
 export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 
 # LaTeX
-export PATH=${HOME}/bin/platex/pTeX.app/teTeX/bin:${PATH}
-export TEXINPUTS=${HOME}/lib/tex//:${TEXINPUTS}
+export PATH=/usr/texbin:${PATH}
+export TEXINPUTS=${HOME}/lib/tex/:${TEXINPUTS}
 
 # Git
 export PATH=${PATH}:/usr/local/git/bin
+export PATH=${HOME}/bin/git/git-utils:${PATH}
 
 # Haskell
 export PATH=${PATH}:${HOME}/.cabal/bin
 
 # Go
-export PATH=${PATH}:${HOME}/bin/go/bin
+export GOPATH=${HOME}/lib/go
 
-# Firefox Addon SDK
-export PATH=${PATH}:${HOME}/bin/addon-sdk-1.3/bin
+# node
+export PATH=${PATH}:${HOME}/local/node/bin
 
-# sage
-export PATH=${PATH}:/Applications/sage
+# Homebrew
+export HOMEBREW_GITHUB_API_TOKEN=$(security find-generic-password -a homebrew-github-api-token -s homebrew-github-api-token -w)
+
+export PATH=/usr/local/opt/libxml2/bin:${PATH}
+export PATH=/usr/local/opt/texinfo/bin:${PATH}
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
@@ -116,8 +120,10 @@ fi
 # less
 #export LESSCHARDEF=8bcccbcc18b95.33b33b.
 export LESSCHARSET=utf-8
-export LESS='-c -m -x4 -R'
-export LESS="-isnMCd"
+export LESS='-e -F -R -S -X -x4'
+#export LESS='-c -m -x4 -R -F -X'
+#export LESS="-isnMCd"
+
 export LESSBINFMT='*n-'
 export PAGER=less
 export CLICOLOR_FORCE=1
@@ -139,7 +145,7 @@ export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
 # 最優先パス
 export PATH=${HOME}/.emacs.d/bin:${PATH}
 export PATH=${HOME}/bin:${PATH}
-export PATH=${HOME}/local/bin:${PATH}
+export PATH=${HOME}/opt/py36/bin:${PATH}
 export PATH=${HOME}/bin/air/bin:${PATH}
 
 #-----------------------------------------------------------------
@@ -166,7 +172,9 @@ setopt auto_param_keys
 # cdのタイミングで自動的にpushd
 setopt auto_pushd
 # 無駄な末尾の / を削除する
-setopt auto_remove_slash
+unsetopt auto_remove_slash
+# ディレクトリにマッチした場合/を付加
+setopt mark_dirs
 # csh スタイルのヒストリ置換
 setopt bang_hist
 # {a-za-z} をブレース展開
@@ -346,6 +354,12 @@ export LS_COLORS='di=36:ln=37；45:so=32:pi=33:ex=37;41:bd=34;46:cd=34;43:su=30;
 # 補完無視ファイル設定
 fignore=(.o .dvi .aux .toc - \~)
 
+# ロード
+# rm -f ~/.zcompdump; compinit
+fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
+# 補完の利用設定
+autoload -Uz compinit; compinit
+
 ## キャッシュの設定
 # 補完をキャッシュ
 zstyle ':completion:*' use-cache true
@@ -360,7 +374,8 @@ zstyle ':completion:*' cache-path ~/var/zsh/zsh_completion.cache
 zstyle ':completion:*' verbose true
 # 補完の機能を拡張
 #zstyle ':completion:*' completer _expand _oldlist _complete _match _prefix _approximate _list _history
-zstyle ':completion:*' completer _oldlist _complete _expand _match _prefix _approximate _list _history
+#zstyle ':completion:*' completer _oldlist _complete _expand _match _prefix _approximate _list _history
+zstyle ':completion:*' completer _complete _match _prefix _approximate _list _history
 # 補完候補で入力された文字でまず補完してみて、補完不可なら大文字小文字を変換して補完する
 zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z} r:|[-_.]=**' '+m:{A-Z}={a-z} r:|[-_.]=**'
 
@@ -383,6 +398,7 @@ zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/s
 zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
 # SCP での補完を抑止
 zstyle ':completion:*:complete:scp:*:files' command command -
+zstyle ':completion:*:files' remote-access no
 
 # URLをコピペした時にエスケープ対象文字を自動エスケープする
 #autoload -Uz url-quote-magic
@@ -398,109 +414,106 @@ zstyle ':completion:*' recent-dirs-insert both
 #-----------------------------------------------------------------
 # plugin
 #-----------------------------------------------------------------
-# rm -f ~/.zcompdump; compinit
-fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
-# 補完の利用設定
-autoload -Uz compinit; compinit
-
 #unsetopt auto_remove_slash
 unsetopt sh_word_split
 # zaw
-source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/zaw/zaw.zsh
-source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/cdd/cdd.zsh
-function chpwd() {_reg_pwd_screennum;}
-(( $+functions[cdd] )) || return
+#source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/zaw/zaw.zsh
+#source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/cdd/cdd.zsh
+#function chpwd() {_reg_pwd_screennum;}
+#(( $+functions[cdd] )) || return
+#
+#function zaw-src-cdd () {
+#    if [ -r "$CDD_PWD_FILE" ]; then
+#        for window in `cat $CDD_PWD_FILE | sed '/^$/d'`; do
+#            candidates+=("${window}")
+#        done
+#        actions=(zaw-src-cdd-cd)
+#        act_descriptions=("cdd for zaw")
+#    fi
+#}
 
-function zaw-src-cdd () {
-    if [ -r "$CDD_PWD_FILE" ]; then
-        for window in `cat $CDD_PWD_FILE | sed '/^$/d'`; do
-            candidates+=("${window}")
-        done
-        actions=(zaw-src-cdd-cd)
-        act_descriptions=("cdd for zaw")
-    fi
-}
+#function zaw-src-cdd-cd () {
+#    BUFFER="cd `echo $1 | cut -d ':' -f 2`"
+#    zle accept-line
+#}
+#zaw-register-src -n cdd zaw-src-cdd
 
-function zaw-src-cdd-cd () {
-    BUFFER="cd `echo $1 | cut -d ':' -f 2`"
-    zle accept-line
-}
-zaw-register-src -n cdd zaw-src-cdd
+#zmodload zsh/parameter
 
-zmodload zsh/parameter
-
-function zaw-src-dirstack() {
-    : ${(A)candidates::=$dirstack}
-    actions=("zaw-callback-execute" "zaw-callback-replace-buffer" "zaw-callback-append-to-buffer")
-    act_descriptions=("execute" "replace edit buffer" "append to edit buffer")
-}
-zaw-register-src -n dirstack zaw-src-dirstack
+#function zaw-src-dirstack() {
+#    : ${(A)candidates::=$dirstack}
+#    actions=("zaw-callback-execute" "zaw-callback-replace-buffer" "zaw-callback-append-to-buffer")
+#    act_descriptions=("execute" "replace edit buffer" "append to edit buffer")
+#}
+#zaw-register-src -n dirstack zaw-src-dirstack
 
 # auto-fu
-source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/auto-fu.zsh/auto-fu.zsh
-function zle-line-init() {auto-fu-init;}; zle -N zle-line-init
-zstyle ':auto-fu:var' postdisplay ''
+#source ${HOME}/.emacs.d/rc.d/zsh.d/plugins/auto-fu.zsh/auto-fu.zsh
+#function zle-line-init() {auto-fu-init;}; zle -N zle-line-init
+# -azfu- の非表示
+#zstyle ':auto-fu:var' postdisplay $''
 
 # afu+cancel
-function afu+cancel () {
-    afu-clearing-maybe
-    ((afu_in_p == 1)) && { afu_in_p=0; BUFFER="$buffer_cur"; }
-}
-zle -N afu+cancel
-function bindkey-advice-before () {
-    local key="$1"
-    local advice="$2"
-    local widget="$3"
-    [[ -z "$widget" ]] && {
-        local -a bind
-        bind=(`bindkey -M main "$key"`)
-        widget=$bind[2]
-    }
-    local fun="$advice"
-    if [[ "$widget" != "undefined-key" ]]; then
-        local code=${"$(<=(cat <<"EOT"
-            function $advice-$widget () {
-                zle $advice
-                zle $widget
-            }
-            fun="$advice-$widget"
-EOT
-        ))"}
-        eval "${${${code//\$widget/$widget}//\$key/$key}//\$advice/$advice}"
-    fi
-    zle -N "$fun"
-    bindkey -M afu "$key" "$fun"
-}
-bindkey-advice-before "^G" afu+cancel
+#function afu+cancel () {
+#    afu-clearing-maybe
+#    ((afu_in_p == 1)) && { afu_in_p=0; BUFFER="$buffer_cur"; }
+#}
+#zle -N afu+cancel
+#function bindkey-advice-before () {
+#    local key="$1"
+#    local advice="$2"
+#    local widget="$3"
+#    [[ -z "$widget" ]] && {
+#        local -a bind
+#        bind=(`bindkey -M main "$key"`)
+#        widget=$bind[2]
+#    }
+#    local fun="$advice"
+#    if [[ "$widget" != "undefined-key" ]]; then
+#        local code=${"$(<=(cat <<"EOT"
+#            function $advice-$widget () {
+#                zle $advice
+#                zle $widget
+#            }
+#            fun="$advice-$widget"
+#EOT
+#        ))"}
+#        eval "${${${code//\$widget/$widget}//\$key/$key}//\$advice/$advice}"
+#    fi
+#    zle -N "$fun"
+#    bindkey -M afu "$key" "$fun"
+#}
+#bindkey-advice-before "^G" afu+cancel
 
 # delete unambiguous prefix when accepting line
-function afu+delete-unambiguous-prefix () {
-    afu-clearing-maybe
-    local buf; buf="$BUFFER"
-    local bufc; bufc="$buffer_cur"
-    [[ -z "$cursor_new" ]] && cursor_new=-1
-    [[ "$buf[$cursor_new]" == ' ' ]] && return
-    [[ "$buf[$cursor_new]" == '/' ]] && return
-    ((afu_in_p == 1)) && [[ "$buf" != "$bufc" ]] && {
-        # there are more than one completion candidates
-        zle afu+complete-word
-        [[ "$buf" == "$BUFFER" ]] && {
-            # the completion suffix was an unambiguous prefix
-            afu_in_p=0; buf="$bufc"
-        }
-        BUFFER="$buf"
-        buffer_cur="$bufc"
-    }
-}
-zle -N afu+delete-unambiguous-prefix
-function afu-ad-delete-unambiguous-prefix () {
-    local afufun="$1"
-    local code; code=$functions[$afufun]
-    eval "function $afufun () { zle afu+delete-unambiguous-prefix; $code }"
-}
-afu-ad-delete-unambiguous-prefix afu+accept-line
-afu-ad-delete-unambiguous-prefix afu+accept-line-and-down-history
-afu-ad-delete-unambiguous-prefix afu+accept-and-hold
+#function afu+delete-unambiguous-prefix () {
+#    afu-clearing-maybe
+#    local buf; buf="$BUFFER"
+#    local bufc; bufc="$buffer_cur"
+#    [[ -z "$cursor_new" ]] && cursor_new=-1
+#    [[ "$buf[$cursor_new]" == ' ' ]] && return
+#    [[ "$buf[$cursor_new]" == '/' ]] && return
+#    ((afu_in_p == 1)) && [[ "$buf" != "$bufc" ]] && {
+#        # there are more than one completion candidates
+#        zle afu+complete-word
+#        [[ "$buf" == "$BUFFER" ]] && {
+#            # the completion suffix was an unambiguous prefix
+#            afu_in_p=0; buf="$bufc"
+#        }
+#        BUFFER="$buf"
+#        buffer_cur="$bufc"
+#    }
+#}
+#zle -N afu+delete-unambiguous-prefix
+#function afu-ad-delete-unambiguous-prefix () {
+#    local afufun="$1"
+#    local code; code=$functions[$afufun]
+#    eval "function $afufun () { zle afu+delete-unambiguous-prefix; $code }"
+#}
+#afu-ad-delete-unambiguous-prefix afu+accept-line
+#afu-ad-delete-unambiguous-prefix afu+accept-line-and-down-history
+#afu-ad-delete-unambiguous-prefix afu+accept-and-hold
+
 
 #-----------------------------------------------------------------
 # 関数定義
@@ -667,6 +680,42 @@ function ercrun {
     fi
 }
 
+# peco
+function peco-select-history() {
+    local tac
+    if which tac > /dev/null;
+    then
+        tac="tac"
+    elif which gtac > /dev/null;
+    then
+        tac="gtac"
+    else
+        tac="tail -r"
+    fi
+    BUFFER=$(\history -n 1 | \
+        eval $tac | \
+        awk '!a[$0]++' | \
+        peco --query "$LBUFFER")
+    CURSOR=$#BUFFER
+    zle clear-screen
+}
+if which peco > /dev/null;
+then
+    zle -N peco-select-history
+    bindkey '^r' peco-select-history
+else
+    bindkey '^r' zaw-history
+fi
+
+function peco-select-port-upgrade() {
+    sudo port upgrade $(port outdated | \
+    pbcopy; pbpaste | \
+    peco | \
+    cut -f1 -d' ')
+}
+
+
+
 #-----------------------------------------------------------------
 # エイリアス設定
 #-----------------------------------------------------------------
@@ -690,11 +739,14 @@ alias emacs='emacs -nw'
 # python
 alias hgpush="hg push --new-branch"
 alias pipin="pip install -U"
-alias ipython="ipython -i -c '%doctest_mode' --pylab=osx "
+#alias ipython="ipython -i -c '%doctest_mode' --pylab=osx "
+alias ipython="ipython -i -c '%doctest_mode' --pylab "
+alias inotebook="\ipython notebook"
+alias pipup="pip list --format legacy --outdated | cut -d' ' -f1 | xargs pip install --upgrade"
 
-# port
-alias portup="sudo port -v selfupdate; port outdated; pip list -o;"
-alias portout="sudo port upgrade -u outdated"
+# brew
+alias brewup="brew update; port outdated"
+alias brewout="brew outdated"
 
 # Erlang
 alias ercall="erlc +export_all"
@@ -704,7 +756,7 @@ autoload -Uz zmv
 alias zmv='noglob zmv -W'
 
 # グローバルエイリアス
-alias -g V="| /usr/share/vim/vim73/macros/less.sh"
+alias -g V="| /usr/share/vim/vim74/macros/less.sh"
 
 # 自分に依存した設定
 alias sakuradiary="~/Sites/sakitojp/bin/scp_diary.command"
@@ -727,9 +779,8 @@ bindkey '^p' history-search-backward
 #bindkey '^r' copy-prev-word
 bindkey ' '  magic-space
 
-bindkey '^@' zaw-cdr
-bindkey '^u' zaw-cdd
-bindkey '^r' zaw-history
+#bindkey '^@' zaw-cdr
+#bindkey '^u' zaw-cdd
 
 #-----------------------------------------------------------------
 # システム別設定
