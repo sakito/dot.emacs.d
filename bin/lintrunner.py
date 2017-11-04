@@ -241,17 +241,19 @@ class PyflakesRunner(LintRunner):
 
 
 def main():
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option("-e", "--virtualenv",
-                      dest="virtualenv",
-                      default=None,
-                      help="virtualenv directory")
-    parser.add_option("-i", "--ignore_codes",
-                      dest="ignore_codes",
-                      default=(),
-                      help="error codes to ignore")
-    options, args = parser.parse_args()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('file_path',
+                        help='file path')
+    parser.add_argument('-e', '--virtualenv',
+                        dest='virtualenv',
+                        default=None,
+                        help='virtualenv directory')
+    parser.add_argument('-i', '--ignore_codes',
+                        dest='ignore_codes',
+                        default=(),
+                        help='error codes to ignore')
+    args = parser.parse_args()
 
     for runnerclass in (
             # PycheckerRunner,
@@ -260,17 +262,16 @@ def main():
             # PyflakesRunner,
             # CompilerRunner,
     ):
-        runner = runnerclass(virtualenv=options.virtualenv,
-                             ignore_codes=options.ignore_codes)
+        runner = runnerclass(virtualenv=args.virtualenv,
+                             ignore_codes=args.ignore_codes)
         try:
-            if args is not None and len(args) > 0:
-                runner.run(args[0])
-        except Exception as e:
-            # print >> sys.stdout, '{0} FAILED'.format(runner)
-            print('ERROR : {} failed to run at {} line 1. {}'.format(
-                runner.__class__.__name__, args[0], e.message))
+            if args:
+                runner.run(args.file_path)
+        except Exception:
             import traceback
-            traceback.print_exc()
+            print('ERROR : {} failed to run at {} line 1. {}'.format(
+                runner.__class__.__name__,
+                args.file_path, traceback.print_exc()))
 
 
 if __name__ == '__main__':
