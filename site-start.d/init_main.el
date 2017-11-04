@@ -69,7 +69,7 @@
 (require 'init_smartchr)
 ;; (require 'init_key-combo)
 ;; migemo
-(require 'init_cmigemo)
+;; (require 'init_cmigemo)
 ;;; Elscreen
 (require 'init_elscreen)
 ;; dired
@@ -83,7 +83,7 @@
 ;; eldoc
 ;; (require 'init_eldoc)
 ;;; プログラミング関連
-(require 'init_flymake)
+;; (require 'init_flymake)
 ;;; Pythonの設定
 (require 'init_python)
 ;(require 'init_python-mode)

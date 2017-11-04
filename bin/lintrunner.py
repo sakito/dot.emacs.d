@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import re
@@ -74,7 +75,8 @@ class LintRunner(object):
         with Popen(args, stdout=PIPE, stderr=PIPE,
                    env=self.env, universal_newlines=True) as process:
             for line in process.stdout.readlines():
-                self.process_output(line)
+                if not line.startswith('*'):
+                    self.process_output(line)
 
 
 class CompilerRunner(LintRunner):
@@ -113,7 +115,8 @@ class PylintRunner(LintRunner):
     output_matcher = re.compile(
         r'(?P<filename>[^:]+):'
         r'(?P<line_number>\d+):'
-        r'\s\[(?P<error_type>[WECR])(?P<error_number>[\d]+.+?\])'
+        # r'\s\[(?P<error_type>[WECR])(?P<error_number>[\d]+.+?\])'
+        r'\s\[(?P<error_type>[WECR])(?P<error_number>[\d]+)'
         r'\s*(?P<description>.*)$')
     command = PYLINT_COMMAND
     sane_default_ignore_codes = set([
@@ -144,8 +147,9 @@ class PylintRunner(LintRunner):
     @property
     def run_flags(self):
         return ('--output-format', 'parseable',
-                '--include-ids', 'y',
+                # '--include-ids', 'y',
                 '--reports', 'n',
+                '--score', 'n',
                 # '--errors-only',
                 '-d ' + ','.join(self.operative_ignore_codes))
 
@@ -261,10 +265,10 @@ def main():
         try:
             if args is not None and len(args) > 0:
                 runner.run(args[0])
-        except Exception:
+        except Exception as e:
             # print >> sys.stdout, '{0} FAILED'.format(runner)
-            print('ERROR : {0} failed to run at {1} line 1.'.format(
-                runner.__class__.__name__, args[0]))
+            print('ERROR : {} failed to run at {} line 1. {}'.format(
+                runner.__class__.__name__, args[0], e.message))
             import traceback
             traceback.print_exc()
 

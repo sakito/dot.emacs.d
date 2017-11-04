@@ -79,7 +79,9 @@
 
 ;; flymake
 ;; https://github.com/tam17aki/helm-flymake
-(require 'helm-flymake)
+;; (require 'helm-flymake)
+(require 'helm-flycheck)
+
 
 ;; コマンド候補
 ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
@@ -114,8 +116,9 @@
 
 (setq helm-mini-default-sources
       '(
-        helm-source-flymake-warning
-        helm-source-flymake-error
+        helm-source-flycheck
+        ;; helm-source-flymake-warning
+        ;; helm-source-flymake-error
         helm-source-buffers-list
         helm-source-file-name-history
         helm-source-recentf
