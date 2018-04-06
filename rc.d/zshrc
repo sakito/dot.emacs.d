@@ -77,6 +77,12 @@ if [ -d ${HOME}/python/OpenCV-2.4.2/build/lib ];then
     export PYTHONPATH=$PYTHONPATH:${HOME}/local/OpenCV-2.4.2/lib
 fi
 
+# pyenv
+export PYENV_ROOT=/opt/pyenv
+export PATH=$PYENV_ROOT/bin:$PATH
+eval "$(pyenv init -)"
+
+
 # mysql
 export PATH=/usr/local/mysql/bin:${PATH}
 export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
@@ -85,15 +91,8 @@ export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 export PATH=/usr/texbin:${PATH}
 export TEXINPUTS=${HOME}/lib/tex/:${TEXINPUTS}
 
-# Git
-export PATH=${PATH}:/usr/local/git/bin
-export PATH=${HOME}/bin/git/git-utils:${PATH}
-
 # Haskell
 export PATH=${PATH}:${HOME}/.cabal/bin
-
-# Go
-export GOPATH=${HOME}/lib/go
 
 # node
 export PATH=${PATH}:${HOME}/local/node/bin
@@ -142,7 +141,7 @@ export MANWIDTH=80
 export HGENCODING=utf-8
 
 # 64bit
-export ARCHFLAGS='-Os -arch i386 -arch x86_64 -fno-common'
+export ARCHFLAGS='-Os -arch x86_64 -fno-common'
 
 # 最優先パス
 export PATH=${HOME}/.emacs.d/bin:${PATH}
