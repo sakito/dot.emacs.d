@@ -39,6 +39,18 @@
   (local-set-key (kbd ";") (smartchr '(";; " ";")))
   )
 
+(defun smartchr-custom-keybindings-clang ()
+  ;; !! がカーソルの位置
+  (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+  (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+  (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+  (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+  (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+  (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+  (local-set-key (kbd ":") (smartchr '(":: " ":")))
+  (local-set-key (kbd ";") (smartchr '(";" ";;")))
+  )
+
 (defun smartchr-custom-keybindings-py ()
   (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
   (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -113,7 +125,6 @@
 
 ;; 適用するモードを限定
 (dolist (hook (list
-              'c-mode-common-hook
               'css-mode-hook
               'nxml-mode-hook
               'js2-mode-hook
@@ -135,6 +146,7 @@
 (add-hook 'tuareg-mode-hook 'smartchr-custom-keybindings-ocaml)
 (add-hook 'scala-mode-hook 'smartchr-custom-keybindings-scala)
 (add-hook 'erlang-mode-hook 'smartchr-custom-keybindings-erlang)
+(add-hook 'c-mode-common-hook 'smartchr-custom-keybindings-clang)
 
 (provide 'init_smartchr)
 ;;; init_smartchr.el ends here
