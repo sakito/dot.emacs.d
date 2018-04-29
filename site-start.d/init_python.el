@@ -29,7 +29,7 @@
 (setenv "PYTHONSTARTUP"
         (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
 (setenv "PYTHONPATH"
-        (expand-file-name "~/local/py35/lib/python3.5/site-packages"))
+        (expand-file-name "~/opt/py36/lib/python3.6/site-packages"))
 
 ;; mode
 (add-to-list 'auto-mode-alist '("\\.cgi\\'" . python-mode))
@@ -38,7 +38,7 @@
 
 ;; (executable-find "ipython")
 (setq
- python-shell-interpreter "ipython"
+ python-shell-interpreter "jupyter"
  python-shell-interpreter-args ""
  ;; python-shell-interpreter-args "-i --pylab --colors=Linux"
  ;; python-shell-interpreter-args "--matplotlib=osx --colors=Linux"
@@ -58,27 +58,44 @@
 ;; pep8
 ;; pip install pep8
 ;; python-pep8.el https://gist.github.com/302847
-(require 'python-pep8)
+;; (require 'python-pep8)
 
 ;; pylint
 ;; pip install pylint-i18n
 ;; python-pylint.el https://gist.github.com/302848
-(require 'python-pylint)
+;; (require 'python-pylint)
 
 ;; flymake
-(when (load "flymake" t)
-  (defun flymake-python-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      ;; (list "lintrunner.exe" (list local-file))))
-      (list "lintrunner.py" (list local-file))))
-      ;; (list "pylama.sh" (list local-file))))
-  (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
-  (add-to-list 'flymake-allowed-file-name-masks '("wscript$" flymake-python-init))
-  (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
+;; (when (load "flymake" t)
+;;   (defun flymake-python-init ()
+;;     (let* ((temp-file (flymake-init-create-temp-buffer-copy
+;;                        'flymake-create-temp-inplace))
+;;            (local-file (file-relative-name
+;;                         temp-file
+;;                         (file-name-directory buffer-file-name))))
+;;       ;; (list "lintrunner.exe" (list local-file))))
+;;       ;; (list "lintrunner.py" (list local-file))))
+;;       (list "lint.sh" (list local-file))))
+;;       ;; (list "pylama.sh" (list local-file))))
+;;   (add-to-list 'flymake-allowed-file-name-masks '("\\.py$" flymake-python-init))
+;;   (add-to-list 'flymake-allowed-file-name-masks '("wscript$" flymake-python-init))
+;;   (add-hook 'python-mode-hook (lambda () (flymake-mode t))))
+(require 'flycheck)
+
+(flycheck-define-checker python-pylintrunner
+  "lintrunner.py"
+  :command ("lintrunner.py" source-inplace)
+  :error-patterns
+  ((error line-start
+          "ERROR " (optional (id (one-or-more (not (any ":"))))) ":"
+          (message) " at " (file-name) " line " line (optional "," column) "." line-end)
+   (warning line-start
+            "WARNING " (optional (id (one-or-more (not (any ":"))))) ":"
+            (message) " at " (file-name) " line " line (optional "," column) "." line-end))
+  :modes python-mode)
+
+(add-to-list 'flycheck-checkers 'python-pylintrunner)
+(add-hook 'python-mode-hook 'flycheck-mode)
 
 ;; Pymacs
 ;; (require 'pymacs)
