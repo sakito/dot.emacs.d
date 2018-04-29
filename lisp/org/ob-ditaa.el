@@ -1,10 +1,10 @@
-;;; ob-ditaa.el --- org-babel functions for ditaa evaluation
+;;; ob-ditaa.el --- Babel Functions for ditaa        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 
@@ -19,7 +19,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -34,20 +34,42 @@
 ;; 3) we are adding the "file" and "cmdline" header arguments
 ;;
 ;; 4) there are no variables (at least for now)
-;;
-;; 5) it depends on a variable defined in org-exp-blocks (namely
-;;    `org-ditaa-jar-path') so be sure you have org-exp-blocks loaded
 
 ;;; Code:
 (require 'ob)
-
-(defvar org-ditaa-jar-path) ;; provided by org-exp-blocks
+(require 'org-compat)
 
 (defvar org-babel-default-header-args:ditaa
   '((:results . "file")
     (:exports . "results")
     (:java . "-Dfile.encoding=UTF-8"))
   "Default arguments for evaluating a ditaa source block.")
+
+(defcustom org-ditaa-jar-path (expand-file-name
+			       "ditaa.jar"
+			       (file-name-as-directory
+				(expand-file-name
+				 "scripts"
+				 (file-name-as-directory
+				  (expand-file-name
+				   "../contrib"
+				   (file-name-directory (org-find-library-dir "org")))))))
+  "Path to the ditaa jar executable."
+  :group 'org-babel
+  :type 'string)
+
+(defcustom org-babel-ditaa-java-cmd "java"
+  "Java executable to use when evaluating ditaa blocks."
+  :group 'org-babel
+  :type 'string)
+
+(defcustom org-ditaa-eps-jar-path
+  (expand-file-name "DitaaEps.jar" (file-name-directory org-ditaa-jar-path))
+  "Path to the DitaaEps.jar executable."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
 
 (defcustom org-ditaa-jar-option "-jar"
   "Option for the ditaa jar file.
@@ -59,28 +81,39 @@ Do not leave leading or trailing spaces in this string."
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	 (out-file ((lambda (el)
-		      (or el
-			  (error
-			   "ditaa code block requires :file header argument")))
-		    (cdr (assoc :file params))))
-	 (cmdline (cdr (assoc :cmdline params)))
-	 (java (cdr (assoc :java params)))
+  (let* ((out-file (or (cdr (assq :file params))
+		       (error
+			"ditaa code block requires :file header argument")))
+	 (cmdline (cdr (assq :cmdline params)))
+	 (java (cdr (assq :java params)))
 	 (in-file (org-babel-temp-file "ditaa-"))
-	 (cmd (concat "java " java " " org-ditaa-jar-option " "
+	 (eps (cdr (assq :eps params)))
+	 (eps-file (when eps
+		     (org-babel-process-file-name (concat in-file ".eps"))))
+	 (pdf-cmd (when (and (or (string= (file-name-extension out-file) "pdf")
+				 (cdr (assq :pdf params))))
+		    (concat
+		     "epstopdf"
+		     " " eps-file
+		     " -o=" (org-babel-process-file-name out-file))))
+	 (cmd (concat org-babel-ditaa-java-cmd
+		      " " java " " org-ditaa-jar-option " "
 		      (shell-quote-argument
-		       (expand-file-name org-ditaa-jar-path))
+		       (expand-file-name
+			(if eps org-ditaa-eps-jar-path org-ditaa-jar-path)))
 		      " " cmdline
 		      " " (org-babel-process-file-name in-file)
-		      " " (org-babel-process-file-name out-file))))
+		      " " (if pdf-cmd
+			      eps-file
+			    (org-babel-process-file-name out-file)))))
     (unless (file-exists-p org-ditaa-jar-path)
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
     (message cmd) (shell-command cmd)
+    (when pdf-cmd (message pdf-cmd) (shell-command pdf-cmd))
     nil)) ;; signal that output has already been written to file
 
-(defun org-babel-prep-session:ditaa (session params)
+(defun org-babel-prep-session:ditaa (_session _params)
   "Return an error because ditaa does not support sessions."
   (error "Ditaa does not support sessions"))
 

@@ -1,10 +1,10 @@
-;;; ob-ruby.el --- org-babel functions for ruby evaluation
+;;; ob-ruby.el --- Babel Functions for Ruby          -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 
@@ -19,7 +19,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -37,13 +37,13 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
-(eval-when-compile (require 'cl))
 
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
 (declare-function xmp "ext:rcodetools" (&optional option))
+
+(defvar inf-ruby-default-implementation)
+(defvar inf-ruby-implementations)
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
@@ -53,29 +53,45 @@
 (defvar org-babel-ruby-command "ruby"
   "Name of command to use for executing ruby code.")
 
+(defcustom org-babel-ruby-hline-to "nil"
+  "Replace hlines in incoming tables with this when translating to ruby."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-babel-ruby-nil-to 'hline
+  "Replace nil in ruby tables with this before returning."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'symbol)
+
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-ruby-initiate-session
-		   (cdr (assoc :session params))))
-         (result-params (cdr (assoc :result-params params)))
-         (result-type (cdr (assoc :result-type params)))
+		   (cdr (assq :session params))))
+         (result-params (cdr (assq :result-params params)))
+         (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:ruby params)))
          (result (if (member "xmp" result-params)
 		     (with-temp-buffer
 		       (require 'rcodetools)
 		       (insert full-body)
-		       (xmp (cdr (assoc :xmp-option params)))
+		       (xmp (cdr (assq :xmp-option params)))
 		       (buffer-string))
 		   (org-babel-ruby-evaluate
 		    session full-body result-type result-params))))
     (org-babel-reassemble-table
-     result
-     (org-babel-pick-name (cdr (assoc :colname-names params))
-			  (cdr (assoc :colnames params)))
-     (org-babel-pick-name (cdr (assoc :rowname-names params))
-			  (cdr (assoc :rownames params))))))
+     (org-babel-result-cond result-params
+       result
+       (org-babel-ruby-table-or-string result))
+     (org-babel-pick-name (cdr (assq :colname-names params))
+			  (cdr (assq :colnames params)))
+     (org-babel-pick-name (cdr (assq :rowname-names params))
+			  (cdr (assq :rownames params))))))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -108,7 +124,7 @@ This function is called by `org-babel-execute-src-block'."
      (format "%s=%s"
 	     (car pair)
 	     (org-babel-ruby-var-to-ruby (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert VAR into a ruby variable.
@@ -116,26 +132,37 @@ Convert an elisp value into a string of ruby source code
 specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
-    (format "%S" var)))
+    (if (eq var 'hline)
+	org-babel-ruby-hline-to
+      (format "%S" var))))
 
 (defun org-babel-ruby-table-or-string (results)
   "Convert RESULTS into an appropriate elisp value.
 If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-script-escape results))
+  (let ((res (org-babel-script-escape results)))
+    (if (listp res)
+        (mapcar (lambda (el) (if (not el)
+				 org-babel-ruby-nil-to el))
+                res)
+      res)))
 
-(defun org-babel-ruby-initiate-session (&optional session params)
+(defun org-babel-ruby-initiate-session (&optional session _params)
   "Initiate a ruby session.
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   (unless (string= session "none")
     (require 'inf-ruby)
-    (let ((session-buffer (save-window-excursion
-			    (run-ruby nil session) (current-buffer))))
+    (let* ((cmd (cdr (assoc inf-ruby-default-implementation
+			    inf-ruby-implementations)))
+	   (buffer (get-buffer (format "*%s*" session)))
+	   (session-buffer (or buffer (save-window-excursion
+					(run-ruby cmd session)
+					(current-buffer)))))
       (if (org-babel-comint-buffer-livep session-buffer)
 	  (progn (sit-for .25) session-buffer)
-        (sit-for .5)
-        (org-babel-ruby-initiate-session session)))))
+	(sit-for .5)
+	(org-babel-ruby-initiate-session session)))))
 
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
   "String to indicate that evaluation has completed.")
@@ -165,78 +192,74 @@ end
 ")
 
 (defun org-babel-ruby-evaluate
-  (buffer body &optional result-type result-params)
+    (buffer body &optional result-type result-params)
   "Pass BODY to the Ruby process in BUFFER.
-If RESULT-TYPE equals 'output then return a list of the outputs
-of the statements in BODY, if RESULT-TYPE equals 'value then
+If RESULT-TYPE equals `output' then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY, as elisp."
   (if (not buffer)
       ;; external process evaluation
-      (case result-type
-	(output (org-babel-eval org-babel-ruby-command body))
-	(value (let ((tmp-file (org-babel-temp-file "ruby-")))
-		 (org-babel-eval
-		  org-babel-ruby-command
-		  (format (if (member "pp" result-params)
-			      org-babel-ruby-pp-wrapper-method
-			    org-babel-ruby-wrapper-method)
-			  body (org-babel-process-file-name tmp-file 'noquote)))
-		 ((lambda (raw)
-		    (if (or (member "code" result-params)
-			    (member "pp" result-params))
-			raw
-		      (org-babel-ruby-table-or-string raw)))
-		  (org-babel-eval-read-file tmp-file)))))
+      (pcase result-type
+	(`output (org-babel-eval org-babel-ruby-command body))
+	(`value (let ((tmp-file (org-babel-temp-file "ruby-")))
+		  (org-babel-eval
+		   org-babel-ruby-command
+		   (format (if (member "pp" result-params)
+			       org-babel-ruby-pp-wrapper-method
+			     org-babel-ruby-wrapper-method)
+			   body (org-babel-process-file-name tmp-file 'noquote)))
+		  (org-babel-eval-read-file tmp-file))))
     ;; comint session evaluation
-    (case result-type
-      (output
-       (mapconcat
-	#'identity
-	(butlast
-	 (split-string
-	  (mapconcat
-	   #'org-babel-trim
-	   (butlast
-	    (org-babel-comint-with-output
-		(buffer org-babel-ruby-eoe-indicator t body)
-	      (mapc
-	       (lambda (line)
-		 (insert (org-babel-chomp line)) (comint-send-input nil t))
-	       (list body org-babel-ruby-eoe-indicator))
-	      (comint-send-input nil t)) 2)
-	   "\n") "[\r\n]")) "\n"))
-      (value
-       ((lambda (results)
-	  (if (or (member "code" result-params) (member "pp" result-params))
-	      results
-	    (org-babel-ruby-table-or-string results)))
-	(let* ((tmp-file (org-babel-temp-file "ruby-"))
-	       (ppp (or (member "code" result-params)
-			(member "pp" result-params))))
-	  (org-babel-comint-with-output
-	      (buffer org-babel-ruby-eoe-indicator t body)
-	    (when ppp (insert "require 'pp';") (comint-send-input nil t))
-	    (mapc
-	     (lambda (line)
-	       (insert (org-babel-chomp line)) (comint-send-input nil t))
-	     (append
-	      (list body)
-	      (if (not ppp)
-		  (list (format org-babel-ruby-f-write
-				(org-babel-process-file-name tmp-file 'noquote)))
-		(list
-		 "results=_" "require 'pp'" "orig_out = $stdout"
-		 (format org-babel-ruby-pp-f-write
-			 (org-babel-process-file-name tmp-file 'noquote))))
-	      (list org-babel-ruby-eoe-indicator)))
-	    (comint-send-input nil t))
-	  (org-babel-eval-read-file tmp-file)))))))
-
-(defun org-babel-ruby-read-string (string)
-  "Strip \\\"s from around a ruby string."
-  (if (string-match "^\"\\([^\000]+\\)\"$" string)
-      (match-string 1 string)
-    string))
+    (pcase result-type
+      (`output
+       (let ((eoe-string (format "puts \"%s\"" org-babel-ruby-eoe-indicator)))
+	 ;; Force the session to be ready before the actual session
+	 ;; code is run.  There is some problem in comint that will
+	 ;; sometimes show the prompt after the the input has already
+	 ;; been inserted and that throws off the extraction of the
+	 ;; result for Babel.
+	 (org-babel-comint-with-output
+	     (buffer org-babel-ruby-eoe-indicator t eoe-string)
+	   (insert eoe-string) (comint-send-input nil t))
+	 ;; Now we can start the evaluation.
+	 (mapconcat
+	  #'identity
+	  (butlast
+	   (split-string
+	    (mapconcat
+	     #'org-trim
+	     (org-babel-comint-with-output
+		 (buffer org-babel-ruby-eoe-indicator t body)
+	       (mapc
+		(lambda (line)
+		  (insert (org-babel-chomp line)) (comint-send-input nil t))
+		(list "conf.echo=false;_org_prompt_mode=conf.prompt_mode;conf.prompt_mode=:NULL"
+		      body
+		      "conf.prompt_mode=_org_prompt_mode;conf.echo=true"
+		      eoe-string)))
+	     "\n") "[\r\n]") 4) "\n")))
+      (`value
+       (let* ((tmp-file (org-babel-temp-file "ruby-"))
+	      (ppp (or (member "code" result-params)
+		       (member "pp" result-params))))
+	 (org-babel-comint-with-output
+	     (buffer org-babel-ruby-eoe-indicator t body)
+	   (when ppp (insert "require 'pp';") (comint-send-input nil t))
+	   (mapc
+	    (lambda (line)
+	      (insert (org-babel-chomp line)) (comint-send-input nil t))
+	    (append
+	     (list body)
+	     (if (not ppp)
+		 (list (format org-babel-ruby-f-write
+			       (org-babel-process-file-name tmp-file 'noquote)))
+	       (list
+		"results=_" "require 'pp'" "orig_out = $stdout"
+		(format org-babel-ruby-pp-f-write
+			(org-babel-process-file-name tmp-file 'noquote))))
+	     (list org-babel-ruby-eoe-indicator)))
+	   (comint-send-input nil t))
+	 (org-babel-eval-read-file tmp-file))))))
 
 (provide 'ob-ruby)
 

@@ -3,18 +3,18 @@
 ;;; Code:
 ;;;###autoload
 (defun org-release ()
-  "The release version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-   (let ((org-release "7.9.2"))
+  "The release version of Org.
+Inserted by installing Org mode or when a release is made."
+   (let ((org-release "9.1.12"))
      org-release))
 ;;;###autoload
 (defun org-git-version ()
-  "The Git version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-   (let ((org-git-version "7.9.2-dist"))
+  "The Git version of Org mode.
+Inserted by installing Org or when a release is made."
+   (let ((org-git-version "9.1.12-dist"))
      org-git-version))
 ;;;###autoload
-(defconst org-odt-data-dir "/usr/share/emacs/etc/org"
+(defvar org-odt-data-dir "/usr/share/emacs/etc/org"
   "The location of ODT styles.")
 
 (provide 'org-version)

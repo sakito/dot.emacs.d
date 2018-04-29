@@ -1,10 +1,10 @@
-;;; ob-keys.el --- key bindings for org-babel
+;;; ob-keys.el --- Key Bindings for Babel            -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 
@@ -19,17 +19,17 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; Add org-babel keybindings to the org-mode keymap for exposing
-;; org-babel functions.  These will all share a common prefix.  See
+;; Add Org Babel keybindings to the Org mode keymap for exposing
+;; Org Babel functions.  These will all share a common prefix.  See
 ;; the value of `org-babel-key-bindings' for a list of interactive
 ;; functions and their associated keys.
 
 ;;; Code:
-(require 'ob)
+(require 'ob-core)
 
 (defvar org-babel-key-prefix "\C-c\C-v"
   "The key prefix for Babel interactive key-bindings.
@@ -89,6 +89,7 @@ functions which are assigned key bindings, and see
     ("h" . org-babel-describe-bindings)
     ("\C-x" . org-babel-do-key-sequence-in-edit-buffer)
     ("x" . org-babel-do-key-sequence-in-edit-buffer)
+    ("k" . org-babel-remove-result-one-or-many)
     ("\C-\M-h" . org-babel-mark-block))
   "Alist of key bindings and interactive Babel functions.
 This list associates interactive Babel functions
@@ -98,6 +99,8 @@ a-list placed behind the generic `org-babel-key-prefix'.")
 
 (provide 'ob-keys)
 
-
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; ob-keys.el ends here
