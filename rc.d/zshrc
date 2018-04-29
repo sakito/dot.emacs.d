@@ -99,11 +99,13 @@ export PATH=${PATH}:${HOME}/local/node/bin
 
 # Homebrew
 export HOMEBREW_GITHUB_API_TOKEN=$(security find-generic-password -a homebrew-github-api-token -s homebrew-github-api-token -w)
-export LDFLAGS=-L/usr/local/opt/readline/lib:${LDFLAGS}
-export CPPFLAGS=-I/usr/local/opt/readline/include:${CPPFLAGS}
-
 export PATH=/usr/local/opt/libxml2/bin:${PATH}
 export PATH=/usr/local/opt/texinfo/bin:${PATH}
+export PATH=/usr/local/opt/openssl/bin:${PATH}
+
+export LDFLAGS=-L/usr/local/opt/readline/lib:/usr/local/opt/openssl/lib:${LDFLAGS}
+export CPPFLAGS=-I/usr/local/opt/readline/include:/usr/local/opt/oepnssl/include:${CPPFLAGS}
+
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
@@ -147,7 +149,6 @@ export ARCHFLAGS='-Os -arch x86_64 -fno-common'
 export PATH=${HOME}/.emacs.d/bin:${PATH}
 export PATH=${HOME}/bin:${PATH}
 export PATH=${HOME}/opt/py36/bin:${PATH}
-export PATH=${HOME}/bin/air/bin:${PATH}
 
 #-----------------------------------------------------------------
 # 非端末プロセスなら終了
@@ -736,13 +737,15 @@ alias reload="source ~/.zshrc"
 
 # python
 alias hgpush="hg push --new-branch"
-alias pipin="pip3 install -U"
 alias ipython="ipython -i -c '%doctest_mode' --pylab "
-alias inotebook="\jupyter notebook"
-alias pipup="pip3 list --format legacy --outdated | cut -d' ' -f1 | xargs pip install --upgrade"
+alias lab="\jupyter-lab"
+
+alias pipin="pip3 install -U"
+#alias pipup="pip3 list --format=legacy --outdated | awk '{print $1}' | xargs pip install -U"
+alias pipup="pip3 list --outdated --format=columns |awk '{if(NR>2)print $1}' |xargs pip3 install"
 
 # brew
-alias brewup="brew update; brew outdated"
+alias brewcheck="brew update; brew outdated"
 alias brewout="brew outdated"
 
 # http://d.hatena.ne.jp/mollifier/20101227/p1
