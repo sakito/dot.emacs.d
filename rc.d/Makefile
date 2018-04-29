@@ -21,9 +21,20 @@ dotfiles:
 	#echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg
 	#echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
 
+brewinstall:
+	brew install coreutils findutils
+	brew install readline
+	brew install tmux reattach-to-user-namespace
+	brew install zsh
+	brew install wget
+	brew install autoconf automake
+	brew install texinfo
+	brew install git
+	brew install gauche go
+
 portinstall:
 	sudo port install nkf wget lftp libxml2 libxslt w3m apg
-	sudo port install coreuitls findutils
+	sudo port install coreutils findutils
 	sudo port install zsh-devel +mp_completion +pcre +examples +doc
 	sudo port install screen
 	sudo port install tmux +screen
