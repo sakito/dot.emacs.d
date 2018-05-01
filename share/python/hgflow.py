@@ -112,7 +112,7 @@ from mercurial.i18n import _
 
 
 
-VERSION                   = "0.9.8.2"
+VERSION                   = "0.9.8.3"
 CONFIG_BASENAME           = ".hgflow"
 OLD_CONFIG_BASENAME       = ".flow"
 CONFIG_SECTION_BRANCHNAME = "branchname"
@@ -1190,7 +1190,7 @@ class Flow( object ) :
         @param branch: Branch to test if it has shelved changes
         """
         shelve_name = "flow/" + branch.fullname() + ".pch"
-        patch_fname = self.repo.join( "patches/" + shelve_name )
+        patch_fname = self.repo.vfs.join( "patches/" + shelve_name )
         return os.path.isfile( patch_fname )
 
 
@@ -1233,7 +1233,7 @@ class Flow( object ) :
         if (self.autoshelve or kwarg.get( "force" )) :
             basename    = basename if (basename) else self.curr_workspace.fullname()
             shelve_name = "flow/" + basename + ".pch"
-            patch_fname = self.repo.join( "patches/" + shelve_name )
+            patch_fname = self.repo.vfs.join( "patches/" + shelve_name )
             if (os.path.isfile( patch_fname ) or (shelve_name in self._dryrun_shelve)) :
                 self._check_mq()
                 self._import_( patch_fname, no_commit = True, prefix = "", base = "", strip = 1 )
