@@ -741,8 +741,7 @@ alias ipython="ipython -i -c '%doctest_mode' --pylab "
 alias lab="\jupyter-lab"
 
 alias pipin="pip3 install -U"
-#alias pipup="pip3 list --format=legacy --outdated | awk '{print $1}' | xargs pip install -U"
-alias pipup="pip3 list --outdated --format=columns |awk '{if(NR>2)print $1}' |xargs pip3 install"
+alias pipup="pip3 list --outdated --format=columns |awk '{if(NR>2)print \$1}' |xargs pip3 install"
 
 # brew
 alias brewcheck="brew update; brew outdated"
