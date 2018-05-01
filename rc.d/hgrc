@@ -1,43 +1,53 @@
 [ui]
 username = sakito <sakito@sakito.com>
 ignore=~/.hgignore
+#ignore.local = .hg/hgignore
 style=compact
 ssh = ssh -C
 merge = emacsclient
+
 [extensions]
 convert=
 graphlog=
 bookmarks=
 color=
-hggit=
-hgk=
+pager=
 mq=
 purge=
 extdiff=
 progress=
-#hgsubversion=
-hgsubversion = ~/lib/python/hgsubversion/hgsubversion
-flow = ~/.emacs.d/share/python/hgflow.py
-hgshelve= ~/.emacs.d/share/python/hgshelve.py
+shelve=
 rebase=
 histedit=
-[diff]
-git = True
-[extdiff]
-cmd.ediff = sh
-opts.ediff = -c 'if [ -d $0 ]; then emacsclient --eval "(ediff-directories \"$0\" \"$1\" \"\")"; else emacsclient --eval "(ediff-files \"$0\" \"$1\")"; fi'
-[merge-tools]
-emacsclient.args = --eval "(progn (raise-frame (selected-frame))(x-focus-frame (selected-frame))(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\"))"
-[color]
-status.modified = white bold red_background
-# status.modified = white bold underline red_background
-status.added = green bold
-status.removed = red bold blue_background
-status.deleted = cyan bold underline
-status.unknown = green bold underline
-status.ignored = black bold
-[web]
-cacerts = ~/etc/Certificates.pem
-[flow]
-autoshelve = true
+pager=
 
+# 以下は非標準プラグイン
+hggit=
+flow=~/.emacs.d/share/python/hgflow.py
+
+[diff]
+git=True
+
+[extdiff]
+cmd.ediff=sh
+opts.ediff=-c 'if [ -d $0 ]; then emacsclient --eval "(ediff-directories \"$0\" \"$1\" \"\")"; else emacsclient --eval "(ediff-files \"$0\" \"$1\")"; fi'
+
+[merge-tools]
+emacsclient.args=--eval "(progn (raise-frame (selected-frame))(x-focus-frame (selected-frame))(ediff-merge-with-ancestor \""$local"\" \""$other"\" \""$base"\" nil \""$output"\"))"
+
+[color]
+status.modified=white bold red_background
+status.added=green bold
+status.removed=red bold blue_background
+status.deleted=cyan bold underline
+status.unknown=green bold underline
+status.ignored=black bold
+
+[pager]
+pager=LESS='FRX' less
+
+[web]
+cacerts=~/etc/Certificates.pem
+
+[flow]
+autoshelve=true
