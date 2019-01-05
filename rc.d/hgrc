@@ -3,8 +3,8 @@ username = sakito <sakito@sakito.com>
 ignore=~/.hgignore
 #ignore.local = .hg/hgignore
 style=compact
-ssh = ssh -C
-merge = emacsclient
+ssh=ssh -C
+merge=emacsclient
 
 [extensions]
 convert=
@@ -19,11 +19,13 @@ progress=
 shelve=
 rebase=
 histedit=
-pager=
 
 # 以下は非標準プラグイン
-hggit=
+#hggit=
 flow=~/.emacs.d/share/python/hgflow.py
+
+[subrepos]
+git:allowed=true
 
 [diff]
 git=True
@@ -47,7 +49,7 @@ status.ignored=black bold
 pager=LESS='FRX' less
 
 [web]
-cacerts=~/etc/Certificates.pem
+cacerts=~/lib/Certificates.pem
 
 [flow]
 autoshelve=true

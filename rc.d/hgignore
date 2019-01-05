@@ -6,13 +6,15 @@ syntax: glob
 *.pyo
 *.entrypickle
 *.log
-*.pdf
+#*.pdf
 *.orig
 .svn
 .git
 .semantic.cache
 .org-id-locations
 .DS_Store
+.FBCIndex
+.FBCLockFolder/.FBCSemaphoreFile
 develop-eggs
 #eggs
 parts
@@ -38,3 +40,4 @@ dist/*
 .cache/*
 .lock-waf_darwin_build
 *.beam
+*.o
