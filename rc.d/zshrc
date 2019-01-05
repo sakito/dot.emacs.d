@@ -143,7 +143,7 @@ export MANWIDTH=80
 export HGENCODING=utf-8
 
 # 64bit
-export ARCHFLAGS='-Os -arch x86_64 -fno-common'
+#export ARCHFLAGS='-Os -arch x86_64 -fno-common'
 
 # 最優先パス
 export PATH=${HOME}/.emacs.d/bin:${PATH}
@@ -359,6 +359,7 @@ fignore=(.o .dvi .aux .toc - \~)
 # ロード
 # rm -f ~/.zcompdump; compinit
 fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
+fpath=(/usr/local/share/zsh-completions $fpath)
 # 補完の利用設定
 autoload -Uz compinit; compinit
 
@@ -742,10 +743,11 @@ alias lab="\jupyter-lab"
 
 alias pipin="pip3 install -U"
 alias pipup="pip3 list --outdated --format=columns |awk '{if(NR>2)print \$1}' |xargs pip3 install"
+alias pipout="pip3 list --outdated"
 
 # brew
-alias brewcheck="brew update; brew outdated"
-alias brewout="brew outdated"
+alias brewout="brew update; brew outdated"
+#alias brewout="brew outdated"
 
 # http://d.hatena.ne.jp/mollifier/20101227/p1
 autoload -Uz zmv
@@ -757,7 +759,6 @@ alias -g V="| /usr/share/vim/vim74/macros/less.sh"
 # 自分に依存した設定
 alias sakuradiary="~/Sites/sakitojp/bin/scp_diary.command"
 alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
-alias easy_install64="env ARCHFLAGS='-Os -arch x86_64 -fno-common' easy_install -UZ "
 
 #-----------------------------------------------------------------
 # キーバインド設定
