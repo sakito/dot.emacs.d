@@ -86,3 +86,12 @@
 	path = local-lisp/shackle
 	url = git://github.com/wasamasa/shackle.git
 	ignore = dirty
+[submodule "rc.d/zsh.d/plugins/zaw"]
+	path = rc.d/zsh.d/plugins/zaw
+	url = git://github.com/zsh-users/zaw.git
+[submodule "rc.d/zsh.d/plugins/auto-fu.zsh"]
+	path = rc.d/zsh.d/plugins/auto-fu.zsh
+	url = git://github.com/hchbaw/auto-fu.zsh.git
+[submodule "rc.d/zsh.d/plugins/completions"]
+	path = rc.d/zsh.d/plugins/completions
+	url = git://github.com/zsh-users/zsh-completions.git
