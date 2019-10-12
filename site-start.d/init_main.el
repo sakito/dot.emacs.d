@@ -121,7 +121,7 @@
 ;; @see http://fly.srk.fer.hr/~hniksic/emacs/
 (require 'htmlize)
 ;; howm
-(require 'init_howm)
+;;(require 'init_howm)
 ;; sdicの設定
 ;;(require 'init_sdic)
 ;; Dictionary.app 呼びだし
@@ -150,7 +150,7 @@
 ;; (require 'init_irc)
 
 (require 'init_speedbar)
-(require 'init_org)
+;;(require 'init_org)
 ;; (require 'init_slime)
 (require 'init_calendar)
 (require 'init_linum)

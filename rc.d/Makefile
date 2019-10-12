@@ -7,15 +7,15 @@ all:
 	@echo CWD = ${CWD}
 
 dotfiles:
-	ln -s ${CWD}/hgignore ${HOME}/.hgignore
-	ln -s ${CWD}/pip ${HOME}/.pip
-	#ln -s ${CWD}/screenrc ${HOME}/.screenrc
-	ln -s ${CWD}/zlogin ${HOME}/.zlogin
-	ln -s ${CWD}/hgrc ${HOME}/.hgrc
-	ln -s ${CWD}/pythonrc.py ${HOME}/.pythonrc.py
-	ln -s ${CWD}/tmux.conf ${HOME}/.tmux.conf
-	ln -s ${CWD}/zshrc ${HOME}/.zshrc
-	#ln -s ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
+	ln -sf ${CWD}/hgignore ${HOME}/.hgignore
+	ln -sf ${CWD}/pip ${HOME}/.pip
+	#ln -sf ${CWD}/screenrc ${HOME}/.screenrc
+	ln -sf ${CWD}/zlogin ${HOME}/.zlogin
+	ln -sf ${CWD}/hgrc ${HOME}/.hgrc
+	ln -sf ${CWD}/pythonrc.py ${HOME}/.pythonrc.py
+	ln -sf ${CWD}/tmux.conf ${HOME}/.tmux.conf
+	ln -sf ${CWD}/zshrc ${HOME}/.zshrc
+	#ln -sf ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
 	#[ -d ${HOME}/.buildout ] || mkdir ${HOME}/.buildout
 	#cp ${CWD}/buildout/default.cfg ${HOME}/.buildout
 	#echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg

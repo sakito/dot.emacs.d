@@ -39,6 +39,7 @@ var/*
 share/*
 private/*
 .session
+ac-comphist.dat
 .hg/
 
 # end

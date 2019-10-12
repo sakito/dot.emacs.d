@@ -103,9 +103,10 @@ export PATH=/usr/local/opt/libxml2/bin:${PATH}
 export PATH=/usr/local/opt/texinfo/bin:${PATH}
 export PATH=/usr/local/opt/openssl/bin:${PATH}
 
-export LDFLAGS=-L/usr/local/opt/readline/lib:/usr/local/opt/openssl/lib:${LDFLAGS}
-export CPPFLAGS=-I/usr/local/opt/readline/include:/usr/local/opt/oepnssl/include:${CPPFLAGS}
+export LDFLAGS=-L/usr/local/opt/readline/lib:/usr/local/opt/openssl/lib:${LDFLAGS}:/usr/local/opt/libxml2/lib
+export CPPFLAGS=-I/usr/local/opt/readline/include:/usr/local/opt/oepnssl/include:${CPPFLAGS}:/usr/local/opt/libxml2/include
 
+export PKG_CONFIG_PATH="/usr/local/opt/libxml2/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig"
 
 # Java
 export JAVA_OPTS="-Dfile.encoding=UTF-8"
