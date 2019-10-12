@@ -1,66 +1,88 @@
 [submodule "local-lisp/wgrep"]
 	path = local-lisp/wgrep
 	url = https://github.com/mhayashi1120/Emacs-wgrep.git
+    ignore = dirty
 [submodule "local-lisp/expand-region"]
 	path = local-lisp/expand-region
 	url = git://github.com/magnars/expand-region.el.git
+    ignore = dirty
 [submodule "local-lisp/mark-multiple"]
 	path = local-lisp/mark-multiple
 	url = git://github.com/magnars/mark-multiple.el.git
+    ignore = dirty
 [submodule "local-lisp/deferred"]
 	path = local-lisp/deferred
 	url = git://github.com/kiwanami/emacs-deferred.git
+    ignore = dirty
 [submodule "local-lisp/ctable"]
 	path = local-lisp/ctable
 	url = git://github.com/kiwanami/emacs-ctable.git
+    ignore = dirty
 [submodule "local-lisp/epc"]
 	path = local-lisp/epc
 	url = git://github.com/kiwanami/emacs-epc.git
+    ignore = dirty
 [submodule "local-lisp/key-combo"]
 	path = local-lisp/key-combo
 	url = git://github.com/uk-ar/key-combo.git
+    ignore = dirty
 [submodule "local-lisp/flex-autopair"]
 	path = local-lisp/flex-autopair
 	url = git://github.com/uk-ar/flex-autopair.git
+    ignore = dirty
 [submodule "local-lisp/auto-complete"]
 	path = local-lisp/auto-complete
 	url = git://github.com/auto-complete/auto-complete.git
+    ignore = dirty
 [submodule "local-lisp/distel"]
 	path = local-lisp/distel
 	url = git://github.com/jixiuf/distel.git
+    ignore = dirty
 [submodule "local-lisp/popup-el"]
 	path = local-lisp/popup-el
 	url = git://github.com/auto-complete/popup-el.git
+    ignore = dirty
 [submodule "local-lisp/fuzzy-el"]
 	path = local-lisp/fuzzy-el
 	url = git://github.com/auto-complete/fuzzy-el.git
+    ignore = dirty
 [submodule "local-lisp/ob-objc-el"]
 	path = local-lisp/ob-objc-el
 	url = git://gist.github.com/568534.git
+    ignore = dirty
 [submodule "local-lisp/elscreen"]
 	path = local-lisp/elscreen
 	url = git://github.com/knu/elscreen.git
+    ignore = dirty
 [submodule "local-lisp/pos-tip"]
 	path = local-lisp/pos-tip
 	url = git://github.com/tjarvstrand/pos-tip.git
+    ignore = dirty
 [submodule "local-lisp/js2-mode"]
 	path = local-lisp/js2-mode
 	url = git://github.com/mooz/js2-mode.git
+    ignore = dirty
 [submodule "local-lisp/ptel"]
 	path = local-lisp/ptel
 	url = git://github.com/bling/pt.el.git
+    ignore = dirty
 [submodule "local-lisp/helm-descbinds"]
 	path = local-lisp/helm-descbinds
 	url = git://github.com/emacs-helm/helm-descbinds.git
+    ignore = dirty
 [submodule "local-lisp/emacs-helm-ag"]
 	path = local-lisp/emacs-helm-ag
 	url = git://github.com/syohex/emacs-helm-ag.git
+    ignore = dirty
 [submodule "local-lisp/helm-flymake"]
 	path = local-lisp/helm-flymake
 	url = git://github.com/tam17aki/helm-flymake.git
+    ignore = dirty
 [submodule "local-lisp/psession"]
 	path = local-lisp/psession
 	url = git://github.com/thierryvolpiatto/psession.git
+    ignore = dirty
 [submodule "local-lisp/shackle"]
 	path = local-lisp/shackle
 	url = git://github.com/wasamasa/shackle.git
+	ignore = dirty
