@@ -1,0 +1,43 @@
+# Backup files
+*~
+auto-save-list
+anything-c-adaptive-history
+image-dired
+
+# Compiled
+*.elc
+*.pyc
+
+# Packaging
+.cask
+elpa/*
+
+# Undo-tree save-files
+*.~undo-tree
+
+# Mac
+.DS_Store
+
+# 開発関連
+*.exe
+*.o
+*.c
+.gitmodules
+.travis.yml
+*.log
+*.orig
+
+# 対象外ディレクトリ
+lisp/flim/*
+lisp/semi/*
+lisp/wl/*
+lisp/w3m/*
+lisp/navi2ch/*
+lisp/auctex/*
+#*tex*
+var/*
+share/*
+private/*
+.session
+
+# end
