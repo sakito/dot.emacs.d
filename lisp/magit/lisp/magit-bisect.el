@@ -1,6 +1,6 @@
 ;;; magit-bisect.el --- bisect support for Magit  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2011-2017  The Magit Project Contributors
+;; Copyright (C) 2011-2018  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -79,6 +79,12 @@ other actions from the bisect popup (\
   (interactive (if (magit-bisect-in-progress-p)
                    (user-error "Already bisecting")
                  (magit-bisect-start-read-args)))
+  (unless (magit-rev-ancestor-p good bad)
+    (user-error
+     "The good revision (%s) has to be an ancestor of the bad one (%s)"
+     good bad))
+  (when (magit-anything-modified-p)
+    (user-error "Cannot bisect with uncommitted changes"))
   (magit-git-bisect "start" (list bad good) t))
 
 (defun magit-bisect-start-read-args ()
@@ -89,9 +95,9 @@ other actions from the bisect popup (\
 (defun magit-bisect-reset ()
   "After bisecting, cleanup bisection state and return to original `HEAD'."
   (interactive)
-  (when (magit-confirm 'reset-bisect)
-    (magit-run-git "bisect" "reset")
-    (ignore-errors (delete-file (magit-git-dir "BISECT_CMD_OUTPUT")))))
+  (magit-confirm 'reset-bisect)
+  (magit-run-git "bisect" "reset")
+  (ignore-errors (delete-file (magit-git-dir "BISECT_CMD_OUTPUT"))))
 
 ;;;###autoload
 (defun magit-bisect-good ()
@@ -172,7 +178,7 @@ bisect run'."
       (magit-insert-heading "Bisect Rest:")
       (magit-git-wash (apply-partially 'magit-log-wash-log 'bisect-vis)
         "bisect" "visualize" "git" "log"
-        "--format=%h%d %s" "--decorate=full"
+        "--format=%h%d%x00%s" "--decorate=full"
         (and magit-bisect-show-graph "--graph")))))
 
 (defun magit-insert-bisect-log ()
@@ -192,7 +198,7 @@ bisect run'."
         (save-restriction
           (narrow-to-region beg (point))
           (goto-char (point-min))
-          (magit-insert-section (bisect-log heading t)
+          (magit-insert-section (bisect-item heading t)
             (insert (propertize heading 'face 'magit-section-secondary-heading))
             (magit-insert-heading)
             (magit-wash-sequence
@@ -203,8 +209,9 @@ bisect run'."
            "# first bad commit: \\[\\([a-z0-9]\\{40\\}\\)\\] [^\n]+\n" nil t)
       (magit-bind-match-strings (hash) nil
         (magit-delete-match)
-        (magit-insert-section (bisect-log)
+        (magit-insert-section (bisect-item)
           (insert hash " is the first bad commit\n"))))))
 
+;;; _
 (provide 'magit-bisect)
 ;;; magit-bisect.el ends here

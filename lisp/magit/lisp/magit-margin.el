@@ -1,6 +1,6 @@
 ;;; magit-margin.el --- margins in Magit buffers  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2017  The Magit Project Contributors
+;; Copyright (C) 2010-2018  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -32,6 +32,9 @@
 
 (require 'dash)
 
+(eval-when-compile
+  (require 'subr-x))
+
 (require 'magit-section)
 (require 'magit-mode)
 
@@ -61,9 +64,14 @@ does not carry to other options."
 (magit-define-popup magit-margin-popup
   "Popup console for changing appearance of the margin."
   :actions '("Margin"
-             (?L "toggle visibility" magit-toggle-margin)
-             (?l "cycle style"       magit-cycle-margin-style)
-             (?d "toggle details"    magit-toggle-margin-details))
+             (?L "Toggle visibility" magit-toggle-margin)
+             (?l "Cycle style"       magit-cycle-margin-style)
+             (?d "Toggle details"    magit-toggle-margin-details)
+             (lambda ()
+               (and (with-current-buffer magit-pre-popup-buffer
+                      (derived-mode-p 'magit-refs-mode))
+                    (propertize "Left edge" 'face 'magit-popup-heading)))
+             (?v "Change verbosity" magit-refs-set-show-commit-count))
   :max-action-columns 1)
 
 (defun magit-toggle-margin ()
@@ -114,13 +122,13 @@ does not carry to other options."
     (`magit-status-mode     'magit-status-margin)))
 
 (defun magit-set-buffer-margin (&optional reset refresh)
-  (-when-let (option (magit-margin-option))
+  (when-let ((option (magit-margin-option)))
     (let* ((default (symbol-value option))
            (default-width (nth 2 default)))
       (when (or reset (not magit-buffer-margin))
         (setq magit-buffer-margin (copy-sequence default)))
-      (-let [(enable style _width details details-width)
-             magit-buffer-margin]
+      (pcase-let ((`(,enable ,style ,_width ,details ,details-width)
+                   magit-buffer-margin))
         (when (functionp default-width)
           (setf (nth 2 magit-buffer-margin)
                 (funcall default-width style details details-width)))
@@ -138,9 +146,10 @@ does not carry to other options."
 (defun magit-set-window-margin (&optional window)
   (when (or window (setq window (get-buffer-window)))
     (with-selected-window window
-      (set-window-margins nil (car (window-margins))
-                          (and (magit-buffer-margin-p)
-                               (nth 2 magit-buffer-margin))))))
+      (set-window-margins
+       nil (car (window-margins))
+       (and (magit-buffer-margin-p)
+            (nth 2 magit-buffer-margin))))))
 
 (defun magit-make-margin-overlay (&optional string previous-line)
   (if previous-line
@@ -214,7 +223,7 @@ English.")
 
 (defun magit--age (date &optional abbreviate)
   (cl-labels ((fn (age spec)
-                  (-let [(char unit units weight) (car spec)]
+                  (pcase-let ((`(,char ,unit ,units ,weight) (car spec)))
                     (let ((cnt (round (/ age weight 1.0))))
                       (if (or (not (cdr spec))
                               (>= (/ age weight) 1))
@@ -222,8 +231,12 @@ English.")
                                           ((= cnt 1) unit)
                                           (t units)))
                         (fn age (cdr spec)))))))
-    (fn (abs (- (float-time) (string-to-number date)))
+    (fn (abs (- (float-time)
+                (if (stringp date)
+                    (string-to-number date)
+                  date)))
         magit--age-spec)))
 
+;;; _
 (provide 'magit-margin)
 ;;; magit-margin.el ends here

@@ -1,6 +1,6 @@
 ;;; magit-core.el --- core functionality  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2017  The Magit Project Contributors
+;; Copyright (C) 2010-2018  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -30,7 +30,6 @@
 
 ;;; Code:
 
-(require 'magit-popup)
 (require 'magit-utils)
 (require 'magit-section)
 (require 'magit-git)
@@ -128,5 +127,6 @@ are enabled by default by the popup `magit-NAME-popup'."
 (custom-add-to-group 'magit-related 'smerge-refine-ignore-whitespace 'custom-variable)
 (custom-add-to-group 'magit-related 'vc-follow-symlinks 'custom-variable)
 
+;;; _
 (provide 'magit-core)
 ;;; magit-core.el ends here

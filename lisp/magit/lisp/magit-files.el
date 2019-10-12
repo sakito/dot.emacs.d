@@ -1,6 +1,6 @@
 ;;; magit-files.el --- finding files  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2017  The Magit Project Contributors
+;; Copyright (C) 2010-2018  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -29,6 +29,9 @@
 ;; modes.
 
 ;;; Code:
+
+(eval-when-compile
+  (require 'subr-x))
 
 (require 'magit)
 
@@ -227,15 +230,31 @@ directory, while reading the FILENAME."
 (magit-define-popup magit-file-popup
   "Popup console for Magit commands in file-visiting buffers."
   :actions '((?s "Stage"     magit-stage-file)
-             (?d "Diff"      magit-diff-buffer-file)
-             (?l "Log"       magit-log-buffer-file)
-             (?b "Blame"     magit-blame-popup)
-             (?u "Unstage"   magit-unstage-file)
              (?D "Diff..."   magit-diff-buffer-file-popup)
              (?L "Log..."    magit-log-buffer-file-popup)
-             (?p "Find blob" magit-blob-previous)
-             (?c "Commit"    magit-commit-popup))
-  :max-action-columns 4)
+             (?B "Blame..."  magit-blame-popup) nil
+             (?u "Unstage"   magit-unstage-file)
+             (?d "Diff"      magit-diff-buffer-file)
+             (?l "Log"       magit-log-buffer-file)
+             (?b "Blame"     magit-blame-addition)
+             (?p "Prev blob" magit-blob-previous)
+             (?c "Commit"    magit-commit-popup) nil
+             (?t "Trace"     magit-log-trace-definition)
+             (?r (lambda ()
+                   (with-current-buffer magit-pre-popup-buffer
+                     (and (not buffer-file-name)
+                          (propertize "...removal" 'face 'default))))
+                 magit-blame-removal)
+             (?n "Next blob" magit-blob-next)
+             (?e "Edit line" magit-edit-line-commit)
+             nil nil
+             (?f (lambda ()
+                   (with-current-buffer magit-pre-popup-buffer
+                     (and (not buffer-file-name)
+                          (propertize "...reverse" 'face 'default))))
+                 magit-blame-reverse)
+             nil)
+  :max-action-columns 5)
 
 (defvar magit-file-mode-lighter "")
 
@@ -250,16 +269,24 @@ Currently this only adds the following key bindings.
 
 (defun magit-file-mode-turn-on ()
   (and buffer-file-name
-       (ignore-errors (magit-inside-worktree-p))
+       (magit-inside-worktree-p t)
        (magit-file-mode)))
 
 ;;;###autoload
 (define-globalized-minor-mode global-magit-file-mode
   magit-file-mode magit-file-mode-turn-on
-  :package-version '(magit . "2.2.0")
+  :package-version '(magit . "2.13.0")
   :link '(info-link "(magit)Minor Mode for Buffers Visiting Files")
   :group 'magit-essentials
-  :group 'magit-modes)
+  :group 'magit-modes
+  :init-value t)
+;; Unfortunately `:init-value t' only sets the value of the mode
+;; variable but does not cause the mode function to be called, and we
+;; cannot use `:initialize' to call that explicitly because the option
+;; is defined before the functions, so we have to do it here.
+(cl-eval-when (load)
+  (when global-magit-file-mode
+    (global-magit-file-mode 1)))
 
 ;;; Blob Mode
 
@@ -267,10 +294,16 @@ Currently this only adds the following key bindings.
   (let ((map (make-sparse-keymap)))
     (cond ((featurep 'jkl)
            (define-key map "i" 'magit-blob-previous)
-           (define-key map "k" 'magit-blob-next))
+           (define-key map "k" 'magit-blob-next)
+           (define-key map "j" 'magit-blame-addition)
+           (define-key map "l" 'magit-blame-removal)
+           (define-key map "f" 'magit-blame-reverse))
           (t
            (define-key map "p" 'magit-blob-previous)
-           (define-key map "n" 'magit-blob-next)))
+           (define-key map "n" 'magit-blob-next)
+           (define-key map "b" 'magit-blame-addition)
+           (define-key map "r" 'magit-blame-removal)
+           (define-key map "f" 'magit-blame-reverse)))
     (define-key map "q" 'magit-kill-this-buffer)
     map)
   "Keymap for `magit-blob-mode'.")
@@ -297,8 +330,8 @@ Currently this only adds the following key bindings.
 (defun magit-blob-previous ()
   "Visit the previous blob which modified the current file."
   (interactive)
-  (-if-let (file (or magit-buffer-file-name
-                     (buffer-file-name (buffer-base-buffer))))
+  (if-let ((file (or magit-buffer-file-name
+                     (buffer-file-name (buffer-base-buffer)))))
       (--if-let (magit-blob-ancestor magit-buffer-revision file)
           (magit-blob-visit it (line-number-at-pos))
         (user-error "You have reached the beginning of time"))
@@ -307,7 +340,7 @@ Currently this only adds the following key bindings.
 (defun magit-blob-visit (blob-or-file line)
   (if (stringp blob-or-file)
       (find-file blob-or-file)
-    (-let [(rev file) blob-or-file]
+    (pcase-let ((`(,rev ,file) blob-or-file))
       (magit-find-file rev file)
       (apply #'message "%s (%s %s ago)"
              (magit-rev-format "%s" rev)
@@ -335,19 +368,23 @@ Currently this only adds the following key bindings.
 
 (defun magit-file-rename (file newname)
   "Rename the FILE to NEWNAME.
-If FILE isn't tracked in Git fallback to using `rename-file'."
+If FILE isn't tracked in Git, fallback to using `rename-file'."
   (interactive
    (let* ((file (magit-read-file "Rename file"))
-          (newname (read-file-name (format "Rename %s to file: " file))))
+          (dir (file-name-directory file))
+          (newname (read-file-name (format "Rename %s to file: " file)
+                                   (and dir (expand-file-name dir)))))
      (list (expand-file-name file (magit-toplevel))
            (expand-file-name newname))))
-  (if (magit-file-tracked-p file)
+  (if (magit-file-tracked-p (magit-convert-filename-for-git file))
       (let ((oldbuf (get-file-buffer file)))
         (when (and oldbuf (buffer-modified-p oldbuf))
           (user-error "Save %s before moving it" file))
         (when (file-exists-p newname)
           (user-error "%s already exists" newname))
-        (magit-run-git "mv" file newname)
+        (magit-run-git "mv"
+                       (magit-convert-filename-for-git file)
+                       (magit-convert-filename-for-git newname))
         (when oldbuf
           (with-current-buffer oldbuf
             (let ((buffer-read-only buffer-read-only))
@@ -359,24 +396,36 @@ If FILE isn't tracked in Git fallback to using `rename-file'."
     (rename-file file newname current-prefix-arg)
     (magit-refresh)))
 
-(defun magit-file-untrack (file)
-  "Untrack FILE.
-Stop tracking FILE in Git but do not remove it from the working
-tree."
-  (interactive (list (magit-read-tracked-file "Untrack file")))
-  (magit-run-git "rm" "--cached" "--" file))
+(defun magit-file-untrack (files &optional force)
+  "Untrack the selected FILES or one file read in the minibuffer.
 
-(defun magit-file-delete (file &optional force)
-  "Delete FILE.
-With a prefix argument FORCE do so even when FILE has uncommitted
-changes.
+With a prefix argument FORCE do so even when the files have
+staged as well as unstaged changes."
+  (interactive (list (or (--if-let (magit-region-values 'file t)
+                             (progn
+                               (unless (magit-file-tracked-p (car it))
+                                 (user-error "Already untracked"))
+                               (magit-confirm-files 'untrack it "Untrack"))
+                           (list (magit-read-tracked-file "Untrack file"))))
+                     current-prefix-arg))
+  (magit-run-git "rm" "--cached" (and force "--force") "--" files))
 
-If FILE isn't tracked in Git fallback to using `delete-file'."
-  (interactive (list (magit-read-file "Delete file")))
-  (if (magit-file-tracked-p file)
-      (magit-run-git "rm" (and force "--force") "--" file)
-    (delete-file (expand-file-name file (magit-toplevel)) t)
-    (magit-refresh)))
+(defun magit-file-delete (files &optional force)
+  "Delete the selected FILES or one file read in the minibuffer.
+
+With a prefix argument FORCE do so even when the files have
+uncommitted changes.  When the files aren't being tracked in
+Git, then fallback to using `delete-file'."
+  (interactive (list (--if-let (magit-region-values 'file t)
+                         (magit-confirm-files 'delete it "Delete")
+                       (list (magit-read-file "Delete file")))
+                     current-prefix-arg))
+  (if (magit-file-tracked-p (car files))
+      (magit-call-git "rm" (and force "--force") "--" files)
+    (let ((topdir (magit-toplevel)))
+      (dolist (file files)
+        (delete-file (expand-file-name file topdir) t))))
+  (magit-refresh))
 
 ;;;###autoload
 (defun magit-file-checkout (rev file)
@@ -401,11 +450,11 @@ If FILE isn't tracked in Git fallback to using `delete-file'."
 (defun magit-read-file (prompt &optional tracked-only)
   (let ((choices (nconc (magit-list-files)
                         (unless tracked-only (magit-untracked-files)))))
-    (magit-completing-read prompt choices nil t nil nil
-                           (car (member (or (magit-section-when (file submodule))
-                                            (magit-file-relative-name
-                                             nil tracked-only))
-                                        choices)))))
+    (magit-completing-read
+     prompt choices nil t nil nil
+     (car (member (or (magit-section-value-if '(file submodule))
+                      (magit-file-relative-name nil tracked-only))
+                  choices)))))
 
 (defun magit-read-tracked-file (prompt)
   (magit-read-file prompt t))
@@ -439,5 +488,6 @@ If DEFAULT is non-nil, use this as the default value instead of
                                        (magit-list-files)
                                        nil nil initial-contents) ","))
 
+;;; _
 (provide 'magit-files)
 ;;; magit-files.el ends here
