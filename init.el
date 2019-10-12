@@ -72,10 +72,11 @@
 (defvar emacs23-p (equal emacs-major-version 23))
 (defvar emacs24-p (equal emacs-major-version 24))
 (defvar emacs25-p (equal emacs-major-version 25))
+(defvar emacs26-p (equal emacs-major-version 26))
 (defvar darwin-p (eq system-type 'darwin))
 (defvar ns-p (featurep 'ns))
 (defvar carbon-p (and (eq window-system 'mac) emacs22-p))
-(defvar mac-p (and (eq window-system 'mac) (or emacs23-p emacs24-p emacs25-p)))
+(defvar mac-p (and (eq window-system 'mac) (or emacs23-p emacs24-p emacs25-p emacs26-p)))
 (defvar linux-p (eq system-type 'gnu/linux))
 (defvar colinux-p (when linux-p
                     (let ((file "/proc/modules"))
