@@ -39,5 +39,6 @@ var/*
 share/*
 private/*
 .session
+.hg/
 
 # end
