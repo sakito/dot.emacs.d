@@ -86,7 +86,6 @@
 ;; (require 'init_flymake)
 ;;; Pythonの設定
 (require 'init_python)
-;(require 'init_python-mode)
 ;; vsc and scm
 (require 'init_scm)
 ;; git
@@ -155,7 +154,6 @@
 (require 'init_calendar)
 (require 'init_linum)
 ;; (require 'init_go)
-;; (require 'init_viewer)
 ;; (require 'init_keychord)
 ;; (require 'init_pyregexp)
 ;; (require 'init_expand-region)

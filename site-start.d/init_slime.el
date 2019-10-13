@@ -61,9 +61,9 @@
 ;; セキュリティに問題がある設定なので注意すること
 (setq slime-enable-evaluate-in-emacs t)
 ;; repl の履歴で重複を取り除く
-(setq slime-repl-history-remove-duplicates t)
+;; (setq slime-repl-history-remove-duplicates t)
 ;; repl の履歴で無駄な空白を取り除く
-(setq slime-repl-history-trim-whitespaces t)
+;; (setq slime-repl-history-trim-whitespaces t)
 
 ;; auto-complete の設定
 ;; http://github.com/purcell/ac-slime/blob/master/ac-slime.el
@@ -106,7 +106,7 @@
                     anything-slime
                     ))
      ;; setup の引数だと動作しない環境があるので設定
-     (require 'slime-repl)(slime-repl-init)
+     ;; (require 'slime-repl)(slime-repl-init)
      (require 'slime-fancy)
      (require 'slime-indentation)
      (require 'slime-references)
@@ -114,9 +114,9 @@
      (require 'slime-scratch)
      (require 'slime-media)
      (require 'slime-annot)
-     (require 'anything-slime)(anything-slime-init)
-     (setq slime-complete-symbol*-fancy t)
-     (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
+     ;; (require 'anything-slime)(anything-slime-init)
+     ;; (setq slime-complete-symbol*-fancy t)
+     ;; (setq slime-complete-at-point-function 'slime-fuzzy-complete-symbol)
      ;; (setq lisp-indent-function 'cl-indent:function)
      ))
 
@@ -167,41 +167,41 @@
     ad-do-it))
 
 ;; Hyperspec と cltl2 を anything で引けるようにする
-(eval-after-load "anything"
-  '(progn
-     (setq anything-c-source-hyperspec
-           `((name . "Lookup Hyperspec")
-             (candidates . (lambda ()
-                             (let ((symbols nil))
-                               (mapatoms #'(lambda (sym) (push (symbol-name sym) symbols))
-                                         common-lisp-hyperspec-symbols)
-                               symbols)))
-             (action . (("Show Hyperspec" . hyperspec-lookup)))))
+;; (eval-after-load "anything"
+;;   '(progn
+;;      (setq anything-c-source-hyperspec
+;;            `((name . "Lookup Hyperspec")
+;;              (candidates . (lambda ()
+;;                              (let ((symbols nil))
+;;                                (mapatoms #'(lambda (sym) (push (symbol-name sym) symbols))
+;;                                          common-lisp-hyperspec-symbols)
+;;                                symbols)))
+;;              (action . (("Show Hyperspec" . hyperspec-lookup)))))
 
-     (setq anything-c-source-cltl2
-           `((name . "Lookup CLTL2")
-             (candidates . (lambda ()
-                             (let ((symbols nil))
-                               (mapatoms #'(lambda (sym) (push (symbol-name sym) symbols))
-                                         cltl2-symbols)
-                               symbols)))
-             (action . (("Show CLTL2" . cltl2-lookup)))))
+;;      (setq anything-c-source-cltl2
+;;            `((name . "Lookup CLTL2")
+;;              (candidates . (lambda ()
+;;                              (let ((symbols nil))
+;;                                (mapatoms #'(lambda (sym) (push (symbol-name sym) symbols))
+;;                                          cltl2-symbols)
+;;                                symbols)))
+;;              (action . (("Show CLTL2" . cltl2-lookup)))))
 
-     (defun anything-hyperspec-and-cltl2 ()
-       (interactive)
-       (anything (list anything-c-source-hyperspec anything-c-source-cltl2) (thing-at-point 'symbol)))))
+;;      (defun anything-hyperspec-and-cltl2 ()
+;;        (interactive)
+;;        (anything (list anything-c-source-hyperspec anything-c-source-cltl2) (thing-at-point 'symbol)))))
 
 ;; The Art of the Metaobject Protocol(AMOP) を引く
 ;; @see http://gist.github.com/25243
-(defun amop-lookup ()
-  (interactive)
-  (browse-url
-   (format "http://www.lisp.org/mop/dictionary.html#%s"
-           (let* ((name (thing-at-point 'symbol))
-                  (pos (position ?: name)))
-             (if pos
-                 (subseq name (1+ pos))
-               name)))))
+;; (defun amop-lookup ()
+;;   (interactive)
+;;   (browse-url
+;;    (format "http://www.lisp.org/mop/dictionary.html#%s"
+;;            (let* ((name (thing-at-point 'symbol))
+;;                   (pos (position ?: name)))
+;;              (if pos
+;;                  (subseq name (1+ pos))
+;;                name)))))
 
 ;; Anaphoric Macro aif の定義
 ;; @see http://www.komaba.utmc.or.jp/~flatline/onlispjhtml/anaphoricMacros.html
@@ -237,7 +237,7 @@
            (copy-region-as-kill start end)
            (switch-to-buffer-other-window ccl-buf)
            (yank)
-           (slime-repl-send-input "\n")
+           ;; (slime-repl-send-input "\n")
            ;;(switch-to-buffer-other-window buf-name)
            )
           (t (message "Not exist *slime-repl ccl* buffer!")))
@@ -268,21 +268,21 @@
 
 ;; popwin の設定
 ;; Apropos
-(push '("*slime-apropos*") popwin:special-display-config)
+;; (push '("*slime-apropos*") popwin:special-display-config)
 ;; Macroexpand
-(push '("*slime-macroexpansion*") popwin:special-display-config)
+;; (push '("*slime-macroexpansion*") popwin:special-display-config)
 ;; Help
-(push '("*slime-description*") popwin:special-display-config)
+;; (push '("*slime-description*") popwin:special-display-config)
 ;; Compilation
-(push '("*slime-compilation*" :noselect t) popwin:special-display-config)
+;; (push '("*slime-compilation*" :noselect t) popwin:special-display-config)
 ;; Cross-reference
-(push '("*slime-xref*") popwin:special-display-config)
+;; (push '("*slime-xref*") popwin:special-display-config)
 ;; Debugger
-(push '(sldb-mode :stick t) popwin:special-display-config)
+;; (push '(sldb-mode :stick t) popwin:special-display-config)
 ;; REPL
-(push '(slime-repl-mode :stick t :position bottom :width 25) popwin:special-display-config)
+;; (push '(slime-repl-mode :stick t :position bottom :width 25) popwin:special-display-config)
 ;; Connections
-(push '(slime-connection-list-mode) popwin:special-display-config)
+;; (push '(slime-connection-list-mode) popwin:special-display-config)
 
 ;; slime scratch を保存する
 (require 'slime-scratch-log)
@@ -295,7 +295,7 @@
 (defun skt:slime-scratch ()
   (interactive)
   (progn
-    (slime-scratch)
+    ;; (slime-scratch)
     (slsl-restore-scratch)))
 
 (provide 'init_slime)

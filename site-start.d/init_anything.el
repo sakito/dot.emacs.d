@@ -32,14 +32,6 @@
 ;; (require 'anything-private-config)
 (require 'anything-match-plugin)
 
-;; anything-howm
-;; @see http://d.hatena.ne.jp/kitokitoki/20110103/p1
-(require 'anything-howm)
-(defvar anything-howm-data-directory "~/howm")
-;; 最近のメモとして100個まで表示
-(setq anything-howm-recent-menu-number-limit 100)
-(global-set-key (kbd "C-c , a") 'anything-howm-menu-command)
-
 ;; session を利用するため anything-c-adaptive-save-history を作成しない
 (remove-hook 'kill-emacs-hook 'anything-c-adaptive-save-history)
 ;;(ad-disable-advice 'anything-exit-minibuffer 'before 'anything-c-adaptive-exit-minibuffer)
@@ -164,20 +156,6 @@
 (require 'popup-kill-ring)
 (setq popup-kill-ring-item-size-max 1000)
 (global-set-key (kbd "M-y") 'popup-kill-ring)
-
-;;; anything-c-moccurの設定
-;; see http://d.hatena.ne.jp/IMAKADO/20080724/1216882563
-;; (require 'anything-c-moccur)
-(setq
- ;;`anything-idle-delay'
- anything-c-moccur-anything-idle-delay 0.2
- ;; `anything-c-moccur-dmoccur'などのコマンドでバッファの情報をハイライトする
-;;  anything-c-moccur-higligt-info-line-flag t
- ;; 現在選択中の候補の位置を他のwindowに表示する
-;;  anything-c-moccur-enable-auto-look-flag t
- ;; `anything-c-moccur-occur-by-moccur'の起動時にポイントの位置の単語を初期パターンにする
- ;;  anything-c-moccur-enable-initial-pattern t
- )
 
 ;; バッファ内検索
 ;; (global-set-key (kbd "M-o") 'anything-c-moccur-occur-by-moccur)
