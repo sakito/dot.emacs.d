@@ -28,13 +28,6 @@ elpa/*
 *.orig
 
 # 対象外ディレクトリ
-lisp/flim/*
-lisp/semi/*
-lisp/wl/*
-lisp/w3m/*
-lisp/navi2ch/*
-lisp/auctex/*
-#*tex*
 var/*
 share/*
 private/*
