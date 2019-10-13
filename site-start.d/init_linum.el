@@ -1,6 +1,6 @@
 ;;; init_linum.el --- linum
 
-;; Copyright (C) 2011  sakito
+;; Copyright (C) 2019 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -19,43 +19,24 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
-;; https://github.com/myuhe/emacs-yalinum/blob/master/yalinum.el
-;; http://sheephead.homelinux.org/2011/03/25/6706/
+;; 行番号関連
 
 ;;; Code:
 (toggle-scroll-bar nil)
 
 (require 'linum)
 (global-linum-mode t)
-;; フックにかける
+
+;; 特定モードのみで有効にする場合はhookで設定
 ;; (dolist (hook (list
 ;;                'c-mode-hook
 ;;                'emacs-lisp-mode-hook
-;;                'lisp-interaction-mode-hook
-;;                'lisp-mode-hook
-;;                'java-mode-hook
-;;                'js2-mode-hook
-;;                'haskell-mode-hook
-;;                'sh-mode-hook
-;;                'python-mode-hook
-;;                'ess-mode-hook
-;;                'inferior-ess-mode-hook
-;;                'lua-mode-hook
-;;                'scala-mode-hook
-;;                'haskell-mode-hook
-;;                'css-mode-hook
-;;                'makefile-mode-hook
-;;                'rst-mode-hook
 ;;                ))
 ;;   (add-hook hook '(lambda ()
 ;;                     (linum-mode 1))))
 
 ;; 表示フォーマット
 (setq linum-format "%04d")
-
-;;yalinumの背景色の設定
-;;(set-face-background 'yalinum-bar-face "DarkOliveGreen")
 
 (provide 'init_linum)
 ;;; init_linum.el ends here
