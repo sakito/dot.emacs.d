@@ -1,6 +1,6 @@
 ;;; helm-man.el --- Man and woman UI -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -96,7 +96,8 @@ source.")
     :filtered-candidate-transformer
      (lambda (candidates _source)
        (sort candidates #'helm-generic-sort-fn))
-    :action  '(("Display Man page" . helm-man-default-action))))
+    :action  '(("Display Man page" . helm-man-default-action))
+    :group 'helm-man))
 
 ;;;###autoload
 (defun helm-man-woman (arg)

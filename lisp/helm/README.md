@@ -4,7 +4,7 @@
 </p>
 
 
-<h1 align="center">Emacs-helm</h1>
+<h1 align="center">Emacs-Helm</h1>
 
 <p align="center">
   <img src="https://avatars3.githubusercontent.com/u/1541688?v=3&amp;s=200" alt="Emacs-helm" title="" />
@@ -13,18 +13,18 @@
 ***
 <p align="justify">
   <b>Helm</b> is an Emacs framework for incremental completions and narrowing
-  selections. It helps to rapidly complete file names, buffer names, or
-  any other Emacs interactions requiring selecting an item from a list of
-  possible choices.
-  Helm is a fork of <b>anything.el</b>, which was originally written by Tamas
-  Patrovic and can be considered to be its successor. <b>Helm</b> cleans the
-  legacy code that is leaner, modular, and unchained from constraints of
-  backward compatibility.
+  selections. It provides an easy-to-use API for developers wishing to build
+  their own Helm applications in Emacs, powerful search tools and dozens of
+  already built-in commands providing completion to almost everything.
+  It is a must-have for anyone using Emacs as a main work environment.
+  Helm has been widely adopted by many Emacs power-users.
+  It is available in Melpa and can be easily installed from the Emacs package manager.
 </p>
 
 ***
 <p align="center">
   <a href="https://emacs-helm.github.io/helm/"><b>Homepage</b></a> |
+  <a href="https://github.com/emacs-helm/helm/releases"><b>Downloads</b></a> |
   <a href="https://github.com/emacs-helm/helm/wiki#install"><b>Get started</b></a> |
   <a href="https://github.com/emacs-helm/helm/wiki"><b>Helm wiki</b></a> |
   <a href="https://github.com/emacs-helm/helm/wiki/FAQ"><b>FAQ</b></a>
@@ -33,11 +33,19 @@
 ***
 
 <p align="center">
-  Maintainance of Helm is a <a href="https://github.com/emacs-helm/helm/commits?author=thierryvolpiatto"><b>Lot of work</b></a>
-  I have done freely since 2011.<br>
-  As it is taking a lot of my time it starts to be more and more difficult<br>
+  Maintaining Helm requires a <a href="https://github.com/emacs-helm/helm/commits?author=thierryvolpiatto"><b>lot of work</b></a>,
+  which I have done voluntarily since 2011.<br>
+  As it demands lots of my time it gets increasingly difficult<br>
   maintaining it without financial help.<br>
-  If you feel Helm is making your daily work easier,<br><b>please consider making a donation.</b>
+  Thanks to all the people that are helping or have helped Helm development,<br>
+  but they are actually too few to continue serenely.<br>
+  By the way, after the release of version 3.0 I will have to stop<br>
+  developing Helm seriously until I get enough financial support,<br>
+  only providing a minimal bugfix maintenance.<br>
+  Thanks for your understanding<br>
+  If you feel Helm is making your daily work easier,<br>
+  <b>please consider making a donation.</b><br>
+
 </p>
 
 <p align="center">
@@ -45,7 +53,7 @@
 </p>
 
 <div align="center">
-  <a href="https://www.paypal.me/thierryvolpiatto/10">
+  <a href="https://www.paypal.me/tvolpiatto">
     <img title="Donate with Paypal"
          alt="Donate with Paypal"
          style="height: 50px; width: auto;"
@@ -57,11 +65,6 @@
          style="height: 50px; width: auto;"
          src="https://github.com/emacs-helm/helm/blob/master/images/patreon-25x.png?raw=true"></a>
   &nbsp;&nbsp;
-  <a href="https://gratipay.com/emacs-helm/">
-    <img title="Donate weekly using Gratipay"
-         alt="Donate monthly using Patreon"
-         style="height: 50px; width: auto;"
-         src="https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.png"></a>
 </div>
 
 ***

@@ -1,6 +1,6 @@
 ;;; helm-imenu.el --- Helm interface for Imenu -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -40,11 +40,6 @@
   :group 'helm-imenu
   :type 'function)
 
-(defcustom helm-imenu-lynx-style-map t
-  "Use Arrow keys to jump to occurences."
-  :group 'helm-imenu
-  :type  'boolean)
-
 (defcustom helm-imenu-all-buffer-assoc nil
   "Major mode association alist for `helm-imenu-in-all-buffers'.
 Allow `helm-imenu-in-all-buffers' searching in these associated buffers
@@ -70,7 +65,7 @@ even if not using a single source to display imenu in all buffers."
 (defcustom helm-imenu-type-faces
   '(("^Variables$" . font-lock-variable-name-face)
     ("^\\(Function\\|Functions\\|Defuns\\)$" . font-lock-function-name-face)
-    ("^\\(Types\\|Provides\\|Requires\\|Classes\\|Includes\\|Imports\\|Misc\\|Code\\)$" . font-lock-type-face))
+    ("^\\(Types\\|Provides\\|Requires\\|Classes\\|Class\\|Includes\\|Imports\\|Misc\\|Code\\)$" . font-lock-type-face))
   "Faces for showing type in helm-imenu.
 This is a list of cons cells.  The cdr of each cell is a face to be used,
 and it can also just be like \\='(:foreground \"yellow\").
@@ -81,6 +76,10 @@ Each car is a regexp match pattern of the imenu type string."
            (regexp :tag "Imenu type regexp pattern")
            (sexp :tag "Face"))))
 
+(defcustom helm-imenu-extra-modes nil
+  "Extra modes where helm-imenu-in-all-buffers should look into."
+  :group 'helm-imenu
+  :type '(repeat symbol))
 
 ;;; keymap
 (defvar helm-imenu-map
@@ -88,28 +87,37 @@ Each car is a regexp match pattern of the imenu type string."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "M-<down>") 'helm-imenu-next-section)
     (define-key map (kbd "M-<up>")   'helm-imenu-previous-section)
-    (when helm-imenu-lynx-style-map
-      (define-key map (kbd "<left>")    'helm-maybe-exit-minibuffer)
-      (define-key map (kbd "<right>")   'helm-execute-persistent-action)
-      (define-key map (kbd "M-<left>")  'helm-previous-source)
-      (define-key map (kbd "M-<right>") 'helm-next-source))
-    (delq nil map)))
+    map))
+
+(defcustom helm-imenu-lynx-style-map nil
+  "Use Arrow keys to jump to occurences."
+  :group 'helm-imenu
+  :type  'boolean
+  :set (lambda (var val)
+         (set var val)
+         (if val
+             (progn
+               (define-key helm-imenu-map (kbd "<right>")  'helm-execute-persistent-action)
+               (define-key helm-imenu-map (kbd "<left>")   'helm-maybe-exit-minibuffer))
+           (define-key helm-imenu-map (kbd "<right>") nil)
+           (define-key helm-imenu-map (kbd "<left>")  nil))))
 
 (defun helm-imenu-next-or-previous-section (n)
-  (with-helm-buffer
+  (with-helm-window
     (let* ((fn (lambda ()
-                 (car (split-string (helm-get-selection nil t)
-                                    helm-imenu-delimiter))))
+                 (car (split-string
+                       (buffer-substring
+                        (point-at-bol) (point-at-eol))
+                       helm-imenu-delimiter))))
            (curtype (funcall fn))
-           (move-fn (if (> n 0) #'helm-next-line #'helm-previous-line))
            (stop-fn (if (> n 0)
                         #'helm-end-of-source-p
-                        #'helm-beginning-of-source-p)))
-      (catch 'break
-        (while (not (funcall stop-fn))
-          (funcall move-fn)
-          (unless (string= curtype (funcall fn))
-            (throw 'break nil)))))))
+                      #'helm-beginning-of-source-p)))
+      (while (and (not (funcall stop-fn))
+                  (string= curtype (funcall fn)))
+        (forward-line n))
+      (helm-mark-current-line)
+      (helm-follow-execute-persistent-action-maybe))))
 
 (defun helm-imenu-next-section ()
   (interactive)
@@ -143,7 +151,8 @@ Each car is a regexp match pattern of the imenu type string."
    (nomark :initform t)
    (keymap :initform helm-imenu-map)
    (help-message :initform 'helm-imenu-help-message)
-   (action :initform 'helm-imenu-action)))
+   (action :initform 'helm-imenu-action)
+   (group :initform 'helm-imenu)))
 
 (defcustom helm-imenu-fuzzy-match nil
   "Enable fuzzy matching in `helm-source-imenu'."
@@ -198,7 +207,7 @@ Each car is a regexp match pattern of the imenu type string."
           helm-cached-imenu-candidates
         (setq imenu--index-alist nil)
         (prog1 (setq helm-cached-imenu-candidates
-                     (let ((index (imenu--make-index-alist t))) 
+                     (let ((index (imenu--make-index-alist t)))
                        (helm-imenu--candidates-1
                         (delete (assoc "*Rescan*" index) index))))
           (setq helm-cached-imenu-tick tick))))))
@@ -213,7 +222,8 @@ Each car is a regexp match pattern of the imenu type string."
                  for b in lst
                  for count from 1
                  when (with-current-buffer b
-                        (and (derived-mode-p 'prog-mode)
+                        (and (or (member major-mode helm-imenu-extra-modes)
+                                 (derived-mode-p 'prog-mode))
                              (helm-same-major-mode-p
                               cur-buf helm-imenu-all-buffer-assoc)))
                  if build-sources
@@ -272,24 +282,29 @@ Each car is a regexp match pattern of the imenu type string."
 
 (defun helm-imenu-transformer (candidates)
   (cl-loop for (k . v) in candidates
-        for types = (or (helm-imenu--get-prop k)
-                        (list "Function" k))
-        for bufname = (buffer-name
-                       (pcase v
-                         ((pred overlayp) (overlay-buffer v))
-                         ((or (pred markerp) (pred integerp))
-                          (marker-buffer v))))
-        for disp1 = (mapconcat
-                     (lambda (x)
-                       (propertize
-                        x 'face
-                        (cl-loop for (p . f) in helm-imenu-type-faces
-                                 when (string-match p x)
-                                 return f)))
-                     types helm-imenu-delimiter)
-        for disp = (propertize disp1 'help-echo bufname)
-        collect
-        (cons disp (cons k v))))
+           ;; (k . v) == (symbol-name . marker)
+           for bufname = (buffer-name
+                          (pcase v
+                            ((pred overlayp) (overlay-buffer v))
+                            ((or (pred markerp) (pred integerp))
+                             (marker-buffer v))))
+           for types = (or (helm-imenu--get-prop k)
+                           (list (if (with-current-buffer bufname
+                                       (derived-mode-p 'prog-mode))
+                                     "Function"
+                                   "Top level")
+                                 k))
+           for disp1 = (mapconcat
+                        (lambda (x)
+                          (propertize
+                           x 'face
+                           (cl-loop for (p . f) in helm-imenu-type-faces
+                                    when (string-match p x) return f
+                                    finally return 'default)))
+                        types helm-imenu-delimiter)
+           for disp = (propertize disp1 'help-echo bufname 'types types)
+           collect
+           (cons disp (cons k v))))
 
 ;;;###autoload
 (defun helm-imenu ()
@@ -304,7 +319,7 @@ Each car is a regexp match pattern of the imenu type string."
         (helm-execute-action-at-once-if-one
          helm-imenu-execute-action-at-once-if-one))
     (helm :sources 'helm-source-imenu
-          :default (list (concat "\\_<" str "\\_>") str)
+          :default (list (concat "\\_<" (and str (regexp-quote str)) "\\_>") str)
           :preselect str
           :buffer "*helm imenu*")))
 
@@ -337,7 +352,7 @@ or it have an association in `helm-imenu-all-buffer-assoc'."
                      (helm-imenu-candidates-in-all-buffers 'build-sources)
                      '(helm-source-imenu-all))))
     (helm :sources sources
-          :default (list (concat "\\_<" str "\\_>") str)
+          :default (list (concat "\\_<" (and str (regexp-quote str)) "\\_>") str)
           :preselect (unless helm--maybe-use-default-as-input str)
           :buffer "*helm imenu all*")))
 

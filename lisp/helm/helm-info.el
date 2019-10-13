@@ -1,6 +1,6 @@
 ;;; helm-info.el --- Browse info index with helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-lib)
+(require 'helm-utils)
 (require 'info)
 
 (declare-function Info-index-nodes "info" (&optional file))
@@ -52,8 +53,8 @@ files with `helm-info-at-point'."
                  (helm-candidate-buffer))
       (kill-buffer it))
   (unless (helm-candidate-buffer)
-    (save-window-excursion
-      (info file)
+    (save-selected-window
+      (info file " *helm info temp buffer*")
       (let ((tobuf (helm-candidate-buffer 'global))
             Info-history
             start end line)
@@ -77,7 +78,8 @@ files with `helm-info-at-point'."
                           "\n" "" (buffer-substring start end)))
               (with-current-buffer tobuf
                 (insert line)
-                (insert "\n")))))))))
+                (insert "\n")))))
+        (bury-buffer)))))
 
 (defun helm-info-goto (node-line)
   (Info-goto-node (car node-line))
@@ -147,6 +149,7 @@ Elements of the list are strings of Info file names without
 extensions (e.g. \"emacs\" for file \"emacs.info.gz\"). Info
 files are found by searching directories in
 `Info-directory-list'."
+  (info-initialize) ; Build Info-directory-list from INFOPATH (Issue #2118)
   (let ((files (cl-loop for d in (or Info-directory-list
                                      Info-default-directory-list)
                         when (file-directory-p d)
@@ -221,31 +224,36 @@ Info files are made available."
   (helm-build-sync-source "Info Pages"
     :init #'helm-info-pages-init
     :candidates (lambda () helm-info--pages-cache)
-    :action '(("Show with Info" .(lambda (node-str)
-                                  (info (replace-regexp-in-string
-                                         "^[^:]+: " "" node-str)))))
+    :action '(("Show with Info" .
+               (lambda (node-str)
+                 (info (replace-regexp-in-string
+                        "^[^:]+: " "" node-str)))))
     :requires-pattern 2)
   "Helm source for Info pages.")
 
 (defun helm-info-pages-init ()
   "Collect candidates for initial Info node Top."
-  (if helm-info--pages-cache
-      helm-info--pages-cache
-    (let ((info-topic-regexp "\\* +\\([^:]+: ([^)]+)[^.]*\\)\\.")
-          topics)
-      (with-temp-buffer
-        (Info-find-node "dir" "top")
-        (goto-char (point-min))
-        (while (re-search-forward info-topic-regexp nil t)
-          (push (match-string-no-properties 1) topics))
-        (kill-buffer))
-      (setq helm-info--pages-cache topics))))
+  (or helm-info--pages-cache
+      (let ((info-topic-regexp "\\* +\\([^:]+: ([^)]+)[^.]*\\)\\."))
+        (save-selected-window
+          (info "dir" " *helm info temp buffer*")
+          (Info-find-node "dir" "top")
+          (goto-char (point-min))
+          (while (re-search-forward info-topic-regexp nil t)
+            (push (match-string-no-properties 1)
+                  helm-info--pages-cache))
+          (kill-buffer)))))
 
 ;;;###autoload
 (defun helm-info-at-point ()
-  "Preconfigured `helm' for searching info at point.
-With a prefix-arg insert symbol at point."
+  "Preconfigured `helm' for searching info at point."
   (interactive)
+  (cl-loop for src in helm-info-default-sources
+           for name = (if (symbolp src)
+                          (assoc 'name (symbol-value src))
+                        (assoc 'name src))
+           unless name
+           do (warn "Couldn't build source `%S' without its info file" src))
   (helm :sources helm-info-default-sources
         :buffer "*helm info*"))
 

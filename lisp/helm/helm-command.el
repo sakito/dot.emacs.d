@@ -1,6 +1,6 @@
 ;;; helm-command.el --- Helm execute-exended-command. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ It is used only when `helm-M-x-fuzzy-match' is enabled."
   "Prefix argument before calling `helm-M-x'.")
 
 
-(cl-defun helm-M-x-get-major-mode-command-alist (mode-map)
+(defun helm-M-x-get-major-mode-command-alist (mode-map)
   "Return alist of MODE-MAP."
   (when mode-map
     (cl-loop for key being the key-seqs of mode-map using (key-bindings com)
@@ -246,6 +246,7 @@ than the default which is OBARRAY."
                 :input-history 'helm-M-x-input-history
                 :del-input nil
                 :help-message 'helm-M-x-help-message
+                :group 'helm-command
                 :keymap helm-M-x-map
                 :must-match t
                 :match-part (lambda (c) (car (split-string c)))
@@ -272,24 +273,28 @@ You can get help on each command by persistent action."
    (progn
      (setq helm-M-x-prefix-argument current-prefix-arg)
      (list current-prefix-arg (helm-M-x-read-extended-command))))
-  (unless (string= command-name "")
-    (let ((sym-com (and (stringp command-name) (intern-soft command-name))))
-      (when sym-com
-        ;; Avoid having `this-command' set to *exit-minibuffer.
-        (setq this-command sym-com
-              ;; Handle C-x z (repeat) Issue #322
-              real-this-command sym-com)
-        ;; If helm-M-x is called with regular emacs completion (kmacro)
-        ;; use the value of arg otherwise use helm-current-prefix-arg.
-        (let ((prefix-arg (or helm-current-prefix-arg helm-M-x-prefix-argument)))
-          ;; This ugly construct is to save history even on error.
-          (unless helm-M-x-always-save-history
-            (command-execute sym-com 'record))
-          (setq extended-command-history
-                (cons command-name
-                      (delete command-name extended-command-history)))
-          (when helm-M-x-always-save-history
-            (command-execute sym-com 'record)))))))
+  (when (stringp command-name)
+    (unless (string= command-name "")
+      (let ((sym-com (and (stringp command-name) (intern-soft command-name))))
+        (when sym-com
+          ;; Avoid having `this-command' set to *exit-minibuffer.
+          (setq this-command sym-com
+                ;; Handle C-x z (repeat) Issue #322
+                real-this-command sym-com)
+          ;; If helm-M-x is called with regular emacs completion (kmacro)
+          ;; use the value of arg otherwise use helm-current-prefix-arg.
+          (let ((prefix-arg (or helm-current-prefix-arg helm-M-x-prefix-argument)))
+            (cl-flet ((save-hist (command)
+                        (setq extended-command-history
+                              (cons command (delete command extended-command-history)))))
+              (condition-case-unless-debug err
+                  (progn
+                    (command-execute sym-com 'record)
+                    (save-hist command-name))
+                (error
+                 (when helm-M-x-always-save-history
+                   (save-hist command-name))
+                 (signal (car err) (cdr err)))))))))))
 (put 'helm-M-x 'interactive-only 'command-execute)
 
 (provide 'helm-command)

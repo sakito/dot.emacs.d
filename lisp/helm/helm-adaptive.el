@@ -3,7 +3,7 @@
 ;; Original Author: Tamas Patrovics
 
 ;; Copyright (C) 2007 Tamas Patrovics
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,7 +30,10 @@
 
 (defcustom helm-adaptive-history-file
   "~/.emacs.d/helm-adaptive-history"
-  "Path of file where history information is stored."
+  "Path of file where history information is stored.
+When nil history is not saved nor restored after emacs restart unless
+you save/restore `helm-adaptive-history' with something else like
+psession or desktop."
   :type 'string
   :group 'helm-adapt)
 
@@ -110,8 +113,7 @@ Format: ((SOURCE-NAME (SELECTED-CANDIDATE (PATTERN . NUMBER-OF-USE) ...) ...) ..
     (setq helm-adaptive-done t)
     (let ((source (helm-adapt-use-adaptive-p)))
       (when source
-        (let* ((source-name (or (assoc-default 'type source)
-                                (assoc-default 'name source)))
+        (let* ((source-name (assoc-default 'name source))
                (source-info (or (assoc source-name helm-adaptive-history)
                                 (progn
                                   (push (list source-name) helm-adaptive-history)
@@ -165,28 +167,30 @@ Format: ((SOURCE-NAME (SELECTED-CANDIDATE (PATTERN . NUMBER-OF-USE) ...) ...) ..
 (defun helm-adaptive-maybe-load-history ()
   "Load `helm-adaptive-history-file' which contain `helm-adaptive-history'.
 Returns nil if `helm-adaptive-history-file' doesn't exist."
-  (when (file-readable-p helm-adaptive-history-file)
+  (when (and helm-adaptive-history-file
+             (file-readable-p helm-adaptive-history-file))
     (load-file helm-adaptive-history-file)))
 
 (defun helm-adaptive-save-history (&optional arg)
   "Save history information to file given by `helm-adaptive-history-file'."
   (interactive "p")
-  (with-temp-buffer
-    (insert
-     ";; -*- mode: emacs-lisp -*-\n"
-     ";; History entries used for helm adaptive display.\n")
-    (prin1 `(setq helm-adaptive-history ',helm-adaptive-history)
-           (current-buffer))
-    (insert ?\n)
-    (write-region (point-min) (point-max) helm-adaptive-history-file nil
-                  (unless arg 'quiet))))
+  (when helm-adaptive-history-file
+    (with-temp-buffer
+      (insert
+       ";; -*- mode: emacs-lisp -*-\n"
+       ";; History entries used for helm adaptive display.\n")
+      (let (print-length print-level)
+        (prin1 `(setq helm-adaptive-history ',helm-adaptive-history)
+               (current-buffer)))
+      (insert ?\n)
+      (write-region (point-min) (point-max) helm-adaptive-history-file nil
+                    (unless arg 'quiet)))))
 
 (defun helm-adaptive-sort (candidates source)
   "Sort the CANDIDATES for SOURCE by usage frequency.
 This is a filtered candidate transformer you can use with the
 `filtered-candidate-transformer' attribute."
-  (let* ((source-name (or (assoc-default 'type source)
-                          (assoc-default 'name source)))
+  (let* ((source-name (assoc-default 'name source))
          (source-info (assoc source-name helm-adaptive-history)))
     (if source-info
         (let ((usage
@@ -256,10 +260,11 @@ Useful when you have a old or corrupted `helm-adaptive-history-file'."
     (delete-file helm-adaptive-history-file)))
 
 (defun helm-adaptive-compare (x y)
-  "Compare candidates X and Y taking into account that the
-candidate can be in (DISPLAY . REAL) format."
-  (equal (if (listp x) (cdr x) x)
-         (if (listp y) (cdr y) y)))
+  "Compare display parts if some of candidates X and Y.
+
+Arguments X and Y are cons cell in (DISPLAY . REAL) format or atoms."
+  (equal (if (listp x) (car x) x)
+         (if (listp y) (car y) y)))
 
 
 (provide 'helm-adaptive)

@@ -1,6 +1,6 @@
 ;;; helm-misc.el --- Various functions for helm -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -44,13 +44,6 @@
   :group 'helm-misc
   :type '(alist :key-type string :value-type function))
 
-(defcustom helm-mini-default-sources '(helm-source-buffers-list
-                                       helm-source-recentf
-                                       helm-source-buffer-not-found)
-  "Default sources list used in `helm-mini'."
-  :group 'helm-misc
-  :type '(repeat (choice symbol)))
-
 (defface helm-time-zone-current
     '((t (:foreground "green")))
   "Face used to colorize current time in `helm-world-time'."
@@ -64,13 +57,43 @@
 
 
 ;;; Latex completion
+;;
+;; Test
+;; (setq LaTeX-math-menu '("Math"
+;; ["foo" val0 t]
+;; ("bar"
+;; ["baz" val1 t])
+;; ("aze"
+;; ["zer" val2 t])
+;; ("AMS"
+;; ("rec"
+;; ["fer" val3 t])
+;; ("rty"
+;; ["der" val4 t]))
+;; ("ABC"
+;; ("xcv"
+;; ["sdf" val5 t])
+;; ("dfg"
+;; ["fgh" val6 t]))))
+;; (helm-latex-math-candidates)
+;; =>
+;; (("foo" . val0)
+;; ("baz" . val1)
+;; ("zer" . val2)
+;; ("fer" . val3)
+;; ("der" . val4)
+;; ("sdf" . val5)
+;; ("fgh" . val6))
+
 (defvar LaTeX-math-menu)
 (defun helm-latex-math-candidates ()
-  "Collect candidates for latex math completion."
-  (cl-loop for i in (cddr LaTeX-math-menu)
-        for elm = (cl-loop for s in i when (vectorp s)
-                        collect (cons (aref s 0) (aref s 1)))
-        append elm))
+  (cl-labels ((helm-latex--math-collect (L)
+                (cond ((vectorp L)
+                       (list (cons (aref L 0) (aref L 1))))
+                      ((listp L)
+                       (cl-loop for a in L nconc
+                                (helm-latex--math-collect a))))))
+    (helm-latex--math-collect LaTeX-math-menu)))
 
 (defvar helm-source-latex-math
   (helm-build-sync-source "Latex Math Menu"
@@ -106,11 +129,14 @@
 
 ;;; World time
 ;;
+(defvar zoneinfo-style-world-list)
+(defvar legacy-style-world-list)
+
 (defun helm-time-zone-transformer (candidates _source)
   (cl-loop for i in candidates
            for (z . p) in display-time-world-list
            collect
-           (cons 
+           (cons
             (cond ((string-match (format-time-string "%H:%M" (current-time)) i)
                    (propertize i 'face 'helm-time-zone-current))
                   ((string-match helm-time-zone-home-location i)
@@ -120,6 +146,22 @@
 
 (defvar helm-source-time-world
   (helm-build-in-buffer-source "Time World List"
+    :init (lambda ()
+            (require 'time)
+            (unless (and display-time-world-list
+                         (listp display-time-world-list))
+              ;; adapted from `time--display-world-list' from
+              ;; emacs-27 for compatibility as
+              ;; `display-time-world-list' is set by default to t.
+              (setq display-time-world-list
+                    ;; Determine if zoneinfo style timezones are
+                    ;; supported by testing that America/New York and
+                    ;; Europe/London return different timezones.
+                    (let ((nyt (format-time-string "%z" nil "America/New_York"))
+                          (gmt (format-time-string "%z" nil "Europe/London")))
+                      (if (string-equal nyt gmt)
+                          legacy-style-world-list
+                        zoneinfo-style-world-list)))))
     :data (lambda ()
             (with-temp-buffer
               (display-time-world-display display-time-world-list)
@@ -159,23 +201,6 @@ It is added to `extended-command-history'.
           (const :tag "Must match" t)
           (const :tag "Confirm" 'confirm)
           (const :tag "Always allow" nil)))
-
-;;; Shell history
-;;
-;;
-(defun helm-comint-input-ring-action (candidate)
-  "Default action for comint history."
-  (with-helm-current-buffer
-    (delete-region (comint-line-beginning-position) (point-max))
-    (insert candidate)))
-
-(defvar helm-source-comint-input-ring
-  (helm-build-sync-source "Comint history"
-    :candidates (lambda ()
-                  (with-helm-current-buffer
-                    (ring-elements comint-input-ring)))
-    :action 'helm-comint-input-ring-action)
-  "Source that provide helm completion against `comint-input-ring'.")
 
 
 ;;; Helm ratpoison UI
@@ -296,17 +321,6 @@ Default action change TZ environment variable locally to emacs."
               elm))))
     (delete-minibuffer-contents)
     (insert elm)))
-
-;;;###autoload
-(defun helm-comint-input-ring ()
-  "Preconfigured `helm' that provide completion of `comint' history."
-  (interactive)
-  (when (derived-mode-p 'comint-mode)
-    (helm :sources 'helm-source-comint-input-ring
-          :input (buffer-substring-no-properties (comint-line-beginning-position)
-                                                 (point-at-eol))
-          :buffer "*helm comint history*")))
-
 
 (provide 'helm-misc)
 

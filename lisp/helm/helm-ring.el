@@ -1,6 +1,6 @@
 ;;; helm-ring.el --- kill-ring, mark-ring, and register browsers for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,19 +46,22 @@ will not have anymore separators between candidates."
           (integer :tag "Max candidate offset"))
   :group 'helm-ring)
 
-(defcustom helm-register-max-offset 160
-  "Max size of string register entries before truncating."
-  :group 'helm-ring
-  :type  'integer)
-
 (defcustom helm-kill-ring-actions
-  '(("Yank" . helm-kill-ring-action-yank)
-    ("Delete" . helm-kill-ring-action-delete)
-    ("Append" . helm-kill-ring-append))
+  '(("Yank marked" . helm-kill-ring-action-yank)
+    ("Delete marked" . helm-kill-ring-action-delete))
   "List of actions for kill ring source."
   :group 'helm-ring
   :type '(alist :key-type string :value-type function))
 
+(defcustom helm-kill-ring-separator "\n"
+  "The separator used to separate marked candidates when yanking."
+  :group 'helm-ring
+  :type 'string)
+
+(defcustom helm-register-max-offset 160
+  "Max size of string register entries before truncating."
+  :group 'helm-ring
+  :type  'integer)
 
 ;;; Kill ring
 ;;
@@ -69,9 +72,9 @@ will not have anymore separators between candidates."
     (define-key map (kbd "M-y")     'helm-next-line)
     (define-key map (kbd "M-u")     'helm-previous-line)
     (define-key map (kbd "M-D")     'helm-kill-ring-delete)
-    (define-key map (kbd "C-M-w")   'helm-kill-ring-run-append)
     (define-key map (kbd "C-]")     'helm-kill-ring-toggle-truncated)
     (define-key map (kbd "C-c C-k") 'helm-kill-ring-kill-selection)
+    (define-key map (kbd "C-c d")   'helm-kill-ring-run-persistent-delete)
     map)
   "Keymap for `helm-show-kill-ring'.")
 
@@ -88,14 +91,18 @@ will not have anymore separators between candidates."
     :persistent-help "DoNothing"
     :keymap helm-kill-ring-map
     :migemo t
-    :multiline 'helm-kill-ring-max-offset)
+    :multiline 'helm-kill-ring-max-offset
+    :group 'helm-ring)
   "Source for browse and insert contents of kill-ring.")
 
 (defun helm-kill-ring-candidates ()
-  (cl-loop for kill in (helm-fast-remove-dups kill-ring :test 'equal)
-        unless (or (< (length kill) helm-kill-ring-threshold)
-                   (string-match "\\`[\n[:blank:]]+\\'" kill))
-        collect kill))
+  (cl-loop with cands = (helm-fast-remove-dups kill-ring :test 'equal)
+           for kill in (if (eq (helm-attr 'last-command) 'yank)
+                            (cdr cands)
+                          cands)
+           unless (or (< (length kill) helm-kill-ring-threshold)
+                      (string-match "\\`[\n[:blank:]]+\\'" kill))
+           collect kill))
 
 (defun helm-kill-ring-transformer (candidates _source)
   "Ensure CANDIDATES are not read-only."
@@ -139,41 +146,72 @@ Same as `helm-kill-selection-and-quit' called with a prefix arg."
         (cl-return)
         (helm-next-line))))
 
-(defun helm-kill-ring-action-yank (str)
+(defun helm-kill-ring-action-yank (_str)
+  "Insert concatenated marked candidates in current-buffer.
+
+When two prefix args are given prompt to choose separator, otherwise
+use `helm-kill-ring-separator' as default."
+  (let ((marked (helm-marked-candidates))
+        (sep (if (equal helm-current-prefix-arg '(16))
+                 (read-string "Separator: ")
+               helm-kill-ring-separator)))
+    (helm-kill-ring-action-yank-1
+     (cl-loop for c in (butlast marked)
+              concat (concat c sep) into str
+              finally return (concat str (car (last marked)))))))
+
+(defun helm-kill-ring-action-yank-1 (str)
   "Insert STR in `kill-ring' and set STR to the head.
+
+When called with a prefix arg, point and mark are exchanged without
+activating region.
 If this action is executed just after `yank',
 replace with STR as yanked string."
-  (with-helm-current-buffer
-    (unwind-protect
-         (progn
-           (setq kill-ring (delete str kill-ring))
-           ;; Adding a `delete-selection' property
-           ;; to `helm-kill-ring-action' is not working
-           ;; because `this-command' will be `helm-maybe-exit-minibuffer',
-           ;; so use this workaround (Issue #1520).
-           (when (and (region-active-p) delete-selection-mode)
-             (delete-region (region-beginning) (region-end)))
-           (if (not (eq (helm-attr 'last-command helm-source-kill-ring) 'yank))
-               (insert-for-yank str)
+  (let ((yank-fn (lambda (&optional before yank-pop)
+                   (insert-for-yank str)
+                   ;; Set the window start back where it was in
+                   ;; the yank command, if possible.
+                   (when yank-pop
+                     (set-window-start (selected-window) yank-window-start t))
+                   (when (or (equal helm-current-prefix-arg '(4)) before)
+                     ;; Same as exchange-point-and-mark but without
+                     ;; activating region.
+                     (goto-char (prog1 (mark t)
+                                  (set-marker (mark-marker)
+                                              (point)
+                                              helm-current-buffer)))))))
+    ;; Prevent inserting and saving highlighted items.
+    (set-text-properties 0 (length str) nil str)
+    (with-helm-current-buffer
+      (unwind-protect
+           (progn
+             (setq kill-ring (delete str kill-ring))
+             ;; Adding a `delete-selection' property
+             ;; to `helm-kill-ring-action' is not working
+             ;; because `this-command' will be `helm-maybe-exit-minibuffer',
+             ;; so use this workaround (Issue #1520).
+             (when (and (region-active-p) delete-selection-mode)
+               (delete-region (region-beginning) (region-end)))
+             (if (not (eq (helm-attr 'last-command helm-source-kill-ring) 'yank))
+                 (progn
+                   ;; Ensure mark is at beginning of inserted text.
+                   (push-mark)
+                   ;; When yanking in a helm minibuffer we need a small
+                   ;; delay to detect the mark in previous minibuffer. [1]
+                   (run-with-timer 0.01 nil yank-fn))
                ;; from `yank-pop'
                (let ((inhibit-read-only t)
                      (before (< (point) (mark t))))
                  (if before
                      (funcall (or yank-undo-function 'delete-region) (point) (mark t))
-                     (funcall (or yank-undo-function 'delete-region) (mark t) (point)))
+                   (funcall (or yank-undo-function 'delete-region) (mark t) (point)))
                  (setq yank-undo-function nil)
                  (set-marker (mark-marker) (point) helm-current-buffer)
-                 (insert-for-yank str)
-                 ;; Set the window start back where it was in the yank command,
-                 ;; if possible.
-                 (set-window-start (selected-window) yank-window-start t)
-                 (when before
-                   ;; This is like exchange-point-and-mark, but doesn't activate the mark.
-                   ;; It is cleaner to avoid activation, even though the command
-                   ;; loop would deactivate the mark because we inserted text.
-                   (goto-char (prog1 (mark t)
-                                (set-marker (mark-marker) (point) helm-current-buffer)))))))
-      (kill-new str))))
+                 ;; Same as [1] but use the same mark and point as in
+                 ;; the initial yank according to BEFORE even if no
+                 ;; prefix arg is given.
+                 (run-with-timer 0.01 nil yank-fn before 'pop))))
+        (kill-new str)))))
 (define-obsolete-function-alias 'helm-kill-ring-action 'helm-kill-ring-action-yank "2.4.0")
 
 (defun helm-kill-ring-action-delete (_candidate)
@@ -182,6 +220,27 @@ replace with STR as yanked string."
            do (setq kill-ring
                     (delete c kill-ring))))
 
+(defun helm-kill-ring-persistent-delete (_candidate)
+  (unwind-protect
+       (cl-loop for c in (helm-marked-candidates)
+                do (progn
+                     (helm-preselect (format "^%s" (regexp-quote c)))
+                     (setq kill-ring (delete c kill-ring))
+                     (helm-delete-current-selection)
+                     (helm--remove-marked-and-update-mode-line c)))
+    (with-helm-buffer
+      (setq helm-marked-candidates nil
+            helm-visible-mark-overlays nil))
+    (helm-force-update (helm-aif (helm-get-selection nil t) (regexp-quote it)))))
+
+(defun helm-kill-ring-run-persistent-delete ()
+  "Delete current candidate without quitting."
+  (interactive)
+  (with-helm-alive-p
+    (helm-attrset 'quick-delete '(helm-kill-ring-persistent-delete . never-split))
+    (helm-execute-persistent-action 'quick-delete)))
+(put 'helm-kill-ring-run-persistent-delete 'helm-only t)
+
 (defun helm-kill-ring-delete ()
   "Delete marked candidates from `kill-ring'.
 
@@ -189,20 +248,8 @@ This is a command for `helm-kill-ring-map'."
   (interactive)
   (with-helm-alive-p
     (helm-exit-and-execute-action 'helm-kill-ring-action-delete)))
+(put 'helm-kill-ring-delete 'helm-only t)
 
-(defun helm-kill-ring-append (_candidate)
-  "Yank concatenated marked candidates."
-  (let ((marked (helm-marked-candidates)))
-    (helm-kill-ring-action-yank
-     (cl-loop for cand in marked
-              for sep = (if (string-match "\n\\'" cand) "" "\n")
-              concat (concat cand sep)))))
-
-(defun helm-kill-ring-run-append ()
-  "Yank concatenated marked candidates."
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-kill-ring-append)))
 
 ;;;; <Mark ring>
 ;; DO NOT use these sources with other sources use
@@ -222,42 +269,49 @@ This is a command for `helm-kill-ring-map'."
 
 (defun helm-mark-ring-get-candidates ()
   (with-helm-current-buffer
-    (cl-loop with marks = (if (mark t) (cons (mark-marker) mark-ring) mark-ring)
-             for i in marks
+    (cl-loop with marks = (if (mark t)
+                              (cons (mark-marker) mark-ring)
+                            mark-ring)
+             for marker in marks
              with max-line-number = (line-number-at-pos (point-max))
              with width = (length (number-to-string max-line-number))
              for m = (format (concat "%" (number-to-string width) "d: %s")
-                             (line-number-at-pos i)
-                             (helm-mark-ring-line-string-at-pos i))
-             unless (and recip (member m recip))
-             collect m into recip
+                             (line-number-at-pos marker)
+                             (helm-mark-ring-line-string-at-pos marker))
+             unless (and recip (assoc m recip))
+             collect (cons m marker) into recip
              finally return recip)))
+
+(defun helm-mark-ring-default-action (candidate)
+  (let ((target (copy-marker candidate)))
+    (helm-aif (marker-buffer candidate)
+        (progn
+          (switch-to-buffer it)
+          (helm-log-run-hook 'helm-goto-line-before-hook)
+          (helm-match-line-cleanup)
+          (with-helm-current-buffer
+            (unless helm-yank-point (setq helm-yank-point (point))))
+          (helm-goto-char target)
+          (helm-highlight-current-line))
+      ;; marker points to no buffer, no need to dereference it, just
+      ;; delete it.
+      (setq mark-ring (delete target mark-ring))
+      (error "Marker points to no buffer"))))
 
 (defvar helm-source-mark-ring
   (helm-build-sync-source "mark-ring"
     :candidates #'helm-mark-ring-get-candidates
-    :action '(("Goto line"
-               . (lambda (candidate)
-                   (helm-goto-line (string-to-number candidate))))) 
-    :persistent-action (lambda (candidate)
-                         (switch-to-buffer helm-current-buffer)
-                         (helm-goto-line (string-to-number candidate)))
-    :persistent-help "Show this line"))
+    :action '(("Goto line" . helm-mark-ring-default-action))
+    :persistent-help "Show this line"
+    :group 'helm-ring))
 
 ;;; Global-mark-ring
 (defvar helm-source-global-mark-ring
   (helm-build-sync-source "global-mark-ring"
     :candidates #'helm-global-mark-ring-get-candidates
-    :action '(("Goto line"
-              . (lambda (candidate)
-                  (let ((items (split-string candidate ":")))
-                    (switch-to-buffer (cl-second items))
-                    (helm-goto-line (string-to-number (car items)))))))
-    :persistent-action (lambda (candidate)
-                         (let ((items (split-string candidate ":")))
-                           (switch-to-buffer (cl-second items))
-                           (helm-goto-line (string-to-number (car items)))))
-    :persistent-help "Show this line"))
+    :action '(("Goto line" . helm-mark-ring-default-action))
+    :persistent-help "Show this line"
+    :group 'helm-ring))
 
 (defun helm-global-mark-ring-format-buffer (marker)
   (with-current-buffer (marker-buffer marker)
@@ -275,51 +329,14 @@ This is a command for `helm-kill-ring-map'."
 (defun helm-global-mark-ring-get-candidates ()
   (let ((marks global-mark-ring))
     (when marks
-      (cl-loop for i in marks
-               for mb = (marker-buffer i)
+      (cl-loop for marker in marks
+               for mb = (marker-buffer marker)
                for gm = (unless (or (string-match "^ " (format "%s" mb))
                                     (null mb))
-                          (helm-global-mark-ring-format-buffer i))
-               when (and gm (not (member gm recip)))
-               collect gm into recip
+                          (helm-global-mark-ring-format-buffer marker))
+               when (and gm (not (assoc gm recip)))
+               collect (cons gm marker) into recip
                finally return recip))))
-
-(defun helm--push-mark (&optional location nomsg activate)
-  "[Internal] Don't use directly, use instead `helm-push-mark-mode'."
-  (unless (null (mark t))
-    (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
-    (when (> (length mark-ring) mark-ring-max)
-      (move-marker (car (nthcdr mark-ring-max mark-ring)) nil)
-      (setcdr (nthcdr (1- mark-ring-max) mark-ring) nil)))
-  (set-marker (mark-marker) (or location (point)) (current-buffer))
-  ;; Now push the mark on the global mark ring.
-  (setq global-mark-ring (cons (copy-marker (mark-marker))
-                               ;; Avoid having multiple entries
-                               ;; for same buffer in `global-mark-ring'.
-                               (cl-loop with mb = (current-buffer)
-                                        for m in global-mark-ring
-                                        for nmb = (marker-buffer m)
-                                        unless (eq mb nmb)
-                                        collect m)))
-  (when (> (length global-mark-ring) global-mark-ring-max)
-    (move-marker (car (nthcdr global-mark-ring-max global-mark-ring)) nil)
-    (setcdr (nthcdr (1- global-mark-ring-max) global-mark-ring) nil))
-  (or nomsg executing-kbd-macro (> (minibuffer-depth) 0)
-      (message "Mark set"))
-  (when (or activate (not transient-mark-mode))
-    (set-mark (mark t)))
-  nil)
-
-;;;###autoload
-(define-minor-mode helm-push-mark-mode
-    "Provide an improved version of `push-mark'.
-Modify the behavior of `push-mark' to update
-the `global-mark-ring' after each new visit."
-  :group 'helm-ring
-  :global t
-  (if helm-push-mark-mode
-      (advice-add 'push-mark :override #'helm--push-mark)
-      (advice-remove 'push-mark #'helm--push-mark)))
 
 ;;;; <Register>
 ;;; Insert from register
@@ -335,7 +352,8 @@ the `global-mark-ring' after each new visit."
                           for register = (car candidate)
                           do (setq register-alist
                                 (delq (assoc register register-alist)
-                                      register-alist)))))))
+                                      register-alist))))))
+    :group 'helm-ring)
   "See (info \"(emacs)Registers\")")
 
 (defun helm-register-candidates ()
@@ -389,16 +407,17 @@ the `global-mark-ring' after each new visit."
              (list (format "%s: %s\n" lines
                            (truncate-string-to-width
                             (mapconcat 'identity (list (car val))
-                                       "^J") (- (window-width) 15)))
+                                       "^J")
+                            (- (window-width) 15)))
                    'insert-register)))
           ((stringp val)
            (list
-            ;; without properties
             (concat (substring-no-properties
                      val 0 (min (length val) helm-register-max-offset))
                     (if (> (length val) helm-register-max-offset)
                         "[...]" ""))
             'insert-register
+            'kill-new
             'append-to-register
             'prepend-to-register)))
         unless (null string-actions) ; Fix Issue #1107.
@@ -411,6 +430,11 @@ the `global-mark-ring' after each new visit."
            '((insert-register
               "Insert Register" .
               (lambda (c) (insert-register (car c))))
+             (kill-new
+              "Kill Register" .
+              (lambda (c) (with-temp-buffer
+                            (insert-register (car c))
+                            (kill-new (buffer-string)))))
              (jump-to-register
               "Jump to Register" .
               (lambda (c) (jump-to-register (car c))))
@@ -490,33 +514,71 @@ Define your macros with `f3' and `f4'.
 See (info \"(emacs) Keyboard Macros\") for detailed infos.
 This command is useful when used with persistent action."
   (interactive)
-  (helm :sources
-        (helm-build-sync-source "Kmacro"
-          :candidates (lambda ()
-                        (helm-fast-remove-dups
-                         (cons (kmacro-ring-head)
-                               kmacro-ring)
-                         :test 'equal))
-          :multiline t
-          :candidate-transformer
-          (lambda (candidates)
-            (cl-loop for c in candidates collect
-                     (propertize (help-key-description (car c) nil)
-                                 'helm-realvalue c)))
-          :persistent-help "Execute kmacro"
-          :help-message 'helm-kmacro-help-message
-          :action
-          (helm-make-actions
-           "Execute kmacro (`C-u <n>' to execute <n> times)"
-           (lambda (candidate)
-             (interactive)
-             ;; Move candidate on top of list for next use.
-             (setq kmacro-ring (delete candidate kmacro-ring))
-             (kmacro-push-ring)
-             (kmacro-split-ring-element candidate)
-             (kmacro-exec-ring-item
-              candidate helm-current-prefix-arg))))
-        :buffer "*helm kmacro*"))
+  (let ((helm-quit-if-no-candidate
+         (lambda () (message "No kbd macro has been defined"))))
+    (helm :sources
+          (helm-build-sync-source "Kmacro"
+            :candidates (lambda ()
+                          (helm-fast-remove-dups
+                           (cons (kmacro-ring-head)
+                                 kmacro-ring)
+                           :test 'equal))
+            :multiline t
+            :candidate-transformer
+            (lambda (candidates)
+              (cl-loop for c in candidates collect
+                       (propertize (help-key-description (car c) nil)
+                                   'helm-realvalue c)))
+            :persistent-help "Execute kmacro"
+            :help-message 'helm-kmacro-help-message
+            :action
+            (helm-make-actions
+             "Execute kmacro (`C-u <n>' to execute <n> times)"
+             'helm-kbd-macro-execute
+             "Concat marked macros"
+             'helm-kbd-macro-concat-macros
+             "Delete marked macros"
+             'helm-kbd-macro-delete-macro
+             "Edit marked macro"
+             'helm-kbd-macro-edit-macro)
+            :group 'helm-ring)
+          :buffer "*helm kmacro*")))
+
+(defun helm-kbd-macro-execute (candidate)
+  ;; Move candidate on top of list for next use.
+  (setq kmacro-ring (delete candidate kmacro-ring))
+  (kmacro-push-ring)
+  (kmacro-split-ring-element candidate)
+  (kmacro-exec-ring-item
+   candidate helm-current-prefix-arg))
+
+(defun helm-kbd-macro-concat-macros (_candidate)
+  (let ((mkd (helm-marked-candidates)))
+    (when (cdr mkd)
+      (kmacro-push-ring)
+      (setq last-kbd-macro
+            (mapconcat 'identity
+                       (cl-loop for km in mkd
+                                if (vectorp km)
+                                append (cl-loop for k across km collect
+                                                (key-description (vector k)))
+                                into result
+                                else collect (car km) into result
+                                finally return result)
+                       "")))))
+
+(defun helm-kbd-macro-delete-macro (_candidate)
+  (let ((mkd (helm-marked-candidates)))
+    (kmacro-push-ring)
+    (cl-loop for km in mkd
+             do (setq kmacro-ring (delete km kmacro-ring)))
+    (kmacro-pop-ring1)))
+
+(defun helm-kbd-macro-edit-macro (candidate)
+  (kmacro-push-ring)
+  (setq kmacro-ring (delete candidate kmacro-ring))
+  (kmacro-split-ring-element candidate)
+  (kmacro-edit-macro))
 
 (provide 'helm-ring)
 

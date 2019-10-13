@@ -1,6 +1,8 @@
 ;;; helm-semantic.el --- Helm interface for Semantic -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2012 ~ 2017 Daniel Hackney <dan@haxney.org>
+;;               2012 ~ 2019  Thierry Volpiatto<thierry.volpiatto@gmail.com>
+
 ;; Author: Daniel Hackney <dan@haxney.org>
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -33,11 +35,6 @@
   "Semantic tags related libraries and applications for helm."
   :group 'helm)
 
-(defcustom helm-semantic-lynx-style-map t
-  "Use Arrow keys to jump to occurences."
-  :group 'helm-semantic
-  :type  'boolean)
-
 (defcustom helm-semantic-display-style
   '((python-mode . semantic-format-tag-summarize)
     (c-mode . semantic-format-tag-concise-prototype-c-mode)
@@ -62,10 +59,20 @@ you have completion on these functions with `C-M i' in the customize interface."
 (defvar helm-semantic-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
-    (when helm-semantic-lynx-style-map
-      (define-key map (kbd "<left>")  'helm-maybe-exit-minibuffer)
-      (define-key map (kbd "<right>") 'helm-execute-persistent-action))
-    (delq nil map)))
+    map))
+
+(defcustom helm-semantic-lynx-style-map nil
+  "Use Arrow keys to jump to occurences."
+  :group 'helm-semantic
+  :type  'boolean
+  :set (lambda (var val)
+         (set var val)
+         (if val
+             (progn
+               (define-key helm-semantic-map (kbd "<right>")  'helm-execute-persistent-action)
+               (define-key helm-semantic-map (kbd "<left>")   'helm-maybe-exit-minibuffer))
+           (define-key helm-semantic-map (kbd "<right>") nil)
+           (define-key helm-semantic-map (kbd "<left>")  nil))))
 
 ;; Internals vars
 (defvar helm-semantic--tags-cache nil)
@@ -116,7 +123,7 @@ you have completion on these functions with `C-M i' in the customize interface."
   (with-current-buffer helm-buffer
     (when (looking-at " ")
       (goto-char (next-single-property-change
-                  (point-at-bol) 'semantic-tag nil (point-at-eol)))) 
+                  (point-at-bol) 'semantic-tag nil (point-at-eol))))
     (let ((tag (get-text-property (point) 'semantic-tag)))
       (semantic-go-to-tag tag)
       (unless persistent
@@ -160,10 +167,13 @@ you have completion on these functions with `C-M i' in the customize interface."
   "Preconfigured `helm' for `semantic'.
 If ARG is supplied, pre-select symbol at point instead of current"
   (interactive "P")
-  (let ((tag (helm-aif (semantic-current-tag-parent)
-                  (cons (format "\\_<%s\\_>" (car it))
-                        (format "\\_<%s\\_>" (car (semantic-current-tag))))
-                (format "\\_<%s\\_>" (car (semantic-current-tag))))))
+  (let ((tag (helm-aif (car (semantic-current-tag-parent))
+                 (let ((curtag (car (semantic-current-tag))))
+                   (if (string= it curtag)
+                       (format "\\_<%s\\_>" curtag)
+                     (cons (format "\\_<%s\\_>" it)
+                           (format "\\_<%s\\_>" curtag))))
+               (format "\\_<%s\\_>" (car (semantic-current-tag))))))
     (unless helm-source-semantic
       (setq helm-source-semantic
             (helm-make-source "Semantic Tags" 'helm-semantic-source
@@ -202,13 +212,16 @@ Fill in the symbol at point by default."
          (helm-execute-action-at-once-if-one
           (and imenu-p
                helm-imenu-execute-action-at-once-if-one))
-         (tag (helm-aif (semantic-current-tag-parent)
-                  (cons (format "\\_<%s\\_>" (car it))
-                        (format "\\_<%s\\_>" (car (semantic-current-tag))))
+         (tag (helm-aif (car (semantic-current-tag-parent))
+                  (let ((curtag (car (semantic-current-tag))))
+                    (if (string= it curtag)
+                        (format "\\_<%s\\_>" curtag)
+                      (cons (format "\\_<%s\\_>" it)
+                            (format "\\_<%s\\_>" curtag))))
                 (format "\\_<%s\\_>" (car (semantic-current-tag))))))
     (helm :sources source
           :candidate-number-limit 9999
-          :default (and imenu-p (list (concat "\\_<" str "\\_>") str))
+          :default (and imenu-p (list (concat "\\_<" (and str (regexp-quote str)) "\\_>") str))
           :preselect (if (or arg imenu-p) str tag)
           :buffer "*helm semantic/imenu*")))
 

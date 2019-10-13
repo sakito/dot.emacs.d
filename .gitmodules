@@ -95,3 +95,6 @@
 [submodule "rc.d/zsh.d/plugins/completions"]
 	path = rc.d/zsh.d/plugins/completions
 	url = git://github.com/zsh-users/zsh-completions.git
+[submodule "local-lisp/async"]
+	path = local-lisp/async
+	url = git://github.com/jwiegley/emacs-async.git

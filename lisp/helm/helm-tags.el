@@ -1,6 +1,6 @@
 ;;; helm-tags.el --- Helm for Etags. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2017 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -234,6 +234,7 @@ If no entry in cache, create one."
                                               (helm-etags-action-goto
                                                'find-file-other-frame
                                                c))))
+    :group 'helm-tags
     :persistent-help "Go to line"
     :persistent-action (lambda (candidate)
                          (helm-etags-action-goto 'find-file candidate)
@@ -260,6 +261,7 @@ If no entry in cache, create one."
 (defun helm-etags-action-goto (switcher candidate)
   "Helm default action to jump to an etags entry in other window."
   (require 'etags)
+  (deactivate-mark t)
   (helm-log-run-hook 'helm-goto-line-before-hook)
   (let* ((split (helm-grep-split-line candidate))
          (fname (cl-loop for tagf being the hash-keys of helm-etags-cache
@@ -309,13 +311,7 @@ This function aggregates three sources of tag files:
         (str (if (region-active-p)
                  (buffer-substring-no-properties
                   (region-beginning) (region-end))
-                 ;; Use a raw syntax-table to determine tap.
-                 ;; This may be wrong when calling etags
-                 ;; with hff from a buffer that use
-                 ;; a different syntax, but most of the time it
-                 ;; should be better.
-                 (with-syntax-table (standard-syntax-table)
-                   (thing-at-point 'symbol)))))
+               (thing-at-point 'symbol))))
     (if (cl-notany 'file-exists-p tag-files)
         (message "Error: No tag file found.\
 Create with etags shell command, or visit with `find-tag' or `visit-tags-table'.")
