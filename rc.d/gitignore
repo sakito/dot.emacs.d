@@ -1,0 +1,16 @@
+# Backup files
+*~
+
+# Compiled
+*.elc
+*.pyc
+*.o
+*.c
+
+# Mac
+.DS_Store
+
+# その他
+.hg/
+
+# end

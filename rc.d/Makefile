@@ -8,18 +8,14 @@ all:
 
 dotfiles:
 	ln -sf ${CWD}/hgignore ${HOME}/.hgignore
-	ln -sf ${CWD}/pip ${HOME}/.pip
-	#ln -sf ${CWD}/screenrc ${HOME}/.screenrc
-	ln -sf ${CWD}/zlogin ${HOME}/.zlogin
 	ln -sf ${CWD}/hgrc ${HOME}/.hgrc
+	ln -sf ${CWD}/gitconfig ${HOME}/.gitconfig
+	ln -sf ${CWD}/gitignore ${HOME}/.config/git/ignore
+	ln -sf ${CWD}/pip ${HOME}/.pip
+	ln -sf ${CWD}/zlogin ${HOME}/.zlogin
 	ln -sf ${CWD}/pythonrc.py ${HOME}/.pythonrc.py
 	ln -sf ${CWD}/tmux.conf ${HOME}/.tmux.conf
 	ln -sf ${CWD}/zshrc ${HOME}/.zshrc
-	#ln -sf ${CWD}/ccl-init.lisp ${HOME}/.ccl-init.lisp
-	#[ -d ${HOME}/.buildout ] || mkdir ${HOME}/.buildout
-	#cp ${CWD}/buildout/default.cfg ${HOME}/.buildout
-	#echo "eggs-directory = $HOME/var/eggs" >> ${HOME}/.buildout/default.cfg
-	#echo "download-cache = $HOME/var/cache" >> ${HOME}/.buildout/default.cfg
 
 brewinstall:
 	brew install coreutils findutils
@@ -32,31 +28,31 @@ brewinstall:
 	brew install git
 	brew install gauche go
 
-portinstall:
-	sudo port install nkf wget lftp libxml2 libxslt w3m apg
-	sudo port install coreutils findutils
-	sudo port install zsh-devel +mp_completion +pcre +examples +doc
-	sudo port install screen
-	sudo port install tmux +screen
-	sudo port install gawk gsed
-	sudo port install yasm
-	sudo port install scala29 ocaml smlnj
-	sudo port install gauche slib
-	sudo port install ccl lisp-hyperspec
-	sudo port install subversion +bash_completion +mod_dav_svn +tools +unicode_path
-	sudo port install subversion-python27bindings
-	sudo port install readline
-	sudo port install jpeg
-	sudo port install lcms
-	sudo port install rlwrap
-	sudo port install webp
+#portinstall:
+#	sudo port install nkf wget lftp libxml2 libxslt w3m apg
+#	sudo port install coreutils findutils
+#	sudo port install zsh-devel +mp_completion +pcre +examples +doc
+#	sudo port install screen
+#	sudo port install tmux +screen
+#	sudo port install gawk gsed
+#	sudo port install yasm
+#	sudo port install scala29 ocaml smlnj
+#	sudo port install gauche slib
+#	sudo port install ccl lisp-hyperspec
+#	sudo port install subversion +bash_completion +mod_dav_svn +tools +unicode_path
+#	sudo port install subversion-python27bindings
+#	sudo port install readline
+#	sudo port install jpeg
+#	sudo port install lcms
+#	sudo port install rlwrap
+#	sudo port install webp
 
 # no test sorry
 pipinstall:
 	curl -O https://raw.github.com/pypa/virtualenv/develop/virtualenv.py
 	python virtualenv.py --distribute -p /usr/local/bin/python ${HOME}/local
 	source ${HOME}/local/bin/activate
-	easy_install readline
-	echo "/opt/local/lib/svn-python2.7" >  ${HOME}/local/lib/python2.7/site-packages/svn-python.pth
+	pip install readline
 	pip -r requirements.txt
 
+# end

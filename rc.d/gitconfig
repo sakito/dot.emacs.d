@@ -1,17 +1,18 @@
 [user]
-	name = sakito
-	email = sakito@sakito.com
-[core]
-	excludesfile = ~/.gitignore_global
+    name = sakito
+    email = sakito@sakito.com
 [color]
     ui = true
-[alias]
-    st = status
-    ci = commit
-    co = checkout
 [difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+    cmd = /usr/local/bin/meld $LOCAL $REMOTE
+    path = 
 [mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+    cmd = /usr/local/bin/meld $LOCAL $BASE $REMOTE --auto-merge --output=$MERGED
+    trustExitCode = true
+[alias]
+    st = status -s
+    co = checkout
+    ci = commit
+    b = branch --no-merged
+
+# global な gitignore は $HOME/.config/git/ignore に配置
