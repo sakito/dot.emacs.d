@@ -102,9 +102,11 @@ export HOMEBREW_GITHUB_API_TOKEN=$(security find-generic-password -a homebrew-gi
 export PATH=/usr/local/opt/libxml2/bin:${PATH}
 export PATH=/usr/local/opt/texinfo/bin:${PATH}
 export PATH=/usr/local/opt/openssl/bin:${PATH}
+export PATH=/usr/local/opt/libiconv/bin:${PATH}
 
-export LDFLAGS=-L/usr/local/opt/readline/lib:/usr/local/opt/openssl/lib:${LDFLAGS}:/usr/local/opt/libxml2/lib
-export CPPFLAGS=-I/usr/local/opt/readline/include:/usr/local/opt/oepnssl/include:${CPPFLAGS}:/usr/local/opt/libxml2/include
+
+export LDFLAGS=-L/usr/local/opt/readline/lib:/usr/local/opt/openssl/lib:${LDFLAGS}:/usr/local/opt/libxml2/lib:/usr/local/opt/libiconv/lib
+export CPPFLAGS=-I/usr/local/opt/readline/include:/usr/local/opt/oepnssl/include:${CPPFLAGS}:/usr/local/opt/libxml2/include:/usr/local/opt/libiconv/include
 
 export PKG_CONFIG_PATH="/usr/local/opt/libxml2/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig"
 
@@ -150,6 +152,7 @@ export HGENCODING=utf-8
 export PATH=${HOME}/.emacs.d/bin:${PATH}
 export PATH=${HOME}/bin:${PATH}
 export PATH=${HOME}/opt/py36/bin:${PATH}
+export PATH=${HOME}/opt/py27/bin:$PATH
 
 #-----------------------------------------------------------------
 # 非端末プロセスなら終了
@@ -361,6 +364,7 @@ fignore=(.o .dvi .aux .toc - \~)
 # rm -f ~/.zcompdump; compinit
 fpath=(${HOME}/.emacs.d/rc.d/zsh.d/completions/src $fpath)
 fpath=(/usr/local/share/zsh-completions $fpath)
+fpath=(/usr/local/etc/bash_completion.d $fpath)
 # 補完の利用設定
 autoload -Uz compinit; compinit
 
@@ -738,8 +742,8 @@ alias j=jobs
 alias reload="source ~/.zshrc"
 
 # python
-alias hgpush="hg push --new-branch"
-alias ipython="ipython -i -c '%doctest_mode' --pylab "
+#alias hgpush="hg push --new-branch"
+#alias ipython="ipython -i -c '%doctest_mode' --pylab "
 alias lab="\jupyter-lab"
 
 alias pipin="pip3 install -U"
@@ -748,7 +752,7 @@ alias pipout="pip3 list --outdated"
 
 # brew
 alias brewout="brew update; brew outdated"
-#alias brewout="brew outdated"
+alias brewin="brew upgrade"
 
 # http://d.hatena.ne.jp/mollifier/20101227/p1
 autoload -Uz zmv
@@ -758,8 +762,8 @@ alias zmv='noglob zmv -W'
 alias -g V="| /usr/share/vim/vim74/macros/less.sh"
 
 # 自分に依存した設定
-alias sakuradiary="~/Sites/sakitojp/bin/scp_diary.command"
-alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
+alias sakuradiary="~/Sites/sakitojp/bin/scp_diary.sh"
+#alias site_sync="~/Sites/sakitojp/bin/site_sync.sh"
 
 #-----------------------------------------------------------------
 # キーバインド設定

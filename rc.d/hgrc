@@ -22,7 +22,7 @@ histedit=
 
 # 以下は非標準プラグイン
 #hggit=
-flow=~/.emacs.d/share/python/hgflow.py
+#flow=~/.emacs.d/share/python/hgflow.py
 
 [subrepos]
 git:allowed=true

@@ -133,8 +133,6 @@
 (require 'init_css)
 ;; nxml-mode
 (require 'init_nxml)
-;; scala-mode
-;; (require 'init_scala)
 ;; haskel-mode
 ;; (require 'init_haskell)
 ;; php-mode

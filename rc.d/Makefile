@@ -10,6 +10,7 @@ dotfiles:
 	ln -sf ${CWD}/hgignore ${HOME}/.hgignore
 	ln -sf ${CWD}/hgrc ${HOME}/.hgrc
 	ln -sf ${CWD}/gitconfig ${HOME}/.gitconfig
+	[ -d ${HOME}/.config/git ] || mkdir -p ${HOME}/.config/git
 	ln -sf ${CWD}/gitignore ${HOME}/.config/git/ignore
 	ln -sf ${CWD}/pip ${HOME}/.pip
 	ln -sf ${CWD}/zlogin ${HOME}/.zlogin
@@ -18,15 +19,17 @@ dotfiles:
 	ln -sf ${CWD}/zshrc ${HOME}/.zshrc
 
 brewinstall:
-	brew install coreutils findutils
-	brew install readline
-	brew install tmux reattach-to-user-namespace
-	brew install zsh
-	brew install wget
 	brew install autoconf automake
+	brew install coreutils findutils
 	brew install texinfo
-	brew install git
-	brew install gauche go
+	brew install readline ncurses
+	brew install gawk gnu-sed gauche go
+	brew install zsh zsh-completions
+	brew install git cmake
+	brew install tmux reattach-to-user-namespace
+	brew install hdf5 icu4c xz
+	brew install wget ffmpeg imagemagick peco
+
 
 #portinstall:
 #	sudo port install nkf wget lftp libxml2 libxslt w3m apg
