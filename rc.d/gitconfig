@@ -9,6 +9,10 @@
 [mergetool "sourcetree"]
     cmd = /usr/local/bin/meld $LOCAL $BASE $REMOTE --auto-merge --output=$MERGED
     trustExitCode = true
+[merge]
+    ff = false
+[pull]
+    ff = only
 [alias]
     st = status -s
     co = checkout
