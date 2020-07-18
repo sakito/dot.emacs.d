@@ -98,3 +98,6 @@
 [submodule "local-lisp/async"]
 	path = local-lisp/async
 	url = git://github.com/jwiegley/emacs-async.git
+[submodule "lisp/japanese-holidays"]
+	path = lisp/japanese-holidays
+	url = git://github.com/emacs-jp/japanese-holidays.git
