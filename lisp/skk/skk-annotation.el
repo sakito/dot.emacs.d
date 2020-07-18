@@ -193,10 +193,12 @@
 
   (autoload 'skk-lookup-get-content "skk-lookup")
   (autoload 'run-python "python")
-  (autoload 'python-send-command "python")
-  (autoload 'python-send-string "python")
+;  (autoload 'python-send-command "python")
+;  (autoload 'python-send-string "python")
   (autoload 'python-check-comint-prompt "python")
-  (autoload 'python-proc "python")
+;  (autoload 'python-proc "python")
+  (autoload 'python-shell-internal-get-or-create-process "python")
+  (autoload 'python-shell-get-process-name "python")
   (autoload 'html2text "html2text")
   (autoload 'html2text-delete-tags "html2text")
   (autoload 'url-hexify-string "url-util")
@@ -703,14 +705,20 @@ NO-PREVIOUS-ANNOTATION を指定 (\\[Universal-Argument] \\[skk-annotation-ad
 キー入力の内容によってアノテーションのコピー、情報源 URL のブラウズ、または
 別の情報源からの意味取得を行う。"
   (let* ((copy-command (key-binding skk-annotation-copy-key))
-	 (browse-command (key-binding skk-annotation-browse-key))
+;;;	 (browse-command (key-binding skk-annotation-browse-key))
+         ;; * skk-kakutei-key が 標準 C-j であれば、browse-command は C-o の open-line() となる。
+         ;; * skk-kakutei-key が skk-annotation-browse-key と衝突する C-o であれば、
+         ;;   browse-command は skk-insert() となる。 SPC も skk-insert() であるため、
+         ;;   結果として SPC の打鍵で browse-command となってしまう。
+         ;; * skk-kakutei-key が skk-insert() なのは skk-compile-rule-list() 参照のこと。
+         (it (key-binding skk-annotation-browse-key))     ; Fix #58
+         (browse-command (if (eq 'skk-insert it) nil it)) ; Fix #58
 	 (list (list copy-command browse-command))
 	 event key command urls note cache char digit exit)
     (while (and (not exit)
 		list
-		(or (memq this-command
-			  '(skk-annotation-wikipedia-region-or-at-point
-			    skk-annotation-lookup-region-or-at-point))
+		(or (memq this-command '(skk-annotation-wikipedia-region-or-at-point
+			                 skk-annotation-lookup-region-or-at-point))
 		    (eq skk-henkan-mode 'active))
 		(if digit
 		    t
@@ -722,17 +730,14 @@ NO-PREVIOUS-ANNOTATION を指定 (\\[Universal-Argument] \\[skk-annotation-ad
 		    (progn
 		      (setq event (next-command-event)
 			    key (skk-event-key event)
-			    command (key-binding
-				     (if (featurep 'xemacs) event key)))
+			    command (key-binding (if (featurep 'xemacs) event key)))
 		      ;; Return value of the following expression is important.
 		      (or (memq command list)
 			  (eq command 'digit-argument)
-			  (memq command
-				'(skk-annotation-wikipedia-region-or-at-point
-				  skk-annotation-lookup-region-or-at-point))
+			  (memq command '(skk-annotation-wikipedia-region-or-at-point
+				          skk-annotation-lookup-region-or-at-point))
 			  (equal (key-description key)
-				 (key-description
-				  skk-annotation-wikipedia-key))))
+				 (key-description skk-annotation-wikipedia-key))))
 		  (quit
 		   (when (eval-when-compile (and (featurep 'xemacs)
 						 (= emacs-major-version 21)
@@ -765,46 +770,43 @@ NO-PREVIOUS-ANNOTATION を指定 (\\[Universal-Argument] \\[skk-annotation-ad
 		 (when url
 		   (setq urls (cons url urls)))))
 	     (unless (equal annotation "")
-	       (cond
-		(urls
-		 (dolist (url urls)
-		   (cond ((consp url)
-			  (setq exit t)
-			  (apply (car url) (cdr url)))
-			 (t
-			  (browse-url url))))
-		 (skk-message "注釈のソースをブラウズしています..."
-			      "Browsing originals for the current notes..."))
-		(t
-		 (skk-message "注釈のソースが見つかりません"
-			      "No originals found for the current notes")))
+	       (cond (urls
+		      (dolist (url urls)
+		        (cond ((consp url)
+			       (setq exit t)
+			       (apply (car url) (cdr url)))
+			      (t
+			       (browse-url url))))
+		      (skk-message "注釈のソースをブラウズしています..."
+			           "Browsing originals for the current notes..."))
+		     (t
+		      (skk-message "注釈のソースが見つかりません"
+			           "No originals found for the current notes")))
 	       (setq event nil
 		     digit nil
 		     char  nil)
 	       (unless exit
 		 (skk-annotation-show-2 annotation))))
 	    ((eq command 'digit-argument)
-	     (setq char  (cond ((featurep 'xemacs)
-				key)
-			       ((integerp event)
-				event)
-			       (t
-				(get event 'ascii-character)))
+	     (setq char (cond ((featurep 'xemacs)
+			       key)
+			      ((integerp event)
+			       event)
+			      (t
+			       (get event 'ascii-character)))
 		   digit (- (logand char ?\177) ?0)
 		   event nil))
 	    ((or (equal (key-description key)
 			(key-description skk-annotation-wikipedia-key))
-		 (memq command
-		       '(skk-annotation-wikipedia-region-or-at-point
-			 skk-annotation-lookup-region-or-at-point)))
-	     (setq sources
-		   (if (and digit
-			    (> digit 0)
-			    (<= digit
-				(length skk-annotation-other-sources)))
-		       (list (nth (1- digit)
-				  skk-annotation-other-sources))
-		     skk-annotation-other-sources))
+		 (memq command '(skk-annotation-wikipedia-region-or-at-point
+			         skk-annotation-lookup-region-or-at-point)))
+	     (setq sources (if (and digit
+			            (> digit 0)
+			            (<= digit
+				        (length skk-annotation-other-sources)))
+		               (list (nth (1- digit)
+				          skk-annotation-other-sources))
+		             skk-annotation-other-sources))
 	     (setq event nil
 		   digit nil
 		   char  nil)
@@ -985,7 +987,7 @@ If there isn't, it's probably not appropriate to send input to return Eldoc
 information etc.  If PROC is non-nil, check the buffer for that process."
   (cond
    ((eval-when-compile (skkannot-emacs-24_3-or-later))
-    (with-current-buffer (process-buffer (or proc (python-proc)))
+    (with-current-buffer (process-buffer (or proc (python-shell-internal-get-or-create-process)))
       (save-excursion
 	(save-match-data
 	  (re-search-backward (concat python-shell-prompt-regexp " *\\=")
@@ -1017,7 +1019,7 @@ information etc.  If PROC is non-nil, check the buffer for that process."
    (t
     ;; python + readline で UTF-8 の入力をするために LANG の設定が必要。
     (let* ((env (getenv "LANG"))
-	   python-buffer orig-py-buffer)
+	   orig-py-buffer)
       (unless (eval-when-compile (skkannot-emacs-24_3-or-later))
 	;; Emacs 24.2 or earlier
 	(setq orig-py-buffer (default-value 'python-buffer)))
@@ -1027,7 +1029,7 @@ information etc.  If PROC is non-nil, check the buffer for that process."
 	(run-python skk-annotation-python-program t t))
       (when (eval-when-compile (skkannot-emacs-24_3-or-later))
 	;; Emacs 24.3 or later
-	(setq python-buffer (get-buffer (format "*%s*" python-shell-buffer-name))
+	(setq python-buffer (get-buffer (format "*%s*" (python-shell-get-process-name t)))
 	      orig-py-buffer (default-value 'python-buffer)))
       (setenv "LANG" env)
       (with-current-buffer python-buffer
@@ -1035,13 +1037,18 @@ information etc.  If PROC is non-nil, check the buffer for that process."
 	(setq-default python-buffer orig-py-buffer)
 	(setq python-buffer orig-py-buffer)
 	(setq skkannot-py-buffer (current-buffer))
-	;;
+
 	(font-lock-mode 0)
 	(set-buffer-multibyte t)
 	(skk-process-kill-without-query (get-buffer-process (current-buffer)))
 	(set-buffer-file-coding-system 'utf-8-emacs)
-	(set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix)
-	;;
+
+        ;; Jan 15 2018, lisp/international/mule.el
+        ;; *  (set-buffer-process-coding-system): Mark as interactive-only.
+        ;; *  in Lisp code use 'set-process-coding-system' instead.
+	(set-process-coding-system (get-buffer-process (current-buffer))
+				   'utf-8-unix 'utf-8-unix)
+
 	(skkannot-py-send-command "import DictionaryServices")
 	(cond ((and wait (skkannot-sit-for 1.0))
 	       (setq skkannot-remaining-delay
@@ -1050,7 +1057,6 @@ information etc.  If PROC is non-nil, check the buffer for that process."
 	       (throw '辞書 nil))
 	      (t
 	       nil))
-	;;
 	skkannot-py-buffer)))))
 
 (defun skkannot-DictServ-cache (word truncate)

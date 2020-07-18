@@ -194,6 +194,7 @@ dependent."
     (when (eval-when-compile (featurep 'xemacs))
       (make-local-hook 'post-command-hook))
     (add-hook 'post-command-hook 'skk-after-point-move nil 'local)
+    (skk-search-ja-dic-maybe t)
     (skk-j-mode-on)
     (run-hooks 'skk-mode-hook)))
 
@@ -490,10 +491,6 @@ dependent."
       (define-key skk-j-mode-map skk-previous-completion-backtab-key
 	#'skk-previous-comp-maybe))
     ;;
-    (when (characterp (symbol-value 'skk-previous-candidate-char))
-      (add-to-list 'skk-previous-candidate-keys
-		   (skk-char-to-unibyte-string
-		    (symbol-value 'skk-previous-candidate-char))))
     (unless (featurep 'skk-kanagaki)
       (dolist (key skk-previous-candidate-keys)
 	(define-key skk-j-mode-map key #'skk-previous-candidate)))
@@ -1419,8 +1416,7 @@ CHAR-LIST $B$N;D$j$HC)$l$J$/$J$C$?@aE@$NLZ$NAH$rJV$9!#(B"
 	      (setq rule (cons key (cdr rule)))))
 	  (unless (or (not (stringp key))
 		      (string-match "\\w" key)
-		      (eq (key-binding key)
-			  'self-insert-command))
+		      (eq (key-binding key) 'self-insert-command))
 	    (define-key skk-j-mode-map key 'skk-insert)))
 	(when (stringp key)
 	  (skk-add-rule tree rule))))
@@ -2716,14 +2712,14 @@ catch $B$9$k!#(Bcatch $B$7$?CM$,J8;zNs$J$i$P!"$=$l$rJV$9(B (word $B$r$=$l$K
   \"word\" --> (\"word\" . nil)
   \"word;\" --> (\"word\" . \"\")
   \"word;note\" --> (\"word\" . \"note\")
-"
-  (save-match-data
-    (let (cand note)
-      (if (string-match ";" word)
-	  (setq cand (substring word 0 (match-beginning 0))
-		note (substring word (match-end 0)))
-	(setq cand word))
-      (cons cand note))))
+"(when word
+   (save-match-data
+     (let (cand note)
+       (if (string-match ";" word)
+	   (setq cand (substring word 0 (match-beginning 0))
+		 note (substring word (match-end 0)))
+	 (setq cand word))
+       (cons cand note)))))
 
 (defun skk-kakutei (&optional arg word)
   "$B8=:_I=<($5$l$F$$$k8l$G3NDj$7!"<-=q$r99?7$9$k!#(B
@@ -4800,7 +4796,9 @@ SKK $B<-=q$N8uJd$H$7$F@5$7$$7A$K@07A$9$k!#(B"
 				 0
 				 (1- (length skk-henkan-key))))))
 
-(defun skk-search-ja-dic-maybe ()
+(defun skk-search-ja-dic-maybe (&optional check)
+  ;; `skk-search-prog-list' $B$N0lMWAG$H$7$F:nMQ$9$k$[$+!"(B
+  ;; skk-mode $B$KF~$k$?$S(B check $B$GI>2A$5$l$k!#(B
   (when (eval-when-compile (featurep 'emacs))
     (unless (or (and (stringp skk-large-jisyo)
 		     (file-readable-p skk-large-jisyo))
@@ -4810,7 +4808,10 @@ SKK $B<-=q$N8uJd$H$7$F@5$7$$7A$K@07A$9$k!#(B"
 		     (file-readable-p skk-cdb-large-jisyo))
 		skk-server-host
 		skk-inhibit-ja-dic-search)
-      (skk-search-ja-dic))))
+      (if check
+	  (skk-message "$B<-=q$H$7$F(B leim/ja-dic $B$r;H$$$^$9(B"
+		       "Use leim/ja-dic as dictionary")
+	(skk-search-ja-dic)))))
 
 (defun skk-search-with-suffix ()
   (unless (or skk-henkan-okurigana

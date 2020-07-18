@@ -1287,8 +1287,6 @@ ASCII $B?t;z$ND>8e$G$"$l$P!"D92;(B($B!<(B)$B$O(B `-' $B$X!"6gE@(B($B!#
 	  '(repeat sexp))
   :group 'skk-henkan)
 
-(defvar skk-previous-candidate-char nil)
-
 (make-obsolete-variable 'skk-previous-candidate-char
 			'skk-previous-candidate-keys
 			"DDSKK 14.2")
@@ -2891,8 +2889,7 @@ Max OS X $B0J30$N4D6-$G$O5!G=$7$J$$!#(B
 		(const :tag "$BMxMQ$7$J$$(B" nil))
   :group 'skk-annotation)
 
-(defcustom skk-annotation-python-program (or (executable-find "python2.6")
-					     (executable-find "python"))
+(defcustom skk-annotation-python-program (executable-find "python")
   "*DictionaryServices $B$N$?$a$K5/F0$9$k(B python $B$N%U%!%$%kL>!#(B"
   :type '(radio (file)
 		(const nil))
@@ -3661,8 +3658,8 @@ server completion $B$,<BAu$5$l$F$*$i$:!"$+$DL5H?1~$J<-=q%5!<%PBP:v!#(B")
 
 ;;; skk-gadget.el related.
 (defcustom skk-gengo-alist
-  '((heisei "$BJ?@.(B" "H") (showa "$B><OB(B" "S") (taisho "$BBg@5(B" "T")
-    (meiji "$BL@<#(B" "M"))
+  '((reiwa "$BNaOB(B" "R") (heisei "$BJ?@.(B" "H") (showa "$B><OB(B" "S")
+    (taisho "$BBg@5(B" "T") (meiji "$BL@<#(B" "M"))
   "*$B859f$rI=5-$7$?J8;zNs$N(B alist$B!#(B
 car $B$O859f$r%m!<%^;zI=5-$7$?(B symbol$B!#(B
 cdr $B$O859fI=5-$N(B string $B$+$i@.$k%j%9%H!#(B"

@@ -1,5 +1,5 @@
 ;;; skk-setup.el --- initial setup for SKK  -*- emacs-lisp -*-
-;; This file was generated automatically by SKK-MK at Mon May  1 16:50:45 2017
+;; This file was generated automatically by SKK-MK at Sat Jul 18 22:22:13 2020
 
 ;; Copyright (C) 2000 NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
 
