@@ -12,6 +12,8 @@ sakito の .emacs.d 以下のファイル を一部公開しています。
 
 リポジトリの構成は以下のようになっています。このようにした経緯に関しては `.emacs.d の利用 <http://www.sakito.com/2009/12/emacsd.html>`_ を参照してください。
 
+dotfile類は https://bitbucket.org/sakito/dot.zsh.d/
+
 .. sourcecode:: text
 
  ~/
@@ -28,8 +30,6 @@ sakito の .emacs.d 以下のファイル を一部公開しています。
      … 頻繁に更新する Emacs Lisp
     private
      … 公開しないファイル類など
-    rc.d
-     … zshrc 等の rc ファイルがはいっていて ln -s している。結局 Emacs との連携を考えるのでまとめた
     bin
      … Emacs Lisp のみから呼ぶことを想定して作成してあるスクリプト等
     share
