@@ -92,14 +92,14 @@
 (when mac-p
   (set-face-attribute 'default
                       nil
-                      :family "September"
+                      ;; :family "September"
+                      :family "Hackgen35"
                       :height 180)
   ;; (set-frame-font "September-14")
-  (set-frame-font "September-18")
+  (set-frame-font "Hackgen35-18")
   (set-fontset-font nil
                     'unicode
-                    ;; (font-spec :family "IPAGothic")
-                    (font-spec :family "September")
+                    (font-spec :family "Hackgen35")
                     nil
                     'append)
   ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
@@ -115,13 +115,13 @@
   ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
   (set-fontset-font nil
                     '( #x3000 .  #x30ff)
-                    (font-spec :family "September")
+                    (font-spec :family "Hackgen35")
                     nil
                     'prepend)
   ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
   (set-fontset-font nil
                     '( #xff00 .  #xffef)
-                    (font-spec :family "September")
+                    (font-spec :family "Hackgen35")
                     nil
                     'prepend)
 
