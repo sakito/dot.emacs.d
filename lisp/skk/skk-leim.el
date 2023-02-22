@@ -9,37 +9,37 @@
 
 ;; This file is part of Daredevil SKK.
 
-;; Daredevil SKK is free software; you can redistribute it and/or
+;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
+;; published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
 
-;; Daredevil SKK is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope that it will be
+;; useful, but WITHOUT ANY WARRANTY; without even the implied
+;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+;; PURPOSE.  See the GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with Daredevil SKK, see the file COPYING.  If not, write to
-;; the Free Software Foundation Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; SKK related code for LEIM
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'skk-macs)
-  (require 'skk-vars))
+(require 'skk)
 
 ;;;###autoload
 (defun skk-activate (&optional name)
-  (skk-set-deactivate-im-func 'skk-inactivate)
+  (setq deactivate-current-input-method-function 'skk-inactivate)
   (skk-mode 1)
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'skk-leim-exit-from-minibuffer)))
 
 ;;;###autoload
 (defun skk-auto-fill-activate (&optional name)
-  (skk-set-deactivate-im-func 'skk-auto-fill-inactivate)
+  (setq deactivate-current-input-method-function 'skk-auto-fill-inactivate)
   (skk-auto-fill-mode 1)
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'skk-leim-exit-from-minibuffer)))
@@ -53,7 +53,7 @@
   (skk-auto-fill-mode -1))
 
 (defun skk-leim-exit-from-minibuffer ()
-  (skk-deactivate-input-method)
+  (deactivate-input-method)
   (when (<= (minibuffer-depth) 1)
     (remove-hook 'minibuffer-exit-hook 'skk-leim-exit-from-minibuffer)))
 
@@ -70,5 +70,9 @@
  "Simple Kana to Kanji conversion program with auto-fill")
 
 (provide 'skk-leim)
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 
 ;;; skk-leim.el ends here

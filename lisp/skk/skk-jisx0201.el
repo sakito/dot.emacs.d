@@ -9,60 +9,56 @@
 
 ;; This file is part of Daredevil SKK.
 
-;; Daredevil SKK is free software; you can redistribute it and/or
+;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
+;; published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
 
-;; Daredevil SKK is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope that it will be
+;; useful, but WITHOUT ANY WARRANTY; without even the implied
+;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+;; PURPOSE.  See the GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with Daredevil SKK, see the file COPYING.  If not, write to
-;; the Free Software Foundation Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;; <簡単な説明>
-;;
+
 ;; ~/.skk に
-;;
-;; (setq skk-use-jisx0201-input-method t)
-;;
+
+;;   (setq skk-use-jisx0201-input-method t)
+
 ;; と書くことでインストールされます。使い方は以下のようになります。
-;;
-;; ◎カタカナモードにおいて、
-;;   ・"C-q" で全角カナモードと半角カナモードを切りかえます。
-;;
-;; ◎ひらがな/カタカナ両モード内での▽モードにおいて、
-;;   ・"C-q" を押すと､見出し語として入力されたひらがな/カタカナをﾊﾝｶｸｶﾀｶﾅに変
-;;     換します。
-;;
+
+;;   ◎カタカナモードにおいて、
+;;     ・"C-q" で全角カナモードと半角カナモードを切りかえます。
+
+;;   ◎ひらがな/カタカナ両モード内での▽モードにおいて、
+;;     ・"C-q" を押すと､見出し語として入力されたひらがな/カタカナをﾊﾝｶｸｶﾀｶﾅに変
+;;       換します。
+
 ;; `skk-jisx0201-roman-rule-list' に JISX0201.1976 Japanese Roman
 ;; (latin-jisx0201) の文字列を定義しています。ただし GNU Emacs 23 以降、ファ
 ;; イル保存時に JIS X 0201 Roman と ASCII の区別がされなくなったようです (円
 ;; 記号およびオーバーラインを除く)。したがってこのファイルの現行版では、これ
 ;; らの 2 文字以外は ASCII の文字が定義されています。
-;;
+
 ;; ｶﾅ と roman を切り替える機能 `skk-toggle-jisx0201' にはキー定義していませ
 ;; ん。
-;;
+
 ;; <業務連絡>
-;;
+
 ;; GNU Emacs 20.3 〜 22 でこのファイルを編集する場合は、ファイルを開く前に
-;;
-;; (setq standard-translation-table-for-decode (make-translation-table nil))
-;;
+
+;;   (setq standard-translation-table-for-decode (make-translation-table nil))
+
 ;; を評価してください。
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'skk-macs)
-  (require 'skk-vars))
+(require 'skk)
 
 (require 'japan-util)
 
@@ -181,7 +177,7 @@
 
 (setq skk-jisx0201-base-rule-tree
       (skk-compile-rule-list skk-jisx0201-base-rule-list
-			     skk-jisx0201-rule-list))
+                             skk-jisx0201-rule-list))
 (setq skk-jisx0201-roman-rule-tree
       (skk-compile-rule-list skk-jisx0201-roman-rule-list))
 
@@ -192,16 +188,16 @@
   "SKK JIS X 0201 (カナ) モードを起動する。"
   (make-local-variable 'skk-rule-tree)
   (setq skk-mode t
-	skk-jisx0201-mode t
-	skk-jisx0201-roman arg
-	skk-rule-tree (if arg
-			  skk-jisx0201-roman-rule-tree
-			skk-jisx0201-base-rule-tree)
-	skk-abbrev-mode nil
-	skk-latin-mode nil
-	skk-j-mode nil
-	skk-jisx0208-latin-mode nil
-	skk-katakana nil)
+        skk-jisx0201-mode t
+        skk-jisx0201-roman arg
+        skk-rule-tree (if arg
+                          skk-jisx0201-roman-rule-tree
+                        skk-jisx0201-base-rule-tree)
+        skk-abbrev-mode nil
+        skk-latin-mode nil
+        skk-j-mode nil
+        skk-jisx0208-latin-mode nil
+        skk-katakana nil)
   (skk-update-modeline 'jisx0201)
   (skk-cursor-set))
 
@@ -237,43 +233,43 @@
      (when (eq ?* (following-char))
        (delete-char 1))
      (skk-jisx0201-zenkaku-region skk-henkan-start-point
-				  skk-okurigana-start-point))
+                                  skk-okurigana-start-point))
     ;;
     (let ((pt1 (point))
-	  pt2 okuri sokuon)
+          pt2 okuri sokuon)
       (setq okuri
-	    (skk-save-point
-	     (backward-char 1)
-	     (buffer-substring-no-properties
-	      (setq pt2 (point)) pt1)))
+            (skk-save-point
+             (backward-char 1)
+             (buffer-substring-no-properties
+              (setq pt2 (point)) pt1)))
       (cond
        ((member okuri '("ﾞ" "ﾟ"))
-	(setq okuri
-	      (concat (skk-save-point
-		       (backward-char 2)
-		       (buffer-substring-no-properties
-			(point)	pt2))
-		       okuri))
-	(setq sokuon t))
+        (setq okuri
+              (concat (skk-save-point
+                       (backward-char 2)
+                       (buffer-substring-no-properties
+                        (point) pt2))
+                      okuri))
+        (setq sokuon t))
        (okuri
-	(setq sokuon
-	      (skk-save-point
-	       (backward-char 2)
-	       (buffer-substring-no-properties
-		(point) pt2)))
-	(unless (member sokuon '("ｯ"))
-	  (setq sokuon nil))))
+        (setq sokuon
+              (skk-save-point
+               (backward-char 2)
+               (buffer-substring-no-properties
+                (point) pt2)))
+        (unless (member sokuon '("ｯ"))
+          (setq sokuon nil))))
       ;;
       (when okuri
-	(skk-save-point
-	 (backward-char (if sokuon 2 1))
-	 (skk-set-marker skk-okurigana-start-point (point)))
-	(setq skk-okuri-char (skk-okurigana-prefix
-			      (skk-katakana-to-hiragana
-			       (skk-jisx0201-zenkaku okuri))))
-	;;
-	(let ((skk-katakana t))
-	  ad-do-it))))
+        (skk-save-point
+         (backward-char (if sokuon 2 1))
+         (skk-set-marker skk-okurigana-start-point (point)))
+        (setq skk-okuri-char (skk-okurigana-prefix
+                              (skk-katakana-to-hiragana
+                               (skk-jisx0201-zenkaku okuri))))
+        ;;
+        (let ((skk-katakana t))
+          ad-do-it))))
    (t
     ad-do-it)))
 
@@ -282,43 +278,43 @@
   (cond
    (skk-jisx0201-mode
     (let ((arg (ad-get-arg 0))
-	  (ch (skk-last-command-char)))
+          (ch last-command-event))
       (cond
        ((or (and (not skk-jisx0201-roman)
-		 (memq ch skk-set-henkan-point-key)
-		 (or skk-okurigana
-		     (not (skk-get-prefix skk-current-rule-tree))
-		     (not (skk-select-branch
-			   skk-current-rule-tree ch))))
-	    (and skk-henkan-mode
-		 (memq ch skk-special-midashi-char-list)))
-	ad-do-it)
+                 (memq ch skk-set-henkan-point-key)
+                 (or skk-okurigana
+                     (not (skk-get-prefix skk-current-rule-tree))
+                     (not (skk-select-branch
+                           skk-current-rule-tree ch))))
+            (and skk-henkan-mode
+                 (memq ch skk-special-midashi-char-list)))
+        ad-do-it)
        ;;
        ((and skk-henkan-mode
-	     (eq ch skk-start-henkan-char))
-	(skk-kana-cleanup 'force)
-	(unless (or skk-okurigana
-		    skk-okuri-char)
-	  (let ((jisx0201 (buffer-substring-no-properties
-			   skk-henkan-start-point
-			   (point)))
-		jisx0208)
-	    (when (and jisx0201
-		       (setq jisx0208
-			     (skk-jisx0201-zenkaku jisx0201)))
-	      (insert-before-markers jisx0208)
-	      (delete-region skk-henkan-start-point
-			     (- (point) (length jisx0208))))))
-	(let ((skk-katakana t))
-	  (skk-start-henkan arg))
-	(skk-cursor-set))
+             (eq ch skk-start-henkan-char))
+        (skk-kana-cleanup 'force)
+        (unless (or skk-okurigana
+                    skk-okuri-char)
+          (let ((jisx0201 (buffer-substring-no-properties
+                           skk-henkan-start-point
+                           (point)))
+                jisx0208)
+            (when (and jisx0201
+                       (setq jisx0208
+                             (skk-jisx0201-zenkaku jisx0201)))
+              (insert-before-markers jisx0208)
+              (delete-region skk-henkan-start-point
+                             (- (point) (length jisx0208))))))
+        (let ((skk-katakana t))
+          (skk-start-henkan arg))
+        (skk-cursor-set))
        ;;
        (skk-jisx0201-roman
-	(let (skk-set-henkan-point-key)
-	  ad-do-it))
+        (let (skk-set-henkan-point-key)
+          ad-do-it))
        ;;
        (t
-	ad-do-it))))
+        ad-do-it))))
    ;;
    (t
     ad-do-it)))
@@ -344,10 +340,10 @@
     (skk-jisx0201-henkan arg))
    (skk-jisx0201-roman
     (setq skk-rule-tree skk-jisx0201-base-rule-tree
-	  skk-jisx0201-roman nil))
+          skk-jisx0201-roman nil))
    (t
     (setq skk-rule-tree skk-jisx0201-roman-rule-tree
-	  skk-jisx0201-roman t))))
+          skk-jisx0201-roman t))))
 
 (defun skk-jisx0201-string-conversion (str func)
   (with-temp-buffer
@@ -419,5 +415,9 @@
        (skk-jisx0201-hankaku matched)))))
 
 (provide 'skk-jisx0201)
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 
 ;;; skk-jisx0201.el ends here

@@ -9,20 +9,18 @@
 
 ;; This file is part of Daredevil SKK.
 
-;; Daredevil SKK is free software; you can redistribute it and/or
+;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
+;; published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
 
-;; Daredevil SKK is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope that it will be
+;; useful, but WITHOUT ANY WARRANTY; without even the implied
+;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+;; PURPOSE.  See the GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with Daredevil SKK, see the file COPYING.  If not, write to
-;; the Free Software Foundation Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -31,21 +29,18 @@
 ;; な文やローマ字文に変換することを目的として作成したプログラムと辞書の総称」
 ;; です。私自身がニュースやメールを読んでいて、日常読みが分らなくて恥ずかしい
 ;; 思いをすることが多いので、逆引きをしたくて作りました。
-;;
+
 ;; KAKASI は、
-;;
-;;  ftp://kakasi.namazu.org/pub/kakasi/
-;;
+
+;;   ftp://kakasi.namazu.org/pub/kakasi/
+
 ;; にあり anonymous ftp で入手できます。
-;;
+
 ;; 素晴しいプログラム KAKASI をお作りになった高橋さんに感謝いたします。
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'skk-macs))
-
-(require 'skk-vars)
+(require 'skk)
 
 (let ((euc (cdr (assoc "euc" skk-coding-system-alist))))
   (modify-coding-system-alist 'process "kakasi" (cons euc euc)))
@@ -85,8 +80,8 @@
   (let ((str (skk-gyakubiki-1 start end all)))
     (save-match-data
       (when (string-match "^[ 　\t]+" str)
-	;; 先頭の空白を取り除く。
-	(setq str (substring str (match-end 0)))))
+        ;; 先頭の空白を取り除く。
+        (setq str (substring str (match-end 0)))))
     (message "%s" str)))
 
 ;;;###autoload
@@ -113,8 +108,8 @@
   (let ((str (skk-gyakubiki-1 start end all 'katakana)))
     (save-match-data
       (when (string-match "^[ 　\t]+" str)
-	;; 先頭の空白を取り除く。
-	(setq str (substring str (match-end 0)))))
+        ;; 先頭の空白を取り除く。
+        (setq str (substring str (match-end 0)))))
     (message "%s" str)))
 
 (defun skk-gyakubiki-1 (start end all &optional katakana)
@@ -189,8 +184,8 @@
   ;; skk-hurigana-* のサブルーチン。
   ;; オプショナル引数の KATAKANA が non-nil であれば、カタカナへ変換する。
   (let ((arg (if katakana
-		 '("-JK" "-f")
-	       '("-JH" "-f"))))
+                 '("-JK" "-f")
+               '("-JH" "-f"))))
     (when skk-allow-spaces-newlines-and-tabs
       (setq arg (cons "-c" arg)))
     (when all
@@ -209,7 +204,7 @@
 る。例えば、\"し\" はヘボン式では \"shi\" だが、訓令式では \"si\" となる。"
   (interactive "*r")
   (let ((arg '("-Ha" "-Ka" "-Ja" "-Ea" "-ka" "-s"))
-	str)
+        str)
     (when skk-allow-spaces-newlines-and-tabs
       (setq arg (cons "-c" arg)))
     (unless skk-romaji-*-by-hepburn
@@ -241,7 +236,7 @@
   ;; START と END 間の領域に対し kakasi コマンドを適用する。ARGLIST を
   ;; kakasi の引数として渡す。kakasi の出力を返す。
   (unless (or skk-use-kakasi
-	      skk-kakasi-command)
+              skk-kakasi-command)
     (skk-error
      "KAKASI がインストールされていないか、使用しない設定(%s)になっています"
      "KAKASI was not installed, or %s is nil"
@@ -260,22 +255,26 @@
       ;; ジョンの文字列をワークバッファに退避する。
       (insert str)
       (unless (and (eq (apply 'call-process-region
-			      (point-min) (point)
-			      skk-kakasi-command
-			      ;; kakasi-2.2.5.hindo.diff が当っていると
-			      ;; 標準エラー出力に頻度情報が出力される。
-			      'delete-original-text
-			      ;;(list t hindo-file)
-			      '(t nil)
-			      nil (cons "-ieuc" (cons "-oeuc" arglist)))
-		       0)
-		   (> (buffer-size) 0))
-	(skk-error "変換できません"
-		   "Cannot convert!"))
+                              (point-min) (point)
+                              skk-kakasi-command
+                              ;; kakasi-2.2.5.hindo.diff が当っていると
+                              ;; 標準エラー出力に頻度情報が出力される。
+                              'delete-original-text
+                              ;;(list t hindo-file)
+                              '(t nil)
+                              nil (cons "-ieuc" (cons "-oeuc" arglist)))
+                       0)
+                   (> (buffer-size) 0))
+        (skk-error "変換できません"
+                   "Cannot convert!"))
       (buffer-string))))
 
 (run-hooks 'skk-kakasi-load-hook)
 
 (provide 'skk-kakasi)
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 
 ;;; skk-kakasi.el ends here
