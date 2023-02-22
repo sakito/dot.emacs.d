@@ -1,6 +1,6 @@
 ;;; helm-elisp-package.el --- helm interface for package.el -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@
 
 (defcustom helm-el-package-initial-filter 'all
   "Show only installed, upgraded or all packages at startup."
-  :group 'helm-el-package
   :type '(radio :tag "Initial filter for elisp packages"
           (const :tag "Show all packages" all)
           (const :tag "Show installed packages" installed)
@@ -35,8 +34,17 @@
           (const :tag "Show upgradable packages" upgrade)))
 
 (defcustom helm-el-truncate-lines t
-  "Truncate lines in helm-buffer when non--nil."
-  :group 'helm-el-package
+  "Truncate lines in `helm-buffer' when non-nil."
+  :type 'boolean)
+
+
+(defcustom helm-el-package-upgrade-on-start nil
+  "Show package upgrades on startup when non nil."
+  :type 'boolean)
+
+(defcustom helm-el-package-autoremove-on-start nil
+  "Try to autoremove no more needed packages on startup.
+See `package-autoremove'."
   :type 'boolean)
 
 ;; internals vars
@@ -48,15 +56,27 @@
 
 ;; Shutup bytecompiler for emacs-24*
 (defvar package-menu-async) ; Only available on emacs-25.
+(defvar helm-marked-buffer-name)
 (declare-function async-byte-recompile-directory "ext:async-bytecomp.el")
+(declare-function with-helm-display-marked-candidates "helm-utils.el")
+
 
 (defun helm-el-package--init ()
+  ;; In emacs-27 package-show-package-list returns an empty buffer
+  ;; until package-initialize have been called.
+  (unless (or package--initialized
+              (null (boundp 'package-quickstart)))
+    (package-initialize))
   (let (package-menu-async
         (inhibit-read-only t))
     (when (null package-alist)
       (setq helm-el-package--show-only 'all))
-    (when (setq helm-el-package--removable-packages
-                (package--removable-packages))
+    (unless (consp package-selected-packages)
+      (helm-aif (package--find-non-dependencies)
+          (setq package-selected-packages it)))
+    (when (and (setq helm-el-package--removable-packages
+                     (package--removable-packages))
+               helm-el-package-autoremove-on-start)
       (package-autoremove))
     (unwind-protect
          (progn
@@ -86,7 +106,8 @@
                    (message "Refreshing packages list done, [%d] package(s) to upgrade"
                             (length helm-el-package--upgrades))
                  (message "Refreshing packages list done, no upgrades available"))
-             (setq helm-el-package--show-only (if helm-el-package--upgrades
+             (setq helm-el-package--show-only (if (and helm-el-package-upgrade-on-start
+                                                       helm-el-package--upgrades)
                                                   'upgrade
                                                 helm-el-package-initial-filter))))
       (kill-buffer "*Packages*"))))
@@ -107,11 +128,9 @@
                (propertize (symbol-name pkg)
                            'face 'font-lock-keyword-face)))))
 
-(defun helm-el-run-visit-homepage ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-visit-homepage)))
-(put 'helm-el-run-visit-homepage 'helm-only t)
+(helm-make-command-from-action helm-el-run-visit-homepage
+    "Visit package homepage from helm elisp packages."
+  'helm-el-package-visit-homepage)
 
 (defun helm-elisp-package--pkg-name (pkg)
   (if (package-desc-p pkg)
@@ -139,11 +158,9 @@
 (defun helm-el-package-install (_candidate)
   (helm-el-package-install-1 (helm-marked-candidates)))
 
-(defun helm-el-run-package-install ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-install)))
-(put 'helm-el-run-package-install 'helm-only t)
+(helm-make-command-from-action helm-el-run-package-install
+    "Install package from helm elisp packages."
+  'helm-el-package-install)
 
 (defun helm-el-package-uninstall-1 (pkg-list &optional force)
   (cl-loop with mkd = pkg-list
@@ -168,11 +185,9 @@
 (defun helm-el-package-uninstall (_candidate)
   (helm-el-package-uninstall-1 (helm-marked-candidates) helm-current-prefix-arg))
 
-(defun helm-el-run-package-uninstall ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-uninstall)))
-(put 'helm-el-run-package-uninstall 'helm-only t)
+(helm-make-command-from-action helm-el-run-package-uninstall
+    "Uninstall package from helm elisp packages."
+  'helm-el-package-uninstall)
 
 (defun helm-el-package-menu--find-upgrades ()
   (cl-loop for entry in helm-el-package--tabulated-list
@@ -241,17 +256,17 @@
             if (member (symbol-name (package-desc-name pkg)) pkgs)
             collect p)))
 
-(defun helm-el-run-package-upgrade ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-upgrade)))
-(put 'helm-el-run-package-upgrade 'helm-only t)
+(helm-make-command-from-action helm-el-run-package-upgrade
+    "Uninstall package from helm elisp packages."
+  'helm-el-package-upgrade)
 
 (defun helm-el-package-upgrade-all ()
   (if helm-el-package--upgrades
       (with-helm-display-marked-candidates
-        helm-marked-buffer-name (mapcar (lambda (x) (symbol-name (car x)))
-                                        helm-el-package--upgrades)
+        helm-marked-buffer-name (helm-fast-remove-dups
+                                 (mapcar (lambda (x) (symbol-name (car x)))
+                                         helm-el-package--upgrades)
+                                 :test 'equal)
         (when (y-or-n-p "Upgrade all packages? ")
           (helm-el-package-upgrade-1 helm-el-package--tabulated-list)))
       (message "No packages to upgrade actually!")))
@@ -259,11 +274,9 @@
 (defun helm-el-package-upgrade-all-action (_candidate)
   (helm-el-package-upgrade-all))
 
-(defun helm-el-run-package-upgrade-all ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-upgrade-all-action)))
-(put 'helm-el-run-package-upgrade-all 'helm-only t)
+(helm-make-command-from-action helm-el-run-package-upgrade-all
+    "Upgrade all packages from helm elisp packages."
+  'helm-el-package-upgrade-all-action)
 
 (defun helm-el-package--transformer (candidates _source)
   (cl-loop for c in candidates
@@ -338,17 +351,17 @@
 (defvar helm-el-package-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
-    (define-key map (kbd "M-I")   'helm-el-package-show-installed)
-    (define-key map (kbd "M-O")   'helm-el-package-show-uninstalled)
-    (define-key map (kbd "M-U")   'helm-el-package-show-upgrade)
-    (define-key map (kbd "M-B")   'helm-el-package-show-built-in)
-    (define-key map (kbd "M-A")   'helm-el-package-show-all)
-    (define-key map (kbd "C-c i") 'helm-el-run-package-install)
-    (define-key map (kbd "C-c r") 'helm-el-run-package-reinstall)
-    (define-key map (kbd "C-c d") 'helm-el-run-package-uninstall)
-    (define-key map (kbd "C-c u") 'helm-el-run-package-upgrade)
-    (define-key map (kbd "C-c U") 'helm-el-run-package-upgrade-all)
-    (define-key map (kbd "C-c @") 'helm-el-run-visit-homepage)
+    (define-key map (kbd "M-I")   #'helm-el-package-show-installed)
+    (define-key map (kbd "M-O")   #'helm-el-package-show-uninstalled)
+    (define-key map (kbd "M-U")   #'helm-el-package-show-upgrade)
+    (define-key map (kbd "M-B")   #'helm-el-package-show-built-in)
+    (define-key map (kbd "M-A")   #'helm-el-package-show-all)
+    (define-key map (kbd "C-c i") #'helm-el-run-package-install)
+    (define-key map (kbd "C-c r") #'helm-el-run-package-reinstall)
+    (define-key map (kbd "C-c d") #'helm-el-run-package-uninstall)
+    (define-key map (kbd "C-c u") #'helm-el-run-package-upgrade)
+    (define-key map (kbd "C-c U") #'helm-el-run-package-upgrade-all)
+    (define-key map (kbd "C-c @") #'helm-el-run-visit-homepage)
     map))
 
 (defvar helm-source-list-el-package nil)
@@ -358,12 +371,20 @@
    (filtered-candidate-transformer :initform 'helm-el-package--transformer)
    (action-transformer :initform 'helm-el-package--action-transformer)
    (help-message :initform 'helm-el-package-help-message)
-   (keymap :initform helm-el-package-map)
+   (keymap :initform 'helm-el-package-map)
    (update :initform 'helm-el-package--update)
    (candidate-number-limit :initform 9999)
    (action :initform '(("Describe package" . helm-el-package-describe)
                        ("Visit homepage" . helm-el-package-visit-homepage)))
+   (find-file-target :initform #'helm-el-package-quit-an-find-file-fn)
    (group :initform 'helm-el-package)))
+
+(defun helm-el-package-quit-an-find-file-fn (source)
+  (let* ((sel (helm-get-selection nil nil source))
+         (pkg (and (stringp sel)
+                   (get-text-property 0 'tabulated-list-id sel))))
+    (when (and pkg (package-installed-p pkg))
+      (expand-file-name (package-desc-dir pkg)))))
 
 (defun helm-el-package--action-transformer (actions candidate)
   (let* ((pkg-desc (get-text-property 0 'tabulated-list-id candidate))
@@ -429,15 +450,13 @@
     (package-install
      (cadr (assq name package-archive-contents)) t)))
 
-(defun helm-el-run-package-reinstall ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-el-package-reinstall)))
-(put 'helm-el-run-package-reinstall 'helm-only t)
+(helm-make-command-from-action helm-el-run-package-reinstall
+    "Reinstall package from helm elisp packages."
+  'helm-el-package-reinstall)
 
 ;;;###autoload
 (defun helm-list-elisp-packages (arg)
-  "Preconfigured helm for listing and handling emacs packages."
+  "Preconfigured `helm' for listing and handling Emacs packages."
   (interactive "P")
   (when arg (setq helm-el-package--initialized-p nil))
   (unless helm-source-list-el-package
@@ -450,10 +469,11 @@
 
 ;;;###autoload
 (defun helm-list-elisp-packages-no-fetch (arg)
-  "Preconfigured helm for emacs packages.
+  "Preconfigured Helm for Emacs packages.
 
-Same as `helm-list-elisp-packages' but don't fetch packages on remote.
-Called with a prefix ARG always fetch packages on remote."
+Same as `helm-list-elisp-packages' but don't fetch packages on
+remote.  Called with a prefix ARG always fetch packages on
+remote."
   (interactive "P")
   (let ((helm-el-package--initialized-p (null arg)))
     (helm-list-elisp-packages nil)))

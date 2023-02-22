@@ -1,6 +1,6 @@
 ;;; helm-sys.el --- System related functions for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2019 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,7 +28,8 @@
   :group 'helm)
 
 (defface helm-top-columns
-    '((t :inherit helm-header))
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       :inherit helm-header))
   "Face for helm help string in minibuffer."
   :group 'helm-sys)
 
@@ -40,20 +41,22 @@
   "Top command used to display output of top.
 A format string where %s will be replaced with `frame-width'.
 
-To use 'top' command, a version supporting batch mode (-b option) is needed.
-On Mac OSX 'top' command doesn't support this, so ps command
-is used instead by default.
-Normally 'top' command output have 12 columns, but in some versions you may
-have less than this, so you can either customize top to use 12 columns with the
-interactives 'f' and 'W' commands of top, or modify
-`helm-top-sort-columns-alist' to fit with the number of columns
-your 'top' command is using.
+To use 'top' command, a version supporting batch mode (-b option)
+is needed. On Mac OSX 'top' command doesn't support this, so the
+'ps' command is used instead by default.
 
-If you modify 'ps' command be sure that 'pid' comes in first
-and \"env COLUMNS=%s\" is specified at beginning of command.
-Ensure also that no elements contain spaces (e.g use start_time and not start).
-Same as for 'top' you can customize `helm-top-sort-columns-alist' to make sort commands
-working properly according to your settings."
+Normally 'top' command output have 12 columns, but in some
+versions you may have less than this, so you can either customize
+'top' to use 12 columns with the interactives 'f' and 'W' commands
+of 'top', or modify `helm-top-sort-columns-alist' to fit with the
+number of columns your 'top' command is using.
+
+If you modify 'ps' command be sure that 'pid' comes in first and
+\"env COLUMNS=%s\" is specified at beginning of command. Ensure
+also that no elements contain spaces (e.g., use start_time and
+not start). Same as for 'top': you can customize
+`helm-top-sort-columns-alist' to make sort commands working
+properly according to your settings."
   :group 'helm-sys
   :type 'string)
 
@@ -62,9 +65,10 @@ working properly according to your settings."
                                         (cpu . 8)
                                         (user . 1))
   "Allow defining which column to use when sorting output of top/ps command.
-Only com, mem, cpu and user are sorted, so no need to put something else there,
-it will have no effect.
-Note that column numbers are counted from zero, i.e column 1 is the nth 0 column."
+Only com, mem, cpu and user are sorted, so no need to put something
+else there,it will have no effect.
+Note that column numbers are counted from zero, i.e. column 1 is the
+nth 0 column."
   :group 'helm-sys
   :type '(alist :key-type symbol :value-type (integer :tag "Column number")))
 
@@ -76,15 +80,15 @@ The minimal delay allowed is 1.5, if less than this helm-top will use 1.5."
 
 (defcustom helm-top-poll-delay-post-command 1.0
   "Helm top stop polling during this delay.
-This delay is additioned to `helm-top-poll-delay' after emacs stop
+This delay is added to `helm-top-poll-delay' after Emacs stops
 being idle."
   :group 'helm-sys
   :type 'float)
 
 (defcustom helm-top-poll-preselection 'linum
-  "Stay on same line or follow candidate when `helm-top-poll' update display.
-Possible values are 'candidate or 'linum.
-This affect also sorting functions in the same way."
+  "Stay on same line or follow candidate when `helm-top-poll' updates display.
+Possible values are \\='candidate or \\='linum.
+This affects also sorting functions in the same way."
   :group'helm-sys
   :type '(radio :tag "Preferred preselection action for helm-top"
           (const :tag "Follow candidate" candidate)
@@ -116,7 +120,7 @@ This affect also sorting functions in the same way."
         (when (and (helm--alive-p) (null no-update))
           ;; Fix quitting while process is running
           ;; by binding `with-local-quit' in init function
-          ;; Issue #1521.
+          ;; Bug#1521.
           (helm-force-update
            (cl-ecase helm-top-poll-preselection
              (candidate (replace-regexp-in-string
@@ -143,9 +147,9 @@ This affect also sorting functions in the same way."
                       helm-top-poll-delay-post-command)))
 
 (defun helm-top-initialize-poll-hooks ()
-  ;; When emacs is idle during say 20s
+  ;; When Emacs is idle during say 20s
   ;; the idle timer will run in 20+1.5 s.
-  ;; This is fine when emacs stays idle, because the next timer
+  ;; This is fine when Emacs stays idle, because the next timer
   ;; will run at 21.5+1.5 etc... so the display will be updated
   ;; at every 1.5 seconds.
   ;; But as soon as emacs looses its idleness, the next update
@@ -337,7 +341,7 @@ Show actions only on line starting by a PID."
   (interactive)
   (helm-top-set-mode-line "CPU")
   ;; Force sorting by CPU even if some versions of top are using by
-  ;; default CPU sorting (Issue #1908).
+  ;; default CPU sorting (Bug#1908).
   (setq helm-top-sort-fn 'helm-top-sort-by-cpu)
   (helm-update (helm-top--preselect-fn)))
 
@@ -412,6 +416,19 @@ Show actions only on line starting by a PID."
             (let (tabulated-list-use-header-line)
               (list-processes--refresh)))
     :candidates (lambda () (mapcar #'process-name (process-list)))
+    :candidate-transformer
+    (lambda (candidates)
+      (cl-loop for c in candidates
+               for command = (mapconcat
+                              'identity
+                              (process-command (get-process c)) " ")
+               if (and command (not (string= command ""))) collect
+               (cons (concat c " --> "
+                              (mapconcat 'identity
+                                         (process-command (get-process c)) " "))
+                     c)
+               else collect c))
+    :multiline t
     :persistent-action (lambda (elm)
                          (delete-process (get-process elm))
                          (helm-delete-current-selection))
@@ -427,21 +444,21 @@ Show actions only on line starting by a PID."
   "Preconfigured `helm' for top command."
   (interactive)
   (add-hook 'helm-after-update-hook 'helm-top--skip-top-line)
-  (save-window-excursion
-    (unless helm-alive-p (delete-other-windows))
-    (unwind-protect
-         (helm :sources 'helm-source-top
-               :buffer "*helm top*" :full-frame t
-               :candidate-number-limit 9999
-               :preselect "^\\s-*[0-9]+"
-               :truncate-lines helm-show-action-window-other-window)
-      (remove-hook 'helm-after-update-hook 'helm-top--skip-top-line))))
+  (unwind-protect
+       (helm :sources 'helm-source-top
+             :buffer "*helm top*" :full-frame t
+             :candidate-number-limit 9999
+             :preselect "^\\s-*[0-9]+"
+             :truncate-lines helm-show-action-window-other-window)
+    (remove-hook 'helm-after-update-hook 'helm-top--skip-top-line)))
 
 ;;;###autoload
 (defun helm-list-emacs-process ()
-  "Preconfigured `helm' for emacs process."
+  "Preconfigured `helm' for Emacs process."
   (interactive)
-  (helm-other-buffer 'helm-source-emacs-process "*helm process*"))
+  (helm :sources 'helm-source-emacs-process
+        :truncate-lines t
+        :buffer "*helm process*"))
 
 ;;;###autoload
 (defun helm-xrandr-set ()
@@ -451,11 +468,5 @@ Show actions only on line starting by a PID."
         :buffer "*helm xrandr*"))
 
 (provide 'helm-sys)
-
-;; Local Variables:
-;; byte-compile-warnings: (not obsolete)
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
 
 ;;; helm-sys.el ends here

@@ -1,6 +1,6 @@
 ;;; helm-comint.el --- Comint prompt navigation for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2019 Pierre Neidhardt <mail@ambrevar.xyz>
+;; Copyright (C) 2020 Pierre Neidhardt <mail@ambrevar.xyz>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,12 +33,14 @@
 ;;; Comint prompts
 ;;
 (defface helm-comint-prompts-promptidx
-  '((t (:foreground "cyan")))
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       (:foreground "cyan")))
   "Face used to highlight comint prompt index."
   :group 'helm-comint-faces)
 
 (defface helm-comint-prompts-buffer-name
-  '((t (:foreground "green")))
+  `((t ,@(and (>= emacs-major-version 27) '(:extend t))
+       (:foreground "green")))
   "Face used to highlight comint buffer name."
   :group 'helm-comint-faces)
 
@@ -47,19 +49,30 @@
   :group 'helm-comint
   :type 'boolean)
 
-(defcustom helm-comint-mode-list '(comint-mode slime-repl-mode)
+(defcustom helm-comint-mode-list '(comint-mode slime-repl-mode sly-mrepl-mode sql-interactive-mode)
   "Supported modes for prompt navigation.
-Derived modes (e.g. Geiser's REPL) are automatically supported."
+Derived modes (e.g., Geiser's REPL) are automatically supported."
   :group 'helm-comint
   :type '(repeat (choice symbol)))
 
+(defcustom helm-comint-next-prompt-function '((sly-mrepl-mode . (lambda ()
+                                                                  (sly-mrepl-next-prompt)
+                                                                  (point))))
+  "Alist of (MODE . NEXT-PROMPT-FUNCTION) to use.
+ If the current major mode is a key in this list, the associated
+ function will be used to navigate the prompts.
+ The function must return the point after the prompt.
+ Otherwise (comint-next-prompt 1) will be used."
+  :group 'helm-comint
+  :type '(alist :key-type symbol :value-type function))
+
 (defcustom helm-comint-max-offset 400
   "Max number of chars displayed per candidate in comint-input-ring browser.
-When `t', don't truncate candidate, show all.
-By default it is approximatively the number of bits contained in five lines
-of 80 chars each i.e 80*5.
-Note that if you set this to nil multiline will be disabled, i.e you
-will not have anymore separators between candidates."
+When t, don't truncate candidate, show all.
+By default it is approximatively the number of bits contained in
+five lines of 80 chars each i.e 80*5.
+Note that if you set this to nil multiline will be disabled, i.e
+you will not have anymore separators between candidates."
   :type '(choice (const :tag "Disabled" t)
           (integer :tag "Max candidate offset"))
   :group 'helm-misc)
@@ -67,8 +80,8 @@ will not have anymore separators between candidates."
 (defvar helm-comint-prompts-keymap
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
-    (define-key map (kbd "C-c o")   'helm-comint-prompts-other-window)
-    (define-key map (kbd "C-c C-o") 'helm-comint-prompts-other-frame)
+    (define-key map (kbd "C-c o")   #'helm-comint-prompts-other-window)
+    (define-key map (kbd "C-c C-o") #'helm-comint-prompts-other-frame)
     map)
   "Keymap for `helm-comint-prompt-all'.")
 
@@ -76,7 +89,7 @@ will not have anymore separators between candidates."
   "List the prompts in BUFFER in mode MODE.
 
 Return a list of (\"prompt\" (point) (buffer-name) prompt-index))
-e.g. (\"ls\" 162 \"*shell*\" 3).
+E.g. (\"ls\" 162 \"*shell*\" 3).
 If BUFFER is nil, use current buffer."
   (with-current-buffer (or buffer (current-buffer))
     (when (derived-mode-p mode)
@@ -84,7 +97,10 @@ If BUFFER is nil, use current buffer."
         (goto-char (point-min))
         (let (result (count 1))
           (save-mark-and-excursion
-            (helm-awhile (and (not (eobp)) (comint-next-prompt 1))
+            (helm-awhile (and (not (eobp))
+                              (helm-aif (alist-get major-mode helm-comint-next-prompt-function)
+                                  (funcall it)
+                                (comint-next-prompt 1)))
               (push (list (buffer-substring-no-properties
                            it (point-at-eol))
                           it (buffer-name) count)
@@ -133,27 +149,23 @@ See `helm-comint-prompts-list'."
 (defun helm-comint-prompts-goto-other-frame (candidate)
   (helm-comint-prompts-goto candidate 'switch-to-buffer-other-frame))
 
-(defun helm-comint-prompts-other-window ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-comint-prompts-goto-other-window)))
-(put 'helm-comint-prompts-other-window 'helm-only t)
+(helm-make-command-from-action helm-comint-prompts-other-window
+    "Switch to comint prompt in other window."
+  'helm-comint-prompts-goto-other-window)
 
-(defun helm-comint-prompts-other-frame ()
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-comint-prompts-goto-other-frame)))
-(put 'helm-comint-prompts-other-frame 'helm-only t)
+(helm-make-command-from-action helm-comint-prompts-other-frame
+    "Switch to comint prompt in other frame."
+  'helm-comint-prompts-goto-other-frame)
 
 ;;;###autoload
 (defun helm-comint-prompts ()
   "Pre-configured `helm' to browse the prompts of the current comint buffer."
   (interactive)
-  (if (apply 'derived-mode-p helm-comint-mode-list)
+  (if (apply #'derived-mode-p helm-comint-mode-list)
       (helm :sources
             (helm-build-sync-source "Comint prompts"
               :candidates (helm-comint-prompts-list major-mode)
-              :candidate-transformer 'helm-comint-prompts-transformer
+              :candidate-transformer #'helm-comint-prompts-transformer
               :action '(("Go to prompt" . helm-comint-prompts-goto)))
             :buffer "*helm comint prompts*")
     (message "Current buffer is not a comint buffer")))
@@ -162,11 +174,11 @@ See `helm-comint-prompts-list'."
 (defun helm-comint-prompts-all ()
   "Pre-configured `helm' to browse the prompts of all comint sessions."
   (interactive)
-  (if (apply 'derived-mode-p helm-comint-mode-list)
+  (if (apply #'derived-mode-p helm-comint-mode-list)
       (helm :sources
             (helm-build-sync-source "All comint prompts"
               :candidates (helm-comint-prompts-list-all major-mode)
-              :candidate-transformer 'helm-comint-prompts-all-transformer
+              :candidate-transformer #'helm-comint-prompts-all-transformer
               :action (quote (("Go to prompt" . helm-comint-prompts-goto)
                               ("Go to prompt in other window `C-c o`" .
                                helm-comint-prompts-goto-other-window)
@@ -202,18 +214,13 @@ See `helm-comint-prompts-list'."
 (defun helm-comint-input-ring ()
   "Preconfigured `helm' that provide completion of `comint' history."
   (interactive)
-  (when (derived-mode-p 'comint-mode)
+  (when (or (derived-mode-p 'comint-mode)
+            (member major-mode helm-comint-mode-list))
     (helm :sources 'helm-source-comint-input-ring
           :input (buffer-substring-no-properties (comint-line-beginning-position)
                                                  (point-at-eol))
           :buffer "*helm comint history*")))
 
 (provide 'helm-comint)
-
-;; Local Variables:
-;; byte-compile-warnings: (not obsolete)
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
 
 ;;; helm-comint.el ends here
