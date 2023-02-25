@@ -26,7 +26,16 @@
 ;;; Code:
 (require 'dash)
 (require 'with-editor)
+(require 'transient)
+(require 'libgit)
 (require 'magit)
+
+(setq transient-values-file
+      (expand-file-name "var/transient/values.el" user-emacs-directory)
+      transient-history-file
+      (expand-file-name "var/transient/history.el" user-emacs-directory)
+      transient-levels-file
+      (expand-file-name "var/transient/levels.el" user-emacs-directory))
 
 (provide 'init_magit)
 ;;; init_magit.el ends here
