@@ -1,11 +1,11 @@
 PKG = transient
 
 ELS   = $(PKG).el
-ELS  += $(PKG)-demo.el
 ELCS  = $(ELS:.el=.elc)
 
-DEPS  = dash
-DEPS += hydra # for lv.el
+DEPS  =
+
+VERSION ?= $(shell test -e $(TOP).git && git describe --tags --abbrev=0 | cut -c2-)
 
 EMACS      ?= emacs
 EMACS_ARGS ?=
@@ -16,7 +16,7 @@ LOAD_PATH  += -L .
 ifndef ORG_LOAD_PATH
 ORG_LOAD_PATH  = -L ../../dash
 ORG_LOAD_PATH += -L ../../org/lisp
-ORG_LOAD_PATH += -L ../../org/contrib/lisp
+ORG_LOAD_PATH += -L ../../org-contrib/lisp
 ORG_LOAD_PATH += -L ../../ox-texinfo+
 endif
 

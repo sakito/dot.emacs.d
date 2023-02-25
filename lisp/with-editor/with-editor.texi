@@ -8,7 +8,7 @@
 
 @copying
 @quotation
-Copyright (C) 2015-2019 Jonas Bernoulli <jonas@@bernoul.li>
+Copyright (C) 2015-2021 Jonas Bernoulli <jonas@@bernoul.li>
 
 You can redistribute this document and/or modify it under the terms
 of the GNU General Public License as published by the Free Software
@@ -31,7 +31,7 @@ General Public License for more details.
 @finalout
 @titlepage
 @title With-Editor User Manual
-@subtitle for version 2.8.3
+@subtitle for version 3.0.4
 @author Jonas Bernoulli
 @page
 @vskip 0pt plus 1filll
@@ -60,10 +60,10 @@ additional functionality which makes it useful even for end-users, who
 don't use Magit or another package which uses it internally.
 
 @noindent
-This manual is for With-Editor version 2.8.3.
+This manual is for With-Editor version 3.0.4.
 
 @quotation
-Copyright (C) 2015-2019 Jonas Bernoulli <jonas@@bernoul.li>
+Copyright (C) 2015-2021 Jonas Bernoulli <jonas@@bernoul.li>
 
 You can redistribute this document and/or modify it under the terms
 of the GNU General Public License as published by the Free Software
@@ -82,6 +82,9 @@ General Public License for more details.
 * Using the With-Editor package::
 * Using With-Editor as a library::
 * Debugging::
+* Command Index::
+* Function Index::
+* Variable Index::
 
 @detailmenu
 --- The Detailed Node Listing ---
@@ -198,7 +201,7 @@ trap \"exit 1\" USR2; \
 while true; do sleep 1; done'"
 @end lisp
 
-Note that the unit seperator character () right after the file
+Note that the unit separator character () right after the file
 name ($0) is required.
 
 Also note that using this alternative implementation leads to a
@@ -255,17 +258,18 @@ command.  This affects most variants of that command, whether they
 are defined in Emacs or in some third-party package.
 @end defvar
 
-The command @code{with-editor-export-editor} exports @code{$EDITOR} or
-another such environment variable in @code{shell-mode}, @code{term-mode} and
-@code{eshell-mode} buffers.  Use this Emacs command before executing a
-shell command which needs the editor set, or always arrange for the
-current Emacs instance to be used as editor by adding it to the
-appropriate mode hooks:
+The command @code{with-editor-export-editor} exports @code{$EDITOR} or another
+such environment variable in @code{shell-mode}, @code{eshell-mode}, @code{term-mode} and
+@code{vterm-mode} buffers.  Use this Emacs command before executing a shell
+command which needs the editor set, or always arrange for the current
+Emacs instance to be used as editor by adding it to the appropriate
+mode hooks:
 
 @lisp
 (add-hook 'shell-mode-hook  'with-editor-export-editor)
-(add-hook 'term-exec-hook   'with-editor-export-editor)
 (add-hook 'eshell-mode-hook 'with-editor-export-editor)
+(add-hook 'term-exec-hook   'with-editor-export-editor)
+(add-hook 'vterm-exec-hook  'with-editor-export-editor)
 @end lisp
 
 Some variants of this function exist; these two forms are equivalent:
@@ -279,9 +283,9 @@ Some variants of this function exist; these two forms are equivalent:
 @cindex with-editor-export-editor
 @deffn Command with-editor-export-editor
 
-When invoked in a @code{shell-mode}, @code{term-mode}, or @code{eshell-mode} buffer, this
-command teaches shell commands to use the current Emacs instance as
-the editor, by exporting @code{$EDITOR}.
+When invoked in a @code{shell-mode}, @code{eshell-mode}, @code{term-mode} or @code{vterm-mode}
+buffer, this command teaches shell commands to use the current Emacs
+instance as the editor, by exporting @code{$EDITOR}.
 @end deffn
 
 @cindex with-editor-export-git-editor
@@ -356,5 +360,20 @@ in Magit, then please open a new issue at
 @uref{https://github.com/magit/with-editor/issues} and provide information
 about your Emacs installation.  Most importantly how did you install
 Emacs and what is the output of @code{M-x with-editor-debug RET}.
+
+@node Command Index
+@appendix Command Index
+
+@printindex cp
+
+@node Function Index
+@appendix Function Index
+
+@printindex fn
+
+@node Variable Index
+@appendix Variable Index
+
+@printindex vr
 
 @bye

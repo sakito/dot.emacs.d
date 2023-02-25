@@ -17,9 +17,8 @@ LOAD_PATH  ?= $(addprefix -L ../,$(DEPS))
 LOAD_PATH  += -L .
 
 ifndef ORG_LOAD_PATH
-ORG_LOAD_PATH  = -L ../dash
-ORG_LOAD_PATH += -L ../org/lisp
-ORG_LOAD_PATH += -L ../org/contrib/lisp
+ORG_LOAD_PATH  = -L ../org/lisp
+ORG_LOAD_PATH += -L ../org-contrib/lisp
 ORG_LOAD_PATH += -L ../ox-texinfo+
 endif
 
@@ -84,7 +83,8 @@ dir: $(PKG).info
 	@printf "%s" $^ | xargs -n 1 $(INSTALL_INFO) --dir=$@
 
 HTML_FIXUP_CSS    = '/<link rel="stylesheet" type="text\/css" href="\/assets\/page.css">/a\
-<link class="s-css-s--style" rel="stylesheet"           title="Default"               href="/assets/themes/default.css">\
+<link rel="icon" href="/assets/magit_alt1.ico">\
+\n<link class="s-css-s--style" rel="stylesheet"           title="Default"               href="/assets/themes/default.css">\
 \n<link class="s-css-s--style" rel="stylesheet alternate" title="Default high contrast" href="/assets/themes/default-high-contrast.css">\
 \n<link class="s-css-s--style" rel="stylesheet alternate" title="Solarized dark xterm"  href="/assets/themes/solarized-dark-xterm.css">\
 \n<link class="s-css-s--style" rel="stylesheet alternate" title="Black on white"        href="/assets/themes/black-on-white.css">\
@@ -135,6 +135,8 @@ release: html html-dir pdf
 	@aws s3 cp $(PKG).html $(RELEASE_TARGET)
 	@aws s3 cp $(PKG).pdf  $(RELEASE_TARGET)
 	@aws s3 sync --delete $(PKG) $(RELEASE_TARGET)$(PKG)/
+	@aws s3 cp $(PUBLISH_TARGET)dir.html $(RELEASE_TARGET)dir.html
+	@aws s3 cp $(PUBLISH_TARGET)dir/index.html $(RELEASE_TARGET)dir/index.html
 	@printf "Generating CDN invalidation\n"
 	@aws cloudfront create-invalidation --distribution-id $(CFRONT_DIST) --paths \
 	"$(subst $(space),$(comma),$(addprefix $(RELEASE_PATH),$(CFRONT_PATHS)))" > /dev/null
@@ -146,6 +148,7 @@ clean:
 	@printf "Cleaning...\n"
 	@rm -rf $(CLEAN)
 
+.PHONY: authors AUTHORS.md
 authors: AUTHORS.md
 
 AUTHORS.md:

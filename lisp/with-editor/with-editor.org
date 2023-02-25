@@ -2,19 +2,19 @@
 :PREAMBLE:
 #+AUTHOR: Jonas Bernoulli
 #+EMAIL: jonas@bernoul.li
-#+DATE: 2015-2019
+#+DATE: 2015-2021
 #+LANGUAGE: en
 
 #+TEXINFO_DIR_CATEGORY: Emacs
 #+TEXINFO_DIR_TITLE: With-Editor: (with-editor).
 #+TEXINFO_DIR_DESC: Using the Emacsclient as $EDITOR
-#+SUBTITLE: for version 2.8.3
+#+SUBTITLE: for version 3.0.4
 
 #+TEXINFO_DEFFN: t
+#+OPTIONS: H:4 num:4 toc:2
 #+PROPERTY: header-args :eval never
 #+BIND: ox-texinfo+-before-export-hook ox-texinfo+-update-copyright-years
 #+BIND: ox-texinfo+-before-export-hook ox-texinfo+-update-version-strings
-#+OPTIONS: H:4 num:4 toc:2
 
 The library ~with-editor~ makes it easy to use the Emacsclient as the
 ~$EDITOR~ of child processes, making sure they know how to call home.
@@ -32,10 +32,10 @@ additional functionality which makes it useful even for end-users, who
 don't use Magit or another package which uses it internally.
 
 #+TEXINFO: @noindent
-This manual is for With-Editor version 2.8.3.
+This manual is for With-Editor version 3.0.4.
 
 #+BEGIN_QUOTE
-Copyright (C) 2015-2019 Jonas Bernoulli <jonas@bernoul.li>
+Copyright (C) 2015-2021 Jonas Bernoulli <jonas@bernoul.li>
 
 You can redistribute this document and/or modify it under the terms
 of the GNU General Public License as published by the Free Software
@@ -143,7 +143,7 @@ it receives a signal.
     while true; do sleep 1; done'"
   #+END_SRC
 
-  Note that the unit seperator character () right after the file
+  Note that the unit separator character () right after the file
   name ($0) is required.
 
   Also note that using this alternative implementation leads to a
@@ -193,17 +193,18 @@ Alternatively use the global ~shell-command-with-editor-mode~.
   command.  This affects most variants of that command, whether they
   are defined in Emacs or in some third-party package.
 
-The command ~with-editor-export-editor~ exports ~$EDITOR~ or
-another such environment variable in ~shell-mode~, ~term-mode~ and
-~eshell-mode~ buffers.  Use this Emacs command before executing a
-shell command which needs the editor set, or always arrange for the
-current Emacs instance to be used as editor by adding it to the
-appropriate mode hooks:
+The command ~with-editor-export-editor~ exports ~$EDITOR~ or another
+such environment variable in ~shell-mode~, ~eshell-mode~, ~term-mode~ and
+~vterm-mode~ buffers.  Use this Emacs command before executing a shell
+command which needs the editor set, or always arrange for the current
+Emacs instance to be used as editor by adding it to the appropriate
+mode hooks:
 
 #+BEGIN_SRC emacs-lisp
   (add-hook 'shell-mode-hook  'with-editor-export-editor)
-  (add-hook 'term-exec-hook   'with-editor-export-editor)
   (add-hook 'eshell-mode-hook 'with-editor-export-editor)
+  (add-hook 'term-exec-hook   'with-editor-export-editor)
+  (add-hook 'vterm-exec-hook  'with-editor-export-editor)
 #+END_SRC
 
 Some variants of this function exist; these two forms are equivalent:
@@ -216,9 +217,9 @@ Some variants of this function exist; these two forms are equivalent:
 
 - Command: with-editor-export-editor
 
-  When invoked in a ~shell-mode~, ~term-mode~, or ~eshell-mode~ buffer, this
-  command teaches shell commands to use the current Emacs instance as
-  the editor, by exporting ~$EDITOR~.
+  When invoked in a ~shell-mode~, ~eshell-mode~, ~term-mode~ or ~vterm-mode~
+  buffer, this command teaches shell commands to use the current Emacs
+  instance as the editor, by exporting ~$EDITOR~.
 
 - Command: with-editor-export-git-editor
 
@@ -285,20 +286,28 @@ https://github.com/magit/with-editor/issues and provide information
 about your Emacs installation.  Most importantly how did you install
 Emacs and what is the output of ~M-x with-editor-debug RET~.
 
-# LocalWords: LocalWords
-# LocalWords: Magit Emacs emacsclient FreeBSD macOS texinfo
-# LocalWords: async eval hg init performant rebase startup
-
-# Local Variables:
-# eval: (require 'ox-texinfo+ nil t)
-# End:
+* Command Index
+:PROPERTIES:
+:APPENDIX:   t
+:INDEX:      cp
+:END:
+* Function Index
+:PROPERTIES:
+:APPENDIX:   t
+:INDEX:      fn
+:END:
+* Variable Index
+:PROPERTIES:
+:APPENDIX:   t
+:INDEX:      vr
+:END:
 * _ Copying
 :PROPERTIES:
 :COPYING:    t
 :END:
 
 #+BEGIN_QUOTE
-Copyright (C) 2015-2019 Jonas Bernoulli <jonas@bernoul.li>
+Copyright (C) 2015-2021 Jonas Bernoulli <jonas@bernoul.li>
 
 You can redistribute this document and/or modify it under the terms
 of the GNU General Public License as published by the Free Software
@@ -312,6 +321,14 @@ General Public License for more details.
 #+END_QUOTE
 
 * _ :ignore:
+
+# LocalWords: LocalWords
+# LocalWords: Magit Emacs emacsclient FreeBSD macOS texinfo
+# LocalWords: async eval hg init performant rebase startup
+
+# Local Variables:
+# eval: (require 'ox-texinfo+ nil t)
+# End:
 
 # IMPORTANT: Also update ORG_ARGS and ORG_EVAL in the Makefile.
 # Local Variables:

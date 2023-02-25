@@ -25,7 +25,7 @@ lisp:
 docs:
 	@$(MAKE) -C docs docs
 
-texi:
+texi: bump-version
 	@$(MAKE) -C docs texi
 
 info:
@@ -44,7 +44,13 @@ publish:
 	@$(MAKE) -C docs publish
 
 release:
-	@$(MAKE) -C docs release
+	@$(MAKE) VERSION=$(VERSION) -C docs release
+
+bump-version:
+	@printf "Setting version in transient.el to $(VERSION)\n"
+	@test -n "$(VERSION)" || (echo "Version not specified"; false)
+	@gsed -i -e "/Package-Version:/s|[0-9.]\+|$(VERSION)|" lisp/transient.el
+	@gsed -i -e "/Package-Version:/s|UNRELEASED|$(shell date +%F)|" docs/CHANGELOG
 
 clean:
 	@printf "Cleaning...\n"
