@@ -32,13 +32,13 @@
 (cond
  ;; デュアルだったりトリプルだったりするので width の方は条件に入れてない
  ;; 設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する
- ((= (display-pixel-height) 1440)
+ ((>= (display-pixel-height) 1400)
   (setq default-frame-alist
         (append (list
-                 '(width . 200)
-                 '(height . 60)
-                 '(top . 30)
-                 '(left . 650)
+                 '(width . 165)
+                 '(height . 50)
+                 '(top . 270)
+                 '(left . 700)
                  )
                 default-frame-alist)))
  ;; 1920 * 1200 ディスプレイ
@@ -92,14 +92,12 @@
 (when mac-p
   (set-face-attribute 'default
                       nil
-                      ;; :family "September"
-                      :family "Hackgen35"
+                      :family "Firge35"
                       :height 180)
-  ;; (set-frame-font "September-14")
-  (set-frame-font "Hackgen35-18")
+  (set-frame-font "Firge35-18")
   (set-fontset-font nil
                     'unicode
-                    (font-spec :family "Hackgen35")
+                    (font-spec :family "Firge35")
                     nil
                     'append)
   ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
@@ -115,13 +113,13 @@
   ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
   (set-fontset-font nil
                     '( #x3000 .  #x30ff)
-                    (font-spec :family "Hackgen35")
+                    (font-spec :family "Firge35")
                     nil
                     'prepend)
   ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
   (set-fontset-font nil
                     '( #xff00 .  #xffef)
-                    (font-spec :family "Hackgen35")
+                    (font-spec :family "Firge35")
                     nil
                     'prepend)
 
@@ -224,9 +222,9 @@
       (mac-p
        (require 'color-theme-dark)
        (color-theme-dark))
-      (windows-p
-       (require 'color-theme-ntemacs)
-       (color-theme-ntemacs))
+      ;; (windows-p
+      ;;  (require 'color-theme-ntemacs)
+      ;;  (color-theme-ntemacs))
       (t
        (require 'color-theme-dark)
        (color-theme-dark))
