@@ -35,11 +35,11 @@
                "/usr/sbin"
                "/bin"
                "/usr/bin"
-               "/opt/local/bin"
+               "/opt/homebrew/bin"
                "/usr/local/bin"
                "/usr/texbin"
                (expand-file-name "~/bin")
-               (expand-file-name "~/opt/py36/bin")
+               (expand-file-name "~/opt/py3.11/bin")
                (expand-file-name "bin" user-emacs-directory)
                ))
   (when (and (file-exists-p dir) (not (member dir exec-path)))
