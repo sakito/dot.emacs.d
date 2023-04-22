@@ -33,8 +33,8 @@
 ;; 常時デバッグ状態
 (setq debug-on-error t)
 
-;; cl 利用前提
-(eval-when-compile (require 'cl))
+;; cl-lib 利用前提
+(eval-when-compile (require 'cl-lib nil t))
 
 ;; Emacs 設定ディレクトリを設定。Emacs 22以下用
 ;; Emacs 23.1 以上では user-emacs-directory 変数が用意されているのでそれを利用
@@ -73,10 +73,11 @@
 (defvar emacs24-p (equal emacs-major-version 24))
 (defvar emacs25-p (equal emacs-major-version 25))
 (defvar emacs26-p (equal emacs-major-version 26))
+(defvar emacs28-p (equal emacs-major-version 28))
 (defvar darwin-p (eq system-type 'darwin))
 (defvar ns-p (featurep 'ns))
 (defvar carbon-p (and (eq window-system 'mac) emacs22-p))
-(defvar mac-p (and (eq window-system 'mac) (or emacs23-p emacs24-p emacs25-p emacs26-p)))
+(defvar mac-p (and (eq window-system 'mac) (or emacs23-p emacs24-p emacs25-p emacs26-p emacs28-p)))
 (defvar linux-p (eq system-type 'gnu/linux))
 (defvar colinux-p (when linux-p
                     (let ((file "/proc/modules"))
@@ -134,13 +135,13 @@
                  (expand-file-name "init.el" user-emacs-directory)
                  (expand-file-name "init.elc" user-emacs-directory))
                 (byte-compile-file
-                 (expand-file-name "init.el" user-emacs-directory) 0))
+                 (expand-file-name "init.el" user-emacs-directory)))
             (byte-recompile-directory
              (expand-file-name "site-start.d" user-emacs-directory) 0)
             ))
 
 ;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
-(when (or emacs23-p emacs24-p emacs25-p)
+(when (or emacs23-p emacs24-p emacs25-p emacs28-p)
   (defun message-startup-time ()
     (message "Emacs loaded in %dms"
              (/ (- (+ (third after-init-time)
