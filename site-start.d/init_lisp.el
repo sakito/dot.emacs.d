@@ -38,7 +38,7 @@
                 "/usr/local/share/info")))
 
 (require 'el-mock)
-(require 'el-expectations)
+;;(require 'el-expectations)
 
 ;; scratch バッファを保存する
 (require 'scratch-log)
