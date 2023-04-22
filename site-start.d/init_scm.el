@@ -45,7 +45,7 @@
 (require 'ahg)
 
 ;; @see https://gist.github.com/546650
-(require 'hg-status)
+;;(require 'hg-status)
 
 ;; svn
 ;; @see http://svn.apache.org/repos/asf/subversion/trunk/contrib/client-side/emacs/dsvn.el
