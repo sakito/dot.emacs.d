@@ -101,3 +101,6 @@
 [submodule "lisp/japanese-holidays"]
 	path = lisp/japanese-holidays
 	url = git://github.com/emacs-jp/japanese-holidays.git
+[submodule "local-lisp/markdown-mode"]
+	path = local-lisp/markdown-mode
+	url = https://github.com/jrblevin/markdown-mode.git

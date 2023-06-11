@@ -65,6 +65,8 @@
 (require 'init_skk)
 ;; rst-mode
 (require 'init_rst)
+;; markdown
+(require 'init_markdown)
 ;; smartchr
 (require 'init_smartchr)
 ;; (require 'init_key-combo)
