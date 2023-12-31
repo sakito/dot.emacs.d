@@ -71,10 +71,11 @@
 (defvar emacs22-p (equal emacs-major-version 22))
 (defvar emacs27-p (equal emacs-major-version 27))
 (defvar emacs28-p (equal emacs-major-version 28))
+(defvar emacs29-p (equal emacs-major-version 29))
 (defvar darwin-p (eq system-type 'darwin))
 (defvar ns-p (featurep 'ns))
 (defvar carbon-p (and (eq window-system 'mac) emacs22-p))
-(defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p)))
+(defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p emacs29-p)))
 (defvar linux-p (eq system-type 'gnu/linux))
 (defvar colinux-p (when linux-p
                     (let ((file "/proc/modules"))
@@ -138,7 +139,7 @@
             ))
 
 ;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
-(when (or emacs27-p emacs28-p)
+(when (or emacs27-p emacs28-p emacs29-p)
   (defun message-startup-time ()
     (message "Emacs loaded in %dms"
              (/ (- (+ (third after-init-time)

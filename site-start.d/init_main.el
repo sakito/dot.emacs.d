@@ -112,7 +112,7 @@
 ;; (when mac-p
 ;;   (require 'init_objc))
 ;; yasnippet
-(require 'init_yasnippet)
+;; (require 'init_yasnippet)
 ;; javascript-mode
 (require 'init_javascript)
 ;;; 文書記述関連

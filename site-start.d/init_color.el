@@ -32,13 +32,13 @@
 (cond
  ;; デュアルだったりトリプルだったりするので width の方は条件に入れてない
  ;; 設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する
- ((>= (display-pixel-height) 1400)
+ ((>= (display-pixel-height) 1440)
   (setq default-frame-alist
         (append (list
-                 '(width . 165)
-                 '(height . 50)
-                 '(top . 270)
-                 '(left . 700)
+                 '(width . 172)
+                 '(height . 60)
+                 '(top . 123)
+                 '(left . 420)
                  )
                 default-frame-alist)))
  ;; 1920 * 1200 ディスプレイ
