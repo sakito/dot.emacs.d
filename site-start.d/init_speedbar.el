@@ -50,7 +50,7 @@
 ;; 拡張子
 (add-hook 'speedbar-mode-hook
           '(lambda ()
-             (speedbar-add-supported-extension '("js" "as" "html" "css" "php" "rst" "howm" "org" "ml" "scala"))))
+             (speedbar-add-supported-extension '("js" "as" "html" "css" "php" "rst" "howm" "org" "ml" "scala" "md" "txt"))))
 
 (provide 'init_speedbar)
 ;;; init_speedbar.el ends here
