@@ -1,6 +1,6 @@
 ;;; helm-dabbrev.el --- Helm implementation of dabbrev. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -237,7 +237,7 @@ The search starts at (1- BEG) with a regexp starting with
 regexp matching syntactically any word or symbol.
 The possible false positives matching SEP-REGEXP at end are
 finally removed."
-  (let ((eol (point-at-eol)))
+  (let ((eol (pos-eol)))
     (save-excursion
       (goto-char (1- beg))
       (when (re-search-forward

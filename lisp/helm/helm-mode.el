@@ -1,6 +1,6 @@
 ;;; helm-mode.el --- Enable helm completion everywhere. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@
 (defvar helm-completion--sorting-done)
 (defvar helm-mode)
 (defvar password-cache)
+(defvar package--builtins)
+(defvar helm--locate-library-doc-cache)
+(defvar helm--locate-library-cache)
 
 ;; No warnings in Emacs built --without-x
 (declare-function x-file-dialog "xfns.c")
@@ -39,6 +42,13 @@
 (declare-function helm-lisp-completion-persistent-help "helm-elisp")
 (declare-function help--symbol-class "help-fns.el")
 (declare-function helm-get-first-line-documentation "helm-elisp")
+(declare-function package-desc-summary   "package")
+(declare-function package-built-in-p "package")
+(declare-function package-desc-status "package")
+(declare-function package-get-descriptor "package")
+(declare-function print-coding-system-briefly "mul-diag.el")
+(declare-function color-rgb-to-hex "color.el")
+(declare-function find-library-name "find-func.el")
 
 (defgroup helm-mode nil
   "Enable helm completion."
@@ -46,8 +56,6 @@
 
 (defcustom helm-completing-read-handlers-alist
   '((find-tag . helm-completing-read-default-find-tag)
-    (xref-find-definitions . helm-completing-read-default-find-tag)
-    (xref-find-references . helm-completing-read-default-find-tag)
     (ggtags-find-tag-dwim . helm-completing-read-default-find-tag)
     (tmm-menubar . nil)
     (find-file . nil)
@@ -59,7 +67,8 @@
     (dired-do-hardlink . helm-read-file-name-handler-1)
     (basic-save-buffer . helm-read-file-name-handler-1)
     (write-file . (default helm-read-file-name-handler-1))
-    (write-region . (default helm-read-file-name-handler-1)))
+    (write-region . (default helm-read-file-name-handler-1))
+    (all-the-icons-insert . helm-mode-all-the-icons-handler))
   "Completing read functions for specific Emacs commands.
 
 By default `helm-mode' use `helm-completing-read-default-handler' to
@@ -150,7 +159,16 @@ same as
 Note that you don't need to enable `ido-mode' for this to work, see
 `helm-mode' documentation."
   :group 'helm-mode
-  :type '(alist :key-type symbol :value-type symbol))
+  :type '(alist
+          :key-type symbol
+          :value-type (choice
+                       function
+                       (list :tag "Specify the completing-read and read-file-name handlers"
+                        (choice
+                         (const :tag "Use default helm completing-read handler" default)
+                         (function :tag "Use this helm completing-read function"))
+                        (function :tag "Use this helm read file name function"))
+                       (other :tag "Disabled" nil))))
 
 (defcustom helm-comp-read-case-fold-search helm-case-fold-search
   "Default Local setting of `helm-case-fold-search' for `helm-comp-read'.
@@ -224,10 +242,44 @@ A list of symbols.  `helm-mode' is rejecting all lambda's, byte-code fns
 and all functions belonging in this list from `minibuffer-setup-hook'.
 This is mainly needed to prevent \"*Completions*\" buffers to popup.")
 
+(defvar helm-comp-read-require-match-overrides '((describe-function . t)
+                                                 (describe-command . t)
+                                                 (describe-minor-mode . t)
+                                                 (load-theme . t)
+                                                 (describe-theme . t))
+  "Allow overriding REQUIRE-MATCH completing-read arg for a specific function.")
+
+(defcustom helm-completions-detailed (and (boundp 'completions-detailed)
+                                          completions-detailed)
+  "Allow providing `completions-detailed' for Emacs < 28.
+Not guaranteed to work with Emacs < 27."
+  :type 'boolean
+  :group 'helm-mode)
+
+(defvar helm-mode-find-file-target-alist
+  '(("switch-to-buffer" . helm-buffers-quit-and-find-file-fn))
+  "An alist composed of (SOURCE_NAME . FUNCTION) elements.
+Where FUNCTION is a function suitable for `helm-quit-and-find-file'.")
+
 (defface helm-mode-prefix
   `((t ,@(and (>= emacs-major-version 27) '(:extend t))
        (:background "red" :foreground "black")))
   "Face used for prefix completion."
+  :group 'helm-mode)
+
+(defface helm-completion-invalid
+    '((t :inherit font-lock-property-name-face))
+  "Face used to highlight invalid functions."
+  :group 'helm-mode)
+
+(defface helm-completions-detailed
+    '((t :inherit font-lock-warning-face))
+  "Face used to highlight completion-detailed informations."
+  :group 'helm-mode)
+
+(defface helm-completions-annotations
+    '((t :inherit font-lock-property-name-face))
+  "Face used to highlight annotations in completion."
   :group 'helm-mode)
 
 (defvar helm-comp-read-map
@@ -237,6 +289,12 @@ This is mainly needed to prevent \"*Completions*\" buffers to popup.")
     (define-key map (kbd "M-RET")      'helm-cr-empty-string)
     map)
   "Keymap for `helm-comp-read'.")
+
+(defvar helm-comp-in-region-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-comp-read-map)
+    map)
+  "Keymap for completion-at-point and friends.")
 
 (defun helm-mode-delete-char-backward-1 ()
   (interactive)
@@ -315,8 +373,8 @@ NOT `setq'."
   :set (lambda (var val)
          (set var val)
          (if (memq val '(helm helm-fuzzy))
-             (define-key helm-comp-read-map (kbd "DEL") 'helm-mode-delete-char-backward-maybe)
-           (define-key helm-comp-read-map (kbd "DEL") 'delete-backward-char))))
+             (define-key helm-comp-in-region-map (kbd "DEL") 'helm-mode-delete-char-backward-maybe)
+           (define-key helm-comp-in-region-map (kbd "DEL") 'delete-backward-char))))
 
 (defconst helm-completion--all-styles
   (let ((flex (if (assq 'flex completion-styles-alist)
@@ -333,16 +391,20 @@ NOT `setq'."
 (defcustom helm-completion-styles-alist '((gud-mode . helm)
                                           ;; See https://github.com/djcb/mu/issues/2181.
                                           (mu4e-compose-mode . emacs))
-  "Allow configuring `helm-completion-style' per mode.
+  "Allow configuring `helm-completion-style' per mode or command.
 
-Each entry is a cons cell like (mode . style) where style must be a
-suitable value for `helm-completion-style'.
-When specifying emacs as style for a mode, `completion-styles' can be
-specified by using a cons cell specifying completion-styles to use
-with helm emacs style, e.g. (foo-mode . (emacs helm flex)) will set
-`completion-styles' to \\='(helm flex) for foo-mode.  This affects only
-completions happening in buffers and not minibuffer completions,
-i.e. completing-read's."
+NOTE: Use a mode for a completion that will be used in a buffer
+i.e. completion-in-region, whereas you have to specify instead a
+command to affect the completing-read trigerred by this
+command. Commands specified in `helm-completing-read-handlers-alist' take
+precedence on commands you put here.
+
+Each entry is a cons cell like (mode . style) where style must be
+a suitable value for `helm-completion-style'.  When specifying
+emacs as style for a mode or a command, `completion-styles' can
+be specified by using a cons cell specifying completion-styles to
+use with helm emacs style, e.g. (foo-mode . (emacs helm flex))
+will set `completion-styles' to \\='(helm flex) for foo-mode."
   :group 'helm-mode
   :type
   `(alist :key-type (symbol :tag "Major Mode")
@@ -491,6 +553,7 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
 
 (cl-defun helm-cr--pattern-in-candidates-p (candidates &optional (pattern helm-pattern))
   (or (assoc pattern candidates)
+      (assoc (concat " " pattern) candidates)
       (assq (intern pattern) candidates)
       (member pattern candidates)
       (member (downcase pattern) candidates)
@@ -499,6 +562,11 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
 (defun helm-cr-default-transformer (candidates source)
   "Default filter candidate function for `helm-comp-read'."
   (let ((must-match (helm-get-attr 'must-match source)))
+    ;; Annotation and affixation are already handled in completion-in-region and
+    ;; in helm-completing-read-default-2 when emacs style is in use.
+    ;; For helm-completing-read-default-1 we handle them in an extra FCT; This
+    ;; allows extracting annotation and affixation from metadata which is not
+    ;; accessible from here.
     (cl-loop for c in candidates
              for cand = (let ((elm (if (stringp c)
                                        (replace-regexp-in-string "\\s\\" "" c)
@@ -516,19 +584,16 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                        (eq must-match t)
                        (helm-cr--pattern-in-candidates-p lst pat))
                    lst
-                 (append (list (cons (concat (propertize
-                                              " " 'display
-                                              (propertize "[?]"
-                                                          'face 'helm-ff-prefix
-                                                          'unknown t))
-                                             pat)
+                 (append (list (cons (helm-aand (propertize "[?]" 'face 'helm-ff-prefix)
+                                                (propertize " " 'display it 'unknown t)
+                                                (concat it pat))
                                      pat))
                          lst))))))
 
 (defun helm-comp-read--move-to-first-real-candidate ()
   (helm-aif (helm-get-selection nil 'withprop)
       ;; Avoid error with candidates with an image as display (Bug#2296).
-      (when (equal (get-text-property 0 'display it) "[?]")
+      (when (helm-candidate-prefixed-p it)
         (helm-next-line))))
 
 (defun helm-cr-default (default cands)
@@ -543,7 +608,10 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                                 do (setq cands (delete d cands))
                                 when str collect str)
                        cands))
-              ((and (not (equal default ""))
+              ;; Some functions like debug-on-entry use (symbol-name sym)
+              ;; without checking if sym is non nil, so the return value become
+              ;; "nil". 
+              ((and (not (member default '("" "nil")))
                     (string= helm-pattern ""))
                (cons default (delete (helm-stringify default)
                                      cands)))
@@ -573,6 +641,7 @@ If COLLECTION is an `obarray', a TEST should be needed. See `obarray'."
                             (name "Helm Completions")
                             header-name
                             candidates-in-buffer
+                            get-line
                             diacritics
                             match-part
                             match-dynamic
@@ -695,6 +764,9 @@ Keys description:
   `helm-source-in-buffer' which is much faster.
   Argument VOLATILE have no effect when CANDIDATES-IN-BUFFER is non--nil.
 
+- GET-LINE: Specify the :get-line slot of `helm-source-in-buffer', has no effect
+  when CANDIDATES-IN-BUFFER is nil.
+ 
 - MATCH-PART: Allow matching only one part of candidate.
   See match-part documentation in `helm-source'.
 
@@ -748,7 +820,8 @@ that use `helm-comp-read'.  See `helm-M-x' for example."
                               (helm-marked-candidates)
                               (identity candidate)))))))
     (let* ((minibuffer-completion-predicate test)
-           (minibuffer-completion-table collection)
+           (minibuffer-completion-table
+            (or minibuffer-completion-table collection))
            (helm-read-file-name-mode-line-string
             (replace-regexp-in-string "helm-maybe-exit-minibuffer"
                                       "helm-confirm-and-exit-minibuffer"
@@ -824,11 +897,14 @@ that use `helm-comp-read'.  See `helm-M-x' for example."
            (src-1 (helm-build-in-buffer-source name
                     :data get-candidates
                     :match-part match-part
+                    :get-line get-line
                     :multiline multiline
                     :header-name header-name
                     :filtered-candidate-transformer
-                    (append (helm-mklist fc-transformer)
-                            '(helm-cr-default-transformer))
+                    (let ((transformers (helm-mklist fc-transformer)))
+                      (append transformers
+                              (unless (member 'helm-cr-default-transformer transformers)
+                                '(helm-cr-default-transformer))))
                     :requires-pattern requires-pattern
                     :persistent-action persistent-action
                     :fuzzy-match fuzzy
@@ -867,8 +943,8 @@ that use `helm-comp-read'.  See `helm-M-x' for example."
                          :history (and (symbolp input-history) input-history)
                          :buffer buffer))
         (remove-hook 'helm-after-update-hook 'helm-comp-read--move-to-first-real-candidate))
-      ;; If `history' is a symbol save it.
-      (when (and result history (symbolp history))
+      ;; If `history' is a symbol save it, except when it is t.
+      (when (and result history (symbolp history) (not (eq history t)))
         (set history
              ;; RESULT may be a a string or a list of strings bug #2461.
              (delete-dups (append (mapcar #'substring-no-properties (helm-mklist result))
@@ -928,62 +1004,422 @@ that use `helm-comp-read'.  See `helm-M-x' for example."
     :default (or default ""))
      (helm-mode--keyboard-quit)))
 
+
+;;; Extra metadata for completions-detailed
+;;
+;;
+(defvar helm-completing-read-extra-metadata
+  '((buffer . (metadata
+               (affixation-function . helm-completing-read-buffer-affixation)
+               (category . buffer)
+               (flags . (helm-completing-read--buffer-lgst-mode))))
+    (symbol-help . (metadata
+                    (affixation-function . helm-symbol-completion-table-affixation)
+                    (category . symbol-help)))
+    (package . (metadata
+                (affixation-function . helm-completion-package-affixation)
+                (category . package)))
+    (theme . (metadata
+              (affixation-function . helm-completion-theme-affixation)
+              (category . theme)))
+    (coding-system . (metadata
+                      (affixation-function . helm-completion-coding-system-affixation)
+                      (category . coding-system)))
+    (color . (metadata
+              (affixation-function . helm-completion-color-affixation)
+              (category . color)))
+    (library . (metadata
+                (affixation-function . helm-completion-library-affixation)
+                (category . library))))
+  "Extra metadata for completing-read.
 
+Alist composed of (CATEGORY . METADATA).
+CATEGORY is extracted from original metadata and METADATA is a list composed
+like this:
+    (metadata (affixation-function . fun)
+              (annotation-function . fun)
+              (category . category)
+              (flags . flags))
+
+FLAGS is a list of variables to renitialize to nil when exiting or quitting.
+
+It is used to add `affixation-function' or `annotation-function' if original
+metadata doesn't have some and `completions-detailed' is non nil.
+When using emacs as `helm-completion-style', this has no effect, keeping same
+behavior as emacs vanilla.")
+
+(defvar helm-completing-read-command-categories
+  '(("customize-variable" . symbol-help)
+    ("customize-set-variable" . symbol-help)
+    ("customize-set-value" . symbol-help)
+    ("customize-save-variable" . symbol-help)
+    ("describe-function" . symbol-help); For Emacs-27.
+    ("describe-variable" . symbol-help); For Emacs-27.
+    ("describe-symbol" . symbol-help)  ; For Emacs-27.
+    ("describe-command" . symbol-help) ; For Emacs-27.
+    ("set-variable" . symbol-help)
+    ("customize-group" . symbol-help)
+    ("find-function" . symbol-help)
+    ("find-variable" . symbol-help)
+    ("trace-function" . symbol-help)
+    ("trace-function-foreground" . symbol-help)
+    ("trace-function-background" . symbol-help)
+    ("describe-minor-mode" . symbol-help)
+    ("where-is" . symbol-help)
+    ("execute-extended-command" . symbol-help)
+    ("find-library" . library)
+    ("locate-library" . library)
+    ("kill-buffer" . buffer)
+    ("package-install" . package)
+    ("package-vc-install" . package)
+    ("package-vc-checkout" . package)
+    ("describe-package" . package)
+    ("load-theme" . theme)
+    ("describe-theme" . theme)
+    ("describe-coding-system" . coding-system)
+    ("read-color" . color))
+  "An alist to specify metadata category by command.
+
+Some commands provide a completion-table with no category
+specified in metadata, we allow here specifying the category of
+the completion provided by a specific command.  The command
+should be specified as a string and the category as a symbol.")
+
+(defvar helm-completing-read--buffer-lgst-mode nil)
+(defun helm-completing-read-buffer-affixation (completions)
+  (let ((len-mode (or helm-completing-read--buffer-lgst-mode
+                      (setq helm-completing-read--buffer-lgst-mode
+                            (cl-loop for bn in completions
+                                     maximize (with-current-buffer bn
+                                                (length (symbol-name major-mode))))))))
+    (lambda (comp)
+      (let* ((buf (get-buffer comp))
+             (fname (buffer-file-name buf))
+             (modified (and fname (buffer-modified-p buf)))
+             (prefix (cond (modified
+                            (propertize
+                             "fm " 'face 'font-lock-comment-face))
+                           (fname
+                            (propertize
+                             " f " 'face 'helm-completions-annotations))
+                           (t (propertize "nf " 'face 'font-lock-doc-face))))
+             (mode (with-current-buffer comp
+                     (propertize
+                      (symbol-name major-mode) 'face 'helm-completions-detailed)))
+             (size (helm-buffer-size buf))
+             (max-len helm-buffer-max-length)
+             (bname (truncate-string-to-width
+                     comp helm-buffer-max-length nil nil
+                     helm-buffers-end-truncated-string))
+             (suffix (format "%s%s%s%s%s(in %s)"
+                             (make-string (1+ (- max-len (length bname))) ? )
+                             (propertize size
+                                         'face 'helm-buffer-size)
+                             (make-string (- 7 (length size)) ? )
+                             mode
+                             (make-string (1+ (- len-mode (length mode))) ? )
+                             (helm-aif fname
+                                 (propertize
+                                  (abbreviate-file-name (file-name-directory it))
+                                  'face 'font-lock-type-face)
+                               (propertize
+                                (with-current-buffer comp
+                                  (abbreviate-file-name default-directory))
+                                'face 'font-lock-doc-face)))))
+        (list (propertize
+               bname 'face (if fname
+                              'font-lock-builtin-face
+                            'font-lock-doc-face))
+              (propertize " " 'display prefix)
+              (propertize " " 'display suffix))))))
+
+(defun helm-symbol-completion-table-affixation (_completions)
+  "Override `help--symbol-completion-table-affixation'.
+
+Normally affixation functions use COMPLETIONS as arg, and return a list of
+modified COMPLETIONS. Now we allow affixations functions to return a
+function instead, just like annotation functions. The function should return a
+list of three elements like (comp prefix suffix). This increase significantly
+the speed avoiding one useless loop on complete list of candidates.
+
+Returns a function and not a list of completions.
+
+It affects actually describe-variable/function/command/symbol functions.
+It uses `helm-get-first-line-documentation' which allow providing documentation
+for `describe-variable' symbols and align properly documentation when helm style
+is used."
+  (lambda (comp)
+    (require 'help-fns)
+    (let* ((sym (intern comp))
+           ;; When using in-buffer implementation we should have the
+           ;; longest len to align documentation for free.
+           ;; Check for style as well in case user switches to emacs
+           ;; style and a candidate buffer remains (with its local vars
+           ;; still available).
+           (max-len (and (memq helm-completion-style '(helm helm-fuzzy))
+                         (helm-in-buffer-get-longest-candidate)))
+           (sep (if (or (null max-len) (zerop max-len))
+                    " --"               ; Default separator.
+                  (helm-make-separator comp max-len)))
+           (doc (ignore-errors
+                  (helm-get-first-line-documentation sym)))
+           (symbol-class (help--symbol-class sym))
+           (group (helm-group-p sym))
+           (key (helm-completion-get-key sym)))
+      (list
+       ;; Symbol (comp).
+       (if (or (symbol-function sym) (boundp sym)
+               (facep sym) group)
+           comp
+         ;; Not already defined function. To test add an advice on a non
+         ;; existing function.
+         (propertize comp 'face 'helm-completion-invalid))
+       ;; Prefix.
+       (helm-aand (cond ((and symbol-class group)
+                         (concat "g" symbol-class))
+                        ((and (not (string= symbol-class ""))
+                              symbol-class))
+                        (group "g")
+                        (t "i"))
+                  (propertize it 'face 'helm-completions-detailed)
+                  (propertize
+                   ;; (format "%-4s" it) makes spaces inheriting text props.
+                   " " 'display (concat it (make-string (- 5 (length it)) ? ))))
+       ;; Suffix.
+       (if doc
+           (helm-aand (propertize doc 'face 'helm-completions-detailed)
+                      (propertize " " 'display (concat sep it key)))
+         "")))))
+
+(defun helm-completion-get-key (sym)
+  "Return key description on symbol SYM."
+  (with-helm-current-buffer
+    (let* ((key     (and (commandp sym) (where-is-internal sym nil 'first-only)))
+           (binding (and key (key-description key))))
+      (when binding
+        (propertize (format " (%s)" binding) 'face 'shadow)))))
+
+(defun helm-completion-package-affixation (_completions)
+  (lambda (comp)
+    (let* ((sym (intern-soft comp))
+           (id (package-get-descriptor sym))
+           (built-in (package-built-in-p sym))
+           (status (and id (package-desc-status id)))
+           (desc (if built-in
+                     (aref (assoc-default sym package--builtins) 2)
+                   (and id (package-desc-summary id))))
+           (sep (helm-make-separator comp)))
+      (list comp
+            (propertize
+             (if status
+                 (format "%s " (substring status 0 1))
+               "b ")
+              'face 'helm-completions-annotations)
+            (or (helm-aand desc
+                           (propertize it 'face 'helm-completions-detailed)
+                           (propertize " " 'display (concat sep it)))
+                "")))))
+
+(defun helm-completion-theme-affixation (_completions)
+  (lambda (comp)
+    (let* ((sym (intern-soft comp))
+           (sep (helm-make-separator comp))
+           (doc (if (custom-theme-p sym)
+                    (helm-get-first-line-documentation sym)
+                  (helm--get-theme-doc-1 sym))))
+      (list comp
+            ""
+            (helm-aand (propertize doc 'face 'helm-completions-detailed)
+                       (propertize " " 'display (concat sep it)))))))
+
+(defun helm--get-theme-doc-1 (sym)
+  (let ((fn (locate-file (concat (symbol-name sym) "-theme.el")
+			 (custom-theme--load-path)
+			 '("" "c")))
+        doc)
+    ;; Avoid loading theme as much as possible.
+    (when fn
+      (with-temp-buffer
+        (insert-file-contents fn)
+        (helm-awhile (let ((read-circle nil))
+		       (condition-case nil
+			   (read (current-buffer))
+		         (end-of-file nil)))
+          (when (eq (car-safe it) 'deftheme)
+            (cl-return (setq doc (car (split-string (nth 2 it) "\n"))))))
+        (unless doc
+          (setq doc (helm--get-theme-doc-from-header)))))
+    doc))
+
+(defun helm--get-theme-doc-from-header ()
+  "Extract doc in first line of theme file."
+  (goto-char (point-min))
+  (let (beg end)
+    (when (re-search-forward "--- " (pos-eol) t)
+      (setq beg (point)))
+    (if (re-search-forward " -\\*-" (pos-eol) t)
+        (setq end (match-beginning 0))
+      (setq end (pos-eol)))
+    (when (and beg end)
+      (buffer-substring beg end))))
+
+(defun helm-completion-coding-system-affixation (_comps)
+  (lambda (comp)
+    (let ((doc (with-output-to-string
+                 (with-current-buffer standard-output
+                   (print-coding-system-briefly (intern comp) 'tightly))))
+          (sep (helm-make-separator comp)))
+      (list comp "" (helm-aand (replace-regexp-in-string "^ *" "" doc)
+                               (replace-regexp-in-string "[\n]" "" it)
+                               (propertize it 'face 'helm-completions-detailed)
+                               (propertize " " 'display (concat sep it)))))))
+
+(defun helm-completion-color-affixation (_comps)
+  (lambda (comp)
+    (let ((sep (helm-make-separator comp))
+          (rgb (condition-case nil
+                   (helm-acase comp
+                     ("foreground at point" (with-helm-current-buffer
+                                              (foreground-color-at-point)))
+                     ("background at point" (with-helm-current-buffer
+                                              (background-color-at-point)))
+                     (t
+                      (apply #'color-rgb-to-hex (color-name-to-rgb comp))))
+                 (error "SAMPLE"))))
+      (list comp
+            ""
+            (helm-aand (propertize rgb 'face `(:background ,rgb
+                                               :distant-foreground "black"))
+                       (propertize " " 'display (concat sep it)))))))
+
+(defun helm-completion-library-affixation (_comps)
+  (require 'helm-elisp)
+  (lambda (comp)
+    ;; Because find-library-include-other-files default to t, we have all the
+    ;; unrelated files and directories coming in ... Even if this modify the
+    ;; behavior of find-library-include-other-files remove them for the benefit
+    ;; of everybody.
+    (unless (or (string-match "\\(\\.elc\\|/\\)\\'" comp)
+                (string-match "\\`\\.#" comp)) ; (bug#2526)
+      (let* ((sep (helm-make-separator comp))
+             (path (or (assoc-default comp helm--locate-library-cache)
+                       (let ((p (find-library-name comp)))
+                         (push (cons comp p) helm--locate-library-cache)
+                         p)))
+             (doc (or (gethash comp helm--locate-library-doc-cache)
+                      (puthash comp (helm-locate-lib-get-summary path)
+                               helm--locate-library-doc-cache))))
+        (list comp
+              ""
+              (helm-aand (propertize doc 'face 'font-lock-warning-face)
+                         (propertize " " 'display (concat sep it))))))))
+
 ;;; Generic completing read
 ;;
 ;;
 (defun helm-completing-read-default-1
     (prompt collection test require-match
      init hist default _inherit-input-method
-     name buffer &optional cands-in-buffer exec-when-only-one)
-  "Call `helm-comp-read' with same args as `completing-read'.
+     name buffer &optional cands-in-buffer exec-when-only-one alistp get-line)
+  "Helm `completing-read' handler not rebuilding its candidates dynamically.
+
+It is used usually with helm or helm-fuzzy `helm-completion-style'.
+Call `helm-comp-read' with same args as `completing-read'.
+
 Extra optional arg CANDS-IN-BUFFER means use `candidates-in-buffer'
 method which is faster.
-It should be used when candidate list doesn't need to be rebuilt dynamically."
-  (let ((history (or (car-safe hist) hist))
-        (initial-input (helm-aif (pcase init
-                                   ((pred (stringp)) init)
-                                   ;; INIT is a cons cell.
-                                   (`(,l . ,_ll) l))
-                           it)))
-    (helm-comp-read
-     prompt collection
-     :test test
-     :history history
-     :reverse-history helm-mode-reverse-history
-     :input-history history
-     :must-match require-match
-     :alistp nil
-     :diacritics helm-mode-ignore-diacritics
-     :help-message #'helm-comp-read-help-message
-     :name name
-     :requires-pattern (if (and (stringp default)
-                                (string= default "")
-                                (or (eq require-match 'confirm)
-                                    (eq require-match
-                                        'confirm-after-completion)))
-                           1 0)
-     :quit-when-no-cand (eq require-match t)
-     :nomark (null helm-comp-read-use-marked)
-     :candidates-in-buffer cands-in-buffer
-     :exec-when-only-one exec-when-only-one
-     :fuzzy (eq helm-completion-style 'helm-fuzzy)
-     :buffer buffer
-     ;; If DEF is not provided, fallback to empty string
-     ;; to avoid `thing-at-point' to be appended on top of list
-     :default (or default "")
-     ;; Fail with special characters (e.g in gnus "nnimap+gmail:")
-     ;; if regexp-quote is not used.
-     ;; when init is added to history, it will be unquoted by
-     ;; helm-comp-read.
-     :initial-input initial-input)))
+
+EXEC-WHEN-ONLY-ONE allow exiting when COLLECTION contains only one candidate.
+
+ALISTP is same as `helm-comp-read' :alistp slot.
+
+When using CANDS-IN-BUFFER, GET-LINE can be specified to exit with candidate
+handling properties, see `helm-comp-read'.
+
+This handler should be used when candidate list doesn't need to be rebuilt
+dynamically otherwise use `helm-completing-read-default-2'."
+  (let* ((history (or (car-safe hist) hist))
+         (initial-input (pcase init
+                          ((pred (stringp)) init)
+                          ;; INIT is a cons cell.
+                          (`(,l . ,_ll) l)))
+         (minibuffer-completion-table collection)
+         (metadata (or (completion-metadata (or initial-input "") collection test)
+                       '(metadata)))
+         (afun (or (plist-get completion-extra-properties :annotation-function)
+                   (completion-metadata-get metadata 'annotation-function)))
+         (afix (or (plist-get completion-extra-properties :affixation-function)
+                   (completion-metadata-get metadata 'affixation-function)))
+         (category (completion-metadata-get metadata 'category))
+         (sort-fn (unless (eq helm-completion-style 'helm-fuzzy)
+                    (or
+                     (completion-metadata-get
+                      metadata 'display-sort-function)
+                     (lambda (candidates)
+                       (sort candidates #'helm-generic-sort-fn)))))
+         flags)
+    (helm-aif (and (null category)
+                   (assoc-default name helm-completing-read-command-categories))
+        (setq metadata `(metadata (category . ,it))
+              category it))
+    (helm-aif (and (or (and (boundp 'completions-detailed) completions-detailed)
+                       helm-completions-detailed)
+                   (assoc-default category helm-completing-read-extra-metadata))
+        (progn
+          (setq metadata it)
+          (setq afun (completion-metadata-get metadata 'annotation-function)
+                afix (completion-metadata-get metadata 'affixation-function)
+                flags (completion-metadata-get metadata 'flags))))
+    (unwind-protect
+         (helm-comp-read
+          prompt collection
+          :test test
+          :history history
+          :reverse-history helm-mode-reverse-history
+          :input-history history
+          :must-match require-match
+          :alistp alistp
+          :diacritics helm-mode-ignore-diacritics
+          :help-message #'helm-comp-read-help-message
+          :name name
+          :requires-pattern (if (and (stringp default)
+                                     (string= default "")
+                                     (memq require-match
+                                           '(confirm confirm-after-completion)))
+                                1 0)
+          :fc-transformer (append (and (or afix afun (memq category '(file library)) sort-fn)
+                                       (list (lambda (candidates _source)
+                                               (helm-completion--initial-filter
+                                                (if (and sort-fn (> (length helm-pattern) 0))
+                                                    (funcall sort-fn candidates)
+                                                  candidates)
+                                                afun afix category))))
+                                  '(helm-cr-default-transformer))
+          :quit-when-no-cand (eq require-match t)
+          :nomark (null helm-comp-read-use-marked)
+          :candidates-in-buffer cands-in-buffer
+          :get-line get-line
+          :exec-when-only-one exec-when-only-one
+          :fuzzy (eq helm-completion-style 'helm-fuzzy)
+          :buffer buffer
+          ;; If DEF is not provided, fallback to empty string
+          ;; to avoid `thing-at-point' to be appended on top of list
+          :default (or default "")
+          ;; Fail with special characters (e.g in gnus "nnimap+gmail:")
+          ;; if regexp-quote is not used.
+          ;; when init is added to history, it will be unquoted by
+          ;; helm-comp-read.
+          :initial-input initial-input)
+      (dolist (f flags) (set f nil)))))
 
 (defun helm-completing-read-default-2
     (prompt collection predicate require-match
      init hist default _inherit-input-method
      name buffer &optional _cands-in-buffer exec-when-only-one)
-  "Call `helm-comp-read' with same args as `completing-read'.
+  "Helm `completing-read' handler with dynamic matching.
 
+Call `helm-comp-read' with same args as `completing-read'.
+For the meaning of optional args see `helm-completing-read-default-1'.
 This handler uses dynamic matching which allows honouring `completion-styles'."
   (let* ((history (or (car-safe hist) hist))
          (input (pcase init
@@ -991,15 +1427,16 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
                   ;; INIT is a cons cell.
                   (`(,l . ,_ll) l)))
          (completion-flex-nospace t)
-         (completion-styles
-          (helm--prepare-completion-styles 'nomode))
+         (minibuffer-completion-table collection)
+         ;; (completion-styles
+         ;;  (helm--prepare-completion-styles 'nomode))
          (metadata (or (completion-metadata (or input "") collection predicate)
                        '(metadata)))
          (afun (or (plist-get completion-extra-properties :annotation-function)
                    (completion-metadata-get metadata 'annotation-function)))
          (afix (or (plist-get completion-extra-properties :affixation-function)
                    (completion-metadata-get metadata 'affixation-function)))
-         (file-comp-p (eq (completion-metadata-get metadata 'category) 'file))
+         (category (completion-metadata-get metadata 'category))
          (compfn (lambda (str _predicate _action)
                    (let* ((completion-ignore-case (helm-set-case-fold-search))
                           (comps
@@ -1041,16 +1478,16 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
                      (append (and default
                                   (memq helm-completion-style '(helm helm-fuzzy))
                                   (list default))
-                             (helm-completion-in-region--initial-filter
-                              (pcase-let ((lst (if (and sort-fn (> (length str) 0))
-                                                   (funcall sort-fn all)
-                                                 all)))
+                             (helm-completion--initial-filter
+                              (let ((lst (if (and sort-fn (> (length str) 0))
+                                             (funcall sort-fn all)
+                                           all)))
                                 (if (and default afix)
                                     (prog1 (append (list default)
                                                    (delete default lst))
                                       (setq default nil))
                                   lst))
-                              afun afix file-comp-p)))))
+                              afun afix category)))))
          (data (if (memq helm-completion-style '(helm helm-fuzzy))
                    (funcall compfn (or input "") nil nil)
                  compfn))
@@ -1087,11 +1524,52 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
          :must-match require-match)
       (setq helm-completion--sorting-done nil))))
 
+(defun helm-mode-all-the-icons-handler (prompt collection test require-match
+                                        init hist default inherit-input-method
+                                        name buffer)
+  "Helm `completing-read' handler for `all-the-icons-insert'."
+  (let* ((max-len 0)
+         sname
+         (cands (cl-loop for (desc . str) in collection
+                         ;; When the FAMILY argument is passed to
+                         ;; `all-the-icons-insert' DESC is the name of icon only
+                         ;; otherwise it is "name  [family]" with unpredictable
+                         ;; spaces or tab numbers between name and [family].
+                         for descnp = (substring-no-properties desc)
+                         for sdesc = (if (string-match
+                                          "\\(.*\\)[[:blank:]]+\\(\\[.*\\]\\)" descnp)
+                                         ;; This is all-the-icons-insert function.
+                                         (match-string 1 descnp)
+                                       ;; This is one of
+                                       ;; all-the-icons-insert-<family>
+                                       ;; functions, extract the family name.
+                                       (prog1 descnp
+                                         (unless sname
+                                           (setq sname (plist-get
+                                                        (get-text-property
+                                                         0 'font-lock-face
+                                                         (get-text-property 0 'display desc))
+                                                        :family)))))
+                         for sdesc2 = (match-string 2 descnp)
+                         do (setq max-len (max max-len (string-width sdesc)))
+                         collect (cons (concat sdesc " " str " " sdesc2) desc)))
+         (fn (lambda ()
+               (with-helm-buffer
+                 (save-excursion
+                   (goto-char (point-min))
+                   (helm-skip-header-and-separator-line 'next)
+                   (while (re-search-forward "^[[:alnum:]_-]+" nil t)
+                     (insert (make-string (- max-len (current-column)) ? )))))))
+         (helm-after-update-hook (append helm-after-update-hook `(,fn))))
+    (helm-completing-read-default-1 prompt cands test require-match
+                                    init hist default inherit-input-method
+                                    (or sname name) buffer t nil t 'buffer-substring)))
+
 (defun helm-completing-read-default-find-tag
     (prompt collection test require-match
      init hist default inherit-input-method
      name buffer)
-  "Specialized `helm-mode' handler for `find-tag'."
+  "Helm `completing-read' handler for `find-tag'."
   ;; Some commands like find-tag may use `read-file-name' from inside
   ;; the calculation of collection. in this case it clash with
   ;; candidates-in-buffer that reuse precedent data (files) which is wrong.
@@ -1106,7 +1584,7 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
     (prompt collection test require-match
      init hist default inherit-input-method
      name buffer)
-  "`helm-mode' handler using sync source as backend."
+  "Helm `completing-read' handler using sync source as backend."
   (helm-completing-read-default-1 prompt collection test require-match
                                   init hist default inherit-input-method
                                   name buffer))
@@ -1115,7 +1593,7 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
     (prompt collection test require-match
      init hist default inherit-input-method
      name buffer)
-  "`helm-mode' handler using inbuffer source as backend."
+  "Helm `completing-read' handler using inbuffer source as backend."
   (helm-completing-read-default-1 prompt collection test require-match
                                   init hist default inherit-input-method
                                   name buffer t))
@@ -1124,7 +1602,10 @@ This handler uses dynamic matching which allows honouring `completion-styles'."
     (prompt collection test require-match
      init hist default inherit-input-method
      name buffer)
-  "Default `helm-mode' handler for all `completing-read'."
+  "Default Helm `completing-read' handler.
+
+Use either `helm-completing-read-default-1' or `helm-completing-read-default-2'
+according to `helm-completion-style'."
   (let* (;; Standard will be used as CANDS-IN-BUFFER arg.
          (standard (and (memq helm-completion-style '(helm helm-fuzzy)) t))
          (fn (if standard
@@ -1195,7 +1676,7 @@ ARG-LIST is a list of arguments to pass to HANDLER."
   ;; minibuffer-complete one time for all [1].
   (cl-letf (((symbol-function 'minibuffer-complete) #'ignore))
     (apply handler arg-list)))
-  
+
 (cl-defun helm--completing-read-default
     (prompt collection &optional
                          predicate require-match
@@ -1216,7 +1697,10 @@ See documentation of `completing-read' and `all-completions' for details."
                                 helm-completing-read-handlers-alist))
          (def-com         (helm-mode--get-default-handler-for 'comp entry))
          (str-defcom      (and def-com (helm-symbol-name def-com)))
-         (def-args        (list prompt collection predicate require-match
+         (def-args        (list prompt collection predicate
+                                (helm-aif (assq current-command
+                                          helm-comp-read-require-match-overrides)
+                                    (cdr it) require-match)
                                 initial-input hist def inherit-input-method))
          ;; Append the two extra args needed to set the buffer and source name
          ;; in helm specialized functions.
@@ -1245,10 +1729,17 @@ See documentation of `completing-read' and `all-completions' for details."
          ;; Disable hack that could be used before `completing-read'.
          ;; i.e (push ?\t unread-command-events).
          unread-command-events
+         ;; Let-bounding here helm-completion-style according to
+         ;; helm-completion-styles-alist allow using helm style per commands.
+         (helm-completion-style (helm-aif (cdr (assq current-command helm-completion-styles-alist))
+                                    (if (cdr-safe it) (car it) it)
+                                  (default-value 'helm-completion-style)))
+         (completion-styles
+          (helm--prepare-completion-styles current-command))
          (default-handler
           ;; If nothing is found in
           ;; helm-completing-read-handlers-alist use default
-          ;; handler.
+          ;; handler which will itself use `helm-completion-style'.
           #'helm-completing-read-default-handler))
     (when (eq def-com 'ido) (setq def-com 'ido-completing-read))
     (unless (or (not entry) def-com)
@@ -1456,12 +1947,9 @@ Keys description:
                        (remhash helm-ff-default-directory
                                 helm-ff--list-directory-cache))
              :match-on-real t
-             :filtered-candidate-transformer (delq nil `(helm-ff-fct
-                                                         helm-ff-maybe-show-thumbnails
-                                                         helm-ff-sort-candidates
-                                                         ,(and helm-ff-icon-mode
-                                                               (featurep 'all-the-icons)
-                                                               'helm-ff-icons-transformer)))
+             :filtered-candidate-transformer '(helm-ff-fct
+                                               helm-ff-maybe-show-thumbnails
+                                               helm-ff-sort-candidates)
              :persistent-action-if persistent-action-if
              :persistent-help persistent-help
              :volatile t
@@ -1511,9 +1999,24 @@ Keys description:
                  dir)))
   (if (and fname (consp fname))
       (setq fname (cl-loop for f in fname
-                           collect (expand-file-name f dir)))
+                           collect (if (file-name-absolute-p fname)
+                                       (expand-file-name
+                                        f (helm-mode-root-dir dir))
+                                     (expand-file-name fname dir))))
       (if (file-name-absolute-p fname)
-          fname (expand-file-name fname dir))))
+          (if (file-remote-p fname)
+              fname
+            (substitute-in-file-name
+             (concat (helm-mode-root-dir dir) fname)))
+        (expand-file-name fname dir))))
+
+(defun helm-mode-root-dir (dir)
+  (if (file-remote-p dir)
+      (let* ((host        (file-remote-p dir 'host))
+             (method      (file-remote-p dir 'method))
+             (user        (file-remote-p dir 'user)))
+        (format "/%s:%s@%s:/" method user host))
+    "/"))
 
 (cl-defun helm--generic-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
@@ -1624,7 +2127,14 @@ Don't use it directly, use instead `helm-read-file-name' in your programs."
                        ;; Helm handlers should always have a non nil INITIAL arg.
                        :initial-input (if (string-match helm-ff-url-regexp init)
                                           init
-                                        (expand-file-name init dir))
+                                        (if (file-name-absolute-p init)
+                                            (if (file-remote-p init)
+                                                init
+                                              (substitute-in-file-name
+                                               (concat (helm-mode-root-dir
+                                                        (or dir init))
+                                                       init)))
+                                          (expand-file-name init dir)))
                        :alistp nil
                        :nomark (null helm-comp-read-use-marked)
                        :marked-candidates helm-comp-read-use-marked
@@ -1659,7 +2169,6 @@ The `helm-find-files' history `helm-ff-history' is used here."
         (helm-split-window-default-side
          (if (eq helm-split-window-default-side 'same)
              'below helm-split-window-default-side))
-        helm-split-window-inside-p
         helm-reuse-last-window-split-state
         ;; Helm handlers should always have a non nil INITIAL arg.
         (init (or initial dir default-directory)))
@@ -1695,55 +2204,62 @@ The `helm-find-files' history `helm-ff-history' is used here."
       (propertize str 'read-only t 'face 'helm-mode-prefix 'rear-nonsticky t)
     str))
 
-(defun helm--symbol-completion-table-affixation (completions)
-  "Same as `help--symbol-completion-table-affixation' but for helm.
+(defun helm-completion--initial-filter (comps afun afix category)
+  "Compute COMPS with function AFIX or AFUN.
 
-Return a list of cons cells of the form (disp . real)."
-  (mapcar (lambda (c)
-            (let* ((s   (intern c))
-                   (doc (ignore-errors
-                          (helm-get-first-line-documentation s))))
-              (cons (concat (propertize
-                             (format "%-4s" (help--symbol-class s))
-                             'face 'completions-annotations)
-                            c
-                            (if doc
-                                (propertize (format " -- %s" doc)
-                                            'face 'completions-annotations)
-                              ""))
-                    c)))
-          completions))
+When CATEGORY is file or library remove dot files from COMPS.
 
-(defun helm-completion-in-region--initial-filter (comps afun afix file-comp-p)
-  "Compute COMPS with function AFUN or AFIX unless FILE-COMP-P non nil.
+If both AFUN and AFIX are provided, AFIX takes precedence.
 
-If both AFUN and AFIX are provided only AFIX is used.
-When FILE-COMP-P is provided only filter out dot files."
-  (if file-comp-p
-      ;; Filter out dot files in file completion.
-      (cl-loop for f in comps unless
-               (string-match "\\`\\.\\{1,2\\}/\\'" f)
-               collect f)
-    (cond (afix (helm--symbol-completion-table-affixation comps))
-          (afun
-           ;; Add annotation at end of
-           ;; candidate if needed, e.g. foo<f>, this happen when
-           ;; completing against a quoted symbol.
-           (mapcar (lambda (s)
-                     (let ((ann (funcall afun s)))
-                       (if ann
-                           (cons
-                            (concat
-                             s
-                             (propertize
-                              " " 'display
-                              (propertize
-                               ann
-                               'face 'completions-annotations)))
-                            s)
+When AFUN, AFIX are nil and CATEGORY is not file return COMPS unmodified."
+  ;; Normally COMPS should be a list of
+  ;; string but in some cases it is given as a list of strings containing a list
+  ;; of string e.g. ("a" "b" "c" ("d" "e" "f")) ; This happen in rgrep
+  ;; (bug#2607) and highlight-* fns (bug #2610), so ensure the list is flattened to
+  ;; avoid e.g. wrong-type argument: stringp '("d" "e" "f")
+  ;; FIXME: If this create a new bug with completion-in-region, flatten COMPS
+  ;; directly in the caller i.e. helm-completing-read-default-1.
+  (when (or afix afun (memq category '(file library)))
+    (setq comps (helm-fast-remove-dups
+                 (helm-flatten-list comps)
+                 :test 'equal)))
+  ;; Filter out dot files in file completion.
+  ;; We were previously exiting directly without handling afix and afun, but
+  ;; maybe some file completion tables have an afix or afun in their metadata so
+  ;; let them a chance to run these functions if some.
+  (when (memq category '(file library))
+    (setq comps
+          (cl-loop for f in comps
+                   unless (string-match "\\`\\.\\{1,2\\}/\\'" f)
+                   collect f)))
+  (cond (afix (let ((affixations (funcall afix comps)))
+                (if (functionp affixations)
+                    (cl-loop for comp in comps
+                             for cand = (funcall affixations comp)
+                             when cand
+                             collect (cons (propertize (concat (nth 1 cand) ;prefix
+                                                               (nth 0 cand) ;comp
+                                                               (nth 2 cand)) ;suffix
+                                                       'match-part (nth 0 cand)) 
+                                           comp))
+                  (cl-loop for (comp prefix suffix) in affixations
+                           collect (cons (propertize
+                                          (concat prefix comp suffix)
+                                          'match-part comp)
+                                         comp)))))
+        (afun
+         ;; Add annotation at end of
+         ;; candidate if needed, e.g. foo<f>, this happen when
+         ;; completing against a quoted symbol.
+         (mapcar (lambda (s)
+                   (let ((ann (funcall afun s)))
+                     (or (helm-aand
+                          ann
+                          (propertize ann 'face 'helm-completions-annotations)
+                          (cons (concat s (propertize " " 'display it)) s))
                          s)))
-                   comps))
-          (t comps))))
+                 comps))
+        (t comps)))
 
 ;; Helm multi matching style
 
@@ -1909,6 +2425,9 @@ is non-nil."
 
 ;; Completion-in-region-function
 
+(defvar helm--completing-region nil
+  "[INTERNAL] flag let-bounded to nil when completing in region.")
+
 (defun helm--completion-in-region (origfun start end collection &optional predicate)
   "Helm replacement of `completion--in-region'.
 
@@ -1939,6 +2458,7 @@ Can be used for `completion-in-region-function' by advicing it with an
       (unwind-protect
           (let* ((enable-recursive-minibuffers t)
                  (completion-flex-nospace t)
+                 (helm--completing-region t)
                  (completion-styles (helm--prepare-completion-styles))
                  (input (buffer-substring-no-properties start end))
                  (prefix (and (eq helm-completion-style 'emacs) initial-input))
@@ -1979,11 +2499,10 @@ Can be used for `completion-in-region-function' by advicing it with an
                                                 (string-suffix-p " " input)
                                                 (string= input ""))
                                       " "))
-                 (file-comp-p (or (eq (completion-metadata-get metadata 'category) 'file)
-                                  (helm-guess-filename-at-point)
-                                  ;; Assume that when `afun' and `predicate' are null
-                                  ;; we are in filename completion.
-                                  (and (null afun) (null predicate))))
+                 (category (or (eq (completion-metadata-get metadata 'category) 'file)
+                               (eq (plist-get completion-extra-properties :category) 'file)))
+                 (file-comp-p (or (eq category 'file)
+                                  (helm-guess-filename-at-point)))
                  ;; `completion-all-completions' store the base-size in the last `cdr',
                  ;; so data looks like this: '(a b c d . 0) and (last data) == (d . 0).
                  base-size
@@ -2033,11 +2552,11 @@ Can be used for `completion-in-region-function' by advicing it with an
                              (unless base-size (setq base-size bs))
                              (setq helm-completion--sorting-done (and sort-fn t))
                              (setq all (copy-sequence comps))
-                             (helm-completion-in-region--initial-filter
+                             (helm-completion--initial-filter
                               (if (and sort-fn (> (length str) 0))
                                   (funcall sort-fn all)
                                 all)
-                              afun afix file-comp-p))))
+                              afun afix category))))
                  (data (if (memq helm-completion-style '(helm helm-fuzzy))
                            (funcall compfn input nil nil)
                          compfn))
@@ -2074,6 +2593,7 @@ Can be used for `completion-in-region-function' by advicing it with an
                             :match-dynamic (eq helm-completion-style 'emacs)
                             :fuzzy (eq helm-completion-style 'helm-fuzzy)
                             :exec-when-only-one t
+                            :keymap helm-comp-in-region-map
                             :quit-when-no-cand
                             (lambda ()
                               ;; Delay message to overwrite "Quit".

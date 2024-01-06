@@ -135,6 +135,7 @@
    "Jump to bookmark" 'helm-bookmark-jump
    "Jump to BM other window" 'helm-bookmark-jump-other-window
    "Jump to BM other frame" 'helm-bookmark-jump-other-frame
+   "Jump to BM other tab" 'helm-bookmark-jump-other-tab
    "Bookmark edit annotation" 'bookmark-edit-annotation
    "Bookmark show annotation" 'bookmark-show-annotation
    "Delete bookmark(s)" 'helm-delete-marked-bookmarks
@@ -231,7 +232,7 @@
 (defcustom helm-type-function-actions
   (helm-make-actions
    "Describe function" 'helm-describe-function
-   "Find function" 'helm-find-function
+   "Find function (C-u for source)" 'helm-find-function
    "Info lookup" 'helm-info-lookup-symbol
    "Debug on entry" 'debug-on-entry
    "Cancel debug on entry" 'cancel-debug-on-entry

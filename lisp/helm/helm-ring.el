@@ -1,6 +1,6 @@
 ;;; helm-ring.el --- kill-ring, mark-ring, and register browsers for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,7 +24,8 @@
 (require 'helm-elisp)
 
 (declare-function undo-tree-restore-state-from-register "ext:undo-tree.el" (register))
-
+(declare-function kmacro--keys "kmacro.el")
+(declare-function frameset-register-p "frameset")
 
 (defgroup helm-ring nil
   "Ring related Applications and libraries for Helm."
@@ -121,12 +122,13 @@ will not have separators between candidates any more."
     (setq helm-kill-ring--truncated-flag (not helm-kill-ring--truncated-flag))
     (let* ((cur-cand (helm-get-selection))
            (presel-fn (lambda ()
-                        (helm-kill-ring--preselect-fn cur-cand))))
+                        (helm-kill-ring--preselect-fn cur-cand)))
+           helm-display-source-at-screen-top)
       (helm-set-attr 'multiline
-                    (if helm-kill-ring--truncated-flag
-                        15000000
-                        helm-kill-ring-max-offset))
-        (helm-update presel-fn))))
+                     (if helm-kill-ring--truncated-flag
+                         15000000
+                       helm-kill-ring-max-offset))
+      (helm-update presel-fn))))
 (put 'helm-kill-ring-toggle-truncated 'helm-only t)
 
 (defun helm-kill-ring-kill-selection ()
@@ -361,6 +363,7 @@ yanked string."
 
 (defun helm-register-candidates ()
   "Collecting register contents and appropriate commands."
+  (require 'frameset)
   (cl-loop for (char . rval) in register-alist
         for key    = (single-key-description char)
         for e27 = (registerv-p rval)
@@ -385,7 +388,8 @@ yanked string."
                      'jump-to-register
                      'insert-register))))
           ((and (consp val) (window-configuration-p (car val)))
-           (list "window configuration."
+           (list (if (fboundp 'describe-register-1)
+                     (describe-register-1 char) "window configuration.")
                  'jump-to-register))
           ((and (vectorp val)
                 (fboundp 'undo-tree-register-data-p)
@@ -394,11 +398,19 @@ yanked string."
             "Undo-tree entry."
             'undo-tree-restore-state-from-register))
           ((or (and (vectorp val) (eq 'registerv (aref val 0)))
-               (and (consp val) (frame-configuration-p (car val))))
-           (list "frame configuration."
+               (and (consp val) (frame-configuration-p (car val)))
+               (or (frame-configuration-p val)
+                   (frameset-register-p val)))
+           (list (if (fboundp 'describe-register-1)
+                     (describe-register-1 char) "Frame configuration")
                  'jump-to-register))
           ((and (consp val) (eq (car val) 'file))
            (list (concat "file:"
+                         (prin1-to-string (cdr val))
+                         ".")
+                 'jump-to-register))
+          ((and (consp val) (eq (car val) 'buffer))
+           (list (concat "buffer:"
                          (prin1-to-string (cdr val))
                          ".")
                  'jump-to-register))
@@ -512,6 +524,7 @@ First call open the kill-ring browser, next calls move to next line."
   (let ((enable-recursive-minibuffers t))
     (helm :sources helm-source-kill-ring
           :buffer "*helm kill ring*"
+          ;; :display-source-at-screen-top nil
           :resume 'noresume
           :allow-nest t)))
 
@@ -519,25 +532,32 @@ First call open the kill-ring browser, next calls move to next line."
 (defun helm-execute-kmacro ()
   "Preconfigured helm for keyboard macros.
 Define your macros with `f3' and `f4'.
-See (info \"(emacs) Keyboard Macros\") for detailed infos.
-This command is useful when used with persistent action."
+See (info \"(emacs) Keyboard Macros\") for detailed infos."
   (interactive)
   (let ((helm-quit-if-no-candidate
          (lambda () (message "No kbd macro has been defined"))))
     (helm :sources
           (helm-build-sync-source "Kmacro"
             :candidates (lambda ()
-                          (helm-fast-remove-dups
-                           (cons (kmacro-ring-head)
-                                 kmacro-ring)
-                           :test 'equal))
+                          (delq nil
+                                (helm-fast-remove-dups
+                                 (cons (kmacro-ring-head)
+                                       kmacro-ring)
+                                 :test 'equal)))
+            
             :multiline t
             :candidate-transformer
             (lambda (candidates)
-              (cl-loop for c in candidates collect
-                       (propertize (help-key-description (car c) nil)
-                                   'helm-realvalue c)))
-            :persistent-help "Execute kmacro"
+              (cl-loop for c in candidates
+                       for keys = (if (functionp c)
+                                      ;; Emacs-29+ (Oclosure).
+                                      (kmacro--keys c)
+                                    ;; Emacs-28 and below (list).
+                                    (car c))
+                       collect (propertize (help-key-description keys nil)
+                                           'helm-realvalue c)))
+            :persistent-action 'ignore
+            :persistent-help "Do nothing"
             :help-message 'helm-kmacro-help-message
             :action
             (helm-make-actions
@@ -548,15 +568,44 @@ This command is useful when used with persistent action."
              "Delete marked macros"
              'helm-kbd-macro-delete-macro
              "Edit marked macro"
-             'helm-kbd-macro-edit-macro)
+             'helm-kbd-macro-edit-macro
+             "Insert kbd macro"
+             'helm-kbd-macro-insert-macro)
             :group 'helm-ring)
           :buffer "*helm kmacro*")))
 
-(defun helm-kbd-macro-execute (candidate)
-  ;; Move candidate on top of list for next use.
+(defun helm-kbd-macro-make-current (candidate)
+  "Make CANDIDATE macro the current one."
   (setq kmacro-ring (delete candidate kmacro-ring))
   (kmacro-push-ring)
-  (kmacro-split-ring-element candidate)
+  (kmacro-split-ring-element candidate))
+
+(defun helm-kbd-macro-insert-macro (candidate)
+  "Insert macro at point in `helm-current-buffer'."
+  (let ((desc (read-string "Describe macro briefly: "))
+        name key)
+    (while (fboundp (setq name (intern (read-string "New name for macro: "))))
+      (message "Symbol `%s' already exists, choose another name" name)
+      (sit-for 1.5))
+    (helm-kbd-macro-make-current candidate)
+    (kmacro-name-last-macro name)
+    (when (y-or-n-p "Bind macro to a new key?")
+      (helm-awhile (key-binding
+                    (setq key (read-key-sequence-vector "Bind macro to key: ")))
+        (message "`%s' already run command `%s', choose another one"
+                 (help-key-description key nil) it)
+        (sit-for 1.5))
+      (global-set-key key name))
+    (with-helm-current-buffer
+      (insert (format ";; %s%s\n"
+                      desc
+                      (and key (format " (bound to `%s')"
+                                       (help-key-description key nil)))))
+      (insert-kbd-macro name (not (null key))))))
+
+(defun helm-kbd-macro-execute (candidate)
+  ;; Move candidate on top of list for next use.
+  (helm-kbd-macro-make-current candidate)
   (kmacro-exec-ring-item
    candidate helm-current-prefix-arg))
 
@@ -565,22 +614,22 @@ This command is useful when used with persistent action."
     (when (cdr mkd)
       (kmacro-push-ring)
       (setq last-kbd-macro
-            (mapconcat 'identity
-                       (cl-loop for km in mkd
-                                if (vectorp km)
-                                append (cl-loop for k across km collect
-                                                (key-description (vector k)))
-                                into result
-                                else collect (car km) into result
-                                finally return result)
-                       "")))))
+            (cl-loop for km in mkd
+                     for keys = (if (functionp km)
+                                    (kmacro--keys km)
+                                  (pcase (car km)
+                                    ((and vec (pred vectorp)) vec)
+                                    ((and str (pred stringp))
+                                     (kmacro--to-vector str))))
+                     vconcat keys)))))
 
 (defun helm-kbd-macro-delete-macro (_candidate)
-  (let ((mkd (helm-marked-candidates)))
-    (kmacro-push-ring)
+  (let ((mkd  (helm-marked-candidates))
+        (head (kmacro-ring-head)))
     (cl-loop for km in mkd
              do (setq kmacro-ring (delete km kmacro-ring)))
-    (kmacro-pop-ring1)))
+    (when (member head mkd)
+      (kmacro-delete-ring-head))))
 
 (defun helm-kbd-macro-edit-macro (candidate)
   (kmacro-push-ring)

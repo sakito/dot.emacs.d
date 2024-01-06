@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 
-## Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+## Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ test -z "$TEMP" && TEMP="/tmp"
 
 CONF_FILE="$TEMP/helm-cfg.el"
 EMACS=emacs
+QUICK=-Q
 TOOLBARS=-1
 LOAD_PACKAGES=
 
@@ -125,6 +126,9 @@ for a in "$@"; do
             shift 1
             LOAD_PACKAGES="$1"
             shift 1
+            ;;
+        -Q | -q)
+            QUICK="$a"
             ;;
         -h)
             usage
@@ -229,7 +233,7 @@ cat > $CONF_FILE <<EOF
     (setq package-load-list
           (if (equal load-packages '("all"))
               '(all)
-            (append '((helm-core t) (helm t) (async t) (popup t))
+            (append '((helm-core t) (helm t) (async t) (popup t) (wfnames t))
                     (mapcar (lambda (p) (list (intern p) t)) load-packages)))))
 
   (package-initialize))
@@ -242,7 +246,7 @@ cat > $CONF_FILE <<EOF
                                (menu-bar-lines . 0)
                                (fullscreen . nil))))
 (blink-cursor-mode -1)
-(require 'helm-config)
+(load "helm-autoloads" nil t)
 (helm-mode 1)
 (with-eval-after-load 'tramp-cache (setq tramp-cache-read-persistent-data t))
 (with-eval-after-load 'auth-source (setq auth-source-save-behavior nil))
@@ -258,4 +262,4 @@ cat > $CONF_FILE <<EOF
 (add-hook 'kill-emacs-hook #'(lambda () (and (file-exists-p "$CONF_FILE") (delete-file "$CONF_FILE"))))
 EOF
 
-$EMACS -Q -l "$CONF_FILE" "$@"
+$EMACS "$QUICK" -l "$CONF_FILE" "$@"

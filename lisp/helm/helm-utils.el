@@ -1,6 +1,6 @@
 ;;; helm-utils.el --- Utilities Functions for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 (declare-function outline-show-subtree "outline")
 (declare-function org-reveal "org")
 (declare-function hs-show-block "hideshow.el")
+(declare-function hs-show-all "hideshow.el")
 (declare-function tab-bar-tabs "tab-bar")
 (declare-function tab-bar-select-tab "tab-bar")
 (declare-function dired-goto-file "dired")
@@ -46,7 +47,7 @@
 (defvar helm-ff-transformer-show-only-basename)
 (defvar helm-popup-tip-mode)
 (defvar helm-ff-last-expanded-candidate-regexp)
-
+(defvar helm-mode-find-file-target-alist)
 
 (defgroup helm-utils nil
   "Utilities routines for Helm."
@@ -244,6 +245,8 @@ See https://www.freeformatter.com/html-entities.html")
 
 (defvar helm-find-many-files-after-hook nil
   "Hook that runs at end of `helm-find-many-files'.")
+
+(defvar helm-marked-buffer-name "*helm marked*")
 
 ;;; Faces.
 ;;
@@ -282,11 +285,13 @@ behavior is the same as with a nil value."
            (const :tag "Split window horizontally" nil)
            (symbol :tag "Guess how to split window" 'decide)))
 
-(defcustom helm-window-show-buffers-function #'helm-window-default-split-fn
+(defcustom helm-window-show-buffers-function #'helm-window-decide-split-fn
   "The default function to use when opening several buffers at once.
 It is typically used to rearrange windows."
   :group 'helm-utils
   :type '(choice
+          (function :tag "Decide how to split according to number of candidates"
+                    helm-window-decide-split-fn)
           (function :tag "Split windows vertically or horizontally"
                     helm-window-default-split-fn)
           (function :tag "Split in alternate windows"
@@ -318,7 +323,8 @@ If a prefix arg is given split windows vertically."
 (defun helm-buffers-switch-to-buffer-or-tab (buffer)
   "Switch to BUFFER in its tab if some."
   (if (and (fboundp 'tab-bar-mode)
-           helm-buffers-maybe-switch-to-tab)
+           helm-buffers-maybe-switch-to-tab
+           tab-bar-mode)
       (let* ((tab-bar-tab-name-function #'tab-bar-tab-name-all)
              (tabs (tab-bar-tabs))
              (tab-names (mapcar (lambda (tab)
@@ -345,6 +351,15 @@ If a prefix arg is given split windows vertically."
            ;; Buf names are separated with "," in TAB-NAMES
            ;; e.g. '("tab-bar.el" "*scratch*, helm-buffers.el").
            thereis (member buffer-name (split-string name ", " t))))
+
+(defun helm-window-decide-split-fn (candidates &optional other-window-fn)
+  "Try to find the best split window fn according to the number of CANDIDATES."
+  (let ((fn (cond ((> (length candidates) 3)
+                   #'helm-window-mosaic-fn)
+                  ((> (length candidates) 2)
+                   #'helm-window-alternate-split-fn)
+                  (t #'helm-window-default-split-fn))))
+    (funcall fn candidates other-window-fn)))
 
 (defun helm-window-default-split-fn (candidates &optional other-window-fn)
   "Split windows in one direction and balance them.
@@ -495,7 +510,7 @@ Default is `helm-current-buffer'."
                    #'outline-show-subtree)
                   ((and (boundp 'hs-minor-mode)
                     hs-minor-mode)
-                   #'hs-show-block)
+                   #'hs-show-all)
                   ((and (boundp 'markdown-mode-map)
                         (derived-mode-p 'markdown-mode))
                    #'markdown-show-entry)))
@@ -516,7 +531,7 @@ Animation is used unless NOANIM is non--nil."
     (with-helm-current-buffer
       (unless helm-yank-point (setq helm-yank-point (point)))))
   (goto-char (point-min))
-  (helm-goto-char (point-at-bol lineno))
+  (helm-goto-char (pos-bol lineno))
   (unless noanim
     (helm-highlight-current-line)))
 
@@ -542,7 +557,7 @@ To use this add it to `helm-goto-line-before-hook'."
     (cl-loop with pos
           while (setq pos (next-single-property-change (point) 'helm-header))
           do (goto-char pos)
-          collect (buffer-substring-no-properties (point-at-bol)(point-at-eol))
+          collect (buffer-substring-no-properties (pos-bol)(pos-eol))
           do (forward-line 1))))
 
 (defun helm-handle-winner-boring-buffers ()
@@ -581,7 +596,9 @@ from its directory."
 (put 'helm-quit-and-find-file 'helm-only t)
 
 (defun helm--quit-and-find-file-default-file (source)
-  (let ((target-fn (helm-get-attr 'find-file-target)))
+  (let ((target-fn (or (helm-get-attr 'find-file-target source)
+                       (assoc-default (helm-get-attr 'name source)
+                                      helm-mode-find-file-target-alist))))
     ;; target-fn function may return nil, in this case fallback to default.
     (helm-aif (and target-fn (funcall target-fn source))
         it
@@ -620,21 +637,24 @@ that is sorting is done against real value of candidate."
          (str1  (if (consp s1) (cdr s1) s1))
          (str2  (if (consp s2) (cdr s2) s2))
          (score (lambda (str r1 r2 r3 lst)
-                    (+ (if (string-match (concat "\\`" qpattern) str) 1 0)
-                       (cond ((string-match r1 str) 5)
-                             ((and (string-match " " qpattern)
-                                   (string-match
-                                    (concat "\\_<" (regexp-quote (car lst))) str)
-                                   (cl-loop for r in (cdr lst)
-                                            always (string-match r str)))
-                              4)
-                             ((and (string-match " " qpattern)
-                                   (cl-loop for r in lst
-                                            always (string-match r str)))
-                              3)
-                             ((string-match r2 str) 2)
-                             ((string-match r3 str) 1)
-                             (t 0)))))
+                  (condition-case nil
+                      (+ (if (string-match (concat "\\`" qpattern) str) 1 0)
+                         (cond ((string-match r1 str) 5)
+                               ((and (string-match " " qpattern)
+                                     (car lst)
+                                     (string-match
+                                      (concat "\\_<" (regexp-quote (car lst))) str)
+                                     (cl-loop for r in (cdr lst)
+                                              always (string-match r str)))
+                                4)
+                               ((and (string-match " " qpattern)
+                                     (cl-loop for r in lst
+                                              always (string-match r str)))
+                                3)
+                               ((string-match r2 str) 2)
+                               ((string-match r3 str) 1)
+                               (t 0)))
+                    (invalid-regexp 0))))
          (sc1 (get-text-property 0 'completion-score str1))
          (sc2 (get-text-property 0 'completion-score str2))
          (sc3 (if sc1 0 (funcall score str1 reg1 reg2 reg3 split)))
@@ -673,7 +693,9 @@ readable format,see `helm-file-human-size'."
                              directory
                              :path 'full
                              :directories t)
-                          (directory-files directory t))
+                          (directory-files
+                           directory t
+                           directory-files-no-dot-files-regexp))
            for file in files
            sum (nth 7 (file-attributes file)) into total
            finally return (if human
@@ -776,39 +798,32 @@ you have in `file-attributes'."
      (int-to-string (cl-getf all :size)))
    (cl-getf all :modif-time)))
 
-(defun helm-split-mode-file-attributes (str &optional string)
-  "Split mode file attributes STR into a proplist.
-If STRING is non--nil return instead a space separated string."
-  (cl-loop with type = (substring str 0 1)
-           with cdr = (substring str 1)
-           for i across cdr
-           for count from 1
-           if (<= count 3)
-           concat (string i) into user
-           if (and (> count 3) (<= count 6))
-           concat (string i) into group
-           if (and (> count 6) (<= count 9))
-           concat (string i) into other
-           finally return
-           (let ((octal (helm-ff-octal-permissions (list user group other))))
-             (if string
-                 (mapconcat 'identity (list type user group other octal) " ")
-               (list :mode-type type :user user
-                     :group group :other other
-                     :octal octal)))))
+(defun helm-split-mode-file-attributes (modes &optional string)
+  "Split MODES in a list of modes.
+MODES is same as what (nth 8 (file-attributes \"foo\")) would return."
+  (if (string-match "\\`\\(.\\)\\(...\\)\\(...\\)\\(...\\)\\'" modes)
+      (let* ((type  (match-string 1 modes))
+             (user  (match-string 2 modes))
+             (group (match-string 3 modes))
+             (other (match-string 4 modes))
+             (octal (helm-ff-numeric-permissions (list user group other))))
+        (if string
+            (mapconcat 'identity (list type user group other octal) " ")
+          (list :mode-type type :user user
+                :group group :other other
+                :octal octal)))
+    (error "Wrong modes specification for %s" modes)))
 
-(defun helm-ff-octal-permissions (perms)
+(defun helm-ff-numeric-permissions (perms)
   "Return the numeric representation of PERMS.
 PERMS is the list of permissions for owner, group and others."
-  (cl-flet ((string-to-octal (str)
-              (cl-loop for c across str
-                       sum (pcase c
-                             (?r 4)
-                             (?w 2)
-                             (?x 1)
-                             (?- 0)))))
-    (cl-loop for str in perms
-             concat (number-to-string (string-to-octal str)))))
+  ;; `file-modes-symbolic-to-number' interpret its MODES argument as what would
+  ;; result when calling such mode on a file with chmod, BTW we have to remove
+  ;; all "-" like read-file-modes does.
+  (helm-aand (listp perms)
+             (apply 'format "u=%s,g=%s,o=%s" perms)
+             (replace-regexp-in-string "-" "" it)
+             (format "%o" (file-modes-symbolic-to-number it))))
 
 (defun helm-format-columns-of-files (files)
   "Same as `dired-format-columns-of-files'.
@@ -883,12 +898,12 @@ Optional arguments START, END and FACE are only here for debugging purpose."
                    (save-excursion
                      (forward-line
                       (- (car helm-highlight-matches-around-point-max-lines)))
-                     (point-at-bol))
+                     (pos-bol))
                    end-match
                    (save-excursion
                      (forward-line
                       (cdr helm-highlight-matches-around-point-max-lines))
-                     (point-at-bol))))
+                     (pos-bol))))
             ((or (null helm-highlight-matches-around-point-max-lines)
                  (zerop helm-highlight-matches-around-point-max-lines))
              (setq start-match start
@@ -898,7 +913,7 @@ Optional arguments START, END and FACE are only here for debugging purpose."
                    (save-excursion
                      (forward-line
                       helm-highlight-matches-around-point-max-lines)
-                     (point-at-bol))
+                     (pos-bol))
                    end-match start))
             ((> helm-highlight-matches-around-point-max-lines 0)
              (setq start-match start
@@ -906,7 +921,7 @@ Optional arguments START, END and FACE are only here for debugging purpose."
                    (save-excursion
                      (forward-line
                       helm-highlight-matches-around-point-max-lines)
-                     (point-at-bol)))))
+                     (pos-bol)))))
       (catch 'empty-line
         (let* ((regex-list (helm-remove-if-match
                             "\\`!" (helm-mm-split-pattern
@@ -1028,7 +1043,7 @@ Assume regexp is a pcre based regexp."
            (lambda ()
              (save-selected-window
                (with-helm-window
-                 (helm-aif (get-text-property (point-at-bol) 'help-echo)
+                 (helm-aif (get-text-property (pos-bol) 'help-echo)
                      (popup-tip (concat " " (abbreviate-file-name
                                              (replace-regexp-in-string "\n.*" "" it)))
                                 :around nil
@@ -1058,7 +1073,9 @@ Assume regexp is a pcre based regexp."
                             "xdg-open")
                            ((or (eq system-type 'darwin) ;; Mac OS X
                                 (eq system-type 'macos)) ;; Mac OS 9
-                            "open"))
+                            "open")
+			   ((eq system-type 'cygwin)
+			    "cygstart"))
                      file))))
 
 (defun helm-open-dired (file)
@@ -1097,14 +1114,19 @@ Run `helm-find-many-files-after-hook' at end."
 
 (defun helm-read-repeat-string (prompt &optional count)
   "Prompt as many time PROMPT is not empty.
-If COUNT is non--nil add a number after each prompt."
-  (cl-loop with elm
-        while (not (string= elm ""))
-        for n from 1
-        do (when count
-             (setq prompt (concat prompt (int-to-string n) ": ")))
-        collect (setq elm (helm-read-string prompt)) into lis
-        finally return (remove "" lis)))
+If COUNT is non--nil add a number after each prompt.
+Return the list of strings entered in each prompt."
+  (cl-loop with prt = prompt
+           with elm
+           while (not (string= elm ""))
+           for n from 1
+           do (when count
+                (setq prt (format "%s (%s): "
+                                  (replace-regexp-in-string
+                                   ": " "" prompt)
+                                  (int-to-string n))))
+           collect (setq elm (helm-read-string prt)) into lis
+           finally return (remove "" lis)))
 
 (defun helm-html-bookmarks-to-alist (file url-regexp bmk-regexp)
   "Parse HTML bookmark FILE and return an alist with (title . url) as elements."

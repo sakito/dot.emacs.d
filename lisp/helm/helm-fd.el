@@ -1,6 +1,6 @@
 ;;; helm-fd.el --- helm interface for fd command line tool. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 (require 'helm-types)
 
 (declare-function ansi-color-apply "ansi-color.el")
+(declare-function split-string-shell-command "shell.el")
 
 (defvar helm-fd-executable "fd"
   "The fd shell command executable.")
@@ -83,13 +84,18 @@
 (defun helm-fd-process ()
   "Initialize fd process in an helm async source."
   (let* (process-connection-type
-         (cmd (append helm-fd-switches (split-string helm-pattern " ")))
+         (cmd (append helm-fd-switches
+                      (or (and (fboundp #'split-string-shell-command)
+                               (split-string-shell-command helm-pattern))
+                          (split-string helm-pattern))))
          (proc (apply #'start-process "fd" nil helm-fd-executable cmd))
          (start-time (float-time))
          (fd-version (replace-regexp-in-string
                       "\n" ""
-                      (shell-command-to-string (concat helm-fd-executable " --version")))))
-    (helm-log "helm-fd-process" "Fd command:\nfd %s" (mapconcat 'identity cmd " "))
+                      (shell-command-to-string
+                       (concat helm-fd-executable " --version")))))
+    (helm-log "helm-fd-process" "Fd command:\nfd %s"
+              (mapconcat 'identity cmd " "))
     (helm-log "helm-fd-process" "VERSION: %s" fd-version)
     (prog1
         proc

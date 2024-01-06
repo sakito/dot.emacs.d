@@ -44,10 +44,11 @@ ELPA_DIR := $(if $(shell test -d $(XDG_ELPA_DIR)), $(XDG_ELPA_DIR), $(HOME)/.ema
 XDG_STRAIGHT_DIR := $(if $(XDG_CONFIG_HOME), $(XDG_CONFIG_HOME)/emacs/straight/build, $(HOME)/.config/emacs/straight/build)
 STRAIGHT_DIR := $(if $(shell test -d $(XDG_STRAIGHT_DIR)), $(XDG_STRAIGHT_DIR), $(HOME)/.emacs.d/straight/build)
 
-ASYNC_ELPA_DIR  =  $(shell \
-	test -d $(ELPA_DIR) && \
-	find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/async-[.0-9]*' 2> /dev/null | \
-	sort | tail -n 1)
+#ASYNC_ELPA_DIR  =  $(shell \
+#	test -d $(ELPA_DIR) && \
+#	find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/async-[.0-9]*' 2> /dev/null | \
+#	sort | tail -n 1)
+ASYNC_ELPA_DIR = "../async"
 ifneq "$(ASYNC_ELPA_DIR)" ""
 	LOADPATH += -L $(ASYNC_ELPA_DIR)
 endif

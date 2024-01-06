@@ -1,6 +1,6 @@
 ;;; helm-eval.el --- eval expressions from helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 (require 'edebug)
 
 (declare-function helm-lisp-completion-at-point "helm-elisp.el")
-
+(declare-function helm-elisp-show-doc-modeline "helm-elisp.el")
+(defvar helm-elisp-help-function)
 
 (defgroup helm-eval nil
   "Eval related Applications and libraries for Helm."

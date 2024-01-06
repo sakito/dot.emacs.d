@@ -1,6 +1,6 @@
 ;;; helm-eshell.el --- pcomplete and eshell completion for helm. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -290,7 +290,7 @@ at point."
       (delete-char -1) (setq del-dot t)
       (setq helm-ec-target (substring helm-ec-target 0 (1- (length helm-ec-target)))))
     (cond ((eq first ?\()
-           (helm-lisp-completion-or-file-name-at-point))
+           (helm-lisp-completion-at-point))
           ;; In eshell `pcomplete-parse-arguments' is called
           ;; with `pcomplete-parse-arguments-function'
           ;; locally bound to `eshell-complete-parse-arguments'
@@ -405,7 +405,7 @@ If BUFFER is nil, use current buffer."
                            (get-text-property (match-beginning 0) 'read-only))
                       (null eshell-highlight-prompt))
               (push (list (buffer-substring-no-properties
-                           it (point-at-eol))
+                           it (pos-eol))
                           it (buffer-name) count)
                     result)
               (setq count (1+ count))))

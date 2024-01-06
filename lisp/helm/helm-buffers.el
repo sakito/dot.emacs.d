@@ -1,6 +1,6 @@
 ;;; helm-buffers.el --- helm support for buffers. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -144,8 +144,13 @@ you want to keep the recentest order when narrowing candidates."
   :type 'function)
 
 (defcustom helm-buffers-show-icons nil
-  "Prefix buffer names with an icon when non nil."
-  :type 'boolean)
+  "Prefix buffer names with an icon when non nil.
+Don't use `setq' to set this."
+  :type 'boolean
+  :set (lambda (var val)
+         (if (require 'all-the-icons nil t)
+             (set var val)
+           (set var nil))))
 
 
 ;;; Faces
@@ -426,7 +431,7 @@ The list is reordered with `helm-buffer-list-reorder-fn'."
                      (cond ((eq type 'dired)
                             (all-the-icons-octicon "file-directory"))
                            (buf-fname
-                            (all-the-icons-icon-for-file buf-fname))
+                            (all-the-icons-icon-for-file buf-name))
                            (t (all-the-icons-octicon "star" :v-adjust 0.0))))))
            (buf-name (propertize buf-name 'face face1
                                  'help-echo help-echo
@@ -533,10 +538,7 @@ The list is reordered with `helm-buffer-list-reorder-fn'."
 Should be called after others transformers i.e. (boring
 buffers)."
   (cl-assert helm-fuzzy-matching-highlight-fn nil "Wrong type argument functionp: nil")
-  (cl-loop with helm-buffers-show-icons = (and (featurep 'all-the-icons)
-                                               (default-toplevel-value
-                                                   'helm-buffers-show-icons))
-           for i in buffers
+  (cl-loop for i in buffers
            for (name size mode meta) = (if helm-buffer-details-flag
                                            (helm-buffer--details i 'details)
                                          (helm-buffer--details i))
@@ -626,14 +628,14 @@ buffers)."
 (defun helm-buffers-mark-similar-buffers-1 (&optional type)
   (with-helm-window
     (let* ((src (helm-get-current-source))
-           (type (or type
-                     (get-text-property
-                      0 'type (helm-get-selection nil 'withprop src)))))
+           (sel (helm-get-selection nil 'withprop src))
+           (type (or type (get-text-property
+                           (min 2 (length sel)) 'type sel))))
       (helm-map-candidates-in-source src
         (lambda (_cand) (helm-make-visible-mark))
         (lambda (cand)
           (and (not (helm-this-visible-mark))
-               (eq (get-text-property 0 'type cand) type))))
+               (eq (get-text-property 2 'type cand) type))))
       (helm-mark-current-line)
       (helm-display-mode-line src t)
       (when helm-marked-candidates
@@ -1108,19 +1110,18 @@ Can be used by any source that list buffers."
   (cl-assert (not helm-buffers-in-project-p)
              nil "You are already browsing this project"))
 
+;;;###autoload
 (defun helm-buffers-quit-and-find-file-fn (source)
-  (let* ((sel (helm-get-selection nil nil source))
-         (buf (helm-aand (bufferp sel)
-                         (get-buffer sel)
-                         (buffer-name it))))
-    (when buf
+  (let* ((sel   (get-buffer (helm-get-selection nil nil source)))
+         (bname (and (bufferp sel) (buffer-name sel))))
+    (when bname
       (or (buffer-file-name sel)
-          (car (rassoc buf dired-buffers))
-          (and (with-current-buffer buf
+          (car (rassoc bname dired-buffers))
+          (and (with-current-buffer bname
                  (eq major-mode 'org-agenda-mode))
                org-directory
                (expand-file-name org-directory))
-          (with-current-buffer buf
+          (with-current-buffer bname
             (expand-file-name default-directory))))))
 
 ;;; Candidate Transformers

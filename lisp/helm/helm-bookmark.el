@@ -1,6 +1,6 @@
 ;;; helm-bookmark.el --- Helm for Emacs regular Bookmarks. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2021 Thierry Volpiatto 
+;; Copyright (C) 2012 ~ 2023 Thierry Volpiatto 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@
 (declare-function all-the-icons-fileicon     "ext:all-the-icons.el")
 (declare-function all-the-icons-icon-for-file"ext:all-the-icons.el")
 (declare-function all-the-icons-octicon      "ext:all-the-icons.el")
+(declare-function all-the-icons-match-to-alist "ext:all-the-icons.el")
+
+(defvar all-the-icons-dir-icon-alist)
 
 
 (defgroup helm-bookmark nil
@@ -58,8 +61,13 @@
   :type '(repeat (choice symbol)))
 
 (defcustom helm-bookmark-use-icon nil
-  "Display candidates with an icon with `all-the-icons' when non nil."
-  :type 'boolean)
+  "Display candidates with an icon with `all-the-icons' when non nil.
+Don't use `setq' to set this."
+  :type 'boolean
+  :set (lambda (var val)
+         (if (require 'all-the-icons nil t)
+             (set var val)
+           (set var nil))))
 
 (defcustom helm-bookmark-default-sort-method 'adaptive
   "Sort method for `helm-filtered-bookmarks'.
@@ -141,6 +149,7 @@ will be honored."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "C-c o")   #'helm-bookmark-run-jump-other-window)
     (define-key map (kbd "C-c C-o") #'helm-bookmark-run-jump-other-frame)
+    (define-key map (kbd "C-c C-t") #'helm-bookmark-run-jump-other-tab)
     (define-key map (kbd "C-d")     #'helm-bookmark-run-delete)
     (define-key map (kbd "C-]")     #'helm-bookmark-toggle-filename)
     (define-key map (kbd "M-e")     #'helm-bookmark-run-edit)
@@ -192,23 +201,28 @@ will be honored."
   "Toggle bookmark location visibility."
   'toggle-filename 'helm-bookmark-toggle-filename-1)
 
+(defun helm-bookmark-jump-1 (candidate &optional fn)
+  (let (;; FIXME Why is prefarg necessary here?
+        (current-prefix-arg helm-current-prefix-arg)
+        non-essential)
+    (bookmark-jump candidate fn)))
+
 (defun helm-bookmark-jump (candidate)
   "Jump to bookmark action."
-  (let ((current-prefix-arg helm-current-prefix-arg)
-        non-essential)
-    (bookmark-jump candidate)))
+  (helm-bookmark-jump-1 candidate))
 
 (defun helm-bookmark-jump-other-frame (candidate)
   "Jump to bookmark in other frame action."
-  (let ((current-prefix-arg helm-current-prefix-arg)
-        non-essential)
-    (bookmark-jump candidate 'switch-to-buffer-other-frame)))
+  (helm-bookmark-jump-1 candidate #'switch-to-buffer-other-frame))
 
 (defun helm-bookmark-jump-other-window (candidate)
   "Jump to bookmark in other window action."
-  (let (non-essential)
-    (bookmark-jump-other-window candidate)))
+  (helm-bookmark-jump-1 candidate #'switch-to-buffer-other-window))
 
+(defun helm-bookmark-jump-other-tab (candidate)
+  "Jump to bookmark action."
+  (cl-assert (fboundp 'tab-bar-mode) nil "Tab-bar-mode not available")
+  (helm-bookmark-jump-1 candidate #'switch-to-buffer-other-tab))
 
 ;;; bookmark-set
 ;;
@@ -517,6 +531,8 @@ If `browse-url-browser-function' is set to something else than
     (define-key map (kbd "C-x C-d") #'helm-bookmark-run-browse-project)
     map))
 
+;; Same as `helm-source-filtered-bookmarks' but override actions and keymap
+;; specifically for helm-find-files bookmarks.
 (defclass helm-bookmark-override-inheritor (helm-source) ())
 
 (cl-defmethod helm--setup-source ((source helm-bookmark-override-inheritor))
@@ -525,8 +541,10 @@ If `browse-url-browser-function' is set to something else than
   (setf (slot-value source 'action)
         (helm-append-at-nth
          (cl-loop for (name . action) in helm-type-bookmark-actions
+                  ;; We don't want those actions in helm-find-files bookmarks.
                   unless (memq action '(helm-bookmark-jump-other-frame
-                                        helm-bookmark-jump-other-window))
+                                        helm-bookmark-jump-other-window
+                                        helm-bookmark-jump-other-tab))
                   collect (cons name action))
          '(("Browse project" . helm-bookmark-browse-project)) 1))
   (setf (slot-value source 'keymap) helm-bookmark-find-files-map))
@@ -593,9 +611,16 @@ If `browse-url-browser-function' is set to something else than
                         i)
           for icon = (when helm-bookmark-use-icon
                        (cond ((and isfile hff)
-                              (all-the-icons-octicon "file-directory"))
+                              (helm-aif (or (all-the-icons-match-to-alist
+                                             (helm-basename (helm-basedir isfile t))
+                                             all-the-icons-dir-icon-alist)
+                                            (all-the-icons-match-to-alist
+                                             (helm-basename isfile)
+                                             all-the-icons-dir-icon-alist))
+                                  (apply (car it) (cdr it))
+                                (all-the-icons-octicon "file-directory")))
                              ((and isfile isinfo) (all-the-icons-octicon "info"))
-                             (isfile (all-the-icons-icon-for-file isfile))
+                             (isfile (all-the-icons-icon-for-file (helm-basename isfile)))
                              ((or iswoman isman)
                               (all-the-icons-fileicon "man-page"))
                              ((or isgnus ismu4e)
@@ -761,8 +786,12 @@ consecutive words from the buffer into the new bookmark name."
   'helm-bookmark-jump-other-frame)
 
 (helm-make-command-from-action helm-bookmark-run-jump-other-window
-  "Jump to bookmark from keyboard."
+  "Jump to bookmark other window from keyboard."
   'helm-bookmark-jump-other-window)
+
+(helm-make-command-from-action helm-bookmark-run-jump-other-tab
+  "Jump to bookmark other tab from keyboard."
+  'helm-bookmark-jump-other-tab)
 
 (helm-make-command-from-action helm-bookmark-run-delete
   "Delete bookmark from keyboard."
@@ -776,7 +805,7 @@ E.g. prepended with *."
 
 (defun helm-delete-marked-bookmarks (_ignore)
   "Delete this bookmark or all marked bookmarks."
-  (cl-dolist (i (helm-marked-candidates))
+  (dolist (i (helm-marked-candidates))
     (bookmark-delete (helm-bookmark-get-bookmark-from-name i)
                      'batch)))
 
@@ -796,8 +825,6 @@ E.g. prepended with *."
 Optional source `helm-source-bookmark-addressbook' is loaded only
 if external addressbook-bookmark package is installed."
   (interactive)
-  (when helm-bookmark-use-icon
-    (require 'all-the-icons))
   (helm :sources helm-bookmark-default-filtered-sources
         :prompt "Search Bookmark: "
         :buffer "*helm filtered bookmarks*"
