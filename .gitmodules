@@ -104,3 +104,6 @@
 [submodule "local-lisp/markdown-mode"]
 	path = local-lisp/markdown-mode
 	url = https://github.com/jrblevin/markdown-mode.git
+[submodule "local-lisp/adoc-mode"]
+	path = local-lisp/adoc-mode
+	url = https://github.com/bbatsov/adoc-mode.git
