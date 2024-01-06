@@ -4,7 +4,8 @@
 ;;   Masatake YAMATO <masata-y@is.aist-nara.ac.jp>
 
 ;; Author: Masatake YAMATO <masata-y@is.aist-nara.ac.jp>
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 
 ;; This file is part of Daredevil SKK.
@@ -67,7 +68,8 @@
 
 ;;;###autoload
 (defun skk-cursor-off-1 ()
-  (ccc-set-cursor-color-buffer-local nil))
+  (when ccc-default-cursor-color
+    (ccc-set-cursor-color-buffer-local nil)))
 
 (provide 'skk-cursor)
 

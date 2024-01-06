@@ -3,7 +3,8 @@
 ;; Copyright (C) 1999, 2000 NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
 
 ;; Author: NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 
 ;; This file is part of Daredevil SKK.
@@ -116,13 +117,13 @@
                      "gzip -d")
                     ((file-exists-p ps)
                      (message "skk-get: Use powershell version of the simple gzip.")
-                     (format "powershell -executionpolicy remotesigned %s" ps))
+                     (format "powershell.exe -executionpolicy remotesigned -file %s" (shell-quote-argument ps)))
                     (t
                      (error "skk-get: gzip command could not be found. Aborts.")))))
     (dolist (f (directory-files dir t ".gz"))
       (let ((fn (convert-standard-filename f)))
         (message "skk-get: expand %s..." fn)
-        (shell-command (format "%s %s" cmd fn))
+        (shell-command (format "%s %s" cmd (shell-quote-argument fn)))
         (when (file-exists-p fn)
           (delete-file fn))))))
 

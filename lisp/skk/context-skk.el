@@ -192,7 +192,7 @@
 ;;;###autoload (autoload 'context-skk-mode "context-skk" "文脈に応じて自動的にskkの入力モードをlatinに切り換えるマイナーモード。" t)
 (define-minor-mode context-skk-mode
   "文脈に応じて自動的に skk の入力モードを latin に切り換えるマイナーモード。"
-  t
+  :init-value t
   :lighter " ;▽")
 
 ;;
@@ -291,9 +291,9 @@
         context-skk-programming-mode))
 
 (defun context-skk-in-string-p ()
-  (nth 3 (parse-partial-sexp (point) (point-min))))
+  (nth 3 (parse-partial-sexp (point-min) (point))))
 (defun context-skk-in-comment-p ()
-  (nth 4 (parse-partial-sexp (point) (point-min))))
+  (nth 4 (parse-partial-sexp (point-min) (point))))
 
 ;;
 ;; 現在のポイント下に keymap が定義されているかどうか？

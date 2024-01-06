@@ -1,10 +1,11 @@
 ;;; skk.el --- Daredevil SKK (Simple Kana to Kanji conversion program) -*- coding: iso-2022-jp -*-
 
 ;; Copyright (C) 1988-1997 Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
-;; Copyright (C) 1999-2010 SKK Development Team <skk@ring.gr.jp>
+;; Copyright (C) 1999-2020 SKK Development Team
 
 ;; Author: Masahiko Sato <masahiko@kuis.kyoto-u.ac.jp>
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 
 ;; This file is part of Daredevil SKK.
@@ -318,6 +319,7 @@ dependent."
   (skk-emacs-prepare-menu)
   (skk-setup-charset-list)
   (skk-setup-delete-selection-mode)
+  (skk-setup-melpa-isearch)
   (when skk-annotation-lookup-DictionaryServices
     (skk-annotation-start-python))
   (setq skk-mode-invoked t))
@@ -556,14 +558,9 @@ dependent."
                mode-string-list)))))
 
 (defun skk-make-indicator-alist-1 (mode base)
-  (skk-mode-string-to-indicator 'mode-line
-                                (concat "--" base
-                                        (cond ((skk-face-proportional-p 'mode-line)
-                                               ":")
-                                              ((memq mode '(latin abbrev))
-                                               "::")
-                                              (t
-                                               ":")))))
+  (skk-mode-string-to-indicator mode
+                                (format "%s%s%s" skk-indicator-prefix base
+                                        (funcall skk-indicator-suffix-func mode))))
 
 (defun skk-setup-modeline ()
   "$B%b!<%I%i%$%s$X$N%9%F!<%?%9I=<($r=`Hw$9$k!#(B"
@@ -836,6 +833,17 @@ Delete Selection $B%b!<%I$,(B SKK $B$r;H$C$?F|K\8lF~NO$KBP$7$F$b5!G=$9$k$h$&$
     (forward-line 1)
     (backward-char 1)
     (setq skk-okuri-nasi-min (point-marker))))
+
+(defun skk-setup-melpa-isearch ()
+  (and (string-match-p "melpa" (skk-version))
+       ;; FIXME
+       (null (delete nil
+                     (mapcar (lambda (e)
+                               (when (symbolp e)
+                                 (string-match-p "skk" (symbol-name e))))
+                             isearch-mode-hook)))
+       (skk-message "skk-setup.el $B$r;29M$K$7$F!"(Bisearch-mode-hook $B$r@_Dj$7$F$/$@$5$$!#(B"
+                    "Please refer to the source file `skk-setup.el' and setup isearch-mode-hook.") ))
 
 ;;;###autoload
 (defun skk-emulate-original-map (arg)
@@ -2238,23 +2246,10 @@ KEYS $B$H(B CANDIDATES $B$rAH$_9g$o$;$F#7$NG\?t8D$N8uJd72(B ($B8uJd?t$,(B
         (if window
             (select-window window)
           (other-window 1)))
-      (unless (eq (next-window) (selected-window))
-        ;; *$B8uJd(B* $B%P%C%U%!$r8+0W$/$9$k!#(B
-        ;; `save-window-excursion' $B$NCf$J$N$GBg>fIW$J$O$:!#(B
-        (and skk-candidate-buffer-delete-other-windows
-             (delete-other-windows)))
-      (save-selected-window
+      (let ((w (selected-window)))
         (pop-to-buffer buff)
-        (let ((lines (count-lines (point-min) (point-max))))
-          ;; window-height() includes mode-line
-          (when (> lines (1- (window-height)))
-            (enlarge-window (- lines (1- (window-height))))))
-        (unless (pos-visible-in-window-p)
-          (recenter '(1)))
         (fit-window-to-buffer)
-        (apply 'set-window-fringes (if skk-candidate-buffer-display-fringes
-                                       skk-candidate-buffer-fringe-width
-                                     '(nil 0 0))))
+        (select-window w))
       (when minibuf-p
         (select-window (minibuffer-window))))))
 
@@ -2438,13 +2433,10 @@ auto $B$K@_Dj$9$k$H%f!<%6$K3NG'$7$J$$!#(B
           (if window
               (select-window window)
             (other-window 1)))
-        (unless (eq (next-window) (selected-window))
-          (delete-other-windows))
-        (save-selected-window
+        (let ((w (selected-window)))
           (pop-to-buffer buff)
           (fit-window-to-buffer)
-          (unless (pos-visible-in-window-p)
-            (recenter '(1))))
+          (select-window w))
         (when minibuf-p
           (select-window (minibuffer-window)))))))
 
@@ -3288,7 +3280,7 @@ TYPE ($BJ8;z$N<oN`(B) $B$K1~$8$?J8;z$r%9%-%C%W$7$F%P%C%U%!$N@hF,J}8~$XLa$k!#
 (defun skk-what-char-type ()
   "$B8=:_$N%]%$%s%H$K$"$kJ8;z$N<oN`$rH=JL$9$k!#(B
 $BJ8;z$N<oN`$K1~$8$F!"<!$N$$$:$l$+$N%7%s%\%k$rJV$9!#(B
-'hiragana 'katakana 'jisx0208-latin 'ascii 'unknown"
+\\='hiragana \\='katakana \\='jisx0208-latin \\='ascii \\='unknown"
   (save-match-data
     (cond ((looking-at "[$B$!(B-$B$s(B]")
            'hiragana)
@@ -3837,7 +3829,8 @@ If you want to restore the dictionary from your drive, try
 ;;;###autoload
 (defun skk-get-jisyo-buffer (file &optional nomsg)
   "FILE $B$r3+$$$F(B SKK $B<-=q%P%C%U%!$r:n$j!"%P%C%U%!$rJV$9!#(B
-$B<-=q%P%C%U%!$K$O(B `skk-jisyo-code' $B$,E,MQ$5$l$k(B (nil $B$G$"$l$P(B euc) $B$,!"(BFILE $B$K(B (\"path/to/file\" . CODING-SYSTEM) $B$N%3%s%9%;%k$b;XDj$G$-$k!#(B
+$B<-=q%P%C%U%!$K$O(B `skk-jisyo-code' $B$,E,MQ$5$l$k(B (nil $B$G$"$l$P(B euc) $B$,!"(BFILE $B$K(B
+ (\"path/to/file\" . CODING-SYSTEM) $B$N%3%s%9%;%k$b;XDj$G$-$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B NOMSG $B$r;XDj$9$k$H%U%!%$%kFI$_9~$_$N:]$N%a%C%;!<%8$rI=<($7$J(B
 $B$$!#(B"
   (when file
@@ -5173,6 +5166,29 @@ FACE $B$O!VA07J?'!WKt$O!VA07J?'(B + $B%9%i%C%7%e(B + $BGX7J?'!W$N7A<0$G;XDj
   "$B"'%b!<%I$G$"$l$P!"8uJd$NI=<($r$d$a$F"&%b!<%I$KLa$9(B ($B8+=P$78l$O;D$9(B)$B!#(B
 $B"&%b!<%I$G$"$l$P!"8+=P$78l$r:o=|$9$k!#(B
 $B>e5-$N$I$A$i$N%b!<%I$G$b$J$1$l$P(B `keyboard-quit' $B$HF1$8F0:n$r$9$k!#(B"
+
+  ;; Emacs 27 $B$^$G$O(B $BHs(B interactive $B$G$"$C$?$,!"(B
+  ;; Emacs 28 $B$+$i(B WARNING: Adding advice to subr keyboard-quit
+  ;;   without mirroring its interactive spec $B$H$J$C$?$?$a(B interactive $B$H$7$?!#(B
+  ;; SRC/lisp/emacs-lisp/advoce.el $B$N(B @@ Advising interactive subrs: $B$,;29M$K$J$k!#(B
+  (interactive)
+
+  (if (not skk-mode)
+      ad-do-it
+    (cond
+     ((eq skk-henkan-mode 'active)
+      (skk-henkan-inactivate))
+     ((eq skk-henkan-mode 'on)
+      (skk-henkan-off-by-quit))
+     (t
+      (if (skk-get-prefix skk-current-rule-tree)
+          (skk-erase-prefix 'clean)
+        ad-do-it)))))
+
+(skk-defadvice abort-minibuffers (around skk-ad activate preactivate)
+  "$BF1>e(B"
+  (interactive)
+
   (if (not skk-mode)
       ad-do-it
     (cond
@@ -5315,6 +5331,8 @@ skk $B$NF0:n$H@09g$5$;$k!#(B
 (skk-wrap-newline-command widget-field-activate)
 (skk-wrap-newline-command org-insert-heading)
 (skk-wrap-newline-command org-return)
+(skk-wrap-newline-command org-meta-return)
+(skk-wrap-newline-command markdown-enter-key)
 
 ;; hooks.
 

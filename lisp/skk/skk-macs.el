@@ -1,9 +1,10 @@
 ;;; skk-macs.el --- Macros and inline functions commonly used in SKK -*- coding: iso-2022-jp -*-
 
-;; Copyright (C) 1999-2010 SKK Development Team <skk@ring.gr.jp>
+;; Copyright (C) 1999-2010 SKK Development Team
 ;; Copyright (C) 1993-2000 Free Software Foundation, Inc.
 
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 
 ;; This file is part of Daredevil SKK.
@@ -262,7 +263,7 @@ If the event isn't a keypress, this returns nil."
     (while (> dimension 0)
       (setq val (cons (logand code 255) ;; 0xFF
                       val))
-      (setq code (lsh code -8))
+      (setq code (ash code -8))
       (setq dimension (1- dimension)))
     (cons charset val)))
 
@@ -817,7 +818,7 @@ Return the modified ALIST."
   ;; Use addition rather than logand since that is more robust; the low 16
   ;; bits of the seconds might have been incremented, making it more than 16
   ;; bits wide.
-  (+ (lsh (- (car b) (car a)) 16)
+  (+ (ash (- (car b) (car a)) 16)
      (- (nth 1 b) (nth 1 a))))
 
 

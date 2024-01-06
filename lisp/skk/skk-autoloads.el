@@ -1,6 +1,6 @@
 ;;; skk-autoloads.el --- autoload settings for SKK  -*- coding: iso-2022-jp -*-
 
-;; This file was generated automatically by SKK-MK at Wed Feb 22 22:42:25 2023.
+;; This file was generated automatically by SKK-MK at Sun Dec 31 15:59:29 2023.
 
 ;; This file is part of Daredevil SKK.
 
@@ -23,7 +23,7 @@
 ;;;### (autoloads nil "skk-viper" "skk-viper.el" (0 0 0 0))
 ;;; Generated autoloads from skk-viper.el
 
-(autoload 'skk-viper-normalize-map "skk-viper" nil nil nil)
+(autoload 'skk-viper-normalize-map "skk-viper")
 
 (register-definition-prefixes "skk-viper" '("skk-viper-"))
 
@@ -32,19 +32,19 @@
 ;;;### (autoloads nil "skk-jisx0213" "skk-jisx0213.el" (0 0 0 0))
 ;;; Generated autoloads from skk-jisx0213.el
 
-(autoload 'skk-jisx0213-henkan-list-filter "skk-jisx0213" nil nil nil)
+(autoload 'skk-jisx0213-henkan-list-filter "skk-jisx0213")
 
 ;;;***
 
 ;;;### (autoloads nil "ccc" "ccc.el" (0 0 0 0))
 ;;; Generated autoloads from ccc.el
 
-(autoload 'ccc-setup "ccc" nil nil nil)
+(autoload 'ccc-setup "ccc")
 
 (autoload 'ccc-update-buffer-local-frame-params "ccc" "\
 
 
-\(fn &optional BUFFER)" nil nil)
+\(fn &optional BUFFER)")
 
 (register-definition-prefixes "ccc" '("ccc-"))
 
@@ -60,7 +60,7 @@
 ;;;### (autoloads nil "context-skk" "context-skk.el" (0 0 0 0))
 ;;; Generated autoloads from context-skk.el
 
-(let ((loads (get 'context-skk 'custom-loads))) (if (member '"context-skk" loads) nil (put 'context-skk 'custom-loads (cons '"context-skk" loads))))
+(let ((loads (get 'context-skk 'custom-loads))) (if (member '"context-skk" loads) nil (put 'context-skk 'custom-loads (cons '"context-skk" loads)) (put 'skk 'custom-loads (cons 'context-skk (get 'skk 'custom-loads)))))
 
 (defvar context-skk-context-check-hook '(context-skk-out-of-string-or-comment-in-programming-mode-p context-skk-on-keymap-defined-area-p context-skk-in-read-only-p) "\
 *$BF|K\8lF~NO$r<+F0E*$K(B off $B$K$7$?$$!V%3%s%F%-%9%H!W$K$$$l$P(B t $B$rJV$9(B
@@ -113,7 +113,7 @@
 ;;;### (autoloads nil "skk-abbrev" "skk-abbrev.el" (0 0 0 0))
 ;;; Generated autoloads from skk-abbrev.el
 
-(autoload 'skk-abbrev-search "skk-abbrev" nil nil nil)
+(autoload 'skk-abbrev-search "skk-abbrev")
 
 ;;;***
 
@@ -131,24 +131,24 @@
 (autoload 'skk-annotation-get "skk-annotation" "\
 
 
-\(fn ANNOTATION)" nil nil)
+\(fn ANNOTATION)")
 
 (autoload 'skk-annotation-find-and-show "skk-annotation" "\
 $B3F<o%j%=!<%9$+$i%"%N%F!<%7%g%s$r<hF@$7I=<($9$k!#(B
 
-\(fn PAIR)" nil nil)
+\(fn PAIR)")
 
 (autoload 'skk-annotation-show "skk-annotation" "\
 
 
-\(fn ANNOTATION &optional WORD SOURCES)" nil nil)
+\(fn ANNOTATION &optional WORD SOURCES)")
 
 (autoload 'skk-annotation-display-p "skk-annotation" "\
 
 
-\(fn TEST)" nil nil)
+\(fn TEST)")
 
-(autoload 'skk-annotation-toggle-display-p "skk-annotation" nil t nil)
+(autoload 'skk-annotation-toggle-display-p "skk-annotation" nil t)
 
 (autoload 'skk-annotation-add "skk-annotation" "\
 $B:G8e$K3NDj$7$?8l$K(B annotation $B$rIU$1$k!#(B
@@ -156,20 +156,20 @@
 NO-PREVIOUS-ANNOTATION $B$r;XDj(B (\\[Universal-Argument] \\[skk-annotation-add])
 $B$9$k$H!"4{$KIU$1$i$l$F$$$k(B annotation $B$rJT=8%P%C%U%!$K=PNO$7$J$$!#(B
 
-\(fn &optional NO-PREVIOUS-ANNOTATION)" t nil)
+\(fn &optional NO-PREVIOUS-ANNOTATION)" t)
 
 (autoload 'skk-annotation-remove "skk-annotation" "\
-$B:G8e$K3NDj$7$?8l$+$i(B annotation $B$r<h$j5n$k!#(B" t nil)
+$B:G8e$K3NDj$7$?8l$+$i(B annotation $B$r<h$j5n$k!#(B" t)
 
 (autoload 'skk-annotation-quote "skk-annotation" "\
 $B:G8e$K3NDj$7$?8l$K4^$^$l$k(B `;' $B$r8uJd$N0lIt$H$7$F(B quote $B$9$k!#(B
 
-\(fn &optional QUIET)" t nil)
+\(fn &optional QUIET)" t)
 
 (autoload 'skk-annotation-message "skk-annotation" "\
 
 
-\(fn &optional SITUATION)" nil nil)
+\(fn &optional SITUATION)")
 
 (autoload 'skk-annotation-lookup-region-or-at-point "skk-annotation" "\
 $BA*BrNN0h$^$?$O%]%$%s%H0LCV$NC18l$r<-=q$GD4$Y$k!#(B
@@ -181,42 +181,42 @@ NO-PREVIOUS-ANNOTATION $B$r;XDj(B (\\[Universal-Argument] \\[skk-annotation-ad
 $BD4$Y$?7k2L$r(B `skk-annotation-show-as-message' $B$,(B Non-nil $B$G$"$l$P%(%3!<%(%j%"(B
 $B$K!"(Bnil $B$G$"$l$PJL(B window $B$KI=<($9$k!#(B
 
-\(fn &optional PREFIX-ARG START END)" t nil)
+\(fn &optional PREFIX-ARG START END)" t)
 
 (autoload 'skk-annotation-start-python "skk-annotation" "\
 OS X $B$N!V<-=q!W$rMxMQ$9$k$?$a$K(B python $B$r5/F0$9$k!#(B
 
-\(fn &optional WAIT)" nil nil)
+\(fn &optional WAIT)")
 
 (autoload 'skk-annotation-lookup-DictionaryServices "skk-annotation" "\
 python $B$r2p$7$F(B DictionaryServices $B$rMxMQ$7%"%N%F!<%7%g%s$r<hF@$9$k!#(B
 $B%*%W%7%g%s0z?t(B TRUNCATE $B$,(B non-nil $B$N>l9g$O8uJd0lMwMQ$KC;$$%"%N%F!<%7%g%s(B
 $B$K9J$j$3$`!#(B
 
-\(fn WORD &optional TRUNCATE FORCE)" nil nil)
+\(fn WORD &optional TRUNCATE FORCE)")
 
 (autoload 'skk-annotation-preread-dict "skk-annotation" "\
 dict $B$N%W%m%;%9$r5/F0$9$k!#@hFI$_$N$?$a$KMQ$$$k!#(B
 
-\(fn WORD &optional NOWAIT)" nil nil)
+\(fn WORD &optional NOWAIT)")
 
 (autoload 'skk-annotation-lookup-dict "skk-annotation" "\
 dict $B$N%W%m%;%9$rI,MW$J$i5/F0$7!"7k2L$rD4$Y$k!#(B
 $B0UL#$,<hF@$G$-$?>l9g$K$O7k2L$rJ8;zNs$H$7$FJV$9!#(B
 
-\(fn WORD &optional TRUNCATE)" nil nil)
+\(fn WORD &optional TRUNCATE)")
 
 (autoload 'skk-annotation-wikipedia "skk-annotation" "\
 Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k!#(B
 
-\(fn WORD &optional SOURCES)" nil nil)
+\(fn WORD &optional SOURCES)")
 
 (defalias 'skk-annotation-wikipedia-region-or-at-point 'skk-annotation-lookup-region-or-at-point)
 
 (autoload 'skkannot-cache "skk-annotation" "\
 
 
-\(fn WORD &optional SOURCES)" nil nil)
+\(fn WORD &optional SOURCES)")
 
 (register-definition-prefixes "skk-annotation" '("skk"))
 
@@ -225,9 +225,9 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 ;;;### (autoloads nil "skk-auto" "skk-auto.el" (0 0 0 0))
 ;;; Generated autoloads from skk-auto.el
 
-(autoload 'skk-okuri-search-1 "skk-auto" nil nil nil)
+(autoload 'skk-okuri-search-1 "skk-auto")
 
-(autoload 'skk-adjust-search-prog-list-for-auto-okuri "skk-auto" nil nil nil)
+(autoload 'skk-adjust-search-prog-list-for-auto-okuri "skk-auto")
 
 (register-definition-prefixes "skk-auto" '("skk-okuri-search-subr-original"))
 
@@ -253,7 +253,7 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 (autoload 'skk-search-cdb-jisyo "skk-cdb" "\
 
 
-\(fn CDB-PATH)" nil nil)
+\(fn CDB-PATH)")
 
 (register-definition-prefixes "skk-cdb" '("skk-cdb-"))
 
@@ -267,94 +267,94 @@ Wiktionary/Wikipedia $B$N(B WORD $B$KAjEv$9$k5-;v$+$i%"%N%F!<%7%g%s$r<hF@$9$k
 $B$=$l0J30$N%b!<%I$G$O%*%j%8%J%k$N%-!<%^%C%W$K3d$jIU$1$i$l$?%3%^%s%I$r%(%_%e%l!<(B
 $B%H$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-comp "skk-comp" "\
 
 
-\(fn FIRST &optional SILENT)" nil nil)
+\(fn FIRST &optional SILENT)")
 
 (autoload 'skk-comp-do "skk-comp" "\
 
 
-\(fn FIRST &optional SILENT SET-THIS-COMMAND)" nil nil)
+\(fn FIRST &optional SILENT SET-THIS-COMMAND)")
 
 (autoload 'skk-comp-get-candidate "skk-comp" "\
 
 
-\(fn &optional FIRST)" nil nil)
+\(fn &optional FIRST)")
 
 (autoload 'skk-comp-get-all-candidates "skk-comp" "\
 
 
-\(fn KEY PREFIX PROG-LIST)" nil nil)
+\(fn KEY PREFIX PROG-LIST)")
 
 (autoload 'skk-comp-get-regexp "skk-comp" "\
 
 
-\(fn PREFIX)" nil nil)
+\(fn PREFIX)")
 
 (autoload 'skk-comp-collect-kana "skk-comp" "\
 
 
-\(fn TREE)" nil nil)
+\(fn TREE)")
 
 (autoload 'skk-comp-arrange-kana-list "skk-comp" "\
 
 
-\(fn KANA-LIST PREFIX)" nil nil)
+\(fn KANA-LIST PREFIX)")
 
 (autoload 'skk-comp-from-jisyo "skk-comp" "\
 SKK $B<-=q%U%)!<%^%C%H$N(B FILE $B$+$iJd408uJd$rF@$k!#(B
 
-\(fn FILE)" nil nil)
+\(fn FILE)")
 
 (autoload 'skk-comp-search-current-buffer "skk-comp" "\
 
 
-\(fn KEY &optional ABBREV)" nil nil)
+\(fn KEY &optional ABBREV)")
 
 (autoload 'skk-comp-re-search-current-buffer "skk-comp" "\
 
 
-\(fn KEY PREFIX &optional ABBREV)" nil nil)
+\(fn KEY PREFIX &optional ABBREV)")
 
 (autoload 'skk-comp-previous "skk-comp" "\
 
 
-\(fn &optional SET-THIS-COMMAND)" nil nil)
+\(fn &optional SET-THIS-COMMAND)")
 
 (autoload 'skk-comp-previous/next "skk-comp" "\
 
 
-\(fn CH)" nil nil)
+\(fn CH)")
 
 (autoload 'skk-try-completion "skk-comp" "\
 $B"&%b!<%I$G8+=P$78l$rJd40$9$k!#(B
 $B$=$l0J30$N%b!<%I$G$O!"%*%j%8%J%k$N%-!<3d$jIU$1$N%3%^%s%I$r%(%_%e%l!<%H$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-comp-wrapper "skk-comp" "\
 Character $B$G$J$$%-!<$KJd40$r3d$jEv$F$k$?$a$N%3%^%s%I!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-previous-comp-maybe "skk-comp" "\
 Character $B$G$J$$%-!<$KJd40A08uJd$r3d$jEv$F$k$?$a$N%3%^%s%I!#(B
 $B"&%b!<%I$G$OJd40A08uJd!"$5$b$J$1$l$P%*%j%8%J%k$N%-!<Dj5A$r<B9T$9$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-comp-by-history "skk-comp" "\
 $BF~NO$,6u$N;~$KMzNr$+$iJd40$9$k!#(B
 $BBP>]$O8=:_$N(B Emacs $B$N%;%C%7%g%s$K$*$$$F9T$C$?Aw$jL5$7JQ49$N$&$A!"(B
-`skk-kakutei-history-limit' $B$G;XDj$5$l$k:G6a$N$b$N$G$"$k!#(B" nil nil)
+`skk-kakutei-history-limit' $B$G;XDj$5$l$k:G6a$N$b$N$G$"$k!#(B")
 
 (autoload 'skk-comp-smart-find "skk-comp" "\
 `smart-find' $B$,8+$D$1$?%U%!%$%kL>$GJd40$9$k(B
 
-\(fn &optional PATH)" nil nil)
+\(fn &optional PATH)")
 
 (autoload 'skk-search-smart-find "skk-comp" "\
 `smart-find'$B$rMxMQ$7$?JQ49$r9T$&!#(B
@@ -363,12 +363,12 @@ SKK abbrev $B%b!<%I$K$F!"1QJ8;z(B + `skk-completion-search-char' (~)$B$G(B
 $B%G%U%)%k%H$G$O(B SKK abbrev $B%b!<%I$N$_$GM-8z$J5!G=$@$,!"(B
 NOT-ABBREV-ONLY $B$r;XDj$9$k;v$G>o$KM-8z$H$J$k!#(B
 
-\(fn &optional PATH NOT-ABBREV-ONLY WITHOUT-CHAR-MAYBE)" nil nil)
+\(fn &optional PATH NOT-ABBREV-ONLY WITHOUT-CHAR-MAYBE)")
 
 (autoload 'skk-smart-find "skk-comp" "\
 
 
-\(fn KEY &optional PATH)" nil nil)
+\(fn KEY &optional PATH)")
 
 (autoload 'skk-comp-lisp-symbol "skk-comp" "\
 Lisp symbol $BL>$GJd40$9$k!#(B
@@ -377,10 +377,10 @@ PREDICATE $B$K0z?t(B 1 $B8D$N4X?t$r;XDj$9$l$P!"(BPREDICATE $B$rK~$?$9%7%s%\
 $B$J$I$,;XDj$G$-$k!#;XDj$7$J$1$l$P4X?t$^$?$OJQ?t$K8B$C$FJd40$9$k!#(B
 
 `skk-completion-prog-list' $B$XDI2C$9$k$HM-8z$H$J$k!#(B
-\(add-to-list 'skk-completion-prog-list
-         '(skk-comp-lisp-symbol) t)
+\(add-to-list \\='skk-completion-prog-list
+         \\='(skk-comp-lisp-symbol) t)
 
-\(fn &optional PREDICATE)" nil nil)
+\(fn &optional PREDICATE)")
 
 (autoload 'skk-search-lisp-symbol "skk-comp" "\
 Lisp symbol $BL>$GJd40$7$?7k2L$r8!:w7k2L$H$7$FJV$9!#(B
@@ -394,10 +394,10 @@ NOT-ABBREV-ONLY $B$r;XDj$9$k;v$G>o$KM-8z$H$J$k!#(B
 
 
 $B@_DjNc(B
-\(add-to-list 'skk-search-prog-list
-         '(skk-search-lisp-symbol) t)
+\(add-to-list \\='skk-search-prog-list
+         \\='(skk-search-lisp-symbol) t)
 
-\(fn &optional PREDICATE NOT-ABBREV-ONLY WITHOUT-CHAR-MAYBE)" nil nil)
+\(fn &optional PREDICATE NOT-ABBREV-ONLY WITHOUT-CHAR-MAYBE)")
 
 (autoload 'skk-completion-search "skk-comp" "\
 $BJQ49%-!<$GJd40$r9T$$!"F@$i$l$?3F8+=P$7$G$5$i$K8!:w$9$k!#(B
@@ -408,7 +408,7 @@ SEARCH-PROG-LIST $B$O(B `skk-search-prog-list' $B$HF1$87A<0$G!"(B
 $B%G%U%)%k%H$G$O!"Jd40$K$h$C$FF@$i$l$?8+=P$7$HBP1~$9$k8uJd$O%;%C%H$G$"$k$,!"(B
 WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 
-\(fn COMP-PROG-LIST &optional SEARCH-PROG-LIST WITHOUT-MIDASI WITHOUT-CHAR-MAYBE)" nil nil)
+\(fn COMP-PROG-LIST &optional SEARCH-PROG-LIST WITHOUT-MIDASI WITHOUT-CHAR-MAYBE)")
 
 (register-definition-prefixes "skk-comp" '("skk-comp-restrict-by-prefix"))
 
@@ -417,14 +417,14 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 ;;;### (autoloads nil "skk-cursor" "skk-cursor.el" (0 0 0 0))
 ;;; Generated autoloads from skk-cursor.el
 
-(autoload 'skk-cursor-current-color "skk-cursor" nil nil nil)
+(autoload 'skk-cursor-current-color "skk-cursor")
 
 (autoload 'skk-cursor-set-1 "skk-cursor" "\
 
 
-\(fn COLOR)" nil nil)
+\(fn COLOR)")
 
-(autoload 'skk-cursor-off-1 "skk-cursor" nil nil nil)
+(autoload 'skk-cursor-off-1 "skk-cursor")
 
 (register-definition-prefixes "skk-cursor" '("skk-cursor-default-color"))
 
@@ -433,16 +433,16 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 ;;;### (autoloads nil "skk-cus" "skk-cus.el" (0 0 0 0))
 ;;; Generated autoloads from skk-cus.el
 
-(autoload 'skk-customize-group-skk "skk-cus" nil t nil)
+(autoload 'skk-customize-group-skk "skk-cus" nil t)
 
-(autoload 'skk-customize "skk-cus" nil t nil)
+(autoload 'skk-customize "skk-cus" nil t)
 
-(autoload 'skk-cus-setup "skk-cus" nil nil nil)
+(autoload 'skk-cus-setup "skk-cus")
 
 (autoload 'skk-cus-set "skk-cus" "\
 
 
-\(fn &optional ALIST)" nil nil)
+\(fn &optional ALIST)")
 
 (register-definition-prefixes "skk-cus" '("skk-cus"))
 
@@ -451,11 +451,11 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 ;;;### (autoloads nil "skk-dcomp" "skk-dcomp.el" (0 0 0 0))
 ;;; Generated autoloads from skk-dcomp.el
 
-(autoload 'skk-dcomp-marked-p "skk-dcomp" nil nil nil)
+(autoload 'skk-dcomp-marked-p "skk-dcomp")
 
-(autoload 'skk-dcomp-before-kakutei "skk-dcomp" nil nil nil)
+(autoload 'skk-dcomp-before-kakutei "skk-dcomp")
 
-(autoload 'skk-dcomp-after-delete-backward-char "skk-dcomp" nil nil nil)
+(autoload 'skk-dcomp-after-delete-backward-char "skk-dcomp")
 
 (register-definition-prefixes "skk-dcomp" '("skk-dcomp-"))
 
@@ -467,17 +467,17 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 (autoload 'skk-inline-show-vertically-decor-func "skk-decor" "\
 
 
-\(fn STRING)" nil nil)
+\(fn STRING)")
 
 (autoload 'skk-tooltip-show-at-point-decor-func "skk-decor" "\
 
 
-\(fn TEXT)" nil nil)
+\(fn TEXT)")
 
 (autoload 'skk-henkan-show-candidates-buffer-decor-func "skk-decor" "\
 
 
-\(fn STR)" nil nil)
+\(fn STR)")
 
 ;;;***
 
@@ -487,7 +487,7 @@ WITHOUT-MIDASI $B$r;XDj$9$k$H8+=P$7$O>J$+$l$k!#(B
 (autoload 'skk-get "skk-develop" "\
 DIR.
 
-\(fn DIR)" t nil)
+\(fn DIR)" t)
 
 (add-hook 'before-init-hook (lambda nil (eval-after-load "font-lock" '(set (if (boundp 'lisp-el-font-lock-keywords-2) 'lisp-el-font-lock-keywords-2 'lisp-font-lock-keywords-2) (nconc (list (list (concat "(\\(\\(skk-\\)?def\\(" "\\(un-cond\\|subst-cond\\|advice\\|" "macro-maybe\\|alias-maybe\\|un-maybe\\)\\|" "\\(var\\|localvar\\)" "\\)\\)\\>" "[ \11'(]*" "\\(\\sw+\\)?") '(1 font-lock-keyword-face) '(6 (cond ((match-beginning 4) font-lock-function-name-face) ((match-beginning 5) font-lock-variable-name-face)) nil t))) (list (list (concat "(" (regexp-opt '("skk-save-point" "skk-with-point-move" "skk-loop-for-buffers") t) "\\>") '(1 font-lock-keyword-face))) (list (list "(\\(skk-error\\)\\>" '(1 font-lock-warning-face))) (symbol-value (if (boundp 'lisp-el-font-lock-keywords-2) 'lisp-el-font-lock-keywords-2 'lisp-font-lock-keywords-2))))) (put 'skk-deflocalvar 'doc-string-elt 3) (put 'skk-defadvice 'doc-string-elt 3)))
 
@@ -498,15 +498,15 @@ DIR.
 ;;;### (autoloads nil "skk-emacs" "skk-emacs.el" (0 0 0 0))
 ;;; Generated autoloads from skk-emacs.el
 
-(autoload 'skk-emacs-prepare-menu "skk-emacs" nil nil nil)
+(autoload 'skk-emacs-prepare-menu "skk-emacs")
 
-(autoload 'skk-emacs-prepare-modeline-properties "skk-emacs" nil nil nil)
+(autoload 'skk-emacs-prepare-modeline-properties "skk-emacs")
 
 (autoload 'skk-search-ja-dic "skk-emacs" "\
 GNU Emacs $B$KIUB0$9$k$+$J4A;zJQ49<-=q$rMQ$$$F8!:w$9$k!#(B
 $B8=:_$N(B Emacs $B$K$O(B SKK-JISYO.L $B$r4p$KJQ49$5$l$?(B ja-dic.el $B$,IUB0$7$F$$$k!#(B
 $B$3$N<-=q%G!<%?$rMQ$$$FAw$j$"$j!"Aw$j$J$7!"@\F,<-!"@\Hx<-$NJQ49$r9T$&!#(B
-$B$?$@$7!"(BSKK-JISYO.L $B$N$h$&$J1Q?tJQ49!"?tCMJQ49$J$I$O$G$-$J$$!#(B" nil nil)
+$B$?$@$7!"(BSKK-JISYO.L $B$N$h$&$J1Q?tJQ49!"?tCMJQ49$J$I$O$G$-$J$$!#(B")
 
 (register-definition-prefixes "skk-emacs" '("skk-"))
 
@@ -526,7 +526,7 @@ FORMAT $B$O(B `format' $B$NBh#10z?t$NMM<0(B (string) $B$K$h$k=PNO;XDj%F%s%W
 AND-TIME (boolean) $B$r;XDj$9$k$H;~9o$bJV$9!#(B
 `skk-today' $B$H(B `skk-clock' $B$N%5%V%k!<%A%s$G$"$k!#(B
 
-\(fn &optional PP-FUNCTION FORMAT AND-TIME)" nil nil)
+\(fn &optional PP-FUNCTION FORMAT AND-TIME)")
 
 (autoload 'skk-default-current-date "skk-gadget" "\
 $BF|IU>pJs$NI8=`E*$J=PNO$r$9$kB>!"%f!<%6$K$"$kDxEY$N%+%9%?%^%$%:5!G=$rDs6!$9$k!#(B
@@ -566,24 +566,26 @@ DAYOFWEEK-ALIST-INDEX $B$O(B `skk-day-of-week-alist' $B$N3FMWAG$N(B cadr $B
 
 AND-TIME $B$O;~9o$bI=<($9$k$+$I$&$+(B (boolean)$B!#(B
 
-\(fn DATE-INFORMATION FORMAT NUM-TYPE GENGO GENGO-INDEX MONTH-ALIST-INDEX DAYOFWEEK-ALIST-INDEX &optional AND-TIME)" nil nil)
+\(fn DATE-INFORMATION FORMAT NUM-TYPE GENGO GENGO-INDEX MONTH-ALIST-INDEX DAYOFWEEK-ALIST-INDEX &optional AND-TIME)")
 
 (autoload 'skk-relative-date "skk-gadget" "\
-`skk-current-date' $B$N3HD%HG!#(BPP-FUNCTION, FORMAT, AND-TIME $B$O(B `skk-current-date' $B$r;2>H$N$3$H!#(B
+`skk-current-date' $B$N3HD%HG!#0z?t$G$"$k(B PP-FUNCTION, FORMAT $B5Z$S(B AND-TIME
+ $B$O(B `skk-current-date' $B$r;2>H$N$3$H!#(B
+
 $B<B9TNc(B
  (skk-relative-date) => \"$BJ?@.(B25$BG/(B2$B7n(B03$BF|(B($BF|(B)\"
  (skk-relative-date (lambda (arg) body) nil nil :dd -1) => \"$BJ?@.(B25$BG/(B2$B7n(B02$BF|(B($BEZ(B)\"
  (skk-relative-date (lambda (arg) body) nil nil :mm -1) => \"$BJ?@.(B25$BG/(B1$B7n(B03$BF|(B($BLZ(B)\"
  (skk-relative-date (lambda (arg) body) nil nil :yy  2) => \"$BJ?@.(B27$BG/(B2$B7n(B03$BF|(B($B2P(B)\"
 
-\(fn PP-FUNCTION FORMAT AND-TIME &key (YY 0) (MM 0) (DD 0))" nil nil)
+\(fn PP-FUNCTION FORMAT AND-TIME &key (YY 0) (MM 0) (DD 0))")
 
 (autoload 'skk-today "skk-gadget" "\
 `current-time-string' $B$N=PNO$r2C9)$7!"8=:_$NF|;~$rI=$9J8;zNs$r:n$j!"A^F~(B
 $B$9$k!#<B<AE*$K!V(Btoday $B%(%s%H%j$N8F$S=P$7!W$@$1$J$N$G!"%+%9%?%^%$%:$O8D?M(B
 $B<-=q$N(B today $B%(%s%H%j$K$h$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-clock "skk-gadget" "\
 $B%_%K%P%C%U%!$K%G%8%?%k;~7W$rI=<($9$k!#(B
@@ -598,51 +600,51 @@ interactive $B$K5/F0$9$kB>!"(B\"clock /(skk-clock)/\" $B$J$I$N%(%s%H%j$r(B S
 $B$=$l$>$l(B \"clock /(skk-clock nil t)/\" $B$N$h$&$J%(%s%H%j$r<-=q$KA^F~$9$l$PNI$$!#(B
 `skk-date-ad' $B$H(B `skk-number-style' $B$K$h$C$FI=<(J}K!$N%+%9%?%^%$%:$,2DG=!#(B
 
-\(fn &optional KAKUTEI-WHEN-QUIT TIME-SIGNAL)" t nil)
+\(fn &optional KAKUTEI-WHEN-QUIT TIME-SIGNAL)" t)
 
 (autoload 'skk-ad-to-gengo "skk-gadget" "\
 
 
-\(fn GENGO-INDEX &optional DIVIDER TAIL NOT-GANNEN)" nil nil)
+\(fn GENGO-INDEX &optional DIVIDER TAIL NOT-GANNEN)")
 
 (autoload 'skk-ad-to-gengo-1 "skk-gadget" "\
 
 
-\(fn AD &optional NOT-GANNEN MONTH DAY)" nil nil)
+\(fn AD &optional NOT-GANNEN MONTH DAY)")
 
 (autoload 'skk-gengo-to-ad "skk-gadget" "\
 
 
-\(fn &optional HEAD TAIL)" nil nil)
+\(fn &optional HEAD TAIL)")
 
 (autoload 'skk-gengo-to-ad-1 "skk-gadget" "\
 
 
-\(fn GENGO NUMBER)" nil nil)
+\(fn GENGO NUMBER)")
 
 (autoload 'skk-calc "skk-gadget" "\
 
 
-\(fn OPERATOR)" nil nil)
+\(fn OPERATOR)")
 
-(autoload 'skk-plus "skk-gadget" nil nil nil)
+(autoload 'skk-plus "skk-gadget")
 
-(autoload 'skk-minus "skk-gadget" nil nil nil)
+(autoload 'skk-minus "skk-gadget")
 
-(autoload 'skk-times "skk-gadget" nil nil nil)
+(autoload 'skk-times "skk-gadget")
 
 (autoload 'skk-ignore-dic-word "skk-gadget" "\
 
 
-\(fn &rest NO-SHOW-LIST)" nil nil)
+\(fn &rest NO-SHOW-LIST)")
 
-(autoload 'skk-henkan-face-off-and-remove-itself "skk-gadget" nil nil nil)
+(autoload 'skk-henkan-face-off-and-remove-itself "skk-gadget")
 
 (autoload 'skk-gadget-units-conversion "skk-gadget" "\
 `skk-units-alist'$B$r;2>H$7!"49;;$r9T$&!#(B
 NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$&!#(B
 
-\(fn UNIT-FROM NUMBER UNIT-TO)" nil nil)
+\(fn UNIT-FROM NUMBER UNIT-TO)")
 
 (register-definition-prefixes "skk-gadget" '("skk-"))
 
@@ -661,7 +663,7 @@ NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$&!#(B
 (autoload 'skk-inline-show "skk-inline" "\
 
 
-\(fn STR FACE &optional VERTICAL-STR TEXT-MAX-HEIGHT)" nil nil)
+\(fn STR FACE &optional VERTICAL-STR TEXT-MAX-HEIGHT)")
 
 (register-definition-prefixes "skk-inline" '("skk-"))
 
@@ -671,18 +673,18 @@ NUMBER $B$K$D$$$F(B UNIT-FROM $B$+$i(B UNIT-TO $B$X$N49;;$r9T$&!#(B
 ;;; Generated autoloads from skk-isearch.el
 
 (autoload 'skk-isearch-message "skk-isearch" "\
-Show isearch message." nil nil)
+Show isearch message.")
 
 (autoload 'skk-isearch-mode-setup "skk-isearch" "\
-hook function called when skk isearch begin." nil nil)
+hook function called when skk isearch begin.")
 
 (autoload 'skk-isearch-mode-cleanup "skk-isearch" "\
-Hook function called when skk isearch is done." nil nil)
+Hook function called when skk isearch is done.")
 
 (autoload 'skk-isearch-skk-mode "skk-isearch" "\
 
 
-\(fn &rest ARGS)" t nil)
+\(fn &rest ARGS)" t)
 
 (defconst skk-isearch-really-early-advice (lambda nil (defadvice isearch-message-prefix (around skk-isearch-ad activate) (let ((current-input-method (unless (and (boundp 'skk-isearch-switch) skk-isearch-switch) current-input-method))) ad-do-it)) (defadvice isearch-toggle-input-method (around skk-isearch-ad activate) (cond ((string-match "^japanese-skk" (format "%s" default-input-method)) (let ((skk-isearch-initial-mode-when-skk-mode-disabled 'latin)) (skk-isearch-mode-setup) (skk-isearch-skk-mode))) ((null default-input-method) ad-do-it (when (string-match "^japanese-skk" (format "%s" default-input-method)) (let ((skk-isearch-initial-mode-when-skk-mode-disabled 'latin)) (skk-isearch-mode-setup)) (deactivate-input-method))) (t ad-do-it)))))
 
@@ -698,22 +700,22 @@ Hook function called when skk isearch is done." nil nil)
 (autoload 'skk-jisx0201-mode "skk-jisx0201" "\
 SKK $B$N%b!<%I$r(B JIS X 0201 $B%b!<%I$KJQ99$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-toggle-katakana "skk-jisx0201" "\
 
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-hiragana-to-jisx0201-region "skk-jisx0201" "\
 
 
-\(fn START END)" nil nil)
+\(fn START END)")
 
 (autoload 'skk-katakana-to-jisx0201-region "skk-jisx0201" "\
 
 
-\(fn START END)" nil nil)
+\(fn START END)")
 
 (register-definition-prefixes "skk-jisx0201" '("skk-"))
 
@@ -724,7 +726,7 @@ SKK $B$N%b!<%I$r(B JIS X 0201 $B%b!<%I$KJQ99$9$k!#(B
 ;;; Generated autoloads from skk-jisyo-edit-mode.el
 
 (autoload 'skk-jisyo-edit-mode "skk-jisyo-edit-mode" "\
-Major mode for editing SKK JISYO." t nil)
+Major mode for editing SKK JISYO." t)
 
 (add-to-list 'auto-mode-alist '("SKK-JISYO" . skk-jisyo-edit-mode) t)
 
@@ -749,7 +751,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $B$3$N5!G=$O=>Mh$N<jF0$G$N8D?M<-=qJT=8$h$jG[N8$5$l$F$$$k$,!"(BSKK $B<-=q$N9=J8$r(B
 $B%A%'%C%/$9$k$3$H$O$G$-$:!"<+8J@UG$$G$NJT=8$G$"$k$3$H$OJQ$o$j$J$$!#(B
 
-\(fn &optional CODING-SYSTEM)" t nil)
+\(fn &optional CODING-SYSTEM)" t)
 
 (register-definition-prefixes "skk-jisyo-edit-mode" '("skk-"))
 
@@ -765,12 +767,12 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     $BCfEg(B -> {$B$J$+$7$^(B|$B$J$+$8$^(B}
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-gyakubiki-and-henkan "skk-kakasi" "\
 $BNN0h$N4A;z$r$R$i$,$J$KJQ49$7!"$=$N$R$i$,$J$r8+=P$78l$H$7$F$+$J4A;zJQ49$r<B9T$9$k!#(B
 
-\(fn START END)" t nil)
+\(fn START END)" t)
 
 (autoload 'skk-gyakubiki-message "skk-kakasi" "\
 $BNN0h$N4A;z!"Aw$j2>L>$rA4$F$R$i$,$J$KJQ498e!"%(%3!<$9$k!#(B
@@ -779,7 +781,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     $BCfEg(B -> {$B$J$+$7$^(B|$B$J$+$8$^(B}
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-gyakubiki-katakana-region "skk-kakasi" "\
 $BNN0h$N4A;z!"Aw$j2>L>$rA4$F%+%?%+%J$KJQ49$9$k!#(B
@@ -788,7 +790,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     $BCfEg(B -> {$B%J%+%7%^(B|$B%J%+%8%^(B}
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-gyakubiki-katakana-message "skk-kakasi" "\
 $BNN0h$N4A;z!"Aw$j2>L>$rA4$F%+%?%+%J$KJQ498e!"%(%3!<$9$k!#(B
@@ -797,7 +799,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     $BCfEg(B -> {$B%J%+%7%^(B|$B%J%+%8%^(B}
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-hurigana-region "skk-kakasi" "\
 $BNN0h$N4A;z$KA4$F$U$j$,$J$rIU$1$k!#(B
@@ -809,7 +811,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     \"$BCfEg(B\" -> \"$BCfEg(B[{$B$J$+$7$^(B|$B$J$+$8$^(B}]\"
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-hurigana-message "skk-kakasi" "\
 $BNN0h$N4A;z$KA4$F$U$j$,$J$rIU$1!"%(%3!<$9$k!#(B
@@ -821,7 +823,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     \"$BCfEg(B\" -> \"$BCfEg(B[{$B$J$+$7$^(B|$B$J$+$8$^(B}]\"
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-hurigana-katakana-region "skk-kakasi" "\
 $BNN0h$N4A;z$KA4$F%U%j%,%J$rIU$1$k!#(B
@@ -833,7 +835,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     \"$BCfEg(B\" -> \"$BCfEg(B[{$B%J%+%7%^(B|$B%J%+%8%^(B}]\"
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-hurigana-katakana-message "skk-kakasi" "\
 $BNN0h$N4A;z$KA4$F%U%j%,%J$rIU$1!"%(%3!<$9$k!#(B
@@ -845,7 +847,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 $BNc$($P!"(B
     \"$BCfEg(B\" -> \"$BCfEg(B[{$B%J%+%7%^(B|$B%J%+%8%^(B}]\"
 
-\(fn START END &optional ALL)" t nil)
+\(fn START END &optional ALL)" t)
 
 (autoload 'skk-romaji-region "skk-kakasi" "\
 $BNN0h$N4A;z!"$R$i$,$J!"%+%?%+%J!"A41QJ8;z$rA4$F%m!<%^;z$KJQ49$9$k!#(B
@@ -857,7 +859,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 `skk-romaji-*-by-hepburn' $B$,(B nil $B$G$"$l$P!"%m!<%^;z$X$NJQ49MM<0$r71Na<0$KJQ99$9(B
 $B$k!#Nc$($P!"(B\"$B$7(B\" $B$O%X%\%s<0$G$O(B \"shi\" $B$@$,!"71Na<0$G$O(B \"si\" $B$H$J$k!#(B
 
-\(fn START END)" t nil)
+\(fn START END)" t)
 
 (autoload 'skk-romaji-message "skk-kakasi" "\
 $BNN0h$N4A;z!"$R$i$,$J!"%+%?%+%J!"A41QJ8;z$rA4$F%m!<%^;z$KJQ49$7!"%(%3!<$9$k!#(B
@@ -869,7 +871,7 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 `skk-romaji-*-by-hepburn' $B$,(B nil $B$G$"$l$P!"%m!<%^;z$X$NJQ49MM<0$r71Na<0$KJQ99$9(B
 $B$k!#Nc$($P!"(B\"$B$7(B\" $B$O%X%\%s<0$G$O(B \"shi\" $B$@$,!"71Na<0$G$O(B \"si\" $B$H$J$k!#(B
 
-\(fn START END)" t nil)
+\(fn START END)" t)
 
 (register-definition-prefixes "skk-kakasi" '("skk-"))
 
@@ -881,18 +883,18 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 (autoload 'skk-input-by-code-or-menu "skk-kcode" "\
 $BJQ?t(B `skk-kcode-method' $B$G;XDj$5$l$?5!G=$rMQ$$$FJ8;z$rA^F~$9$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-display-code-for-char-at-point "skk-kcode" "\
 $B%]%$%s%H$K$"$kJ8;z$N6hE@HV9f!"(BJIS $B%3!<%I!"(BEUC $B%3!<%I!"%7%U%H(B JIS $B%3!<%I5Z$S%f%K%3!<%I$rI=<($9$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-list-chars "skk-kcode" "\
 $BJQ?t(B `skk-kcode-charset' $B$K=>$C$FJ8;z0lMw$rI=<($9$k(B.
 \\[universal-argument] $BIU$-$G<B9T$9$k$H!"(Bfollowing-char() $B$rM%@hI=<($9$k(B.
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (register-definition-prefixes "skk-kcode" '("skk-"))
 
@@ -904,16 +906,16 @@ SKK $B;HMQCf$N>l9g$O(B SKK $B$K$h$k8D?M<-=q%P%C%U%!$N99?7$,6X;_$5$l$k!#(B
 (autoload 'skk-activate "skk-leim" "\
 
 
-\(fn &optional NAME)" nil nil)
+\(fn &optional NAME)")
 
 (autoload 'skk-auto-fill-activate "skk-leim" "\
 
 
-\(fn &optional NAME)" nil nil)
+\(fn &optional NAME)")
 
-(autoload 'skk-inactivate "skk-leim" nil nil nil)
+(autoload 'skk-inactivate "skk-leim")
 
-(autoload 'skk-auto-fill-inactivate "skk-leim" nil nil nil)
+(autoload 'skk-auto-fill-inactivate "skk-leim")
 
 (register-input-method "japanese-skk" "Japanese" 'skk-activate "" "Simple Kana to Kanji conversion program")
 
@@ -940,7 +942,7 @@ words $B%U%!%$%k$K$"$kA4$F$N8+=P$7$,BP>]$H$J$k!#(B
 `skk-look-use-ispell' $B$r0l;~E*$KJQ99$7$?$$>l9g$K$O(B
 `let' $B$K$h$jB+G{$7$F;H$&;v!#(B
 
-\(fn &optional CONVERSION-ARGUMENTS NOT-ABBREV-ONLY EXPAND-NULL)" nil nil)
+\(fn &optional CONVERSION-ARGUMENTS NOT-ABBREV-ONLY EXPAND-NULL)")
 
 (autoload 'skk-look-completion "skk-look" "\
 look $B%3%^%s%I$rMxMQ$7$FJd408uJd$rF@$k!#(B
@@ -953,12 +955,12 @@ words $B%U%!%$%k$K$"$kA4$F$N8+=P$7$rJV$9!#(B
 `skk-look-use-ispell' $B$r0l;~E*$KJQ99$7$?$$>l9g$K$O(B
 `let' $B$K$h$jB+G{$7$F;H$&;v!#(B
 
-\(fn &optional COMPLETION-ARGUMENTS NOT-ABBREV-ONLY EXPAND-NULL)" nil nil)
+\(fn &optional COMPLETION-ARGUMENTS NOT-ABBREV-ONLY EXPAND-NULL)")
 
 (autoload 'skk-look-ispell "skk-look" "\
 
 
-\(fn WORD &optional SITUATION)" nil nil)
+\(fn WORD &optional SITUATION)")
 
 (register-definition-prefixes "skk-look" '("skk-look-1"))
 
@@ -986,7 +988,7 @@ KEY $B$NCf$NO"B3$9$k?t;z$r8=$o$9J8;zNs$r(B \"#\" $B$KCV$-49$($?J8;zNs$rJV$9!#
 $B$HJQ49$7!"(B`skk-num-list' $B$K(B (\"7\" \"12\") $B$H$$$&%j%9%H$rBeF~$9$k!#(B
 $B<-=q$N8+=P$78l$N8!:w$K;HMQ$9$k!#(B
 
-\(fn KEY)" nil nil)
+\(fn KEY)")
 
 (autoload 'skk-num-convert "skk-num" "\
 INDEX $B$,;X$9(B `skk-henkan-list' $B$NMWAG$r?tCMJQ49$N$?$a$K2C9)$9$k!#(B
@@ -994,12 +996,12 @@ INDEX $B$,;X$9(B `skk-henkan-list' $B$NMWAG$r?tCMJQ49$N$?$a$K2C9)$9$k!#(B
   \"#2\" -> (\"#2\" .\"$B0l(B\")
 $B$N$h$&$KJQ49$9$k!#(B
 
-\(fn INDEX)" nil nil)
+\(fn INDEX)")
 
 (autoload 'skk-num-multiple-convert "skk-num" "\
 
 
-\(fn &optional COUNT)" nil nil)
+\(fn &optional COUNT)")
 
 (autoload 'skk-num-exp "skk-num" "\
 ascii $B?t;z(B (string) $B$N(B NUM $B$r(B TYPE $B$K=>$C$FJQ49$7$?J8;zNs$rJV$9!#(B
@@ -1013,28 +1015,28 @@ TYPE $B$O2<5-$NDL$j!#(B
 8 -> $B7e6h@Z$j$XJQ49(B (1,234,567)
 9 -> $B>-4}$G;HMQ$9$k?t;z(B (\"$B#3;M(B\" $B$J$I(B) $B$XJQ49(B
 
-\(fn NUM TYPE)" nil nil)
+\(fn NUM TYPE)")
 
-(autoload 'skk-num-uniq "skk-num" nil nil nil)
+(autoload 'skk-num-uniq "skk-num")
 
 (autoload 'skk-num-initialize "skk-num" "\
-`skk-use-numeric-conversion' $B4XO"$NJQ?t$r=i4|2=$9$k!#(B" nil nil)
+`skk-use-numeric-conversion' $B4XO"$NJQ?t$r=i4|2=$9$k!#(B")
 
 (autoload 'skk-num-henkan-key "skk-num" "\
 $BE,@Z$JJQ49%-!<$rJV$9!#(B
 type4 $B$N?tCM:FJQ49$,9T$o$l$?$H$-$O!"?tCM<+?H$rJV$7!"$=$l0J30$N?tCMJQ49(B
-$B$G$O!"(B`skk-henkan-key' $B$N?tCM$r(B \"#\" $B$GCV$-49$($?%-!<$rJV$9!#(B" nil nil)
+$B$G$O!"(B`skk-henkan-key' $B$N?tCM$r(B \"#\" $B$GCV$-49$($?%-!<$rJV$9!#(B")
 
 (autoload 'skk-num-update-jisyo "skk-num" "\
 $B?t;z<+?H$r8+=P$78l$H$7$F<-=q$r%"%C%W%G!<%H$9$k!#(B
 
-\(fn NOCONVWORD WORD &optional PURGE)" nil nil)
+\(fn NOCONVWORD WORD &optional PURGE)")
 
 (autoload 'skk-num "skk-num" "\
 $B?t;z$r(B `skk-number-style' $B$NCM$K=>$$JQ49$9$k!#(B
 `skk-current-date' $B$N%5%V%k!<%A%s!#(B
 
-\(fn STR)" nil nil)
+\(fn STR)")
 
 (register-definition-prefixes "skk-num" '("add-number-grouping" "skk-num-"))
 
@@ -1054,11 +1056,11 @@ type4 $B$N?tCM:FJQ49$,9T$o$l$?$H$-$O!"?tCM<+?H$rJV$7!"$=$l0J30$N?tCMJQ49(B
 
 (autoload 'skk-server-completion-search "skk-server-completion" "\
 $B%5!<%P!<%3%s%W%j!<%7%g%s$r9T$$!"F@$i$l$?3F8+=P$7$G$5$i$K8!:w$9$k!#(B
-$BAw$jM-$jJQ49$K$OHsBP1~!#(B" nil nil)
+$BAw$jM-$jJQ49$K$OHsBP1~!#(B")
 
 (autoload 'skk-comp-by-server-completion "skk-server-completion" "\
 Server completion $B$KBP1~$7$?<-=q%5!<%P$rMxMQ$9$kJd40%W%m%0%i%`!#(B
-`skk-completion-prog-list' $B$NMWAG$K;XDj$7$F;H$&!#(B" nil nil)
+`skk-completion-prog-list' $B$NMWAG$K;XDj$7$F;H$&!#(B")
 
 (register-definition-prefixes "skk-server-completion" '("skk-server-completion-search-midasi"))
 
@@ -1069,12 +1071,12 @@ Server completion $B$KBP1~$7$?<-=q%5!<%P$rMxMQ$9$kJd40%W%m%0%i%`!#(B
 
 (autoload 'skk-server-version "skk-server" "\
 Return version information of SKK server.
-When called interactively, print version information." t nil)
+When called interactively, print version information." t)
 
 (autoload 'skk-search-server-1 "skk-server" "\
 `skk-search-server' $B$N%5%V%k!<%A%s!#(B
 
-\(fn FILE LIMIT)" nil nil)
+\(fn FILE LIMIT)")
 
 (autoload 'skk-adjust-search-prog-list-for-server-search "skk-server" "\
 $BJQ?t(B `skk-search-prog-list' $B$rD4@0$9$k!#(B
@@ -1082,10 +1084,10 @@ When called interactively, print version information." t nil)
 `skk-search-prog-list' $B$+$i(B `skk-search-server' $B$r(B car $B$K;}$D%j%9%H$r>C$9!#(B
 non-nil $B$G$"$l$P!"2C$($k!#(B
 
-\(fn &optional NON-DEL)" nil nil)
+\(fn &optional NON-DEL)")
 
 (autoload 'skk-disconnect-server "skk-server" "\
-$B<-=q%5!<%P$r@Z$jN%$9!#(B" nil nil)
+$B<-=q%5!<%P$r@Z$jN%$9!#(B")
 
 (register-definition-prefixes "skk-server" '("skk-"))
 
@@ -1094,7 +1096,7 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 ;;;### (autoloads nil "skk-show-mode" "skk-show-mode.el" (0 0 0 0))
 ;;; Generated autoloads from skk-show-mode.el
 
-(autoload 'skk-show-mode "skk-show-mode" nil t nil)
+(autoload 'skk-show-mode "skk-show-mode" nil t)
 
 (register-definition-prefixes "skk-show-mode" '("skk-show-mode-"))
 
@@ -1113,18 +1115,18 @@ non-nil $B$G$"$l$P!"2C$($k!#(B
 (autoload 'skk-study-search "skk-study" "\
 $B3X=,%G!<%?$r;2>H$7$F(B ENTRY $B$r2C9)$7!"4XO"@-$N$"$k8l$NM%@h=g0L$r>e$2$FJV$9!#(B
 
-\(fn HENKAN-BUFFER MIDASI OKURIGANA ENTRY)" nil nil)
+\(fn HENKAN-BUFFER MIDASI OKURIGANA ENTRY)")
 
 (autoload 'skk-study-update "skk-study" "\
 MIDASI $B$H(B WORD $B$K$D$$$F(B `skk-study-data-ring' $B$N:G=i$N4XO"8l$r4XO"IU$1$F3X=,$9$k!#(B
 
-\(fn HENKAN-BUFFER MIDASI OKURIGANA WORD PURGE)" nil nil)
+\(fn HENKAN-BUFFER MIDASI OKURIGANA WORD PURGE)")
 
 (autoload 'skk-study-save "skk-study" "\
 $B3X=,7k2L$r(B `skk-study-file' $B$XJ]B8$9$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B NOMSG $B$,(B non-nil $B$G$"$l$P!"J]B8%a%C%;!<%8$rI=<($7$J$$!#(B
 
-\(fn &optional NOMSG)" t nil)
+\(fn &optional NOMSG)" t)
 
 (autoload 'skk-study-switch-current-theme "skk-study" "\
 $B%+%l%s%H%P%C%U%!$KBP$7$F(B skk-study $B$N3X=,%F!<%^(B THEME $B$r@_Dj$9$k!#(B
@@ -1132,24 +1134,24 @@ MIDASI $B$H(B WORD $B$K$D$$$F(B `skk-study-data-ring' $B$N:G=i$N4XO"8l$r4XO
 $B%+%l%s%H%P%C%U%!$K3X=,%F!<%^$,@_Dj$5$l$J$$$H$-$O!"3X=,%F!<%^(B
 \"general\" $B$KBP$7$F3X=,$,9T$o$l$k!#(B
 
-\(fn THEME)" t nil)
+\(fn THEME)" t)
 
 (autoload 'skk-study-remove-theme "skk-study" "\
 skk-study $B$N3X=,%F!<%^(B THEME $B$r:o=|$9$k!#(B
 
-\(fn THEME)" t nil)
+\(fn THEME)" t)
 
 (autoload 'skk-study-copy-theme "skk-study" "\
 skk-study $B$N3X=,%F!<%^(B FROM $B$r(B TO $B$K%3%T!<$9$k!#(B
 TO $B$N4{B8%G!<%?$OGK2u$5$l$k!#(B
 
-\(fn FROM TO)" t nil)
+\(fn FROM TO)" t)
 
 (autoload 'skk-study-read "skk-study" "\
 `skk-study-file' $B$+$i3X=,7k2L$rFI$_9~$`!#(B
 $B%*%W%7%g%J%k0z?t$N(B FORCE $B$,(B non-nil $B$G$"$l$P!"GK4~$N3NG'$r$7$J$$!#(B
 
-\(fn &optional NOMSG FORCE)" t nil)
+\(fn &optional NOMSG FORCE)" t)
 
 (register-definition-prefixes "skk-study" '("skk-study-"))
 
@@ -1163,20 +1165,20 @@ TO $B$N4{B8%G!<%?$OGK2u$5$l$k!#(B
 \\[skk-tankan] $B$GIt<sJQ49$r!"(B
 \\[universal-argument] $B?tCM(B \\[skk-tankan] $B$GAm2h?tJQ49$r3+;O$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-tankan-search "skk-tankan" "\
 $BJQ?t(B `skk-henkan-key' $B$G;XDj$5$l$?!VFI$_!W$K4p$E$$$FC14A;zJQ49$r<B9T$9$k!#(B
 $BDL>o$O(B `skk-search-prog-list' $B$N#1MWAG$H$7$F<!$N7A<0$G;XDj$5$l$k!#(B
-'(skk-tankan-search 'skk-search-jisyo-file
+\\='(skk-tankan-search \\='skk-search-jisyo-file
                     skk-large-jisyo 10000))
 
-\(fn FUNC &rest ARGS)" nil nil)
+\(fn FUNC &rest ARGS)")
 
 (autoload 'skk-search-tankanji "skk-tankan" "\
 
 
-\(fn &optional JISYO)" nil nil)
+\(fn &optional JISYO)")
 
 (register-definition-prefixes "skk-tankan" '("skk-"))
 
@@ -1189,7 +1191,7 @@ TO $B$N4{B8%G!<%?$OGK2u$5$l$k!#(B
 Start SKK tutorial.
 You can select English version by \\[universal-argument] \\[skk-tutorial].
 
-\(fn &optional QUERY-LANGUAGE)" t nil)
+\(fn &optional QUERY-LANGUAGE)" t)
 
 (register-definition-prefixes "skk-tut" '("skk"))
 
@@ -1222,7 +1224,7 @@ Return SKK version with its codename.
 If WITHOUT-CODENAME is non-nil, simply return SKK version without
 the codename.
 
-\(fn &optional WITHOUT-CODENAME)" t nil)
+\(fn &optional WITHOUT-CODENAME)" t)
 
 ;;;***
 
@@ -1292,7 +1294,7 @@ A tutorial is available in Japanese or English via \\[skk-tutorial].
 Use a prefix argument to choose the language.  The default is system-
 dependent.
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-auto-fill-mode "skk" "\
 $BF|K\8lF~NO%b!<%I!#<+F0@^$jJV$75!G=IU$-!#(B
@@ -1300,52 +1302,52 @@ dependent.
 $B@5$N0z?t$rM?$($k$H!"6/@)E*$K(B `auto-fill-mode' $B5Z$S(B SKK $B%b!<%I$KF~$k!#(B
 $BIi$N0z?t$rM?$($k$H(B `auto-fill-mode' $B5Z$S(B SKK $B%b!<%I$+$iH4$1$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-setup-jisyo-buffer "skk" "\
 SKK $B$N<-=q%P%C%U%!$rMQ0U$9$k!#(B
 `skk-jisyo' $B$N<-=q%P%C%U%!$G!"(B
  (1)$B6u%P%C%U%!$G$"$l$P!"?7$7$/%X%C%@!<$r:n$j!"(B
  (2)$B<-=q%(%s%H%j$,$"$k4{B8$N<-=q%P%C%U%!$J$i$P!"%X%C%@!<$,@5$7$$$+$I$&$+$r(B
-    $B%A%'%C%/$9$k!#(B" nil nil)
+    $B%A%'%C%/$9$k!#(B")
 
 (autoload 'skk-emulate-original-map "skk" "\
 $B%-!<F~NO$KBP$7$F(B Emacs $B$N%*%j%8%J%k$N%-!<3d$jIU$1$G%3%^%s%I$r<B9T$9$k!#(B
 
-\(fn ARG)" nil nil)
+\(fn ARG)")
 
 (autoload 'skk-adjust-user-option "skk" "\
-$B%f!<%6%*%W%7%g%s$NIT@09g$rD4@0$9$k!#(B" nil nil)
+$B%f!<%6%*%W%7%g%s$NIT@09g$rD4@0$9$k!#(B")
 
 (autoload 'skk-latin-mode "skk" "\
 SKK $B$N%b!<%I$r%"%9%-!<%b!<%I$KJQ99$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-jisx0208-latin-mode "skk" "\
 SKK $B$N%b!<%I$rA41Q%b!<%I$KJQ99$9$k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-toggle-characters "skk" "\
 $B"#%b!<%I!""'%b!<%I$G!"$+$J%b!<%I$H%+%J%b!<%I$r%H%0%k$G@Z$jBX$($k!#(B
 $B"&%b!<%I$G$O(B `skk-henkan-start-point' ($B"&$ND>8e(B) $B$H%+!<%=%k$N4V$NJ8;zNs$K$D$$(B
 $B$F!"$R$i$,$J$H%+%?%+%J$rF~$lBX$($k!#(B
 
-\(fn ARG)" t nil)
+\(fn ARG)" t)
 
 (autoload 'skk-insert "skk" "\
 SKK $B$NJ8;zF~NO$r9T$J$&!#(B
 
-\(fn &optional ARG PROG-LIST-NUMBER)" t nil)
+\(fn &optional ARG PROG-LIST-NUMBER)" t)
 
 (autoload 'skk-compile-rule-list "skk" "\
 rule list $B$rLZ$N7A$K%3%s%Q%$%k$9$k!#(B
 
-\(fn &rest RULE-LISTS)" nil nil)
+\(fn &rest RULE-LISTS)")
 
 (autoload 'skk-henkan-in-minibuff "skk" "\
-$B<-=qEPO?%b!<%I$KF~$j!"EPO?$7$?C18l$NJ8;zNs$rJV$9!#(B" nil nil)
+$B<-=qEPO?%b!<%I$KF~$j!"EPO?$7$?C18l$NJ8;zNs$rJV$9!#(B")
 
 (autoload 'skk-previous-candidate "skk" "\
 $B"'%b!<%I$G$"$l$P!"0l$DA0$N8uJd$rI=<($9$k!#(B
@@ -1353,7 +1355,7 @@ rule list $B$rLZ$N7A$K%3%s%Q%$%k$9$k!#(B
 $B3NDj<-=q$K$h$k3NDj$ND>8e$K8F$V$H3NDj$r%"%s%I%%$7!"8+=P$7$KBP$9$k<!8uJd$rI=<($9$k!#(B
 $B:G8e$K3NDj$7$?$H$-$N8uJd$O%9%-%C%W$5$l$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-treat-strip-note-from-word "skk" "\
 $BJQ498uJd$NJ8;zNs(B WORD $B$r!"8uJd$=$N$b$N$HCm<a$H$KJ,3d$7$F(B cons cell $B$rJV$9!#(B
@@ -1364,7 +1366,7 @@ rule list $B$rLZ$N7A$K%3%s%Q%$%k$9$k!#(B
   \"word;\" --> (\"word\" . \"\")
   \"word;note\" --> (\"word\" . \"note\")
 
-\(fn WORD)" nil nil)
+\(fn WORD)")
 
 (autoload 'skk-kakutei "skk" "\
 $B8=:_I=<($5$l$F$$$k8l$G3NDj$7!"<-=q$r99?7$9$k!#(B
@@ -1372,9 +1374,9 @@ rule list $B$rLZ$N7A$K%3%s%Q%$%k$9$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B WORD $B$rEO$9$H!"8=:_I=<($5$l$F$$$k8uJd$H$OL54X78$K(B
 WORD $B$G3NDj$9$k!#(B
 
-\(fn &optional ARG WORD)" t nil)
+\(fn &optional ARG WORD)" t)
 
-(autoload 'skk-henkan-on-message "skk" nil nil nil)
+(autoload 'skk-henkan-on-message "skk")
 
 (autoload 'skk-start-henkan "skk" "\
 $B"&%b!<%I$G$O4A;zJQ49$r3+;O$9$k!#"'%b!<%I$G$O<!$N8uJd$rI=<($9$k!#(B
@@ -1382,67 +1384,68 @@ WORD $B$G3NDj$9$k!#(B
 $BJQ49$7$F$+$i4A;zJQ49$r3+;O$9$k!#8+=P$78l$rJQ49$;$:$K$=$N$^$^4A;zJQ49$r(B
 $B9T$$$?$1$l$P!"(B\\[universal-argument] SPC $B$H%?%$%W$9$k!#(B
 
-\(fn ARG &optional PROG-LIST-NUMBER)" t nil)
+\(fn ARG &optional PROG-LIST-NUMBER)" t)
 
 (autoload 'skk-set-henkan-point-subr "skk" "\
 $B$+$J$rF~NO$7$?8e$G!"%]%$%s%H$KJQ493+;O$N%^!<%/(B ($B"&(B) $B$rIU$1$k!#(B
 $B$3$N4X?t$O(B `skk-set-henkan-point' $B$NFbIt4X?t$H$7$F$b;HMQ$5$l$F$$$k!#(B
 
-\(fn &optional ARG)" t nil)
+\(fn &optional ARG)" t)
 
 (autoload 'skk-save-jisyo "skk" "\
 SKK $B$N<-=q%P%C%U%!$r%;!<%V$9$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B QUIET $B$,(B non-nil $B$G$"$l$P!"<-=q%;!<%V;~$N%a%C%;!<%8$r(B
 $B=P$5$J$$!#(B
 
-\(fn &optional QUIET)" t nil)
+\(fn &optional QUIET)" t)
 
 (autoload 'skk-save-jisyo-original "skk" "\
 SKK $B$N<-=q%P%C%U%!$r%;!<%V$9$k!#(B
 $B%*%W%7%g%J%k0z?t(B QUIET $B$,(B non-nil $B$G$"$l$P!"<-=q%;!<%V;~$N%a%C%;!<%8$r=P$5$J$$!#(B
 
-\(fn &optional QUIET)" nil nil)
+\(fn &optional QUIET)")
 
 (autoload 'skk-reread-private-jisyo "skk" "\
 $B%P%C%U%!$KFI$_9~$s$@8D?M<-=q$rGK4~$7!"%U%!%$%k$+$i%P%C%U%!$X:FFI$_9~$_$9$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B FORCE $B$,(B non-nil $B$G$"$l$P!"GK4~$N3NG'$r$7$J$$!#(B
 
-\(fn &optional FORCE)" t nil)
+\(fn &optional FORCE)" t)
 
 (autoload 'skk-create-file "skk" "\
 FILE $B$,$J$1$l$P!"(BFILE $B$H$$$&L>A0$N6u%U%!%$%k$r:n$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B JAPANESE/ENGLISH $B$r;XDj$9$k$H!"%U%!%$%k:n@.8e$=$N%a%C%;!<%8(B
 $B$r%(%3!<%(%j%"$KI=<($9$k!#(B
 
-\(fn FILE &optional JAPANESE ENGLISH MODES)" nil nil)
+\(fn FILE &optional JAPANESE ENGLISH MODES)")
 
 (autoload 'skk-get-jisyo-buffer "skk" "\
 FILE $B$r3+$$$F(B SKK $B<-=q%P%C%U%!$r:n$j!"%P%C%U%!$rJV$9!#(B
-$B<-=q%P%C%U%!$K$O(B `skk-jisyo-code' $B$,E,MQ$5$l$k(B (nil $B$G$"$l$P(B euc) $B$,!"(BFILE $B$K(B (\"path/to/file\" . CODING-SYSTEM) $B$N%3%s%9%;%k$b;XDj$G$-$k!#(B
+$B<-=q%P%C%U%!$K$O(B `skk-jisyo-code' $B$,E,MQ$5$l$k(B (nil $B$G$"$l$P(B euc) $B$,!"(BFILE $B$K(B
+ (\"path/to/file\" . CODING-SYSTEM) $B$N%3%s%9%;%k$b;XDj$G$-$k!#(B
 $B%*%W%7%g%J%k0z?t$N(B NOMSG $B$r;XDj$9$k$H%U%!%$%kFI$_9~$_$N:]$N%a%C%;!<%8$rI=<($7$J(B
 $B$$!#(B
 
-\(fn FILE &optional NOMSG)" nil nil)
+\(fn FILE &optional NOMSG)")
 
 (autoload 'skk-search "skk" "\
 `skk-current-search-prog-list' $B$N3FMWAG!J8!:w%W%m%0%i%`!K$r=g$KI>2A$9$k!#(B
-$B$$$:$l$+$NMWAG$,8uJd$r8+$D$1$?;~E@$G=*N;$9$k!#(B" nil nil)
+$B$$$:$l$+$NMWAG$,8uJd$r8+$D$1$?;~E@$G=*N;$9$k!#(B")
 
 (autoload 'skk-compute-henkan-lists "skk" "\
 $B<-=q8uJd72$r#4$D$N%j%9%H$KJ,2r$9$k!#(B
 $B>\$7$/$O!"$3$N4X?t$N%3%a%s%H$r;2>H!#(B
 
-\(fn OKURIGANA)" nil nil)
+\(fn OKURIGANA)")
 
 (autoload 'skk-remove-duplicates "skk" "\
 LIST $B$+$i!"=EJ#$9$kMWAG$r=|30$7$?%j%9%H$rJV$9!#(B
 
-\(fn LIST)" nil nil)
+\(fn LIST)")
 
 (autoload 'skk-update-jisyo "skk" "\
 
 
-\(fn WORD &optional PURGE)" nil nil)
+\(fn WORD &optional PURGE)")
 
 (autoload 'skk-update-jisyo-original "skk" "\
 $B<!$NJQ49;~$K(B WORD $B$,:G=i$N8uJd$K$J$k$h$&$K!"8D?M<-=q$r99?7$9$k!#(B
@@ -1451,70 +1454,70 @@ PURGE $B$,(B non-nil $B$G(B WORD $B$,6&M-<-=q$K$"$k8uJd$J$i(B `skk-ignore-
 $B$$$h$&$K$9$k!#(B
 WORD $B$,6&M-<-=q$K$J$1$l$P!"8D?M<-=q$N<-=q%(%s%H%j$+$i:o=|$9$k!#(B
 
-\(fn WORD &optional PURGE)" nil nil)
+\(fn WORD &optional PURGE)")
 
 (autoload 'skk-quote-char "skk" "\
 WORD $B$r<-=q%(%s%H%j$H$7$F@5$7$$7A$K@07A$9$k!#(B
 $B<-=q7A<0$N@)8B$+$i!"<-=q%(%s%H%jFb$K4^$a$F$O$J$i$J$$J8;z$,(B WORD $B$NCf$K$"$l$P!"(B
 $BI>2A$7$?$H$-$K$=$NJ8;z$H$J$k$h$&$J(B Lisp $B%3!<%I$rJV$9!#(B
 
-\(fn WORD)" nil nil)
+\(fn WORD)")
 
 (autoload 'skk-quote-semicolon "skk" "\
 WORD $B$r<-=q%(%s%H%j$H$7$F@5$7$$7A$K@07A$9$k!#(B
 `skk-quote-char' $B$H;w$F$$$k$,!"Cp<a$H4X78$J$$%;%_%3%m%s(B (;) $B$r=hM}$9$kE@$,(B
 $B0[$J$k!#(B
 
-\(fn WORD)" nil nil)
+\(fn WORD)")
 
 (autoload 'skk-search-progs "skk" "\
 
 
-\(fn KEY &optional PROG-LIST REMOVE-NOTE)" nil nil)
+\(fn KEY &optional PROG-LIST REMOVE-NOTE)")
 
 (autoload 'skk-search-and-replace "skk" "\
 
 
-\(fn START END REGEXP FUNC)" nil nil)
+\(fn START END REGEXP FUNC)")
 
 (autoload 'skk-jisx0208-to-ascii "skk" "\
 
 
-\(fn STRING)" nil nil)
+\(fn STRING)")
 
 (autoload 'skk-henkan-skk-region-by-func "skk" "\
 `skk-henkan-start-point' $B$H(B `skk-henkan-end-point' $B$N4V$NJ8;zNs$rJQ49$9$k!#(B
 $BJQ492DG=$+$I$&$+$N%A%'%C%/$r$7$?8e$K(B ARG $B$r0z?t$H$7$F(B FUNC $B$rE,MQ$7!"(B
 `skk-henkan-start-point' $B$H(B `skk-henkan-end-point' $B$N4V$NJ8;zNs$rJQ49$9$k!#(B
 
-\(fn FUNC &optional ARG)" nil nil)
+\(fn FUNC &optional ARG)")
 
 (autoload 'skk-hiragana-to-katakana "skk" "\
 
 
-\(fn HIRAGANA)" nil nil)
+\(fn HIRAGANA)")
 
 (autoload 'skk-katakana-to-hiragana "skk" "\
 
 
-\(fn KATAKANA)" nil nil)
+\(fn KATAKANA)")
 
 (autoload 'skk-henkan-face-on "skk" "\
 SKK $B$N(B face $BB0@-$r(B ON $B$K$9$k!#(B
 `skk-use-face' $B$,(B non-nil $B$N>l9g!"(B`skk-henkan-start-point' $B$H(B
 `skk-henkan-end-point' $B$N4V$N(B face $BB0@-$r(B `skk-henkan-face' $B$NCM$KJQ99$9$k!#(B
 
-\(fn &optional FACE)" nil nil)
+\(fn &optional FACE)")
 
 (autoload 'skk-henkan-face-off "skk" "\
 SKK $B$N(B face $BB0@-$r(B OFF $B$K$9$k!#(B
 `skk-henkan-start-point' $B$H(B `skk-henkan-end-point' $B$N4V$NI=<($rJQ99$7$F$$$k(B
-`skk-henkan-overlay' $B$r>C$9!#(B" nil nil)
+`skk-henkan-overlay' $B$r>C$9!#(B")
 
 (autoload 'skk-remove-minibuffer-setup-hook "skk" "\
 
 
-\(fn &rest ARGS)" nil nil)
+\(fn &rest ARGS)")
 
 (autoload 'skk-preload "skk" "\
 Emacs $B5/F0;~$K$"$i$+$8$a(B SKK $B$r8F$V$3$H$G(B SKK $B$N1~Ez$rB.$/$9$k!#(B
@@ -1522,7 +1525,7 @@ Emacs $B5/F0;~$K$"$i$+$8$a(B SKK $B$r8F$V$3$H$G(B SKK $B$N1~Ez$rB.$/$9$k!#
 1. skk.el $B$H4XO"$9$k$$$/$D$+$N%U%!%$%k(B ($B=i2s5/F0;~$NCY1d$r4KOB(B)
 2. $B6&M-<-=q72(B ($B=iJQ49;~$NCY1d$r4KOB(B)
 $BJQ?t(B `skk-preload' $B$,(B non-nil $B$N$H$-(B `after-init-hook' $B$+$i8F$P$l$k!#(B
-$B$=$N$?$a(B Emacs $B$N5/F0;~4V$,D9$/$J$kE@$K$OCm0U$rMW$9$k!#(B" nil nil)
+$B$=$N$?$a(B Emacs $B$N5/F0;~4V$,D9$/$J$kE@$K$OCm0U$rMW$9$k!#(B")
 
 (add-hook 'after-init-hook (lambda nil (when (and (symbol-value 'init-file-user) skk-preload) (skk-preload) (message "SKK preload...done")) (when window-system (ccc-setup))) t)
 
@@ -1538,29 +1541,29 @@ BUFFER is made by function `tar-raw-buffer'.
 Return list like `tar-parse-info', See `tar-mode'.
 this function is based on `tar-summarize-buffer'.
 
-\(fn BUFFER)" nil nil)
+\(fn BUFFER)")
 
 (autoload 'tar-file-descriptor "tar-util" "\
 Return descriptor Structure for match FILE in BUFFER.
 BUFFER is made by function `tar-raw-buffer'.
 
-\(fn BUFFER FILE)" nil nil)
+\(fn BUFFER FILE)")
 
 (autoload 'tar-raw-buffer "tar-util" "\
 ARCHIVE is path to tar archive.
 Return buffer object.
 
-\(fn ARCHIVE)" nil nil)
+\(fn ARCHIVE)")
 
 (autoload 'tar-list-files "tar-util" "\
 ARCHIVE is path to tar archive.
 
-\(fn ARCHIVE)" nil nil)
+\(fn ARCHIVE)")
 
 (autoload 'tar-salvage-file "tar-util" "\
 Salvage SALVAGEFILE in ARCHIVE, and save to SAVEFILE.
 
-\(fn ARCHIVE SALVAGEFILE SAVEFILE)" nil nil)
+\(fn ARCHIVE SALVAGEFILE SAVEFILE)")
 
 ;;;***
 (provide 'skk-autoloads)

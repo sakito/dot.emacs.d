@@ -3,7 +3,8 @@
 ;; Copyright (C) 2002 ONODA Arata <onoto@ma.nma.ne.jp>
 
 ;; Author: ONODA Arata <onoto@ma.nma.ne.jp>
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 ;; Created: Jan. 9, 2002
 
@@ -402,7 +403,6 @@
     ("syw" nil ("シェイ" . "しぇい"))
     ("syz" nil ("シャン" . "しゃん"))
     ("sz" nil ("サン" . "さん"))
-    ("tU" nil ("ッ" . "っ"))
     ("tb" nil ("タビ" . "たび"))
     ("td" nil ("テン" . "てん"))
     ("tgh" nil ("テュー" . "てゅー"))
@@ -419,7 +419,6 @@
     ("tp" nil ("トウ" . "とう"))
     ("tq" nil ("タイ" . "たい"))
     ("tr" nil ("タラ" . "たら"))
-    ("tsU" nil ("ッ" . "っ"))
     ("tsa" nil ("ツァ" . "つぁ"))
     ("tse" nil ("ツェ" . "つぇ"))
     ("tsi" nil ("ツィ" . "つぃ"))

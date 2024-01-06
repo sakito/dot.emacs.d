@@ -1,10 +1,11 @@
 ;;; skk-annotation.el --- SKK annotation 関連プログラム -*- coding: iso-2022-jp -*-
 
 ;; Copyright (C) 2000, 2001 NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
-;; Copyright (C) 2000-2010  SKK Development Team <skk@ring.gr.jp>
+;; Copyright (C) 2000-2010  SKK Development Team
 
 ;; Author: NAKAJIMA Mikio <minakaji@osaka.email.ne.jp>
-;; Maintainer: SKK Development Team <skk@ring.gr.jp>
+;; Maintainer: SKK Development Team
+;; URL: https://github.com/skk-dev/ddskk
 ;; Keywords: japanese, mule, input method
 ;; Created: Oct. 27, 2000.
 
@@ -522,10 +523,6 @@ NO-PREVIOUS-ANNOTATION を指定 (\\[Universal-Argument] \\[skk-annotation-ad
                          nil)))
       (setq skk-annotation-original-window-configuration
             (current-window-configuration))
-      (delete-other-windows)
-      ;;       (split-window-vertically)
-      ;;       (other-window 1)
-      ;;       (switch-to-buffer (get-buffer-create skk-annotation-buffer))
       (pop-to-buffer skk-annotation-buffer)
 
       (setq buffer-read-only nil
@@ -989,7 +986,7 @@ information etc.  If PROC is non-nil, check the buffer for that process."
       (goto-char (point-max))
       (compilation-forget-errors)
       (skkannot-py-send-string command)
-      (setq compilation-last-buffer (current-buffer)))))
+      (setq next-error-last-buffer (current-buffer)))))
 
 ;;;###autoload
 (defun skk-annotation-start-python (&optional wait)
@@ -1066,7 +1063,7 @@ information etc.  If PROC is non-nil, check the buffer for that process."
          (when (>= pt (point))
            (forward-line 1)
            (end-of-line))
-         (when (eq (point-at-bol) (point-at-eol))
+         (when (eq (line-beginning-position) (line-end-position))
            (forward-line -1)
            (end-of-line))
          (buffer-substring-no-properties pt (point)))
