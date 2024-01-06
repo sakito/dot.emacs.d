@@ -24,7 +24,8 @@
 ;; https://github.com/emacs-helm/helm
 
 ;;; Code:
-(require 'helm-config)
+(require 'helm)
+(require 'helm-autoloads)
 ;; (setq ad-redefinition-action 'accept)  ;; redefin が気になる場合は設定
 (helm-mode +1)
 
