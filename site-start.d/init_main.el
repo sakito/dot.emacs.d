@@ -63,6 +63,8 @@
 (require 'init_function)
 ;;; SKK
 (require 'init_skk)
+;; AsciiDoc
+(require 'init_adoc)
 ;; rst-mode
 (require 'init_rst)
 ;; markdown

@@ -259,6 +259,17 @@ USA
       `(rst-level-5-face ((t (:background ,violet))))
       `(rst-level-6-face ((t (:background ,blue))))
 
+      ;; adoc
+      `(adoc-title-0-face ((t (:foreground ,skyblue :height 1.2))))
+      `(adoc-title-1-face ((t (:foreground ,skyblue :height 1.1))))
+      `(adoc-title-2-face ((t (:foreground ,skyblue :height 1.05))))
+      `(adoc-title-3-face ((t (:foreground ,skyblue :height 1.0))))
+      `(adoc-title-4-face ((t (:foreground ,skyblue :height 1.1))))
+      `(adoc-meta-hide-face ((t (:foreground ,skyblue))))
+      `(adoc-verbatim-face ((t (:background nil))))
+      `(adoc-list-face ((t (:background nil))))
+      `(adoc-internal-reference-face ((t (:foreground ,(face-attribute 'font-lock-comment-face :foreground)))))
+
       ;; howm
       `(howm-mode-title-face ((t (:background ,yellow))))
 
@@ -304,8 +315,8 @@ USA
       `(helm-candidate-number ((t (:background ,orange2 :foreground ,color-bg3))))
 
       ;; 変更点のハイライト
-      `(highlight-changes ((t (:foreground nil :background ,color-bg0))))
-      `(highlight-changes-delete ((t (:foreground nil :background ,color-bg1))))
+      ;; `(highlight-changes ((t (:foreground nil :background ,color-bg0))))
+      ;; `(highlight-changes-delete ((t (:foreground nil :background ,color-bg1))))
 
       ;; flymake
       `(flymake-errline ((t (:underline ,orange))))
