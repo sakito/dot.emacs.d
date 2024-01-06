@@ -83,8 +83,8 @@
 ;; clean up は必要になったら手動で実施する事
 ;; (add-hook 'kill-emacs-query-functions 'recentf-cleanup)
 
-;; 未使用時間30秒で自動保存
-(run-with-idle-timer 30 t 'recentf-save-list)
+;; 一定の未使用時間毎に自動保存
+(run-with-idle-timer (* 5 60) t 'recentf-save-list)
 (recentf-mode 1)
 
 (provide 'init_recentf)
