@@ -24,10 +24,16 @@
 
 ;;; Code:
 (require 'sr-speedbar nil t)
+
+;; デフォルト右表示を左に変更
+(setq sr-speedbar-right-side nil)
+
+;; 幅指定
 (setq sr-speedbar-width-x 40)
 (setq sr-speedbar-width-console 24)
 (setq sr-speedbar-delete-windows nil)
 
+;; 起動ショートカット
 (global-set-key (kbd "C-^") 'sr-speedbar-toggle)
 
 (setq speedbar-use-images nil)
