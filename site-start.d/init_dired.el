@@ -94,14 +94,14 @@
       (start-process "QuickLook" "*diredQuickLook" "/usr/bin/qlmanage" "-p" (shell-quote-argument file)))))
 
 ;; w3m で表示する
-(defun dired-w3m-find-file ()
-  (interactive)
-  (autoload 'w3m "w3m" "Interface for w3m on Emacs." t)
-  ;;(require 'w3m)
-  (let ((file (dired-get-filename)))
-    (if (y-or-n-p (format "Use emacs-w3m to browse %s? "
-                          (file-name-nondirectory file)))
-        (w3m-find-file file))))
+;; (defun dired-w3m-find-file ()
+;;   (interactive)
+;;   (autoload 'w3m "w3m" "Interface for w3m on Emacs." t)
+;;   ;;(require 'w3m)
+;;   (let ((file (dired-get-filename)))
+;;     (if (y-or-n-p (format "Use emacs-w3m to browse %s? "
+;;                           (file-name-nondirectory file)))
+;;         (w3m-find-file file))))
 
 (put 'dired-find-alternate-file 'disabled nil)
 

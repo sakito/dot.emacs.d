@@ -34,29 +34,29 @@
 ;; @see http://masutaka.net/chalow/2011-10-30-2.html
 (defvar my-recentf-list-prev nil)
 
-;; 保存時にメッセージの出力を抑止
-(defadvice recentf-save-list
-  (around no-message activate)
-  "If `recentf-list' and previous recentf-list are equal,
-do nothing. And suppress the output from `message' and
-`write-file' to minibuffer."
-  (unless (equal recentf-list my-recentf-list-prev)
-    (flet ((message (format-string &rest args)
-                    (eval `(format ,format-string ,@args)))
-           (write-file (file &optional confirm)
-                       (let ((str (buffer-string)))
-                         (with-temp-file file
-                           (insert str)))))
-      ad-do-it
-      (setq my-recentf-list-prev recentf-list))))
+;; ;; 保存時にメッセージの出力を抑止
+;; (defadvice recentf-save-list
+;;   (around no-message activate)
+;;   "If `recentf-list' and previous recentf-list are equal,
+;; do nothing. And suppress the output from `message' and
+;; `write-file' to minibuffer."
+;;   (unless (equal recentf-list my-recentf-list-prev)
+;;     (flet ((message (format-string &rest args)
+;;                     (eval `(format ,format-string ,@args)))
+;;            (write-file (file &optional confirm)
+;;                        (let ((str (buffer-string)))
+;;                          (with-temp-file file
+;;                            (insert str)))))
+;;       ad-do-it
+;;       (setq my-recentf-list-prev recentf-list))))
 
-;; クリーンアップ時のメッセージ出力を抑止
-(defadvice recentf-cleanup
-  (around no-message activate)
-  "suppress the output from `message' to minibuffer"
-  (flet ((message (format-string &rest args)
-                  (eval `(format ,format-string ,@args))))
-    ad-do-it))
+;; ;; クリーンアップ時のメッセージ出力を抑止
+;; (defadvice recentf-cleanup
+;;   (around no-message activate)
+;;   "suppress the output from `message' to minibuffer"
+;;   (flet ((message (format-string &rest args)
+;;                   (eval `(format ,format-string ,@args))))
+;;     ad-do-it))
 
 ;; 自動クリーニングを停止 recentf-cleanup
 ;; tramp や 外部ディスクを利用している場合停止しておかないと面倒な動作になる

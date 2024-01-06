@@ -20,12 +20,14 @@
 
 ;;; Commentary:
 ;; 行番号関連
+;; linumは Emacs 26以上では deprecated
 
 ;;; Code:
 (toggle-scroll-bar nil)
 
-(require 'linum)
-(global-linum-mode t)
+(global-display-line-numbers-mode)
+
+
 
 ;; 特定モードのみで有効にする場合はhookで設定
 ;; (dolist (hook (list
@@ -36,7 +38,7 @@
 ;;                     (linum-mode 1))))
 
 ;; 表示フォーマット
-(setq linum-format "%04d")
+;; (setq linum-format "%04d")
 
 (provide 'init_linum)
 ;;; init_linum.el ends here
