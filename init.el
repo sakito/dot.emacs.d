@@ -76,7 +76,7 @@
 (defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p emacs29-p)))
 (defvar linux-p (eq system-type 'gnu/linux))
 (defvar nt-p (eq system-type 'windows-nt))
-(defvar windows-p (or cygwin-p nt-p meadow-p))
+(defvar windows-p (or nt-p))
 
 ;; 文字コード
 ;;(set-language-environment 'Japanese)

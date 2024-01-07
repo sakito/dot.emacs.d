@@ -23,7 +23,7 @@
 ;; 
 
 ;;; Code:
-(eval-when-compile (require 'cl))
+;; (eval-when-compile (require 'cl))
 (require 'recentf)
 ;; @see http://www.emacswiki.org/cgi-bin/wiki/download/recentf-ext.el
 (require 'recentf-ext)

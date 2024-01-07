@@ -98,9 +98,11 @@
 (toggle-scroll-bar nil)
 
 ;; 行番号表示
+;; 行番号幅を最初から確保(がたつき防止)
+(setq display-line-numbers-width-start 5)
+(setq display-line-numbers-grow-only t)
+(setq display-line-numbers-minor-tick 100)
 (global-display-line-numbers-mode)
-;; 行番号幅4文字を最初から確保(がたつき防止)
-(setq display-line-numbers-width-start 4)
 
 ;; リージョンを kill-ring に入れないで削除できるようにする
 (delete-selection-mode t)
