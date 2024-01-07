@@ -68,27 +68,14 @@
 ;; Emacs の種類バージョンを判別するための変数を定義
 ;; @see http://github.com/elim/dotemacs/blob/master/init.el
 (defun x->bool (elt) (not (not elt)))
-(defvar emacs22-p (equal emacs-major-version 22))
 (defvar emacs27-p (equal emacs-major-version 27))
 (defvar emacs28-p (equal emacs-major-version 28))
 (defvar emacs29-p (equal emacs-major-version 29))
 (defvar darwin-p (eq system-type 'darwin))
 (defvar ns-p (featurep 'ns))
-(defvar carbon-p (and (eq window-system 'mac) emacs22-p))
 (defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p emacs29-p)))
 (defvar linux-p (eq system-type 'gnu/linux))
-(defvar colinux-p (when linux-p
-                    (let ((file "/proc/modules"))
-                      (and
-                       (file-readable-p file)
-                       (x->bool
-                        (with-temp-buffer
-                          (insert-file-contents file)
-                          (goto-char (point-min))
-                          (re-search-forward "^cofuse\.+" nil t)))))))
-(defvar cygwin-p (eq system-type 'cygwin))
 (defvar nt-p (eq system-type 'windows-nt))
-(defvar meadow-p (featurep 'meadow))
 (defvar windows-p (or cygwin-p nt-p meadow-p))
 
 ;; 文字コード
@@ -117,7 +104,6 @@
 ;; 環境依存設定
 (cond
  (mac-p (require 'init_main))
- (carbon-p (require 'init_syscarbon))
  (ns-p (require 'init_sysns))
  (t (require 'init_main))
  )

@@ -154,7 +154,6 @@
 ;;(require 'init_org)
 ;; (require 'init_slime)
 (require 'init_calendar)
-(require 'init_linum)
 ;; (require 'init_go)
 ;; (require 'init_keychord)
 ;; (require 'init_pyregexp)

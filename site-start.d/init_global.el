@@ -94,6 +94,14 @@
 (line-number-mode t)
 (column-number-mode t)
 
+;; scroll bar非表示
+(toggle-scroll-bar nil)
+
+;; 行番号表示
+(global-display-line-numbers-mode)
+;; 行番号幅4文字を最初から確保(がたつき防止)
+(setq display-line-numbers-width-start 4)
+
 ;; リージョンを kill-ring に入れないで削除できるようにする
 (delete-selection-mode t)
 
