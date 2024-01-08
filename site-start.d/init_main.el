@@ -27,15 +27,15 @@
 
 ;; Emacs 24.4 で ad-advised-definition-p が削除された対応
 ;; sr-speedbar.el からコピー
-(if (not (fboundp 'ad-advised-definition-p))
-    (defun ad-advised-definition-p (definition)
-      "Return non-nil if DEFINITION was generated from advice information."
-      (if (or (ad-lambda-p definition)
-              (macrop definition)
-              (ad-compiled-p definition))
-          (let ((docstring (ad-docstring definition)))
-            (and (stringp docstring)
-                 (get-text-property 0 'dynamic-docstring-function docstring))))))
+;(if (not (fboundp 'ad-advised-definition-p))
+;    (defun ad-advised-definition-p (definition)
+;      "Return non-nil if DEFINITION was generated from advice information."
+;      (if (or (ad-lambda-p definition)
+;              (macrop definition)
+;              (ad-compiled-p definition))
+;          (let ((docstring (ad-docstring definition)))
+;            (and (stringp docstring)
+;                 (get-text-property 0 'dynamic-docstring-function docstring))))))
 
 ;;; Code:
 
@@ -48,13 +48,12 @@
 ;; recentf
 (require 'init_recentf)
 ;; shell、eshell 関連
-(require 'init_shell)
+;(require 'init_shell)
 ;; Lisp
 (require 'init_lisp)
 ;; キー設定
 (require 'init_key)
-;; anything
-;; (require 'init_anything)
+;; helm
 (require 'init_helm)
 ;; popwin
 ;; (require 'init_popwin)
@@ -83,7 +82,7 @@
 ;; moccur
 ;; (require 'init_moccur)
 ;; auto-complete
-(require 'init_ac)
+;(require 'init_ac)
 ;; eldoc
 ;; (require 'init_eldoc)
 ;;; プログラミング関連
@@ -105,9 +104,9 @@
 ;;; OCaml
 ;; (require 'init_ocaml)
 ;;;; sql-mode
-(require 'init_sql)
+;(require 'init_sql)
 ;;; smart-compie
-(require 'init_smartcompile)
+;(require 'init_smartcompile)
 ;; c
 (require 'init_c)
 ;; objc
@@ -116,13 +115,13 @@
 ;; yasnippet
 ;; (require 'init_yasnippet)
 ;; javascript-mode
-(require 'init_javascript)
+;(require 'init_javascript)
 ;;; 文書記述関連
 ;; auto-insert
 (require 'init_autoinsert)
 ;; htmlize
 ;; @see http://fly.srk.fer.hr/~hniksic/emacs/
-(require 'htmlize)
+;(require 'htmlize)
 ;; howm
 ;;(require 'init_howm)
 ;; sdicの設定
@@ -136,7 +135,7 @@
 ;; css-modeの設定
 (require 'init_css)
 ;; nxml-mode
-(require 'init_nxml)
+;(require 'init_nxml)
 ;; haskel-mode
 ;; (require 'init_haskell)
 ;; php-mode
@@ -150,7 +149,7 @@
 ;; irc
 ;; (require 'init_irc)
 
-(require 'init_speedbar)
+;(require 'init_speedbar)
 ;;(require 'init_org)
 ;; (require 'init_slime)
 (require 'init_calendar)

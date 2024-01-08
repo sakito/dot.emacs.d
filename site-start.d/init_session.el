@@ -1,8 +1,6 @@
-;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
+;;; init_session.el --- session                      -*- lexical-binding: t; -*-
 
-;;; init_session.el --- session.el
-
-;; Copyright (C) 2009-2011 sakito
+;; Copyright (C) 2024  sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -18,68 +16,40 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; 
+;; 情報永続化関連
 
 ;;; Code:
 
-;; session
-;; @see http://emacs-session.sourceforge.net/
-(when (require 'session nil t)
-  ;; 前回のカーソル位置、開いたファイル履歴等を記憶
-  (setq session-initialize '(de-saveplace session keys menus places)
-        session-globals-include '((kill-ring 500)
-                                  (session-file-alist 500 t)
-                                  (file-name-history 10000))
-        ;; 保存時でなく閉じた時のカーソル位置を記憶する
-        session-undo-check -1)
-  ;; 記憶容量を倍に設定しておく
-  (setq session-globals-max-size 2048)
-  (setq session-save-print-spec '(t nil 40000))
-  (setq session-globals-max-string 2048)
-  (setq session-registers-max-string 2048)
-  ;; ミニバッファ履歴リストの長さ制限を無くす
-  (setq history-length t)
-  ;; session で無視するファイル設定
-  (setq session-set-file-name-exclude-regexp
-        "/\\.overview\\|\\.session\\|News/\\||^/var/folders/\\|^/tmp/\\|\\.orig\\|\\.elc\\|\\.pyc\\|\\.recentf\\|\\.cache\\|\\.howm-kyes")
-  (setq session-save-file
-        (expand-file-name "var/session/session.cache" user-emacs-directory))
-  ;; 30 分で自動保存
-  (defvar my-timer-for-session-save-session (run-at-time t (* 30 60) 'session-save-session))
-  (add-hook 'after-init-hook 'session-initialize))
+(setopt desktop-save-mode t)
+(setopt savehist-mode t)
 
-;; minibuffer history から重複を排除する
-(defun minibuffer-delete-duplicate ()
-  (let (list)
-    (dolist (elt (symbol-value minibuffer-history-variable))
-      (unless (member elt list)
-        (push elt list)))
-    (set minibuffer-history-variable (nreverse list))))
-(add-hook 'minibuffer-setup-hook 'minibuffer-delete-duplicate)
+(setopt savehist-file
+        (expand-file-name "var/session/savehist" user-emacs-directory))
 
-;; kill-ring 内の重複を排除する
-(defadvice kill-new (before ys:no-kill-new-duplicates activate)
-  (setq kill-ring (delete (ad-get-arg 0) kill-ring)))
+;; https://qiita.com/j8takagi/items/64cc011a333345d2d749
+(defun my-set-savehist-additional-variables (&optional file)
+  (let (histvars othervars)
+    (ignore file)
+    (setq histvars (apropos-internal "-\\(\\(history\\)\\|\\(ring\\)\\)\\'" 'boundp))
+    (setq othervars
+          (append othervars
+                  (when desktop-save-mode
+                    (append
+                     desktop-globals-to-save
+                     desktop-locals-to-save
+                     ))
+                  savehist-minibuffer-history-variables
+                  savehist-ignored-variables
+                  ))
+    (dolist (ovar othervars)
+      (setq histvars (delete ovar histvars)))
+    (setopt savehist-additional-variables histvars)))
 
-;; バッファでの同名ファイルに識別子を付与する
-(require 'uniquify)
-(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-;; バッファ名が重複しなくてもディレクトリ名を付与する
-;; 数字は表示階層の深さ だいたい3階層までに抑えるし、howm で年月が見える等の理由で一階層上まで見えるのが好み
-(setq uniquify-min-dir-content 2)
-;; uniquify-ignore-buffers-re を設定すると対象外のバッファを指定できるがデフォルトで特殊バッファは基本よける
-
-;; モードラインにファイルのディレクトリを表示 uniquify-min-dir-content による実質不要
-;; (add-to-list 'global-mode-string '("" default-directory "-"))
-;; (add-to-list 'global-mode-string '(:eval (skt:relative-path default-directory)))
-
-;; kill-summary anything の機能を利用するようにしたので不要
-;(autoload 'kill-summary "kill-summary" nil t)
-;(global-set-key "\M-y" 'kill-summary)
+(add-hook 'after-load-functions 'my-set-sevehist-additional-variables)
 
 
 (provide 'init_session)
