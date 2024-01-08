@@ -38,10 +38,6 @@
 	path = local-lisp/distel
 	url = git://github.com/jixiuf/distel.git
     ignore = dirty
-[submodule "local-lisp/popup-el"]
-	path = local-lisp/popup-el
-	url = git://github.com/auto-complete/popup-el.git
-    ignore = dirty
 [submodule "local-lisp/fuzzy-el"]
 	path = local-lisp/fuzzy-el
 	url = git://github.com/auto-complete/fuzzy-el.git
@@ -107,3 +103,6 @@
 [submodule "local-lisp/adoc-mode"]
 	path = local-lisp/adoc-mode
 	url = https://github.com/bbatsov/adoc-mode.git
+[submodule "local-lisp/popup-el"]
+	path = local-lisp/popup-el
+	url = https://github.com/auto-complete/popup-el.git
