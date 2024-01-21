@@ -144,8 +144,8 @@
 ;;(setq next-screen-context-lines 5)
 
 ;; 終了時に聞く
-;; (setq use-short-answers t)
-;; (setq confirm-kill-emacs 'yes-or-no-p)
+(setq use-short-answers t)
+(setq confirm-kill-emacs 'yes-or-no-p)
 
 ;; 安全な実行のための共通系関数
 
