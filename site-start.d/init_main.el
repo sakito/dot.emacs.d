@@ -42,6 +42,7 @@
 ;; 環境変数
 (require 'init_setenv)
 ;; フレームサイズ、色、フォントの設定
+(require 'init_font)
 (require 'init_color)
 ;; session
 (require 'init_session)
