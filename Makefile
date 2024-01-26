@@ -1,2 +1,5 @@
 all:
-	emacs --batch -l init.d/init_preface.el -f batch-byte-compile init.el
+	emacs --batch -l site-start.d/init_preface.el -f batch-byte-compile init.el
+
+
+
