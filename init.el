@@ -24,59 +24,23 @@
 
 ;;; Code:
 
-(setq user-full-name "sakito")
-(setq user-mail-address "sakito@sakito.com")
-
-;; 詳細時間計測用
-;; (load "~/.emacs.d/private/private/timelag.el")
-
-;; 常時デバッグ状態
-(setq debug-on-error t)
+;; デバッグ
+(set-variable 'debug-on-error t)
+(set-variable 'init-file-debug t)
 
 ;; cl-lib 利用前提
 (eval-when-compile (require 'cl-lib nil t))
 
-;; Emacs 設定ディレクトリを設定。Emacs 22以下用
-;; Emacs 23.1 以上では user-emacs-directory 変数が用意されているのでそれを利用
-(unless (boundp 'user-emacs-directory)
-  (defvar user-emacs-directory (expand-file-name "~/.emacs.d/")))
+;; path追加、条件分岐系関数
+(load (locate-user-emacs-file "site-start.d/init_preface.el"))
 
-;; 引数を load-path へ追加
-;; normal-top-level-add-subdirs-to-load-path はディレクトリ中で
-;; [A-Za-z] で開始する物だけ追加する。
-;; 追加したくない物は . や _ を先頭に付与しておけばロードしない
-;; dolist は Emacs 21 から標準関数なので積極的に利用して良い
-(defun add-to-load-path (&rest paths)
-  (let (path)
-    (dolist (path paths paths)
-      (let ((default-directory
-              (expand-file-name (concat user-emacs-directory path))))
-        (add-to-list 'load-path default-directory)
-        (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-            (normal-top-level-add-subdirs-to-load-path))))))
+;; user
+(setq user-full-name "sakito")
+(setq user-mail-address "sakito@sakito.com")
 
-;; Emacs Lisp のPathを通す
-(add-to-load-path "lisp"
-                  ;; 変更したり、自作の Emacs Lisp
-                  "local-lisp"
-                  ;; private 内には自分専用の物がはいっている
-                  ;; 依存は private 内で完結するようにしている
-                  "private"
-                  ;; 初期設定ファイル
-                  "site-start.d")
-
-;; Emacs の種類バージョンを判別するための変数を定義
-;; @see http://github.com/elim/dotemacs/blob/master/init.el
-(defun x->bool (elt) (not (not elt)))
-(defvar emacs27-p (equal emacs-major-version 27))
-(defvar emacs28-p (equal emacs-major-version 28))
-(defvar emacs29-p (equal emacs-major-version 29))
-(defvar darwin-p (eq system-type 'darwin))
-(defvar ns-p (featurep 'ns))
-(defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p emacs29-p)))
-(defvar linux-p (eq system-type 'gnu/linux))
-(defvar nt-p (eq system-type 'windows-nt))
-(defvar windows-p (or nt-p))
+;; custom-file
+(setq custom-file
+      (expand-file-name "private/customize.el" user-emacs-directory))
 
 ;; 文字コード
 ;;(set-language-environment 'Japanese)
@@ -100,17 +64,7 @@
 
 ;; 全環境共通設定
 (require 'init_global)
-
-;; 環境依存設定
-(cond
- (mac-p (require 'init_main))
- (ns-p (require 'init_sysns))
- (t (require 'init_main))
- )
-
-;; custom-file
-(setq custom-file
-      (expand-file-name "private/customize.el" user-emacs-directory))
+(require 'init_main)
 
 ;; 終了時バイトコンパイル
 (add-hook 'kill-emacs-query-functions
@@ -125,12 +79,11 @@
             ))
 
 ;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
-(when (or emacs27-p emacs28-p emacs29-p)
-  (defun message-startup-time ()
-    (message "Emacs loaded in %dms"
-             (/ (- (+ (cl-third after-init-time)
-                      (* 1000000 (cl-second after-init-time)))
-                   (+ (cl-third before-init-time)
-                      (* 1000000 (cl-second before-init-time))))
-                1000)))
-  (add-hook 'after-init-hook 'message-startup-time))
+(defun message-startup-time ()
+  (message "Emacs loaded in %dms"
+           (/ (- (+ (cl-third after-init-time)
+                    (* 1000000 (cl-second after-init-time)))
+                 (+ (cl-third before-init-time)
+                    (* 1000000 (cl-second before-init-time))))
+              1000)))
+(add-hook 'after-init-hook 'message-startup-time)
