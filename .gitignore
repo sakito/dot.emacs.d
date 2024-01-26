@@ -7,10 +7,13 @@ image-dired
 # Compiled
 *.elc
 *.pyc
+*.exe
+*.o
 
 # Packaging
 .cask
 elpa/*
+el-get/*
 
 # Undo-tree save-files
 *.~undo-tree
@@ -19,10 +22,6 @@ elpa/*
 .DS_Store
 
 # 開発関連
-*.exe
-*.o
-*.c
-.gitmodules
 .travis.yml
 *.log
 *.orig
