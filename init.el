@@ -306,7 +306,7 @@
 (leaf elscreen
   :doc "elscreen"
   :ensure t
-  :require elscreen-server
+  :require elscreen-server elscreen-dired
   :custom
   (dnd-open-file-other-window . nil)
   :hook (after-init-hook . elscreen-start)
@@ -412,12 +412,62 @@
       (transient-force-fixed-pitch . t))
     ))
 
+
+(leaf dired
+  :doc "dired"
+  :require t
+  :custom `(
+           ;; 再帰コピー
+           (dired-recursive-copies . 'always)
+           ;; 再帰削除
+           ;; (dired-recursive-deletes . 'always)
+
+           ;; C-x 2 で分割した隣にコピーや移動をする
+           (dired-dwim-target . t)
+
+           ;; dired-x の機能を利用して 特定ファイルだけ「!」や「X」でQuick Look 可能にする
+           ;; QL の終了は C-g
+           (dired-guess-shell-alist-user
+            . '(("\\.png$" "qlmanage -p")
+                ("\\.jpg$" "qlmanage -p")
+                ("\\.pdf$" "open")))
+           )
+  :config
+  ;; dired-x を起動
+  (leaf dired-x
+    :require t
+    :bind (
+           ;; dired-x では C-x C-j がdired-jump になるので skk-modeに再割り当て
+           ("C-x C-j" . skk-mode)))
+
+  ;; s で並び変え、C-u s で元に戻る
+  ;; @see sorter.el
+  (leaf sorter :require t)
+
+  ;; システムのlsでなくls-lispを利用して表示
+  (leaf ls-lisp
+    :require t
+    :custom ((ls-lisp-use-insert-directory-program . nil)
+             ;; ls のオプション
+             (dired-listing-switches . "-lahF")
+             ;; ディレクトリをより上に表示
+             (ls-lisp-dirs-first . t)
+             ))
+
+  ;; dired-find-alternate-fileを有効化
+  (put 'dired-find-alternate-file 'disabled nil)
+
+  :bind (:dired-mode-map
+         ;; RETで新規バッファを作成しないでディレクトリを開く(デフォルトは「a」)
+         ("RET" . 'dired-find-alternate-file)
+         ;; 「a」を押したときに新規バッファ作成
+         ("a" . 'dired-advertised-find-file))
+  )
+
 ;; 移行前設定
-(require 'init_dired)
 (require 'init_wgrep)
 
 ;; 操作
-;; (require 'init_recentf)
 (require 'init_key)
 (require 'init_helm)
 (require 'init_shackle)
