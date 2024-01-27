@@ -25,6 +25,7 @@
 ;;; Code:
 
 ;; デバッグ
+(require 'sendmail)
 (set-variable 'debug-on-error t)
 (set-variable 'init-file-debug t)
 
@@ -353,10 +354,50 @@
   )
 
 
+(leaf recentf
+  :doc "recentf"
+  :require t
+  :init
+  (leaf recentf-ext
+    :ensure t)
+  :custom
+  `(
+    ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
+    (recentf-save-file
+     . ,(expand-file-name "var/recentf.cache" user-emacs-directory))
+
+    ;; 自動クリーニングを停止 recentf-cleanup
+    ;; tramp や 外部ディスクを利用している場合停止しておかないと面倒な動作になる
+    (recentf-auto-cleanup . 'never)
+
+    ;; 履歴の保存量を多少多めにしておく
+    (recentf-max-saved-items . 1000)
+
+    ;; 除外ファイル
+    (recentf-exclude
+     . '("\\.elc$"
+         "\\.pyc$"
+         "\\.cache$"
+         ".recentf$"
+         ".howm-keys$"
+         "^/var/folders/"
+         "^/tmp/"))
+    )
+  :config
+  ;; 保存ファイルの設定に リモートファイル tramp の先等を追加。これを実施すると起動時にパスワード等の確認はされない
+  (add-to-list 'recentf-keep 'file-remote-p)
+  (add-to-list 'recentf-keep 'file-readable-p)
+
+  ;; 一定の未使用時間毎に自動保存
+  (run-with-idle-timer (* 5 60) t 'recentf-save-list)
+
+  :hook ((after-init-hook . recentf-mode))
+  )
+
+
 (leaf magit
   :doc "magit"
   :ensure t
-  :require sendmail  ;; 本来不要
   :bind (("C-x g" . magit-status)
          ("C-x C-g" . magit-status))
   :init
@@ -376,7 +417,7 @@
 (require 'init_wgrep)
 
 ;; 操作
-(require 'init_recentf)
+;; (require 'init_recentf)
 (require 'init_key)
 (require 'init_helm)
 (require 'init_shackle)
