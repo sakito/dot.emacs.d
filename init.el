@@ -318,8 +318,17 @@
       (transient-force-fixed-pitch . t))
     ))
 
+
+(leaf elscreen
+  :doc "elscreen"
+  :ensure t
+  :require elscreen-server
+  :custom
+  (dnd-open-file-other-window . nil)
+  :hook (after-init-hook . elscreen-start)
+  )
+
 ;; 移行前設定
-(require 'init_elscreen)
 (require 'init_dired)
 (require 'init_wgrep)
 

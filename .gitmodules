@@ -46,10 +46,6 @@
 	path = local-lisp/ob-objc-el
 	url = git://gist.github.com/568534.git
     ignore = dirty
-[submodule "local-lisp/elscreen"]
-	path = local-lisp/elscreen
-	url = git://github.com/knu/elscreen.git
-    ignore = dirty
 [submodule "local-lisp/pos-tip"]
 	path = local-lisp/pos-tip
 	url = git://github.com/tjarvstrand/pos-tip.git
