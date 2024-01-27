@@ -108,6 +108,37 @@
 ;; 初期位置
 (cd "~/")
 
+(leaf setenv
+  :doc "一部環境で環境変数が正常設定されないので、設定する
+不要な物もあるかもしれない"
+  :config
+  ;; LC_ALL
+  (setenv "LC_ALL" "ja_JP.UTF-8")
+
+  ;; PATH設定
+  ;; Mac OS X の bash の PATH は /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
+  ;; 多数の実行環境にて極力汎用的にパスが設定されるようしたい
+  (dolist (dir (list
+                "/sbin"
+                "/usr/sbin"
+                "/bin"
+                "/usr/bin"
+                "/opt/homebrew/bin"
+                "/usr/local/bin"
+                "/usr/texbin"
+                (expand-file-name "~/bin")
+                (expand-file-name "~/opt/py3.11/bin")
+                (expand-file-name "bin" user-emacs-directory)
+                ))
+    (when (and (file-exists-p dir) (not (member dir exec-path)))
+      (setenv "PATH" (concat dir ":" (getenv "PATH")))
+      (setq exec-path (append (list dir) exec-path))))
+
+  (setenv "CVS_RSH" "ssh")
+  (setenv "DISPLAY" "localhost")
+  (setenv "SSH_AUTH_SOCK" (getenv "SSH_AUTH_SOCK"))
+  )
+
 (leaf ui
   :doc "UI関連"
   :custom (
@@ -209,6 +240,7 @@
                (,tramp-file-name-regexp . nil)))
        ))
 
+
 (leaf server
   :doc "emacsclient を利用するためにサーバ起動
 サーバが起動していた場合は先に起動していた方を優先"
@@ -226,8 +258,89 @@
          (find-file-hook . skt:raise-frame)))
 
 
-;; 全環境共通設定
-(require 'init_main)
+(leaf skk
+  :doc "ddskk設定"
+  :ensure ddskk
+  :require t
+  :custom (
+           ;; C-\ でも SKK に切り替えられるように設定
+           (default-input-method . "japanese-skk")
+
+           ;; 送り仮名が厳密に正しい候補を優先して表示
+           (skk-henkan-strict-okuri-precedence . t)
+
+           ;; 漢字登録時、送り仮名が厳密に正しいかをチェック
+           (skk-check-okurigana-on-touroku . t)
+
+           ;; skk server設定
+           (skk-server-host . "localhost")
+           (skk-server-portnum . 1178)
+
+           ;; カーソル色
+           (skk-cursor-hiragana-color . "hot pink")
+           )
+  :config
+  ;; @ を無効にする
+  (setq skk-rom-kana-rule-list
+      (append skk-rom-kana-rule-list
+              '(("@" nil "@"))))
+
+  (defadvice skk-latin-mode (after no-latin-mode-in-lisp-interaction activate)
+    "`lisp-interaction-mode' において英数モードを回避する。"
+    (when (eq major-mode 'lisp-interaction-mode)
+      (skk-mode-off)))
+
+  (leaf ddskk-posframe
+    :ensure t
+    :global-minor-mode t
+    :custom ((ddskk-posframe-border-width . 2))
+    )
+  :hook (
+         ;; C-x C-fでファイルを開くとSKK
+         (find-file-hook . (lambda () (skk-latin-mode t)))
+         )
+  )
+
+;; 移行前設定
+(require 'init_elscreen)
+(require 'init_dired)
+(require 'init_wgrep)
+
+;; 操作
+(require 'init_session)
+(require 'init_recentf)
+(require 'init_key)
+(require 'init_helm)
+(require 'init_shackle)
+(require 'init_function)
+(require 'init_calendar)
+
+;; 開発
+(require 'init_autoinsert)
+(require 'init_smartchr)
+(require 'init_scm)
+(require 'init_lisp)
+(require 'init_modeinfo)
+(require 'init_python)
+(require 'init_magit)
+(require 'init_c)
+(require 'init_web-mode)
+(require 'init_css)
+
+;; テキストファイル
+(require 'init_adoc)
+(require 'init_rst)
+(require 'init_markdown)
+
+;; フレームサイズ、色、フォントの設定
+(require 'init_font)
+(require 'init_color)
+(require 'init_modeline)
+
+;; 非公開系
+(when mac-p
+  (require 'init_private))
+
 
 ;; ;; 終了時バイトコンパイル
 ;; (add-hook 'kill-emacs-query-functions
