@@ -301,6 +301,23 @@
          )
   )
 
+
+(leaf magit
+  :doc "magit"
+  :ensure t
+  :bind (("C-x g" . magit-status))
+  :init
+  (leaf transient
+    :custom
+    `((transient-levels-file
+       . ,(expand-file-name "var/transient/levels.el" user-emacs-directory))
+      (transient-history-file
+       . ,(expand-file-name "var/transient/history.el" user-emacs-directory))
+      (transient-values-file
+       . ,(expand-file-name "var/transient/values.el" user-emacs-directory))
+      (transient-force-fixed-pitch . t))
+    ))
+
 ;; 移行前設定
 (require 'init_elscreen)
 (require 'init_dired)
@@ -322,7 +339,6 @@
 (require 'init_lisp)
 (require 'init_modeinfo)
 (require 'init_python)
-(require 'init_magit)
 (require 'init_c)
 (require 'init_web-mode)
 (require 'init_css)
