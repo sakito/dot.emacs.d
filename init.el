@@ -213,7 +213,7 @@
            ;; shell-mode において最後の行ができるだけウィンドウの一番下にくるようにする
            (comint-scroll-show-maximum-output . t)
   )
-  :config 
+  :config
   (global-display-line-numbers-mode)
   :hook (
          (text-mode-hook . turn-off-auto-fill)
@@ -302,10 +302,63 @@
   )
 
 
+(leaf elscreen
+  :doc "elscreen"
+  :ensure t
+  :require elscreen-server
+  :custom
+  (dnd-open-file-other-window . nil)
+  :hook (after-init-hook . elscreen-start)
+  )
+
+
+(leaf desktop
+  :doc "状態保存"
+  :global-minor-mode desktop-save-mode
+  :custom
+  `(
+    ;; 保存場所を変更
+    (desktop-base-file-name
+     . ,(expand-file-name "var/session/desktop" user-emacs-directory))
+    (desktop-base-lock-name
+     . ,(expand-file-name "var/session/desktop.lock" user-emacs-directory))
+
+    ;; 保存間隔(初期値は30秒)
+    (desktop-auto-save-timeout . ,(* 5 60))
+  ))
+
+
+(leaf savehist
+  :doc "ヒストリー保存"
+  :global-minor-mode savehist-mode
+  :custom
+  `(
+    ;; 保存場所を変更
+    (savehist-file
+     . ,(expand-file-name "var/session/savehist" user-emacs-directory))
+
+    ;; ミニバッファ履歴リストの長さ制限を無くす
+    (history-length . t)
+
+    ;; 重複除去
+    (history-delete-duplicates . t)
+
+    ;; ミニバッファの履歴保存
+    (savehist-save-minibuffer-history . t)
+  )
+  :config
+  ;; history、ring系全部保存
+  (setopt savehist-additional-variables
+        (apropos-internal "-\\(\\(history\\)\\|\\(ring\\)\\)\\'" 'boundp))
+  )
+
+
 (leaf magit
   :doc "magit"
   :ensure t
-  :bind (("C-x g" . magit-status))
+  :require sendmail  ;; 本来不要
+  :bind (("C-x g" . magit-status)
+         ("C-x C-g" . magit-status))
   :init
   (leaf transient
     :custom
@@ -318,22 +371,11 @@
       (transient-force-fixed-pitch . t))
     ))
 
-
-(leaf elscreen
-  :doc "elscreen"
-  :ensure t
-  :require elscreen-server
-  :custom
-  (dnd-open-file-other-window . nil)
-  :hook (after-init-hook . elscreen-start)
-  )
-
 ;; 移行前設定
 (require 'init_dired)
 (require 'init_wgrep)
 
 ;; 操作
-(require 'init_session)
 (require 'init_recentf)
 (require 'init_key)
 (require 'init_helm)
@@ -344,7 +386,7 @@
 ;; 開発
 (require 'init_autoinsert)
 (require 'init_smartchr)
-(require 'init_scm)
+;(require 'init_scm)
 (require 'init_lisp)
 (require 'init_modeinfo)
 (require 'init_python)
