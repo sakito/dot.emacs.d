@@ -600,101 +600,98 @@ TODO 一部設定未整備"
   :ensure t
   :require helm-autoloads
   :global-minor-mode t
+  :custom (
+           ;; M-x を保存
+           (helm-M-x-always-save-history . t)
+
+           (helm-display-function . 'pop-to-buffer)
+
+           (helm-mini-default-sources
+            . '(
+                ;; helm-source-flycheck
+                helm-source-buffers-list
+                helm-source-file-name-history
+                helm-source-recentf
+                helm-source-files-in-current-dir
+                helm-source-emacs-commands-history
+                helm-source-emacs-commands
+                helm-source-bookmarks
+                ))
+           )
+  :bind (
+         ;; mini buffer 起動
+         ("C-;" . helm-mini)
+
+         ;; コマンド表示
+         ("M-x" . helm-M-x)
+
+         ;; バッファ切り替え時の一覧表示
+         ("C-x C-b" . helm-for-files)
+
+         ;; kill ring
+         ("M-y". helm-show-kill-ring)
+
+         ;; C-x C-f には helm 無効
+         ;; ("C-c C-f" . find-file-at-point)
+
+         (:helm-map
+          ("C-;" .  abort-recursive-edit)
+          ;; C-h で削除を有効に
+          ("C-h" . delete-backward-char))
+         )
+  :defun helm-build-sync-source helm-stringify
   :config
-  (leaf helm-after
-    :after helm
+  ;; コマンド候補
+  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
+  ;; 上記を参考にして、履歴に保存されるように修正
+  (defvar helm-source-emacs-commands
+    (helm-build-sync-source "Emacs commands"
+      :candidates (lambda ()
+                    (let (commands)
+                      (mapatoms (lambda (cmds)
+                                  (if (commandp cmds)
+                                      (push (symbol-name cmds)
+                                            commands))))
+                      (sort commands 'string-lessp)))
+      :coerce #'intern-soft
+      :action (lambda (cmd-or-name)
+                (command-execute cmd-or-name 'record)
+                (setq extended-command-history
+                      (cons (helm-stringify cmd-or-name)
+                            (delete (helm-stringify cmd-or-name) extended-command-history)))))
+    "A simple helm source for Emacs commands.")
+
+  (defvar helm-source-emacs-commands-history
+    (helm-build-sync-source "Emacs commands history"
+      :candidates (lambda ()
+                    (let (commands)
+                      (dolist (elem extended-command-history)
+                        (push (intern elem) commands))
+                      commands))
+      :coerce #'intern-soft
+      :action #'command-execute)
+    "Emacs commands history")
+
+  (leaf helm-descbinds
+    :ensure t
+    :global-minor-mode t
+    )
+
+  (leaf helm-ag
+    :ensure t
     :custom (
-             ;; M-x を保存
-             (helm-M-x-always-save-history . t)
-
-             (helm-display-function . 'pop-to-buffer)
-
-             (helm-mini-default-sources
-              . '(
-                  ;; helm-source-flycheck
-                  helm-source-buffers-list
-                  helm-source-file-name-history
-                  helm-source-recentf
-                  helm-source-files-in-current-dir
-                  helm-source-emacs-commands-history
-                  helm-source-emacs-commands
-                  helm-source-bookmarks
-                  ))
+             (helm-ag-base-command . "pt -e --nocolor --nogroup")
              )
     :bind (
-           ;; mini buffer 起動
-           ("C-;" . helm-mini)
-
-           ;; コマンド表示
-           ("M-x" . helm-M-x)
-
-           ;; バッファ切り替え時の一覧表示
-           ("C-x C-b" . helm-for-files)
-
-           ;; kill ring
-           ("M-y". helm-show-kill-ring)
-
-           ;; C-x C-f には helm 無効
-           ;; ("C-c C-f" . find-file-at-point)
-
-           (:helm-map
-            ("C-;" .  abort-recursive-edit)
-            ;; C-h で削除を有効に
-            ("C-h" . delete-backward-char))
+           ("M-g ." . helm-ag)
+           ("M-g ," . helm-ag-pop-stack)
+           ("M-g s" . helm-do-ag)
+           ("C-M-s" . helm-ag-this-file)
            )
-    :defun helm-build-sync-source helm-stringify
-    :config
-    ;; コマンド候補
-    ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
-    ;; 上記を参考にして、履歴に保存されるように修正
-    (defvar helm-source-emacs-commands
-      (helm-build-sync-source "Emacs commands"
-        :candidates (lambda ()
-                      (let (commands)
-                        (mapatoms (lambda (cmds)
-                                    (if (commandp cmds)
-                                        (push (symbol-name cmds)
-                                              commands))))
-                        (sort commands 'string-lessp)))
-        :coerce #'intern-soft
-        :action (lambda (cmd-or-name)
-                  (command-execute cmd-or-name 'record)
-                  (setq extended-command-history
-                        (cons (helm-stringify cmd-or-name)
-                              (delete (helm-stringify cmd-or-name) extended-command-history)))))
-      "A simple helm source for Emacs commands.")
+    )
 
-    (defvar helm-source-emacs-commands-history
-      (helm-build-sync-source "Emacs commands history"
-        :candidates (lambda ()
-                      (let (commands)
-                        (dolist (elem extended-command-history)
-                          (push (intern elem) commands))
-                        commands))
-        :coerce #'intern-soft
-        :action #'command-execute)
-      "Emacs commands history")
-
-    (leaf helm-descbinds
-      :ensure t
-      :global-minor-mode t
-      )
-
-    (leaf helm-ag
-      :ensure t
-      :custom (
-               (helm-ag-base-command . "pt -e --nocolor --nogroup")
-               )
-      :bind (
-             ("M-g ." . helm-ag)
-             ("M-g ," . helm-ag-pop-stack)
-             ("M-g s" . helm-do-ag)
-             ("C-M-s" . helm-ag-this-file)
-             )
-      )
-
-    (leaf helm-flycheck :ensure t)
-  ))
+  (leaf helm-flycheck :ensure t)
+  )
 
 
 (leaf shackle
