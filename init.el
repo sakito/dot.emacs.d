@@ -1185,12 +1185,104 @@ TODO 一部設定未整備"
   )
 
 
+(leaf markdown-mode
+  :url "https://github.com/jrblevin/markdown-mode"
+  :ensure t
+  :mode ("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'"
+         (("README\\.md\\'" . gfm-mode)))
+  )
+
+
+(leaf *default-frame
+  :doc "デフォルトのフレーム設定
+ディスプレイサイズによって分離する
+デュアルだったりトリプルだったりするので width の方は条件に入れてない
+設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する"
+  :config
+  (leaf display-1440
+    :when (= (display-pixel-height) 1440)
+    :config
+    (setq default-frame-alist
+          (append (list
+                   '(width . 172)
+                   '(height . 60)
+                   '(top . 123)
+                   '(left . 420)
+                   )
+                  default-frame-alist)))
+
+  (leaf display-1200
+    :doc "1920 * 1200 ディスプレイ"
+    :when (= (display-pixel-height) 1200)
+    :config
+    (setq default-frame-alist
+          (append (list
+                   '(width . 175)
+                   '(height . 65)
+                   '(top . 50)
+                   '(left . 500)
+                   )
+                  default-frame-alist)))
+
+  (leaf display-other
+    :doc "1440, 1200 以外"
+    :when (and (not (display-pixel-height) 1200) (not (display-pixel-height) 1400))
+    :config
+    (setq default-frame-alist
+        (append (list
+                 '(width . 140)
+                 '(height . 50)
+                 '(top . 90)
+                 '(left . 100)
+                 )
+                default-frame-alist)))
+
+  (add-to-list 'default-frame-alist '(alpha . (92 70)))
+  )
+
+
+(leaf font
+  :doc "https://github.com/yuru7/Firge"
+  :config
+  (set-face-attribute 'default
+                      nil
+                      :family "Firge35"
+                      :height 180)
+  (set-frame-font "Firge35-18")
+  (set-fontset-font nil
+                    'unicode
+                    (font-spec :family "Firge35")
+                    nil
+                    'append)
+  ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
+  ;; http://apagreekkeys.org/NAUdownload.html
+  (set-fontset-font nil
+                    'greek-iso8859-7
+                    (font-spec :family "New Athena Unicode")
+                    nil
+                    'prepend)
+  ;; 記号        3000-303F http://www.triggertek.com/r/unicode/3000-303F
+  ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
+  ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
+  (set-fontset-font nil
+                    '( #x3000 .  #x30ff)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
+  (set-fontset-font nil
+                    '( #xff00 .  #xffef)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  )
+
+
+
+
 ;; 移行前設定
-;; テキストファイル
-(require 'init_markdown)
 
 ;; フレームサイズ、色、フォントの設定
-(require 'init_font)
 (require 'init_color)
 (require 'init_modeline)
 
