@@ -586,6 +586,16 @@
 
 (leaf ffap
   :require t
+  :custom (
+           (ffap-c-path
+            . '("/opt/local/include" "/usr/include" "/usr/local/include"))
+
+           ;; 新規ファイルの場合には確認する
+           (ffap-newfile-prompt . t)
+
+           ;; ffap-kpathsea-expand-path で展開するパスの深さ
+           (ffap-kpathsea-depth . 5)
+           )
   :bind (
          ;; C-x C-f には helm 無効
          ("C-c C-f" . find-file-at-point)
@@ -1052,10 +1062,48 @@ TODO 一部設定未整備"
     )
   )
 
+
+(leaf c-mode
+  :defun c-toggle-hungry-state
+  :custom (
+           ;; コンパイルセッセージの縦幅
+           (compilation-window-height . 8)
+           )
+  :hook (
+         (c-mode-common-hook
+          . (lambda()
+             ;; styleには GNU,cc-mode,ktr,bsd,stroustrup,whitesmith
+             ;; ,ellemtel,linux等がある
+             (c-set-style "cc-mode")
+
+             ;; 基本オフセット
+             (setq c-basic-offset 2)
+
+             ;; namespace {}の中はインデントしない
+             (c-set-offset 'innamespace 0)
+
+             ;; 連続するスペースをバックスペース一回で削除する
+             (c-toggle-hungry-state t)
+             ))
+         )
+  )
+
+
+(leaf makefile-mode
+  :hook (
+         (makefile-mode-hook
+          .  (lambda ()
+               (whitespace-mode t)
+               ;; suspicious-lines を無視しておく
+               (fset 'makefile-warn-suspicious-lines 'ignore)
+               (setq indent-tabs-mode t)))
+         )
+  )
+
+
 ;; 移行前設定
 
 ;; 開発
-(require 'init_c)
 (require 'init_web-mode)
 (require 'init_css)
 
