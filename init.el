@@ -35,7 +35,6 @@
 ;; path追加、条件分岐系関数
 (load (locate-user-emacs-file "site-start.d/init_preface.el"))
 
-
 ;; leaf
 (eval-and-compile
   (when (or load-file-name byte-compile-current-file)
@@ -143,17 +142,11 @@
 (leaf ui
   :doc "UI関連"
   :custom (
-           ;; toolbar
-           (tool-bar-mode . 0)
-
            ;; scroll bar
            (toggle-scroll-bar . nil)
 
            ;; 警告を視覚的にする
            (visible-bell . t)
-
-           ;;起動時のmessageを表示しない
-           (inhibit-startup-message . t)
 
            ;; scratch のメッセージを空にする
            (initial-scratch-message . nil)
