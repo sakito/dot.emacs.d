@@ -598,7 +598,7 @@
 TODO 一部設定未整備"
   :url "https://github.com/emacs-helm/helm"
   :ensure t
-  :require helm-autoloads
+  :require helm helm-autoloads
   :global-minor-mode t
   :custom (
            ;; M-x を保存
@@ -858,11 +858,103 @@ TODO 一部設定未整備"
   )
 
 
+(leaf smartchr
+  :doc "smartchr の設定"
+  :url "http://tech.kayac.com/archive/emacs-tips-smartchr.html"
+  :require t
+  :el-get (smartchr
+            :url "https://github.com/imakado/emacs-smartchr.git")
+  :defun smartchr
+  :config
+  ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
+  (defun smartchr-custom-keybindings ()
+    ;; !! がカーソルの位置
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+    (local-set-key (kbd ";") (smartchr '(";; " ";")))
+    )
+
+  (defun smartchr-custom-keybindings-clang ()
+    ;; !! がカーソルの位置
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
+    (local-set-key (kbd ":") (smartchr '(":: " ":")))
+    (local-set-key (kbd ";") (smartchr '(";" ";;")))
+    )
+
+  (defun smartchr-custom-keybindings-py ()
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"" "\"\"\"`!!'\"\"\"")))
+    (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'" "\'\'\'`!!'\'\'\'")))
+    (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
+    (local-set-key (kbd "#") (smartchr '("# " "### " "#")))
+    (local-set-key (kbd "=") (smartchr '("=" " == " " = ")))
+    (local-set-key (kbd "+") (smartchr '("+" " + " " += 1")))
+    (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
+    )
+
+  (defun smartchr-custom-keybindings-rst ()
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
+    (local-set-key (kbd ".") (smartchr '("." ".. ")))
+    )
+
+  (defun skelton-custom-keybindigs ()
+    ;;   (make-variable-buffer-local 'skeleton-pair)
+    ;;  (make-variable-buffer-local 'skeleton-pair-on-word)
+    ;;  (make-variable-buffer-local 'skeleton-pair-alist)
+    (setq skeleton-pair t)
+    (setq skeleton-pair-on-word t)
+    (setq skeleton-end-hook nil)
+    (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+    (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
+    (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+    (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+    (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
+    )
+
+  ;; 適用するモードを限定
+  (dolist (hook (list
+                 'css-mode-hook
+                 'js2-mode-hook
+                 'lisp-mode-hook
+                 'emacs-lisp-mode-hook
+                 'sql-mode-hook
+                 ))
+    (add-hook hook 'smartchr-custom-keybindings))
+
+  (dolist (hook (list
+                 'makefile-mode-hook
+                 ))
+    (add-hook hook 'skelton-custom-keybindigs))
+
+  :hook (
+         ;; モードオリジナル追加設定
+         (python-mode-hook . smartchr-custom-keybindings-py)
+         (rst-mode-hook . smartchr-custom-keybindings-rst)
+         (c-mode-common-hook . smartchr-custom-keybindings-clang))
+  )
+
+
 ;; 移行前設定
 
 ;; 開発
-;; (require 'init_autoinsert)
-(require 'init_smartchr)
+;; (require 'init_smartchr)
 ;(require 'init_scm)
 (require 'init_lisp)
 (require 'init_modeinfo)
