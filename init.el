@@ -600,98 +600,101 @@ TODO 一部設定未整備"
   :ensure t
   :require helm-autoloads
   :global-minor-mode t
-  :custom (
-           ;; M-x を保存
-           (helm-M-x-always-save-history . t)
-
-           (helm-display-function . 'pop-to-buffer)
-
-           (helm-mini-default-sources
-            . '(
-                ;; helm-source-flycheck
-                helm-source-buffers-list
-                helm-source-file-name-history
-                helm-source-recentf
-                helm-source-files-in-current-dir
-                helm-source-emacs-commands-history
-                helm-source-emacs-commands
-                helm-source-bookmarks
-                ))
-           )
-  :bind (
-         ;; mini buffer 起動
-         ("C-;" . helm-mini)
-
-         ;; コマンド表示
-         ("M-x" . helm-M-x)
-
-         ;; バッファ切り替え時の一覧表示
-         ("C-x C-b" . helm-for-files)
-
-         ;; kill ring
-         ("M-y". helm-show-kill-ring)
-
-         ;; C-x C-f には helm 無効
-         ;; ("C-c C-f" . find-file-at-point)
-
-         (:helm-map
-          ("C-;" .  abort-recursive-edit)
-          ;; C-h で削除を有効に
-          ("C-h" . delete-backward-char))
-         )
-  :defun helm-build-sync-source helm-stringify
   :config
-  ;; コマンド候補
-  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
-  ;; 上記を参考にして、履歴に保存されるように修正
-  (defvar helm-source-emacs-commands
-    (helm-build-sync-source "Emacs commands"
-      :candidates (lambda ()
-                    (let (commands)
-                      (mapatoms (lambda (cmds)
-                                  (if (commandp cmds)
-                                      (push (symbol-name cmds)
-                                            commands))))
-                      (sort commands 'string-lessp)))
-      :coerce #'intern-soft
-      :action (lambda (cmd-or-name)
-                (command-execute cmd-or-name 'record)
-                (setq extended-command-history
-                      (cons (helm-stringify cmd-or-name)
-                            (delete (helm-stringify cmd-or-name) extended-command-history)))))
-    "A simple helm source for Emacs commands.")
-
-  (defvar helm-source-emacs-commands-history
-    (helm-build-sync-source "Emacs commands history"
-      :candidates (lambda ()
-                    (let (commands)
-                      (dolist (elem extended-command-history)
-                        (push (intern elem) commands))
-                      commands))
-      :coerce #'intern-soft
-      :action #'command-execute)
-    "Emacs commands history")
-
-  (leaf helm-descbinds
-    :ensure t
-    :global-minor-mode t
-    )
-
-  (leaf helm-ag
-    :ensure t
+  (leaf helm-after
+    :after helm
     :custom (
-             (helm-ag-base-command . "pt -e --nocolor --nogroup")
+             ;; M-x を保存
+             (helm-M-x-always-save-history . t)
+
+             (helm-display-function . 'pop-to-buffer)
+
+             (helm-mini-default-sources
+              . '(
+                  ;; helm-source-flycheck
+                  helm-source-buffers-list
+                  helm-source-file-name-history
+                  helm-source-recentf
+                  helm-source-files-in-current-dir
+                  helm-source-emacs-commands-history
+                  helm-source-emacs-commands
+                  helm-source-bookmarks
+                  ))
              )
     :bind (
-           ("M-g ." . helm-ag)
-           ("M-g ," . helm-ag-pop-stack)
-           ("M-g s" . helm-do-ag)
-           ("C-M-s" . helm-ag-this-file)
-           )
-    )
+           ;; mini buffer 起動
+           ("C-;" . helm-mini)
 
-  (leaf helm-flycheck :ensure t)
-  )
+           ;; コマンド表示
+           ("M-x" . helm-M-x)
+
+           ;; バッファ切り替え時の一覧表示
+           ("C-x C-b" . helm-for-files)
+
+           ;; kill ring
+           ("M-y". helm-show-kill-ring)
+
+           ;; C-x C-f には helm 無効
+           ;; ("C-c C-f" . find-file-at-point)
+
+           (:helm-map
+            ("C-;" .  abort-recursive-edit)
+            ;; C-h で削除を有効に
+            ("C-h" . delete-backward-char))
+           )
+    :defun helm-build-sync-source helm-stringify
+    :config
+    ;; コマンド候補
+    ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
+    ;; 上記を参考にして、履歴に保存されるように修正
+    (defvar helm-source-emacs-commands
+      (helm-build-sync-source "Emacs commands"
+        :candidates (lambda ()
+                      (let (commands)
+                        (mapatoms (lambda (cmds)
+                                    (if (commandp cmds)
+                                        (push (symbol-name cmds)
+                                              commands))))
+                        (sort commands 'string-lessp)))
+        :coerce #'intern-soft
+        :action (lambda (cmd-or-name)
+                  (command-execute cmd-or-name 'record)
+                  (setq extended-command-history
+                        (cons (helm-stringify cmd-or-name)
+                              (delete (helm-stringify cmd-or-name) extended-command-history)))))
+      "A simple helm source for Emacs commands.")
+
+    (defvar helm-source-emacs-commands-history
+      (helm-build-sync-source "Emacs commands history"
+        :candidates (lambda ()
+                      (let (commands)
+                        (dolist (elem extended-command-history)
+                          (push (intern elem) commands))
+                        commands))
+        :coerce #'intern-soft
+        :action #'command-execute)
+      "Emacs commands history")
+
+    (leaf helm-descbinds
+      :ensure t
+      :global-minor-mode t
+      )
+
+    (leaf helm-ag
+      :ensure t
+      :custom (
+               (helm-ag-base-command . "pt -e --nocolor --nogroup")
+               )
+      :bind (
+             ("M-g ." . helm-ag)
+             ("M-g ," . helm-ag-pop-stack)
+             ("M-g s" . helm-do-ag)
+             ("C-M-s" . helm-ag-this-file)
+             )
+      )
+
+    (leaf helm-flycheck :ensure t)
+  ))
 
 
 (leaf shackle
@@ -794,10 +797,74 @@ TODO 一部設定未整備"
   ))
 
 
+(leaf autoinsert
+  :require t
+  :global-minor-mode auto-insert-mode
+  :init
+  ;; 置換用の関数
+  (defun my-template ()
+    (time-stamp)
+    (mapc #'(lambda(c)
+              (progn
+                (goto-char (point-min))
+                (replace-string (first c) (funcall (rest c)) nil)))
+          template-replacements-alists)
+    (goto-char (point-max))
+    (message "done."))
+  :custom `(
+           ;; テンプレートとなるファイルがあるディレクトリ
+           ;; 末尾に"/"が必要なので注意
+           (auto-insert-directory
+            . ,(expand-file-name "etc/autoinsert/" user-emacs-directory))
+
+           ;; 質問しないで auto-insertを実行する
+           (auto-insert-query . nil))
+
+  :config
+  ;; テンプレート用の置換文字列
+  (defvar template-replacements-alists
+    '(
+      ("%file%" . (lambda () (file-name-nondirectory (buffer-file-name))))
+      ("%module%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+      ;;("%time%" . (lambda () (format-time-string "%Y-%m-%d %k:%M:%S" (current-time))))
+      ("%time%" . (lambda () (format-time-string "%Y-%m-%d 00:00:00" (current-time))))
+      ("%year%" . (lambda () (format-time-string "%Y" (current-time))))
+      ;; ("%file-without-ext%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+      ;; ("%include-guard%" . (lambda () (format "__SCHEME_%s__" (upcase (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
+      ))
+
+  ;; 各モードの設定
+  ;; Python
+  (setq auto-insert-alist
+        (nconc '(
+                 ("\\.rst$" . ["rst.rst" my-template])
+                 (python-mode . ["python.py" my-template])
+                 ) auto-insert-alist))
+  ;; Lisp
+  (setq auto-insert-alist
+        (nconc '(
+                 ("\\.cl$" . ["cl.lisp" my-template])
+                 ("\\.lisp$" . ["cl.lisp" my-template])
+                 (lisp-mode . ["cl.lisp" my-template])
+                 ) auto-insert-alist))
+
+  ;; Shell
+  (setq auto-insert-alist
+        (nconc '(
+                 ("\\.sh$" . ["shell.sh" my-template])
+                 (sh-mode . ["shell.sh" my-template])
+                 ) auto-insert-alist))
+  :hook (
+         ;; ファイルを開いたら実行
+         (find-file-hook . auto-insert)
+         (find-file-not-found-hooks . auto-insert))
+  )
+
+
 ;; 移行前設定
 
 ;; 開発
-(require 'init_autoinsert)
+;; (require 'init_autoinsert)
 (require 'init_smartchr)
 ;(require 'init_scm)
 (require 'init_lisp)
