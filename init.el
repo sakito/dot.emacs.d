@@ -1151,11 +1151,42 @@ TODO 一部設定未整備"
   )
 
 
+(leaf adoc-mode
+  :doc "AsciiDoc"
+  :url "https://github.com/bbatsov/adoc-mode"
+  :ensure t
+  :mode "\\.txt\\'"
+  )
+
+
+(leaf rst
+  :require t
+  :mode "\\.rst$" "\\.rest$"
+  :init
+  (defvar rst-html-program "open"
+    "Program used to preview HTML files.")
+  (defun rst-compile-html-preview ()
+    "Convert the document to a HTML file and launch a preview program."
+    (interactive)
+    (let* ((tmp-filename "/tmp/out.html")
+           (command (format "rst2html.py --template %s/etc/rst/blog_template.txt --stylesheet-path %s/etc/rst/sourcecode.css %s %s && %s %s"
+                            user-emacs-directory user-emacs-directory
+                            buffer-file-name tmp-filename
+                            rst-html-program tmp-filename)))
+      (start-process-shell-command "rst-html-preview" nil command)
+      ))
+  :bind (:rst-mode-map
+         ("C-c C-c" . rst-compile)
+         ("C-c C-p" . rst-compile-html-preview)
+         ("C-c ;" . comment-dwim)
+         ("C-c :" . comment-dwim)
+         )
+  :hook (rst-mode-hook . turn-off-auto-fill)
+  )
+
 
 ;; 移行前設定
 ;; テキストファイル
-(require 'init_adoc)
-(require 'init_rst)
 (require 'init_markdown)
 
 ;; フレームサイズ、色、フォントの設定
