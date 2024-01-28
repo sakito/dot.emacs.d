@@ -580,17 +580,27 @@
     ))
   )
 
+(leaf ffap
+  :require t
+  :bind (
+         ;; C-x C-f には helm 無効
+         ("C-c C-f" . find-file-at-point)
+         )
+  )
+
 
 (leaf helm
   :doc "helm
 TODO 一部設定未整備"
   :url "https://github.com/emacs-helm/helm"
   :ensure t
-  :require ffap helm-autoloads
+  :require helm-autoloads
   :global-minor-mode t
   :custom (
            ;; M-x を保存
            (helm-M-x-always-save-history . t)
+
+           (helm-display-function . 'pop-to-buffer)
 
            (helm-mini-default-sources
             . '(
@@ -618,7 +628,7 @@ TODO 一部設定未整備"
          ("M-y". helm-show-kill-ring)
 
          ;; C-x C-f には helm 無効
-         ("C-c C-f" . find-file-at-point)
+         ;; ("C-c C-f" . find-file-at-point)
 
          (:helm-map
           ("C-;" .  abort-recursive-edit)
@@ -680,10 +690,53 @@ TODO 一部設定未整備"
   )
 
 
+(leaf shackle
+  :ensure t
+  :global-minor-mode t
+  :custom (
+           ;; default nil
+           (shackle-select-reused-windows . nil)
+
+           ;;default below
+           (shackle-default-alignment . 'below)
+
+           ;; default 0.5
+           (shackle-default-size . 0.4)
+
+           (shackle-rules
+            . '((compilation-mode :select nil)
+                ("*Completions*" :size 0.3  :align t)
+                ("*Messages*" :select nil :inhibit-window-quit t :other t)
+                ("*Compile-Log*" :size 10 :select nil)
+
+                ("*Help*" :select t :inhibit-window-quit t :other t)
+                ("*info*" :select t :inhibit-window-quit t :same t)
+                ("\\*[Wo]*Man.*\\*" :regexp t :select t :inhibit-window-quit t :other t)
+
+                ("\\`\\*helm.*?\\*\\'" :regexp t :size 0.3 :align t)
+
+                ("*eshell*" :select t :other t)
+                ("*Shell Command Output*" :select nil)
+                ("\\*Async Shell.*\\*" :regexp t :ignore t)
+                ("\\*poporg.*\\*" :regexp t :select t :other t)
+
+                ("*Calendar*" :select t :size 0.3 :align below)
+
+                ("*aHg diff*" :sise 50 :align above :select t)
+                ("*aHg log*" :align left)
+                ("\\*hg command" :regexp t :select nil)
+
+                (magit-status-mode :select t :inhibit-window-quit t :same t)
+                (magit-log-mode :select t :inhibit-window-quit t :same t)
+                ))
+           )
+  )
+
+
 ;; 移行前設定
 
 ;; 操作
-(require 'init_shackle)
+;; (require 'init_shackle)
 (require 'init_function)
 (require 'init_calendar)
 
