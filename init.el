@@ -613,8 +613,8 @@ TODO 一部設定未整備"
                 helm-source-file-name-history
                 helm-source-recentf
                 helm-source-files-in-current-dir
-                ;; helm-source-emacs-commands-history
-                ;; helm-source-emacs-commands
+                helm-source-emacs-commands-history
+                helm-source-emacs-commands
                 helm-source-bookmarks
                 ))
            )
@@ -639,38 +639,41 @@ TODO 一部設定未整備"
           ;; C-h で削除を有効に
           ("C-h" . delete-backward-char))
          )
-  ;; :defun helm-build-sync-source helm-stringify
+  :defun helm-build-sync-source helm-stringify
   :config
+  ;; TODO Invalid function: helm-build-sync-source が発生する場合があるので、ここでも require している
+  (require 'helm)
+  (require 'helm-autoloads)
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
   ;; 上記を参考にして、履歴に保存されるように修正
-  ; (defvar helm-source-emacs-commands
-  ;  (helm-build-sync-source "Emacs commands"
-  ;    :candidates (lambda ()
-  ;                  (let (commands)
-  ;                    (mapatoms (lambda (cmds)
-  ;                                (if (commandp cmds)
-  ;                                    (push (symbol-name cmds)
-  ;                                          commands))))
-  ;                    (sort commands 'string-lessp)))
-  ;    :coerce #'intern-soft
-  ;    :action (lambda (cmd-or-name)
-  ;              (command-execute cmd-or-name 'record)
-  ;              (setq extended-command-history
-  ;                    (cons (helm-stringify cmd-or-name)
-  ;                          (delete (helm-stringify cmd-or-name) extended-command-history)))))
-  ;  "A simple helm source for Emacs commands.")
+  (defvar helm-source-emacs-commands
+   (helm-build-sync-source "Emacs commands"
+     :candidates (lambda ()
+                   (let (commands)
+                     (mapatoms (lambda (cmds)
+                                 (if (commandp cmds)
+                                     (push (symbol-name cmds)
+                                           commands))))
+                     (sort commands 'string-lessp)))
+     :coerce #'intern-soft
+     :action (lambda (cmd-or-name)
+               (command-execute cmd-or-name 'record)
+               (setq extended-command-history
+                     (cons (helm-stringify cmd-or-name)
+                           (delete (helm-stringify cmd-or-name) extended-command-history)))))
+   "A simple helm source for Emacs commands.")
 
-  ;(defvar helm-source-emacs-commands-history
-  ;  (helm-build-sync-source "Emacs commands history"
-  ;    :candidates (lambda ()
-  ;                  (let (commands)
-  ;                    (dolist (elem extended-command-history)
-  ;                      (push (intern elem) commands))
-  ;                    commands))
-  ;    :coerce #'intern-soft
-  ;    :action #'command-execute)
-  ;  "Emacs commands history")
+  (defvar helm-source-emacs-commands-history
+   (helm-build-sync-source "Emacs commands history"
+     :candidates (lambda ()
+                   (let (commands)
+                     (dolist (elem extended-command-history)
+                       (push (intern elem) commands))
+                     commands))
+     :coerce #'intern-soft
+     :action #'command-execute)
+   "Emacs commands history")
 
   (leaf helm-descbinds
     :ensure t
