@@ -245,6 +245,7 @@
 (leaf mac
   :doc "mac用の設定"
   :when mac-p
+  :defun mac-translate-from-yen-to-backslash
   :init
   ;; 円マークをバックスラッシュに変換
   ;; inline_patch からコピー
@@ -638,7 +639,7 @@ TODO 一部設定未整備"
           ;; C-h で削除を有効に
           ("C-h" . delete-backward-char))
          )
-  :defun helm-build-sync-source
+  :defun helm-build-sync-source helm-stringify
   :config
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
@@ -738,6 +739,7 @@ TODO 一部設定未整備"
 
 (leaf function
   :doc "独自関数"
+  :defun time-stamp-date
   :init
   ;; 時間(更新日)を挿入する
   (defun time-stamp-date ()
@@ -751,11 +753,48 @@ TODO 一部設定未整備"
   )
 
 
-;; 移行前設定
+(leaf calendar
+  :require t
+  :custom (
+           ;; week number
+           (calendar-intermonth-text
+            . '(propertize
+                (format "%02dW"
+                        (car
+                         (calendar-iso-from-absolute
+                          (calendar-absolute-from-gregorian
+                           (list month (- day (1- calendar-week-start-day)) year)))))
+                'font-lock-face 'calendar-iso-week-face))
+           )
+  :bind (
+         (:calendar-mode-map
+          ("f" . calendar-forward-day)
+          ("n" . calendar-forward-day)
+          ("b" . calendar-backward-day))
+         )
 
-;; 操作
-;; (require 'init_function)
-(require 'init_calendar)
+  :config
+  ;; https://github.com/emacs-jp/japanese-holidays
+  (leaf japanese-holidays
+    :ensure t
+    :require t
+    :after calendar
+    :config
+    ;; 他の国の祝日も表示させたい場合は append を追加
+    (setq calendar-holidays
+          (append japanese-holidays holiday-local-holidays holiday-other-holidays))
+
+    ;; 祝日をカレンダーに表示
+    (setq calendar-mark-holidays-flag t)
+    :hook
+    ;; 今日をマークする
+    (calendar-today-visible-hook . calendar-mark-today)
+    (calendar-today-visible-hook . japanese-holiday-mark-weekend)
+    (calendar-today-invisible-hook . japanese-holiday-mark-weekend)
+  ))
+
+
+;; 移行前設定
 
 ;; 開発
 (require 'init_autoinsert)
