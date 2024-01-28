@@ -159,6 +159,12 @@
 
 (leaf edit
   :doc "編集関連"
+  :preface
+  (defun other-window-or-split ()
+    (interactive)
+    (when (one-window-p)
+      (split-window-horizontally))
+    (other-window 1))
   :custom (
            ;; 自動改行
            (auto-fill-mode . nil)
@@ -206,6 +212,10 @@
            (scroll-preserve-screen-position . t)
            ;; shell-mode において最後の行ができるだけウィンドウの一番下にくるようにする
            (comint-scroll-show-maximum-output . t)
+
+           ;; CUA-mode にて矩形選択のみを有効化
+           (cua-enable-cua-keys . nil)
+           (cua-mode . t)
   )
   :config
   (global-display-line-numbers-mode)
@@ -215,9 +225,93 @@
   :bind (
          ;; help key変更
          ("\M-?" . help-for-help)
+
          ;; BackSpaceをC-hに変更
          ("\C-h" . backward-delete-char)
+
+         ;; kill ring 系操作変更
+         ("C-w" . kill-ring-save)
+         ("M-w" . kill-region)
+
+         ;; C-m は 改行とインデントに割り当て(SKK に取られてしまうから)
+         ("C-m" . newline-and-indent)
+
+         ;; window の移動
+         ("<C-tab>" . other-window-or-split)
          ))
+
+
+(leaf mac
+  :doc "mac用の設定"
+  :when mac-p
+  :init
+  ;; 円マークをバックスラッシュに変換
+  ;; inline_patch からコピー
+  ;; (C) Taiichi Hashimoto <taiichi2@mac.com>
+  (defun mac-translate-from-yen-to-backslash ()
+    ;; Convert yen to backslash for JIS keyboard.
+    (interactive)
+
+    (define-key global-map [165] nil)
+    (define-key global-map [2213] nil)
+    (define-key global-map [3420] nil)
+    (define-key global-map [67109029] nil)
+    (define-key global-map [67111077] nil)
+    (define-key global-map [8388773] nil)
+    (define-key global-map [134219941] nil)
+    (define-key global-map [75497596] nil)
+    (define-key global-map [201328805] nil)
+    (define-key function-key-map [165] [?\\])
+    (define-key function-key-map [2213] [?\\]) ;; for Intel
+    (define-key function-key-map [3420] [?\\]) ;; for PowerPC
+    (define-key function-key-map [67109029] [?\C-\\])
+    (define-key function-key-map [67111077] [?\C-\\])
+    (define-key function-key-map [8388773] [?\M-\\])
+    (define-key function-key-map [134219941] [?\M-\\])
+    (define-key function-key-map [75497596] [?\C-\M-\\])
+    (define-key function-key-map [201328805] [?\C-\M-\\])
+    )
+  :config
+  ;; インプッットメソッドの設定
+  ;; (setq default-input-method "MacOSX-IM-JP")
+  ;; インプットメソッド対応パッチにてctrキーをOS側に渡さない設定
+  ;; (mac-add-ignore-shortcut '(control))
+  ;; システムに装飾キー渡さない
+  (setq mac-pass-control-to-system nil)
+  (setq mac-pass-command-to-system nil)
+  ;; (setq mac-pass-option-to-system nil)
+
+  ;;コマンドキーをMetaキーとして利用
+  ;; (setq mac-command-key-is-meta t)
+  (if (eq mac-option-modifier nil)
+      (progn
+        (setq mac-option-modifier 'meta)
+        (setq mac-command-modifier 'hyper)
+        )
+    (progn
+      (setq mac-option-modifier nil)
+      (setq mac-command-modifier 'meta)
+      )
+    )
+  ;; (setq mac-command-key-is-meta nil)
+  ;; (setq ns-command-modifier (quote meta))
+
+  ;; システムの IM を無視する
+  (setq mac-use-input-method-on-system nil)
+  ;; 起動したら US にする
+  ;; (add-hook 'after-init-hook 'mac-change-language-to-us)
+  ;; minibuffer 内は US にする
+  (mac-auto-ascii-mode t)
+  ;; (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
+
+  ;; 入力モードを英語に変更
+  ;; (setq mac-ts-script-language-on-focus '(0 . 0))
+
+  ;; smooth scroll を on
+  (setq mac-mouse-wheel-smooth-scroll t)
+
+  (mac-translate-from-yen-to-backslash)
+  )
 
 
 (leaf backup
@@ -457,11 +551,14 @@
          ("a" . 'dired-advertised-find-file))
   )
 
+
+
+
+
 ;; 移行前設定
 (require 'init_wgrep)
 
 ;; 操作
-(require 'init_key)
 (require 'init_helm)
 (require 'init_shackle)
 (require 'init_function)
