@@ -1,7 +1,3 @@
-[submodule "local-lisp/wgrep"]
-	path = local-lisp/wgrep
-	url = https://github.com/mhayashi1120/Emacs-wgrep.git
-    ignore = dirty
 [submodule "local-lisp/expand-region"]
 	path = local-lisp/expand-region
 	url = git://github.com/magnars/expand-region.el.git
@@ -53,10 +49,6 @@
 [submodule "local-lisp/js2-mode"]
 	path = local-lisp/js2-mode
 	url = git://github.com/mooz/js2-mode.git
-    ignore = dirty
-[submodule "local-lisp/ptel"]
-	path = local-lisp/ptel
-	url = git://github.com/bling/pt.el.git
     ignore = dirty
 [submodule "local-lisp/helm-descbinds"]
 	path = local-lisp/helm-descbinds

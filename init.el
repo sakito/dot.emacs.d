@@ -520,6 +520,13 @@
                 ("\\.pdf$" "open")))
            )
   :config
+  ;; dired 上で r を押すと wdired-change-to-wdired-mode を動作させる
+  (leaf wdired
+    :require t
+    :bind (:dired-mode-map
+           ("r" . wdired-change-to-wdired-mode))
+    )
+
   ;; dired-x を起動
   (leaf dired-x
     :require t
@@ -552,11 +559,30 @@
   )
 
 
+(leaf grep
+  :config
+  (leaf wgrep
+    :url "https://github.com/mhayashi1120/Emacs-wgrep"
+    :ensure t
+    :custom (
+             (wgrep-enable-key . "r")
+             )
+    )
+  (leaf pt
+    :url "https://github.com/monochromegane/the_platinum_searcher"
+    :url "https://github.com/bling/pt.el"
+    :ensure t
+    :config
+    (leaf wgrep-pt
+      :ensure t
+      :hook ((pt-search-mode-hook . wgrep-pt-setup))
+    ))
+  )
+
 
 
 
 ;; 移行前設定
-(require 'init_wgrep)
 
 ;; 操作
 (require 'init_helm)
