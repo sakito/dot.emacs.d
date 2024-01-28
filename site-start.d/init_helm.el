@@ -66,10 +66,10 @@
 (require 'helm-descbinds)
 (helm-descbinds-mode)
 
-;; M-yでkill-ringの内容をpopupする
-(require 'popup-kill-ring)
-(setq popup-kill-ring-item-size-max 1000)
-(global-set-key (kbd "M-y") 'popup-kill-ring)
+;; ;; M-yでkill-ringの内容をpopupする
+;; (require 'popup-kill-ring)
+;; (setq popup-kill-ring-item-size-max 1000)
+;; (global-set-key (kbd "M-y") 'popup-kill-ring)
 
 ;; pt
 ;; https://github.com/syohex/emacs-helm-ag
