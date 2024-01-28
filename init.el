@@ -613,8 +613,8 @@ TODO 一部設定未整備"
                 helm-source-file-name-history
                 helm-source-recentf
                 helm-source-files-in-current-dir
-                helm-source-emacs-commands-history
-                helm-source-emacs-commands
+                ;; helm-source-emacs-commands-history
+                ;; helm-source-emacs-commands
                 helm-source-bookmarks
                 ))
            )
@@ -639,38 +639,38 @@ TODO 一部設定未整備"
           ;; C-h で削除を有効に
           ("C-h" . delete-backward-char))
          )
-  :defun helm-build-sync-source helm-stringify
+  ;; :defun helm-build-sync-source helm-stringify
   :config
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
   ;; 上記を参考にして、履歴に保存されるように修正
-  (defvar helm-source-emacs-commands
-    (helm-build-sync-source "Emacs commands"
-      :candidates (lambda ()
-                    (let (commands)
-                      (mapatoms (lambda (cmds)
-                                  (if (commandp cmds)
-                                      (push (symbol-name cmds)
-                                            commands))))
-                      (sort commands 'string-lessp)))
-      :coerce #'intern-soft
-      :action (lambda (cmd-or-name)
-                (command-execute cmd-or-name 'record)
-                (setq extended-command-history
-                      (cons (helm-stringify cmd-or-name)
-                            (delete (helm-stringify cmd-or-name) extended-command-history)))))
-    "A simple helm source for Emacs commands.")
+  ; (defvar helm-source-emacs-commands
+  ;  (helm-build-sync-source "Emacs commands"
+  ;    :candidates (lambda ()
+  ;                  (let (commands)
+  ;                    (mapatoms (lambda (cmds)
+  ;                                (if (commandp cmds)
+  ;                                    (push (symbol-name cmds)
+  ;                                          commands))))
+  ;                    (sort commands 'string-lessp)))
+  ;    :coerce #'intern-soft
+  ;    :action (lambda (cmd-or-name)
+  ;              (command-execute cmd-or-name 'record)
+  ;              (setq extended-command-history
+  ;                    (cons (helm-stringify cmd-or-name)
+  ;                          (delete (helm-stringify cmd-or-name) extended-command-history)))))
+  ;  "A simple helm source for Emacs commands.")
 
-  (defvar helm-source-emacs-commands-history
-    (helm-build-sync-source "Emacs commands history"
-      :candidates (lambda ()
-                    (let (commands)
-                      (dolist (elem extended-command-history)
-                        (push (intern elem) commands))
-                      commands))
-      :coerce #'intern-soft
-      :action #'command-execute)
-    "Emacs commands history")
+  ;(defvar helm-source-emacs-commands-history
+  ;  (helm-build-sync-source "Emacs commands history"
+  ;    :candidates (lambda ()
+  ;                  (let (commands)
+  ;                    (dolist (elem extended-command-history)
+  ;                      (push (intern elem) commands))
+  ;                    commands))
+  ;    :coerce #'intern-soft
+  ;    :action #'command-execute)
+  ;  "Emacs commands history")
 
   (leaf helm-descbinds
     :ensure t
@@ -979,12 +979,79 @@ TODO 一部設定未整備"
   )
 
 
+(leaf elisp
+  :doc "emacs lisp"
+  :init
+  (defun skt:emacs-lisp-hook ()
+    (setq indent-tabs-mode nil)
+    (local-set-key (kbd "C-c C-c") 'emacs-lisp-byte-compile)
+    (local-set-key (kbd "C-c C-r") 'emacs-lisp-byte-compile-and-load)
+    (local-set-key (kbd "C-c C-e") 'eval-current-buffer)
+    ;; (local-set-key (kbd "C-c C") 'compile-defun)
+    (local-set-key (kbd "C-c C-d") 'eval-defun)
+    (local-set-key (kbd "C-c ;") 'comment-dwim)
+    (local-set-key (kbd "C-c :") 'comment-dwim)
+    (local-set-key (kbd "C-c f") 'describe-function-at-point)
+    (when (fboundp 'expectations)
+      ;; C-M-x compile-defun
+      (local-set-key (kbd "C-c C-t") 'expectations-execute))
+    )
+  :hook (
+         (lisp-interaction-mode-hook . skt:emacs-lisp-hook)
+         (emacs-lisp-mode-hook . skt:emacs-lisp-hook)
+         ))
+
+
+(leaf python
+  :require t
+  :mode "\\.wsgi\\'" "wscript"
+  :init
+  ;; env
+  (setenv "PYTHONSTARTUP"
+          (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
+  (setenv "PYTHONPATH"
+          (expand-file-name "~/opt/py3.12.1/lib/python3.12/site-packages"))
+
+  :bind (:python-mode-map
+         ("C-c ;" . comment-dwim)
+         ("C-c :". comment-dwim)
+         ("C-c !" . run-python)
+
+         ;; ("C-c n" . flymake-goto-next-error)
+         ;; ("C-c p" . flymake-goto-prev-error)
+         ;; ("C-c C-i" . skt:python-import-modules-from-buffer)
+         ;; ("C-c C-c" . skt:python-shell-send-file)
+         )
+
+  :hook (
+         (python-mode-hook . (lambda () (electric-indent-local-mode -1))))
+
+  :config
+  (leaf cython-mode :ensure t)
+
+  (leaf python-flycheck
+    :require flycheck
+    :config
+    (flycheck-define-checker python-pylintrunner
+      "lintrunner.py"
+      :command ("lintrunner.py" source-inplace)
+      :error-patterns
+      ((error line-start
+              "ERROR " (optional (id (one-or-more (not (any ":"))))) ":"
+              (message) " at " (file-name) " line " line (optional "," column) "." line-end)
+       (warning line-start
+                "WARNING " (optional (id (one-or-more (not (any ":"))))) ":"
+                (message) " at " (file-name) " line " line (optional "," column) "." line-end))
+      :modes python-mode)
+    (add-to-list 'flycheck-checkers 'python-pylintrunner)
+
+    :hook (python-mode-hook . flycheck-mode)
+    )
+  )
 
 ;; 移行前設定
 
 ;; 開発
-(require 'init_modeinfo)
-(require 'init_python)
 (require 'init_c)
 (require 'init_web-mode)
 (require 'init_css)
