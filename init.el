@@ -951,12 +951,38 @@ TODO 一部設定未整備"
   )
 
 
+(leaf vc
+  :doc "VCS"
+  :custom (
+           (vc-handled-backends . nil)
+           (vc-display-status . nil)
+           (vc-consult-headers . nil)
+           ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
+           (vc-follow-symlinks . t))
+  :hook
+  ;; log-edit で メッセージの挿入を停止
+  (log-edit-hook . '(log-edit-insert-cvs-template
+                     log-edit-insert-changelog
+                     log-edit-show-files)))
+
+
+(leaf scratch-log
+  :doc "scratch バッファを保存する"
+  :require t
+  :ensure t
+  :custom `(
+            (sl-scratch-log-file
+             . ,(expand-file-name "var/scratch.log" user-emacs-directory))
+            (sl-prev-scratch-string-file
+             . ,(expand-file-name "var/scratch-prev.log" user-emacs-directory))
+            )
+  )
+
+
+
 ;; 移行前設定
 
 ;; 開発
-;; (require 'init_smartchr)
-;(require 'init_scm)
-(require 'init_lisp)
 (require 'init_modeinfo)
 (require 'init_python)
 (require 'init_c)
