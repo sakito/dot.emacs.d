@@ -57,6 +57,8 @@
 (setopt savehist-additional-variables
         (apropos-internal "-\\(\\(history\\)\\|\\(ring\\)\\)\\'" 'boundp))
 
+(when (not (cl-find 'extended-command-history savehist-minibuffer-history-variables))
+    (add-to-list 'savehist-minibuffer-history-variables 'extended-command-history))
 
 ;; https://qiita.com/j8takagi/items/64cc011a333345d2d749
 ;; (defun my-set-savehist-additional-variables (&optional file)

@@ -54,7 +54,7 @@
 
 ;; git
 ;; @see http://gitorious.org/magit/
-(require 'magit)
+;; (require 'magit)
 
 ;; bzr
 ;; private で確認中

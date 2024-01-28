@@ -29,10 +29,12 @@
 ;; (setq ad-redefinition-action 'accept)  ;; redefin が気になる場合は設定
 (helm-mode +1)
 
+(setopt helm-M-x-always-save-history t)
+
 ;; session の利用を優先するため、emacs終了時にhelmの履歴を保存しない
-(remove-hook 'kill-emacs-hook 'helm-c-adaptive-save-history)
+;; (remove-hook 'kill-emacs-hook 'helm-c-adaptive-save-history)
 ;; それでも空ファイルが作成さてしまう環境があるので 0 に設定
-(setq helm-adaptive-history-length 0)
+;; (setq helm-adaptive-history-length 0)
 
 ;; mini buffer 起動
 (define-key global-map (kbd "C-;") 'helm-mini)
