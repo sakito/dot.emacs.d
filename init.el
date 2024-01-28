@@ -487,7 +487,10 @@
   :doc "magit"
   :ensure t
   :bind (("C-x g" . magit-status)
-         ("C-x C-g" . magit-status))
+         ("C-x C-g" . magit-status)
+
+         (:magit-mode-map
+          ("<C-tab>" . other-window-or-split)))
   :init
   (leaf transient
     :custom
@@ -635,7 +638,8 @@ TODO 一部設定未整備"
           ;; C-h で削除を有効に
           ("C-h" . delete-backward-char))
          )
-  :defer-config
+  :defun helm-build-sync-source
+  :config
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
   ;; 上記を参考にして、履歴に保存されるように修正
@@ -667,7 +671,6 @@ TODO 一部設定未整備"
       :action #'command-execute)
     "Emacs commands history")
 
-  :config
   (leaf helm-descbinds
     :ensure t
     :global-minor-mode t
@@ -733,11 +736,25 @@ TODO 一部設定未整備"
   )
 
 
+(leaf function
+  :doc "独自関数"
+  :init
+  ;; 時間(更新日)を挿入する
+  (defun time-stamp-date ()
+    "Retune the current time as a string in Date from."
+    (format-time-string "%04Y-%02m-%02d: "))
+  (defun insert-date nil
+    "Insert Date."
+    (interactive)
+    (insert (time-stamp-date)))
+  :bind ("C-c d" . #'insert-date)
+  )
+
+
 ;; 移行前設定
 
 ;; 操作
-;; (require 'init_shackle)
-(require 'init_function)
+;; (require 'init_function)
 (require 'init_calendar)
 
 ;; 開発
