@@ -1101,10 +1101,32 @@ TODO 一部設定未整備"
   )
 
 
+(leaf web-mode
+  :ensure t
+  :mode "\\.\\(html\\|htm\\)\\'"
+  :hook (
+         (web-mode-hook
+          . (lambda()
+              ;; web-modeの設定
+              ;; html
+              (setq web-mode-markup-indent-offset 2)
+              ;; css
+              (setq web-mode-css-indent-offset 2)
+              ;; js, php, etc..
+              (setq web-mode-code-indent-offset 2)
+              (setq web-mode-comment-style 2)
+              ;; キーの設定
+              (define-key web-mode-map  (kbd "C-;") nil)
+              (define-key web-mode-map  (kbd "C-c C-;") 'web-mode-comment-or-uncomment)
+              ))
+         )
+  )
+
+
+
 ;; 移行前設定
 
 ;; 開発
-(require 'init_web-mode)
 (require 'init_css)
 
 ;; テキストファイル
