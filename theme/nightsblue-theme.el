@@ -20,6 +20,7 @@
 ;;; Commentary:
 
 ;; nightsblue-theme
+;; 色設定したい場合は M-x list-faces-display にて現在色を確認して変更
 
 ;;; Code:
 
@@ -320,6 +321,7 @@ USA
 
    ;; helm
    ;; ファイル色がデフォルト Blue だが背景が黒系統だと見にくいので変更
+   `(helm-selection ((t (:background ,color-bg1))))
    `(helm-file-name ((t (:foreground ,yellow1))))
    `(helm-buffer-file ((t (:foreground ,yellow1))))
    `(helm-ff-file ((t (:foreground ,yellow1))))
