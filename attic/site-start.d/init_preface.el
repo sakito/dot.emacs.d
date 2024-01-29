@@ -43,9 +43,7 @@
                   "local-lisp"
                   ;; private 内には自分専用の物がはいっている
                   ;; 依存は private 内で完結するようにしている
-                  "private"
-                  ;; 初期設定ファイル
-                  "site-start.d")
+                  "private")
 
 
 ;; Emacs の種類バージョンを判別するための変数を定義
