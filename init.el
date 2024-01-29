@@ -848,6 +848,7 @@
 (leaf autoinsert
   :require t
   :global-minor-mode auto-insert-mode
+  :defvar auto-insert-alist template-replacements-alists
   :init
   ;; 置換用の関数
   (defun my-template ()
@@ -927,6 +928,7 @@
   :el-get (smartchr
            :url "https://github.com/imakado/emacs-smartchr.git")
   :defun smartchr
+  :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
   ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
   (defun smartchr-custom-keybindings ()
@@ -1117,6 +1119,9 @@
   :custom (
            ;; コンパイルセッセージの縦幅
            (compilation-window-height . 8)
+
+           ;; 基本オフセット
+           (c-basic-offset . 2)
            )
   :hook (
          (c-mode-common-hook
@@ -1124,9 +1129,6 @@
              ;; styleには GNU,cc-mode,ktr,bsd,stroustrup,whitesmith
              ;; ,ellemtel,linux等がある
              (c-set-style "cc-mode")
-
-             ;; 基本オフセット
-             (setq c-basic-offset 2)
 
              ;; namespace {}の中はインデントしない
              (c-set-offset 'innamespace 0)
@@ -1153,21 +1155,20 @@
 (leaf web-mode
   :ensure t
   :mode "\\.\\(html\\|htm\\)\\'"
-  :hook (
-         (web-mode-hook
-          . (lambda()
-              ;; web-modeの設定
-              ;; html
-              (setq web-mode-markup-indent-offset 2)
-              ;; css
-              (setq web-mode-css-indent-offset 2)
-              ;; js, php, etc..
-              (setq web-mode-code-indent-offset 2)
-              (setq web-mode-comment-style 2)
-              ;; キーの設定
-              (define-key web-mode-map  (kbd "C-;") nil)
-              (define-key web-mode-map  (kbd "C-c C-;") 'web-mode-comment-or-uncomment)
-              ))
+  :custom (
+           ;; html
+           (web-mode-markup-indent-offset . 2)
+           ;; css
+           (web-mode-css-indent-offset . 2)
+           ;; js, php, etc..
+           (web-mode-code-indent-offset . 2)
+           (web-mode-comment-style . 2)
+           )
+  :bind (
+         (:web-mode-map
+          ("C-;" . nil)
+          ("C-c C-;" . web-mode-comment-or-uncomment)
+          )
          )
   )
 
