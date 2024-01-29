@@ -155,6 +155,7 @@
                    '(height . 60)
                    '(top . 123)
                    '(left . 420)
+                   '(alpha . (92 70))
                    )
                   default-frame-alist)))
 
@@ -168,23 +169,9 @@
                    '(height . 65)
                    '(top . 50)
                    '(left . 500)
+                   '(alpha . (92 70))
                    )
                   default-frame-alist)))
-
-  (leaf display-other
-    :doc "1440, 1200 以外"
-    :when (and (not (display-pixel-height) 1200) (not (display-pixel-height) 1400))
-    :config
-    (setq default-frame-alist
-        (append (list
-                 '(width . 140)
-                 '(height . 50)
-                 '(top . 90)
-                 '(left . 100)
-                 )
-                default-frame-alist)))
-
-  (add-to-list 'default-frame-alist '(alpha . (92 70)))
   )
 
 
