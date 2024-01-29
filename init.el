@@ -33,7 +33,7 @@
 (eval-when-compile (require 'cl-lib nil t))
 
 ;; path追加、条件分岐系関数
-(load (locate-user-emacs-file "site-start.d/init_preface.el"))
+(load (locate-user-emacs-file "lisp/init_preface.el"))
 
 ;; leaf
 (eval-and-compile
@@ -151,8 +151,10 @@
            ;; scratch のメッセージを空にする
            (initial-scratch-message . nil)
 
+           ;; yes or no でなく y or n にする
+           ;; (use-short-answers . t)
+
            ;; 終了時に聞く
-           (use-short-answers . t)
            (confirm-kill-emacs . #'yes-or-no-p)
            ))
 
@@ -216,9 +218,21 @@
            ;; CUA-mode にて矩形選択のみを有効化
            (cua-enable-cua-keys . nil)
            (cua-mode . t)
+
+           ;; 行末の空白を表示
+           (show-trailing-whitespace . t)
+
+           ;; EOB を表示
+           (indicate-empty-lines . t)
+           (indicate-buffer-boundaries . 'left)
+
+           ;; マーク領域を色付け
+           (transient-mark-mode . t)
   )
   :config
   (global-display-line-numbers-mode)
+  (global-font-lock-mode t)
+  (setq font-lock-support-mode 'jit-lock-mode)
   :hook (
          (text-mode-hook . turn-off-auto-fill)
          (prog-mode-hook . display-line-numbers-mode)
@@ -313,6 +327,19 @@
   (setq mac-mouse-wheel-smooth-scroll t)
 
   (mac-translate-from-yen-to-backslash)
+  )
+
+
+(leaf highlight
+  :config
+  ;; 変更点に色付け
+  (global-highlight-changes-mode t)
+  ;; 初期は非表示として highlight-changes-visible-mode で表示する
+  (setq highlight-changes-visibility-initial-state nil)
+  :bind (
+         ("M-]" . highlight-changes-next-change)
+         ("M-[" . highlight-changes-previous-change)
+         )
   )
 
 
@@ -597,7 +624,7 @@
            (ffap-kpathsea-depth . 5)
            )
   :bind (
-         ;; C-x C-f には helm 無効
+         ;; C-x C-f
          ("C-c C-f" . find-file-at-point)
          )
   )
@@ -643,6 +670,9 @@ TODO 一部設定未整備"
 
          ;; C-x C-f には helm 無効
          ;; ("C-c C-f" . find-file-at-point)
+
+         ;; imenu
+         ("C-c i" . helm-imenu)
 
          (:helm-map
           ("C-;" .  abort-recursive-edit)
@@ -762,6 +792,14 @@ TODO 一部設定未整備"
     "Insert Date."
     (interactive)
     (insert (time-stamp-date)))
+
+  ;; face を調査するための関数
+  ;; いろいろ知りたい場合は C-u C-x =
+  (defun describe-face-at-point ()
+    "Return face used at point."
+    (interactive)
+    (message "%s" (get-char-property (point) 'face)))
+
   :bind ("C-c d" . #'insert-date)
   )
 
@@ -871,12 +909,23 @@ TODO 一部設定未整備"
   )
 
 
+(leaf hl-line-plus
+  :url "https://github.com/emacsmirror/hl-line-plus"
+  :require hl-line+
+  :el-get (hl-line-plus
+           :url "https://github.com/emacsmirror/hl-line-plus.git")
+  :defun toggle-hl-line-when-idle
+  :config
+  (toggle-hl-line-when-idle 1)
+  )
+
+
 (leaf smartchr
   :doc "smartchr の設定"
   :url "http://tech.kayac.com/archive/emacs-tips-smartchr.html"
   :require t
   :el-get (smartchr
-            :url "https://github.com/imakado/emacs-smartchr.git")
+           :url "https://github.com/imakado/emacs-smartchr.git")
   :defun smartchr
   :config
   ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
@@ -1278,18 +1327,87 @@ TODO 一部設定未整備"
   )
 
 
+(leaf whitespace
+  :require t
+  :config
+  ;; タブ文字、全角空白、文末の空白の色付け
+  ;; @see http://www.emacswiki.org/emacs/WhiteSpace
+  ;; @see http://xahlee.org/emacs/whitespace-mode.html
+  (setq whitespace-style '(spaces tabs space-mark tab-mark))
+  (setq whitespace-display-mappings
+        '(
+          ;; (space-mark 32 [183] [46]) ; normal space, ·
+          (space-mark 160 [164] [95])
+          (space-mark 2208 [2212] [95])
+          (space-mark 2336 [2340] [95])
+          (space-mark 3616 [3620] [95])
+          (space-mark 3872 [3876] [95])
+          (space-mark ?\x3000 [?\□]) ;; 全角スペース
+          ;; (newline-mark 10 [182 10]) ; newlne, ¶
+          (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+          ))
+  :bind (
+         ;; 常に whitespace-mode だと動作が遅くなる場合がある
+         ("C-x w" . global-whitespace-mode))
+  )
+
+;; color-theme
+(setq color-theme-load-all-themes nil)
+(setq color-theme-libraries nil)
+(require 'color-theme)
+(eval-after-load "color-theme"
+  '(progn
+     (color-theme-initialize)
+     (require 'color-theme-dark)
+     (color-theme-dark))
+  )
 
 
-;; 移行前設定
+(leaf mode-line
+  :doc "mode-line のフォーマット"
+  :config
+  (setq-default mode-line-position
+                '(:eval
+                  (list
+                   "  ["
+                   (propertize "%03l" 'face 'font-lock-type-face)
+                   "/"
+                   (propertize (format "%d" (count-lines (point-max) (point-min))) 'face 'font-lock-type-face)
+                   "("
+                   (propertize "%02p" 'face 'font-lock-type-face)
+                   ")"
+                   ","
+                   (propertize "%03c" 'face 'font-lock-type-face)
+                   "] "
+                   ))
+                )
 
-;; フレームサイズ、色、フォントの設定
-(require 'init_color)
-(require 'init_modeline)
+  (setq-default mode-line-format
+                '(
+                  (elscreen-display-screen-number ("-" elscreen-e21-mode-line-string))
+                  "" skk-modeline-input-mode "%e"
+                  mode-line-mule-info
+                  mode-line-client
+                  mode-line-modified
+                  mode-line-remote
+                  mode-line-frame-identification
+                  mode-line-buffer-identification
+                  mode-line-position
+                  mode-line-modes
+                  "--"
+                  (which-func-mode ("" which-func-format ("--" 0 2)))
+                  (global-mode-string ("" global-mode-string))
+                  "--"
+                  ("-%-" 0 3)
+                  ))
+  )
 
-;; 非公開系
-(when mac-p
+
+(leaf private
+  :doc "非公開系"
+  :when mac-p
+  :config
   (require 'init_private))
-
 
 ;; ;; 終了時バイトコンパイル
 ;; (add-hook 'kill-emacs-query-functions
