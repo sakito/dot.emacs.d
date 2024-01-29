@@ -139,6 +139,126 @@
   (setenv "SSH_AUTH_SOCK" (getenv "SSH_AUTH_SOCK"))
   )
 
+
+(leaf *default-frame
+  :doc "デフォルトのフレーム設定
+ディスプレイサイズによって分離する
+デュアルだったりトリプルだったりするので width の方は条件に入れてない
+設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する"
+  :config
+  (leaf display-1440
+    :when (= (display-pixel-height) 1440)
+    :config
+    (setq default-frame-alist
+          (append (list
+                   '(width . 172)
+                   '(height . 60)
+                   '(top . 123)
+                   '(left . 420)
+                   )
+                  default-frame-alist)))
+
+  (leaf display-1200
+    :doc "1920 * 1200 ディスプレイ"
+    :when (= (display-pixel-height) 1200)
+    :config
+    (setq default-frame-alist
+          (append (list
+                   '(width . 175)
+                   '(height . 65)
+                   '(top . 50)
+                   '(left . 500)
+                   )
+                  default-frame-alist)))
+
+  (leaf display-other
+    :doc "1440, 1200 以外"
+    :when (and (not (display-pixel-height) 1200) (not (display-pixel-height) 1400))
+    :config
+    (setq default-frame-alist
+        (append (list
+                 '(width . 140)
+                 '(height . 50)
+                 '(top . 90)
+                 '(left . 100)
+                 )
+                default-frame-alist)))
+
+  (add-to-list 'default-frame-alist '(alpha . (92 70)))
+  )
+
+
+(leaf font
+  :doc "https://github.com/yuru7/Firge"
+  :config
+  (set-face-attribute 'default
+                      nil
+                      :family "Firge35"
+                      :height 180)
+  (set-frame-font "Firge35-18")
+  (set-fontset-font nil
+                    'unicode
+                    (font-spec :family "Firge35")
+                    nil
+                    'append)
+  ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
+  ;; http://apagreekkeys.org/NAUdownload.html
+  (set-fontset-font nil
+                    'greek-iso8859-7
+                    (font-spec :family "New Athena Unicode")
+                    nil
+                    'prepend)
+  ;; 記号        3000-303F http://www.triggertek.com/r/unicode/3000-303F
+  ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
+  ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
+  (set-fontset-font nil
+                    '( #x3000 .  #x30ff)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
+  (set-fontset-font nil
+                    '( #xff00 .  #xffef)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  )
+
+
+(leaf whitespace
+  :require t
+  :config
+  ;; タブ文字、全角空白、文末の空白の色付け
+  ;; @see http://www.emacswiki.org/emacs/WhiteSpace
+  ;; @see http://xahlee.org/emacs/whitespace-mode.html
+  (setq whitespace-style '(spaces tabs space-mark tab-mark))
+  (setq whitespace-display-mappings
+        '(
+          ;; (space-mark 32 [183] [46]) ; normal space, ·
+          (space-mark 160 [164] [95])
+          (space-mark 2208 [2212] [95])
+          (space-mark 2336 [2340] [95])
+          (space-mark 3616 [3620] [95])
+          (space-mark 3872 [3876] [95])
+          (space-mark ?\x3000 [?\□]) ;; 全角スペース
+          ;; (newline-mark 10 [182 10]) ; newlne, ¶
+          (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+          ))
+  :bind (
+         ;; 常に whitespace-mode だと動作が遅くなる場合がある
+         ("C-x w" . global-whitespace-mode))
+  )
+
+
+(leaf nightsblue-theme
+  :when window-system
+  :config
+  (add-to-list 'custom-theme-load-path
+               (locate-user-emacs-file "theme"))
+  (load-theme 'nightsblue t t)
+  (enable-theme 'nightsblue)
+  )
+
 (leaf ui
   :doc "UI関連"
   :custom (
@@ -152,7 +272,7 @@
            (initial-scratch-message . nil)
 
            ;; yes or no でなく y or n にする
-           ;; (use-short-answers . t)
+           (use-short-answers . t)
 
            ;; 終了時に聞く
            (confirm-kill-emacs . #'yes-or-no-p)
@@ -630,113 +750,6 @@
   )
 
 
-(leaf helm
-  :doc "helm
-TODO 一部設定未整備"
-  :url "https://github.com/emacs-helm/helm"
-  :ensure t
-  :require helm helm-autoloads
-  :global-minor-mode t
-  :custom (
-           ;; M-x を保存
-           (helm-M-x-always-save-history . t)
-
-           (helm-display-function . 'pop-to-buffer)
-
-           (helm-mini-default-sources
-            . '(
-                ;; helm-source-flycheck
-                helm-source-buffers-list
-                helm-source-file-name-history
-                helm-source-recentf
-                helm-source-files-in-current-dir
-                helm-source-emacs-commands-history
-                helm-source-emacs-commands
-                helm-source-bookmarks
-                ))
-           )
-  :bind (
-         ;; mini buffer 起動
-         ("C-;" . helm-mini)
-
-         ;; コマンド表示
-         ("M-x" . helm-M-x)
-
-         ;; バッファ切り替え時の一覧表示
-         ("C-x C-b" . helm-for-files)
-
-         ;; kill ring
-         ("M-y". helm-show-kill-ring)
-
-         ;; C-x C-f には helm 無効
-         ;; ("C-c C-f" . find-file-at-point)
-
-         ;; imenu
-         ("C-c i" . helm-imenu)
-
-         (:helm-map
-          ("C-;" .  abort-recursive-edit)
-          ;; C-h で削除を有効に
-          ("C-h" . delete-backward-char))
-         )
-  :defun helm-build-sync-source helm-stringify
-  :config
-  ;; TODO Invalid function: helm-build-sync-source が発生する場合があるので、ここでも require している
-  (require 'helm)
-  (require 'helm-autoloads)
-  ;; コマンド候補
-  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
-  ;; 上記を参考にして、履歴に保存されるように修正
-  (defvar helm-source-emacs-commands
-   (helm-build-sync-source "Emacs commands"
-     :candidates (lambda ()
-                   (let (commands)
-                     (mapatoms (lambda (cmds)
-                                 (if (commandp cmds)
-                                     (push (symbol-name cmds)
-                                           commands))))
-                     (sort commands 'string-lessp)))
-     :coerce #'intern-soft
-     :action (lambda (cmd-or-name)
-               (command-execute cmd-or-name 'record)
-               (setq extended-command-history
-                     (cons (helm-stringify cmd-or-name)
-                           (delete (helm-stringify cmd-or-name) extended-command-history)))))
-   "A simple helm source for Emacs commands.")
-
-  (defvar helm-source-emacs-commands-history
-   (helm-build-sync-source "Emacs commands history"
-     :candidates (lambda ()
-                   (let (commands)
-                     (dolist (elem extended-command-history)
-                       (push (intern elem) commands))
-                     commands))
-     :coerce #'intern-soft
-     :action #'command-execute)
-   "Emacs commands history")
-
-  (leaf helm-descbinds
-    :ensure t
-    :global-minor-mode t
-    )
-
-  (leaf helm-ag
-    :ensure t
-    :custom (
-             (helm-ag-base-command . "pt -e --nocolor --nogroup")
-             )
-    :bind (
-           ("M-g ." . helm-ag)
-           ("M-g ," . helm-ag-pop-stack)
-           ("M-g s" . helm-do-ag)
-           ("C-M-s" . helm-ag-this-file)
-           )
-    )
-
-  (leaf helm-flycheck :ensure t)
-  )
-
-
 (leaf shackle
   :ensure t
   :global-minor-mode t
@@ -855,7 +868,7 @@ TODO 一部設定未整備"
     (mapc #'(lambda(c)
               (progn
                 (goto-char (point-min))
-                (replace-string (first c) (funcall (rest c)) nil)))
+                (replace-string (cl-first c) (funcall (cl-rest c)) nil)))
           template-replacements-alists)
     (goto-char (point-max))
     (message "done."))
@@ -1242,124 +1255,111 @@ TODO 一部設定未整備"
   )
 
 
-(leaf *default-frame
-  :doc "デフォルトのフレーム設定
-ディスプレイサイズによって分離する
-デュアルだったりトリプルだったりするので width の方は条件に入れてない
-設定は (frame-parameter (selected-frame) 'height) などで値を取得して設定する"
-  :config
-  (leaf display-1440
-    :when (= (display-pixel-height) 1440)
-    :config
-    (setq default-frame-alist
-          (append (list
-                   '(width . 172)
-                   '(height . 60)
-                   '(top . 123)
-                   '(left . 420)
-                   )
-                  default-frame-alist)))
 
-  (leaf display-1200
-    :doc "1920 * 1200 ディスプレイ"
-    :when (= (display-pixel-height) 1200)
-    :config
-    (setq default-frame-alist
-          (append (list
-                   '(width . 175)
-                   '(height . 65)
-                   '(top . 50)
-                   '(left . 500)
-                   )
-                  default-frame-alist)))
+(leaf helm
+  :doc "helm
+TODO 一部設定未整備"
+  :url "https://github.com/emacs-helm/helm"
+  :ensure t
+  :require helm helm-autoloads
+  :global-minor-mode t
+  :custom (
+           ;; M-x を保存
+           (helm-M-x-always-save-history . t)
 
-  (leaf display-other
-    :doc "1440, 1200 以外"
-    :when (and (not (display-pixel-height) 1200) (not (display-pixel-height) 1400))
-    :config
-    (setq default-frame-alist
-        (append (list
-                 '(width . 140)
-                 '(height . 50)
-                 '(top . 90)
-                 '(left . 100)
-                 )
-                default-frame-alist)))
+           (helm-display-function . 'pop-to-buffer)
 
-  (add-to-list 'default-frame-alist '(alpha . (92 70)))
-  )
-
-
-(leaf font
-  :doc "https://github.com/yuru7/Firge"
-  :config
-  (set-face-attribute 'default
-                      nil
-                      :family "Firge35"
-                      :height 180)
-  (set-frame-font "Firge35-18")
-  (set-fontset-font nil
-                    'unicode
-                    (font-spec :family "Firge35")
-                    nil
-                    'append)
-  ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
-  ;; http://apagreekkeys.org/NAUdownload.html
-  (set-fontset-font nil
-                    'greek-iso8859-7
-                    (font-spec :family "New Athena Unicode")
-                    nil
-                    'prepend)
-  ;; 記号        3000-303F http://www.triggertek.com/r/unicode/3000-303F
-  ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
-  ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
-  (set-fontset-font nil
-                    '( #x3000 .  #x30ff)
-                    (font-spec :family "Firge35")
-                    nil
-                    'prepend)
-  ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
-  (set-fontset-font nil
-                    '( #xff00 .  #xffef)
-                    (font-spec :family "Firge35")
-                    nil
-                    'prepend)
-  )
-
-
-(leaf whitespace
-  :require t
-  :config
-  ;; タブ文字、全角空白、文末の空白の色付け
-  ;; @see http://www.emacswiki.org/emacs/WhiteSpace
-  ;; @see http://xahlee.org/emacs/whitespace-mode.html
-  (setq whitespace-style '(spaces tabs space-mark tab-mark))
-  (setq whitespace-display-mappings
-        '(
-          ;; (space-mark 32 [183] [46]) ; normal space, ·
-          (space-mark 160 [164] [95])
-          (space-mark 2208 [2212] [95])
-          (space-mark 2336 [2340] [95])
-          (space-mark 3616 [3620] [95])
-          (space-mark 3872 [3876] [95])
-          (space-mark ?\x3000 [?\□]) ;; 全角スペース
-          ;; (newline-mark 10 [182 10]) ; newlne, ¶
-          (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
-          ))
+           (helm-mini-default-sources
+            . '(
+                ;; helm-source-flycheck
+                helm-source-buffers-list
+                helm-source-file-name-history
+                helm-source-recentf
+                helm-source-files-in-current-dir
+                helm-source-emacs-commands-history
+                helm-source-emacs-commands
+                helm-source-bookmarks
+                ))
+           )
   :bind (
-         ;; 常に whitespace-mode だと動作が遅くなる場合がある
-         ("C-x w" . global-whitespace-mode))
-  )
+         ;; mini buffer 起動
+         ("C-;" . helm-mini)
 
-;; color-theme
-(setq color-theme-load-all-themes nil)
-(setq color-theme-libraries nil)
-(require 'color-theme)
-(eval-after-load "color-theme"
-  '(progn
-     (color-theme-initialize)
-     (require 'color-theme-dark)
-     (color-theme-dark))
+         ;; コマンド表示
+         ("M-x" . helm-M-x)
+
+         ;; バッファ切り替え時の一覧表示
+         ("C-x C-b" . helm-for-files)
+
+         ;; kill ring
+         ("M-y". helm-show-kill-ring)
+
+         ;; C-x C-f には helm 無効
+         ;; ("C-c C-f" . find-file-at-point)
+
+         ;; imenu
+         ("C-c i" . helm-imenu)
+
+         (:helm-map
+          ("C-;" .  abort-recursive-edit)
+          ;; C-h で削除を有効に
+          ("C-h" . delete-backward-char))
+         )
+  :defun helm-build-sync-source helm-stringify
+  :config
+  ;; TODO Invalid function: helm-build-sync-source が発生する場合があるので、ここでも require している
+  (require 'helm)
+  (require 'helm-autoloads)
+  ;; コマンド候補
+  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
+  ;; 上記を参考にして、履歴に保存されるように修正
+  (defvar helm-source-emacs-commands
+   (helm-build-sync-source "Emacs commands"
+     :candidates (lambda ()
+                   (let (commands)
+                     (mapatoms (lambda (cmds)
+                                 (if (commandp cmds)
+                                     (push (symbol-name cmds)
+                                           commands))))
+                     (sort commands 'string-lessp)))
+     :coerce #'intern-soft
+     :action (lambda (cmd-or-name)
+               (command-execute cmd-or-name 'record)
+               (setq extended-command-history
+                     (cons (helm-stringify cmd-or-name)
+                           (delete (helm-stringify cmd-or-name) extended-command-history)))))
+   "A simple helm source for Emacs commands.")
+
+  (defvar helm-source-emacs-commands-history
+   (helm-build-sync-source "Emacs commands history"
+     :candidates (lambda ()
+                   (let (commands)
+                     (dolist (elem extended-command-history)
+                       (push (intern elem) commands))
+                     commands))
+     :coerce #'intern-soft
+     :action #'command-execute)
+   "Emacs commands history")
+
+  (leaf helm-descbinds
+    :ensure t
+    :global-minor-mode t
+    )
+
+  (leaf helm-ag
+    :ensure t
+    :custom (
+             (helm-ag-base-command . "pt -e --nocolor --nogroup")
+             )
+    :bind (
+           ("M-g ." . helm-ag)
+           ("M-g ," . helm-ag-pop-stack)
+           ("M-g s" . helm-do-ag)
+           ("C-M-s" . helm-ag-this-file)
+           )
+    )
+
+  (leaf helm-flycheck :ensure t)
   )
 
 
@@ -1409,24 +1409,16 @@ TODO 一部設定未整備"
   :config
   (require 'init_private))
 
-;; ;; 終了時バイトコンパイル
-;; (add-hook 'kill-emacs-query-functions
-;;           (lambda ()
-;;             (if (file-newer-than-file-p
-;;                  (expand-file-name "init.el" user-emacs-directory)
-;;                  (expand-file-name "init.elc" user-emacs-directory))
-;;                 (byte-compile-file
-;;                  (expand-file-name "init.el" user-emacs-directory)))
-;;             (byte-recompile-directory
-;;              (expand-file-name "site-start.d" user-emacs-directory) 0)
-;;             ))
 
-;; 起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)
-(defun message-startup-time ()
-  (message "Emacs loaded in %dms"
-           (/ (- (+ (cl-third after-init-time)
-                    (* 1000000 (cl-second after-init-time)))
-                 (+ (cl-third before-init-time)
-                    (* 1000000 (cl-second before-init-time))))
-              1000)))
-(add-hook 'after-init-hook 'message-startup-time)
+(leaf startup-time
+  :doc "起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)"
+  :init
+  (defun message-startup-time ()
+    (message "Emacs loaded in %dms"
+             (/ (- (+ (cl-third after-init-time)
+                      (* 1000000 (cl-second after-init-time)))
+                   (+ (cl-third before-init-time)
+                      (* 1000000 (cl-second before-init-time))))
+                1000)))
+  :hook (after-init-hook . message-startup-time)
+  )
