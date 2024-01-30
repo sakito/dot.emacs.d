@@ -84,6 +84,20 @@
   :custom ((user-full-name . "sakito")
            (user-mail-address . "sakito@sakito.com")))
 
+
+(leaf is_system
+  :doc ";; Emacs の種類バージョンを判別するための変数"
+  :init
+  (defvar mac-p (and (eq window-system 'mac)))
+  (defvar windows-p (eq system-type 'windows-nt))
+  (defvar linux-p (eq system-type 'gnu/linux))
+
+  (defvar emacs27-p (equal emacs-major-version 27))
+  (defvar emacs28-p (equal emacs-major-version 28))
+  (defvar emacs29-p (equal emacs-major-version 29))
+  )
+
+
 (leaf coding
   :doc "文字コード設定"
   :config
@@ -420,7 +434,7 @@
   ;; (setq ns-command-modifier (quote meta))
 
   ;; システムの IM を無視する
-  (setq mac-use-input-method-on-system nil)
+  ;; (setq mac-use-input-method-on-system nil)
   ;; 起動したら US にする
   ;; (add-hook 'after-init-hook 'mac-change-language-to-us)
   ;; minibuffer 内は US にする
@@ -1352,7 +1366,11 @@ TODO 一部設定未整備"
            )
     )
 
-  (leaf helm-flycheck :ensure t)
+  (leaf helm-flycheck
+    :ensure t
+    :bind (
+           ("C-c l" . helm-flycheck)
+           ))
   )
 
 
@@ -1397,8 +1415,11 @@ TODO 一部設定未整備"
 
 
 (leaf private
-  :doc "非公開系"
+  :doc "非公開系
+private 内には自分専用の物がはいっている
+依存は private 内で完結するようにしている"
   :when mac-p
+  :load-path* "private"
   :config
   (require 'init_private))
 
@@ -1415,3 +1436,7 @@ TODO 一部設定未整備"
                 1000)))
   :hook (after-init-hook . message-startup-time)
   )
+
+
+(provide 'init)
+;;; init.el ends here

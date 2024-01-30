@@ -39,27 +39,9 @@
 
 ;; Emacs Lisp のPathを通す
 (add-to-load-path "lisp"
-                  ;; private 内には自分専用の物がはいっている
-                  ;; 依存は private 内で完結するようにしている
-                  "private")
 
+                  )
 
-;; Emacs の種類バージョンを判別するための変数を定義
-;; @see http://github.com/elim/dotemacs/blob/master/init.el
-(defun x->bool (elt) (not (not elt)))
-
-(defvar emacs27-p (equal emacs-major-version 27))
-(defvar emacs28-p (equal emacs-major-version 28))
-(defvar emacs29-p (equal emacs-major-version 29))
-
-(defvar darwin-p (eq system-type 'darwin))
-(defvar ns-p (featurep 'ns))
-(defvar mac-p (and (eq window-system 'mac) (or emacs27-p emacs28-p emacs29-p)))
-
-(defvar linux-p (eq system-type 'gnu/linux))
-
-(defvar nt-p (eq system-type 'windows-nt))
-(defvar windows-p (or nt-p))
 
 
 (provide 'init_preface)
