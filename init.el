@@ -225,6 +225,7 @@
 
 (leaf whitespace
   :require t
+  :defvar whitespace-style whitespace-display-mappings
   :config
   ;; タブ文字、全角空白、文末の空白の色付け
   ;; @see http://www.emacswiki.org/emacs/WhiteSpace
@@ -449,6 +450,7 @@
 
 
 (leaf highlight
+  :defvar highlight-changes-visibility-initial-state
   :config
   ;; 変更点に色付け
   (global-highlight-changes-mode t)
@@ -497,6 +499,7 @@
   :doc "ddskk設定"
   :ensure ddskk
   :require t
+  :defvar skk-rom-kana-rule-list
   :custom (
            ;; C-\ でも SKK に切り替えられるように設定
            (default-input-method . "japanese-skk")
@@ -594,6 +597,7 @@
   :init
   (leaf recentf-ext
     :ensure t)
+  :defvar recentf-keep
   :custom
   `(
     ;; recentf ファイルの保存場所を指定。デフォルトはホームの直下
@@ -844,6 +848,7 @@
     :ensure t
     :require t
     :after calendar
+    :defvar calendar-holidays japanese-holidays calendar-mark-holidays-flag
     :config
     ;; 他の国の祝日も表示させたい場合は append を追加
     (setq calendar-holidays
