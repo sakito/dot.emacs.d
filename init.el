@@ -1043,6 +1043,11 @@
   )
 
 
+(leaf flycheck
+  :ensure t
+  :hook (prog-mode-hook . flycheck-mode))
+
+
 (leaf elisp
   :doc "emacs lisp"
   :init

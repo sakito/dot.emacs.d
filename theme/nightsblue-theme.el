@@ -335,6 +335,10 @@ USA
    `(flymake-errline ((t (:underline ,orange))))
    `(flymake-warnline ((t (:underline ,violet))))
 
+   ;; flycheck
+   `(flycheck-info ((t (:underline (:style wave :color ,cyan)))))
+   `(flycheck-warning ((t (:underline (:style wave :color ,red)))))
+
    ;; ddskk-posframe
    `(ddskk-posframe ((t (:background ,color-bg2))))
    `(ddskk-posframe-border ((t (:background ,color-bg1))))
