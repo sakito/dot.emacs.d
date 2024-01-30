@@ -1062,6 +1062,35 @@
   )
 
 
+(leaf company
+  :ensure t
+  :global-minor-mode global-company-mode
+  :custom
+  (company-transformers . '(company-sort-by-backend-importance))
+  (company-idle-delay . 0)
+  (company-echo-delay . 0)
+  ;; 開始文字数
+  (company-minimum-prefix-length . 2)
+  (company-selection-wrap-around . t)
+  (completion-ignore-case . t)
+  :bind
+  (
+   (:company-active-map
+    ("C-n" . company-select-next)
+    ("C-p" . company-select-previous)
+    ("C-s" . company-filter-candidates)
+    ("C-i" . company-complete-selection))
+   (:company-search-map
+    ("C-n" . company-select-next)
+    ("C-p" . company-select-previous))
+   )
+  :config
+  (leaf company-posframe
+    :ensure t
+    :require t)
+  )
+
+
 (leaf flycheck
   :ensure t
   :hook (prog-mode-hook . flycheck-mode))
