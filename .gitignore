@@ -29,7 +29,7 @@ el-get/*
 # 対象外ディレクトリ
 var/*
 share/*
-private/*
+private/
 .session
 ac-comphist.dat
 .hg/
