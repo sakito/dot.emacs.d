@@ -25,15 +25,12 @@
 ;;; Code:
 
 ;; デバッグ
-(require 'sendmail)
 (set-variable 'debug-on-error t)
 (set-variable 'init-file-debug t)
 
 ;; cl-lib 利用前提
 (eval-when-compile (require 'cl-lib nil t))
 
-;; path追加、条件分岐系関数
-(load (locate-user-emacs-file "lisp/init_preface.el"))
 
 ;; leaf
 (eval-and-compile
@@ -635,6 +632,7 @@
 (leaf magit
   :doc "magit"
   :ensure t
+  :require sendmail  ;; 暫定対処
   :bind (("C-x g" . magit-status)
          ("C-x C-g" . magit-status)
 
@@ -689,7 +687,9 @@
 
   ;; s で並び変え、C-u s で元に戻る
   ;; @see sorter.el
-  (leaf sorter :require t)
+  (leaf sorter
+    :load-path* "lisp"
+    :require t)
 
   ;; システムのlsでなくls-lispを利用して表示
   (leaf ls-lisp
