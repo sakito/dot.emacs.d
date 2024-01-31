@@ -2,7 +2,7 @@
 
 ;;init.el -- Emacs init setting elisp file
 
-;; Copyright (C) 2010-2012 sakito
+;; Copyright (C) 2010-2024 sakito
 
 ;; Author: sakito <sakito@sakito.com>
 ;; Keywords: tools
@@ -138,7 +138,7 @@
                 "/usr/local/bin"
                 "/usr/texbin"
                 (expand-file-name "~/bin")
-                (expand-file-name "~/opt/py3.11/bin")
+                (expand-file-name "~/opt/py3.12.1/bin")
                 (expand-file-name "bin" user-emacs-directory)
                 ))
     (when (and (file-exists-p dir) (not (member dir exec-path)))
@@ -1105,6 +1105,22 @@
 (leaf flycheck
   :ensure t
   :hook (prog-mode-hook . flycheck-mode))
+
+
+(leaf yasnippet
+  :ensure t
+  :global-minor-mode yas-global-mode
+  :config
+  (leaf yasnippet-snippets
+    :ensure t))
+
+
+(leaf lsp-bridge
+  :require t
+  :el-get (lsp-bridge
+           :url "https://github.com/manateelazycat/lsp-bridge.git")
+  :custom (
+           (lsp-bridge-python-lsp-server . "pyright")))
 
 
 (leaf elisp
