@@ -375,6 +375,17 @@
          ))
 
 
+(leaf uniquify
+  :doc "同一ファイル識別のためディレクトリ名を付与する"
+  :require t
+  :custom (
+           ;; ディレクトリ名を付与し angle brackets で囲む
+           (uniquify-buffer-name-style . 'post-forward-angle-brackets)
+           ;; 表示階層の深さ
+           (uniquify-min-dir-content . 2)
+           ))
+
+
 (leaf mac
   :doc "mac用の設定"
   :when mac-p
@@ -1133,6 +1144,7 @@
          ("C-c ;" . comment-dwim)
          ("C-c :". comment-dwim)
          ("C-c !" . run-python)
+         ("C-c C-l" . nil)
 
          ;; ("C-c n" . flymake-goto-next-error)
          ;; ("C-c p" . flymake-goto-prev-error)
@@ -1141,7 +1153,10 @@
          )
 
   :hook (
-         (python-mode-hook . (lambda () (electric-indent-local-mode -1))))
+         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-mode-hook . (lambda () (company-mode -1)))
+         (python-mode-hook . (lambda () (company-posframe-mode -1)))
+         )
 
   :config
   (leaf cython-mode :ensure t)
