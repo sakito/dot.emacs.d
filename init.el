@@ -1116,7 +1116,6 @@
 
 
 (leaf lsp-bridge
-  :require t
   :el-get (lsp-bridge
            :url "https://github.com/manateelazycat/lsp-bridge.git")
   :custom (
