@@ -338,6 +338,8 @@ USA
    ;; flycheck
    `(flycheck-info ((t (:underline (:style wave :color ,cyan)))))
    `(flycheck-warning ((t (:underline (:style wave :color ,red)))))
+   `(flycheck-posframe-info-face ((t (:background ,color-fg2 :foreground ,cyan))))
+   `(flycheck-posframe-warning-face ((t (:background ,color-fg2 :foreground ,red))))
 
    ;; ddskk-posframe
    `(ddskk-posframe ((t (:background ,color-bg2))))

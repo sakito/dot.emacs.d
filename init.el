@@ -1104,6 +1104,11 @@
 
 (leaf flycheck
   :ensure t
+  :config
+  (leaf flycheck-posframe
+    :ensure t
+    :hook
+    (flycheck-mode-hook . flycheck-posframe-mode))
   :hook
   (prog-mode-hook . flycheck-mode))
 
