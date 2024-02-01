@@ -1104,7 +1104,8 @@
 
 (leaf flycheck
   :ensure t
-  :hook (prog-mode-hook . flycheck-mode))
+  :hook
+  (prog-mode-hook . flycheck-mode))
 
 
 (leaf yasnippet
@@ -1237,7 +1238,7 @@
 
 (leaf web-mode
   :ensure t
-  :mode "\\.\\(html\\|htm\\)\\'"
+  :mode "\\.\\(html\\|htm\\)\\'" "\\.js[x]?$" "\\.ts[x]?\\'"
   :custom (
            ;; html
            (web-mode-markup-indent-offset . 2)
