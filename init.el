@@ -138,6 +138,7 @@
                 "/usr/local/bin"
                 "/usr/texbin"
                 (expand-file-name "~/bin")
+                (expand-file-name "~/.emacs.d/bin")
                 (expand-file-name "~/opt/py3.12.1/bin")
                 (expand-file-name "bin" user-emacs-directory)
                 ))
@@ -686,6 +687,29 @@
                 ("\\.pdf$" "open")))
            )
   :config
+  ;; dired の sort を拡張
+  (setq dired-listing-switches "-lhaB --group-directories-first")
+  (defvar list-of-dired-switches
+    '(
+      ;; 標準ソート(ディレクトリは上)
+      "-lhaB --group-directories-first"
+      ;; 更新時刻でソート
+      "-lhaBt"
+      ;; サイズでソート
+      "-lhaBS"
+      ;; 拡張子でソート(ディレクトリは上)
+      "-lhaBX --group-directories-first"
+      )
+    "List of ls switches for dired to cycle among.")
+
+  (defun cycle-dired-switches ()
+    "Cycle through the list `list-of-dired-switches' of switches for ls"
+    (interactive)
+    (setq list-of-dired-switches
+          (append (cdr list-of-dired-switches)
+                  (list (car list-of-dired-switches))))
+    (dired-sort-other (car list-of-dired-switches)))
+
   ;; dired 上で r を押すと wdired-change-to-wdired-mode を動作させる
   (leaf wdired
     :require t
@@ -700,21 +724,30 @@
            ;; dired-x では C-x C-j がdired-jump になるので skk-modeに再割り当て
            ("C-x C-j" . skk-mode)))
 
+
+  (leaf gls
+    :when mac-p
+    :config
+    (let ((gls (executable-find "gls")))
+      (when gls
+        (setq insert-directory-program gls)
+        )))
+
   ;; s で並び変え、C-u s で元に戻る
   ;; @see sorter.el
-  (leaf sorter
-    :load-path* "lisp"
-    :require t)
+  ;; (leaf sorter
+  ;;   :load-path* "lisp"
+  ;;   :require t)
 
-  ;; システムのlsでなくls-lispを利用して表示
-  (leaf ls-lisp
-    :require t
-    :custom ((ls-lisp-use-insert-directory-program . nil)
-             ;; ls のオプション
-             (dired-listing-switches . "-lahF")
-             ;; ディレクトリをより上に表示
-             (ls-lisp-dirs-first . t)
-             ))
+  ;; ;; システムのlsでなくls-lispを利用して表示
+  ;; (leaf ls-lisp
+  ;;   :require t
+  ;;   :custom ((ls-lisp-use-insert-directory-program . nil)
+  ;;            ;; ls のオプション
+  ;;            (dired-listing-switches . "-lahF")
+  ;;            ;; ディレクトリをより上に表示
+  ;;            (ls-lisp-dirs-first . t)
+  ;;            ))
 
   ;; dired-find-alternate-fileを有効化
   (put 'dired-find-alternate-file 'disabled nil)
@@ -723,7 +756,10 @@
          ;; RETで新規バッファを作成しないでディレクトリを開く(デフォルトは「a」)
          ("RET" . 'dired-find-alternate-file)
          ;; 「a」を押したときに新規バッファ作成
-         ("a" . 'dired-advertised-find-file))
+         ("a" . 'dired-advertised-find-file)
+         ;; 「s」を押すとソート順序を順次変更する
+         ("s" . cycle-dired-switches)
+         )
   )
 
 
