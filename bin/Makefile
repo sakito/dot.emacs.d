@@ -1,10 +1,11 @@
+
+CWD=$(shell pwd)
+
 .PHONY: all
 all:
-	@echo "make lint"
+	@echo "make dotfiles"
 
-.PHONY: lint
-lint:
-	cython --embed lintrunner.py
-	gcc -O3 -c lintrunner.c -I${HOME}/local/include/python2.7
-	gcc -o lintrunner.exe lintrunner.o  -L${HOME}/local/lib -framework Python
+.PHONY: dotfiles
+dotfiles:
+	ln -sf ${CWD}/dot.pycheckers ${HOME}/.pycheckers
 

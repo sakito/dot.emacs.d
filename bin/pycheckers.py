@@ -47,7 +47,7 @@ except ImportError:
 CONFIG_FILE_NAME = '.pycheckers'
 
 # Checkers to run by default, when no --checkers options are supplied.
-default_checkers = 'pylint,mypy2,mypy3'
+default_checkers = 'pycodestyle,pylint'
 
 
 class FatalException(Exception):
@@ -654,8 +654,8 @@ class Flake8Runner(LintRunner):
         return args
 
 
-class Pep8Runner(LintRunner):
-    """Run pep8.py, producing flycheck readable output.
+class PycodestyleRunner(LintRunner):
+    """Run pycodestyle.py, producing flycheck readable output.
 
     The raw output looks like:
       spiders/structs.py:3:80: E501 line too long (80 characters)
@@ -665,7 +665,7 @@ class Pep8Runner(LintRunner):
 
     """
 
-    command = 'pep8'
+    command = 'pycodestyle'
 
     output_matcher = re.compile(
         r'(?P<filename>[^:]+):'
@@ -971,7 +971,7 @@ class BanditRunner(LintRunner):
 RUNNERS = {
     'pyflakes': PyflakesRunner,
     'flake8': Flake8Runner,
-    'pep8': Pep8Runner,
+    'pycodestyle': PycodestyleRunner,
     'pylint': PylintRunner,
     'mypy2': MyPy2Runner,
     'mypy3': MyPy3Runner,

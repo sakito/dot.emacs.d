@@ -1,0 +1,4 @@
+[DEFAULT]
+max_line_length = 120
+checkers = pycodestyle,pylint
+ignore_codes = C0301, C0103, C0111, R0904, R0903, W1202
