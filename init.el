@@ -1213,28 +1213,20 @@
          (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
          (python-mode-hook . (lambda () (company-mode -1)))
          (python-mode-hook . (lambda () (company-posframe-mode -1)))
+         (python-mode-hook . flycheck-mode)
          )
 
   :config
   (leaf cython-mode :ensure t)
 
-  (leaf python-flycheck
-    :require flycheck
-    :config
-    (flycheck-define-checker python-pylintrunner
-      "lintrunner.py"
-      :command ("lintrunner.py" source-inplace)
-      :error-patterns
-      ((error line-start
-              "ERROR " (optional (id (one-or-more (not (any ":"))))) ":"
-              (message) " at " (file-name) " line " line (optional "," column) "." line-end)
-       (warning line-start
-                "WARNING " (optional (id (one-or-more (not (any ":"))))) ":"
-                (message) " at " (file-name) " line " line (optional "," column) "." line-end))
-      :modes python-mode)
-    (add-to-list 'flycheck-checkers 'python-pylintrunner)
-
-    :hook (python-mode-hook . flycheck-mode)
+  (leaf flycheck-pycheckers
+    :after flycheck
+    :load-path* "lisp"
+    :require t
+    :custom
+    (flycheck-pycheckers-command . "pycheckers.py")
+    :hook
+    (flycheck-mode-hook . flycheck-pycheckers-setup)
     )
   )
 

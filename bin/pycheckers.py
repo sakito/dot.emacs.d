@@ -22,6 +22,7 @@ from csv import DictReader
 from functools import partial
 import shlex
 import subprocess as sp
+from multiprocessing import Pool, cpu_count
 
 from packaging.version import Version
 
@@ -54,11 +55,10 @@ class FatalException(Exception):
     def __init__(self, msg, filename):
         self.msg = msg
         self.filename = filename
-        super(FatalException, self).__init__()
+        super().__init__()
 
     def __str__(self):
-        return 'ERROR :pycheckers:{msg} at {filename} line 1.'.format(
-            msg=self.msg, filename=self.filename)
+        return f'ERROR :pycheckers:{self.msg} at {self.filename} line 1.'
 
 
 class _Path:
@@ -74,7 +74,7 @@ class _Path:
 
     def __repr__(self):
         # type: () -> str
-        return '{}("{}")'.format(self.__class__.__name__, self.path)
+        return f'{self.__class__.__name__}("{self.path}")'
 
 
 class RootRelativePath(_Path):
@@ -107,7 +107,7 @@ def str2bool(v):
 def croak(msgs, filename):
     # type: (Tuple[str], str) -> None
     for m in msgs:
-        print('ERROR :pycheckers:{} at {} line 1.'.format(m.strip(), filename), file=sys.stderr)
+        print(f'ERROR :pycheckers:{m.strip()} at {filename} line 1.', file=sys.stderr)
     sys.exit(1)
 
 
@@ -169,7 +169,7 @@ class LintRunner:
             return None
 
         # Check for linter-specific ignore code settings first, and just use those if found.
-        ignore_codes_option = '{}_ignore_codes'.format(self.name)
+        ignore_codes_option = f'{self.name}_ignore_codes'
         if hasattr(self.options, ignore_codes_option):
             return set(getattr(self.options, ignore_codes_option).split(','))
 
@@ -191,7 +191,8 @@ class LintRunner:
                 if linter in positive_matches:
                     ret.add(code)
                     break
-                elif linter in negative_matches:
+
+                if linter in negative_matches:
                     break
 
         # HACK: until we have a better way to handle this, ensure we have a
@@ -304,7 +305,7 @@ class LintRunner:
         if config_file:
             if not os.path.exists(config_file):
                 raise FatalException(
-                    "Can't find config file %s for checker %s" % (config_file, self.name),
+                    f"Can't find config file {config_file} for checker {self.name}",
                     self._filepath)
         else:
             # Attempt to find one of the `config_file_names` in the project root
@@ -334,6 +335,7 @@ class LintRunner:
             '%f': filepath,
             '%r': self.find_project_root(filepath),
         }
+
         def map_substitution(part):
             # type: (str) -> str
             for sub, replacement in substitutions.items():
@@ -409,8 +411,7 @@ class LintRunner:
                         # Prepend the command name to the description (if
                         # present) so we know which checker threw which error
                         if 'description' in fixed_up:
-                            fixed_up['description'] = '%s: %s' % (
-                                self.name, fixed_up['description'])
+                            fixed_up['description'] = f'{self.name}: {fixed_up["description"]}'
                         tokens.update(fixed_up)
                         template = (
                             self.out_fmt_w_col if fixed_up.get('column_number')
@@ -421,7 +422,7 @@ class LintRunner:
 
     def _user_command_line_option(self):
         # type: () -> str
-        command_line_option_name = '{}_command'.format(self.name)
+        command_line_option_name = f'{self.name}_command'
         command_line_option = getattr(self.options, command_line_option_name, "")
 
         return command_line_option
@@ -457,9 +458,8 @@ class LintRunner:
             # Return a parseable error message so the normal parsing mechanism
             # can display it
             return 1, [
-                ('ERROR : {}:Checker not found on PATH, '
-                 'unable to check at {} line 1.'.format(
-                     self.command, filepath))]
+                (f'ERROR : {self.command}:Checker not found on PATH, '
+                 f'unable to check at {filepath} line 1.')]
 
         # Save the path to the file being checked so we don't have to pass it everywhere.
         # TODO: This means we're carrying state around, double-check that we're ok with this.
@@ -477,7 +477,7 @@ class LintRunner:
             print(e)
             return 1, [str(e)]
         try:
-            self.debug('{} command: {}'.format(self.name, ' '.join(args)))
+            self.debug(f'{self.name} command: {" ".join(args)}')
             process = sp.Popen(
                 args, stdout=sp.PIPE, stderr=sp.PIPE, universal_newlines=True,
                 env=dict(os.environ, **self.get_env_vars()))
@@ -496,12 +496,10 @@ class LintRunner:
         if not self.process_returncode(process.returncode):
             errors_or_warnings += 1
             out_lines += [
-                ('WARNING : {}:Checker indicated failure of some kind at {} line 1.'.format(
-                    self.command, filepath))]
+                (f'WARNING : {self.command}:Checker indicated failure of some kind at {filepath} line 1.')]
             if self.options.report_checker_errors_inline:
                 for line in err.splitlines():
-                    out_lines += ['WARNING : {}:{} at {} line 1.'.format(
-                        self.command, line, filepath)]
+                    out_lines += [f'WARNING : {self.command}:{line} at {filepath} line 1.']
 
         et = time.time()
         self.debug('Start: %.2fs  end: %.2fs  duration: %.2fs' % (st, et, (et-st)))
@@ -509,8 +507,8 @@ class LintRunner:
         if self.options.debug:
             debug_output = self._get_debug_output()
             errors_or_warnings += len(debug_output)
-            out_lines += ['INFO : {}:{} at {} line 1.'.format(
-                self.command, line, filepath) for line in debug_output]
+            out_lines += [f'INFO : {self.command}:{line} at {filepath} line 1.'
+                          for line in debug_output]
 
         return errors_or_warnings, out_lines
 
@@ -723,7 +721,8 @@ class PylintRunner(LintRunner):
             data['level'] = 'WARNING'
 
         if data.get('symbol'):
-            data['description'] += '  ("{}")'.format(data['symbol'])
+            tmp_symbol = data['symbol']
+            data['description'] += f'  ("{tmp_symbol}")'
 
         # Pylint column numbers are off by one
         if data.get('column_number') is not None:
@@ -840,7 +839,7 @@ class MyPy2Runner(LintRunner):
 
         project_root = self.find_project_root(filepath)
         flags += [
-            '--cache-dir={}'.format(self._get_cache_dir(project_root)),
+            f'--cache-dir={self._get_cache_dir(project_root)}',
         ]
         if self.name == 'mypy':
             # mypy2 mode
@@ -1226,7 +1225,7 @@ def main():
 
     source_file_path = options.file
     if not os.path.exists(source_file_path):
-        raise RuntimeError("Can't find source file %s" % source_file_path)
+        raise RuntimeError(f"Can't find source file {source_file_path}")
 
     options = update_options_locally(options)
 
@@ -1240,12 +1239,11 @@ def main():
     try:
         [RUNNERS[checker_name] for checker_name in checker_names]
     except KeyError as e:
-        croak(("Unknown checker: {}".format(e),  # pylint: disable=used-before-assignment
-               "Expected one of %s" % ', '.join(RUNNERS.keys())),
+        croak((f"Unknown checker: {e}",  # pylint: disable=used-before-assignment
+               f"Expected one of {', '.join(RUNNERS.keys())}"),
               filename=options.file)
 
     if options.multi_thread:
-        from multiprocessing import Pool, cpu_count
         p = Pool(cpu_count() + 1)
 
         func = partial(
