@@ -19,10 +19,11 @@ import sys
 import time
 from argparse import ArgumentParser, ArgumentTypeError
 from csv import DictReader
-from distutils.version import LooseVersion
 from functools import partial
 import shlex
-from subprocess import PIPE, Popen
+import subprocess as sp
+
+from packaging.version import Version
 
 # TODO: Ignore the type of conditional imports until
 # https://github.com/python/mypy/issues/1107 is fixed
@@ -60,7 +61,7 @@ class FatalException(Exception):
             msg=self.msg, filename=self.filename)
 
 
-class _Path(object):
+class _Path:
     """Base class for various types of paths (root-relative, absolute, filename-only, etc.)"""
 
     def __init__(self, p):
@@ -110,7 +111,7 @@ def croak(msgs, filename):
     sys.exit(1)
 
 
-class LintRunner(object):
+class LintRunner:
     """Base class provides common functionality to run python code checkers."""
 
     out_fmt = ("%(level)s %(error_type)s%(error_number)s:"
@@ -145,7 +146,7 @@ class LintRunner(object):
         # The root directory of the current project
         self._project_root = None         # type: Optional[str]
         # The version of the checker, if available
-        self._version = None              # type: Optional[LooseVersion]
+        self._version = None              # type: Optional[Version]
         # Any debugging output
         self._debug_lines = []            # type: List[str]
 
@@ -224,10 +225,10 @@ class LintRunner(object):
 
     @property
     def version(self):
-        # type: () -> LooseVersion
+        # type: () -> Version
         """The version of the current checker."""
         if not self._version:
-            self._version = LooseVersion(self._get_version() or '0')
+            self._version = Version(self._get_version() or '0')
             assert self._version  # make mypy happy
         return self._version
 
@@ -435,7 +436,7 @@ class LintRunner(object):
         args = ['/usr/bin/env', 'which', self.command]
 
         try:
-            process = Popen(args, stdout=PIPE, stderr=PIPE)
+            process = sp.Popen(args, stdout=sp.PIPE, stderr=sp.PIPE)
         except Exception as e:                   # pylint: disable=broad-except
             print(e)
             return False
@@ -477,8 +478,8 @@ class LintRunner(object):
             return 1, [str(e)]
         try:
             self.debug('{} command: {}'.format(self.name, ' '.join(args)))
-            process = Popen(
-                args, stdout=PIPE, stderr=PIPE, universal_newlines=True,
+            process = sp.Popen(
+                args, stdout=sp.PIPE, stderr=sp.PIPE, universal_newlines=True,
                 env=dict(os.environ, **self.get_env_vars()))
         except Exception as e:                   # pylint: disable=broad-except
             print(e, args)
@@ -529,8 +530,8 @@ class LintRunner(object):
         """
         args = self.construct_version_args()
         try:
-            process = Popen(
-                args, stdout=PIPE, stderr=PIPE, universal_newlines=True,
+            process = sp.Popen(
+                args, stdout=sp.PIPE, stderr=sp.PIPE, universal_newlines=True,
                 env=dict(os.environ, **self.get_env_vars()))
         except Exception as e:                   # pylint: disable=broad-except
             print(e, args)
@@ -630,7 +631,7 @@ class Flake8Runner(LintRunner):
         # type: (str) -> Iterable[str]
         args = []
         if self.ignore_codes is not None:
-            if self.version >= LooseVersion('3.6.0'):
+            if self.version >= Version('3.6.0'):
                 # This only works with flake8 3.6.0+, and *extends*
                 # the values given by a config file.
                 args.append('--extend-ignore=' + ','.join(self.ignore_codes))
@@ -824,12 +825,12 @@ class MyPy2Runner(LintRunner):
         if daemon_mode:
             flags = [f for f in flags if f != '--incremental']
             # Older daemon versions didn't support following imports
-            if self.version < LooseVersion('0.780'):
+            if self.version < Version('0.780'):
                 flags = ['run', '--timeout', '600', '--', '--follow-imports=error'] + flags
             else:
                 flags = ['run', '--timeout', '600', '--'] + flags
         else:
-            if self.version < LooseVersion('0.660'):
+            if self.version < Version('0.660'):
                 # --quick-and-dirty is still available
                 flags += ['--quick-and-dirty']
 
@@ -868,11 +869,10 @@ class MyPy2Runner(LintRunner):
             # Currently expecting this command to spit out one file per
             # line; this way we work well with the find command and support
             # spaces in filenames.
-            from subprocess import check_output, CalledProcessError
             try:
-                flags += check_output(self.options.mypy_daemon_files_command,
+                flags += sp.check_output(self.options.mypy_daemon_files_command,
                                       shell=True).strip().split('\n')
-            except CalledProcessError as exc:
+            except sp.CalledProcessError as exc:
                 # Convert this to a FatalException to get it to show up in the
                 # current file buffer.
                 raise FatalException('Mypy daemon files command failed: ' + str(exc),
@@ -1096,8 +1096,8 @@ def get_vcs_branch_name(vcs_root):
         return None
 
     args = commands[vcs_name]
-    p = Popen(
-        args, stdout=PIPE, stderr=PIPE, cwd=vcs_root, universal_newlines=True)
+    p = sp.Popen(
+        args, stdout=sp.PIPE, stderr=sp.PIPE, cwd=vcs_root, universal_newlines=True)
     out, _err = p.communicate()
     p.wait()
     out = out.strip()
@@ -1209,7 +1209,7 @@ def parse_args():
                         action='store')
 
     parser.add_argument('--debug', action='store_true',
-                        help=('Enable output to help debug pycheckers itself'))
+                        help='Enable output to help debug pycheckers itself')
 
     return parser.parse_args()
 
