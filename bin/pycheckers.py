@@ -40,8 +40,7 @@ except ImportError:
 try:
     # pylint: disable=unused-import, ungrouped-imports
     from argparse import Namespace
-    from typing import (
-        Any, Dict, List, Iterable, Optional, Set, Tuple, Union)
+    from typing import Any, Dict, List, Iterable, Optional, Set, Tuple, Union
 except ImportError:
     pass
 
@@ -114,16 +113,16 @@ def croak(msgs, filename):
 class LintRunner:
     """Base class provides common functionality to run python code checkers."""
 
-    out_fmt = ("%(level)s %(error_type)s%(error_number)s:"
-               "%(description)s at %(filename)s line %(line_number)s.")
+    out_fmt = '%(level)s %(error_type)s%(error_number)s:' '%(description)s at %(filename)s line %(line_number)s.'
     out_fmt_w_col = (
-        "%(level)s %(error_type)s%(error_number)s:"
-        "%(description)s at %(filename)s line %(line_number)s,"
-        "%(column_number)s.")
+        '%(level)s %(error_type)s%(error_number)s:'
+        '%(description)s at %(filename)s line %(line_number)s,'
+        '%(column_number)s.'
+    )
 
     output_template = dict.fromkeys(
-        ('level', 'error_type', 'error_number', 'description',
-         'filename', 'line_number', 'column_number'), '')
+        ('level', 'error_type', 'error_number', 'description', 'filename', 'line_number', 'column_number'), ''
+    )
 
     output_matcher = re.compile(r'')
 
@@ -142,13 +141,13 @@ class LintRunner:
         self.options = options
 
         # The path to the file being checked
-        self._filepath = None             # type: Optional[str]
+        self._filepath = None  # type: Optional[str]
         # The root directory of the current project
-        self._project_root = None         # type: Optional[str]
+        self._project_root = None  # type: Optional[str]
         # The version of the checker, if available
-        self._version = None              # type: Optional[Version]
+        self._version = None  # type: Optional[Version]
         # Any debugging output
-        self._debug_lines = []            # type: List[str]
+        self._debug_lines = []  # type: List[str]
 
     @property
     def ignore_codes(self):
@@ -199,14 +198,74 @@ class LintRunner:
         # list of acceptable codes per checker so the checker doesn't crash
         # (looking at you, bandit).
         CHECKER_ACCEPTABLE_CODES = {
-            'bandit': set(['B101', 'B102', 'B103', 'B104', 'B105', 'B106', 'B107', 'B108',
-                           'B109', 'B110', 'B111', 'B112', 'B201', 'B301', 'B302', 'B303',
-                           'B304', 'B305', 'B306', 'B307', 'B308', 'B309', 'B310', 'B311',
-                           'B312', 'B313', 'B314', 'B315', 'B316', 'B317', 'B318', 'B319',
-                           'B320', 'B321', 'B322', 'B401', 'B402', 'B403', 'B404', 'B405',
-                           'B406', 'B407', 'B408', 'B409', 'B410', 'B411', 'B412', 'B501',
-                           'B502', 'B503', 'B504', 'B505', 'B506', 'B601', 'B602', 'B603',
-                           'B604', 'B605', 'B606', 'B607', 'B608', 'B609', 'B701', 'B702', ]),
+            'bandit': set(
+                [
+                    'B101',
+                    'B102',
+                    'B103',
+                    'B104',
+                    'B105',
+                    'B106',
+                    'B107',
+                    'B108',
+                    'B109',
+                    'B110',
+                    'B111',
+                    'B112',
+                    'B201',
+                    'B301',
+                    'B302',
+                    'B303',
+                    'B304',
+                    'B305',
+                    'B306',
+                    'B307',
+                    'B308',
+                    'B309',
+                    'B310',
+                    'B311',
+                    'B312',
+                    'B313',
+                    'B314',
+                    'B315',
+                    'B316',
+                    'B317',
+                    'B318',
+                    'B319',
+                    'B320',
+                    'B321',
+                    'B322',
+                    'B401',
+                    'B402',
+                    'B403',
+                    'B404',
+                    'B405',
+                    'B406',
+                    'B407',
+                    'B408',
+                    'B409',
+                    'B410',
+                    'B411',
+                    'B412',
+                    'B501',
+                    'B502',
+                    'B503',
+                    'B504',
+                    'B505',
+                    'B506',
+                    'B601',
+                    'B602',
+                    'B603',
+                    'B604',
+                    'B605',
+                    'B606',
+                    'B607',
+                    'B608',
+                    'B609',
+                    'B701',
+                    'B702',
+                ]
+            ),
         }
 
         if self.name in CHECKER_ACCEPTABLE_CODES:
@@ -285,7 +344,7 @@ class LintRunner:
         """Check if `filename` (generally a config file) exists in project
         root, and return the full path if so. Otherwise, return None.
         """
-        if not self._filepath:            # This should be set by now
+        if not self._filepath:  # This should be set by now
             raise ValueError("self._filepath not set, can't determine project root")
         project_root = self.find_project_root(self._filepath)
 
@@ -304,9 +363,7 @@ class LintRunner:
         config_file = getattr(self.options, option_name, None)
         if config_file:
             if not os.path.exists(config_file):
-                raise FatalException(
-                    f"Can't find config file {config_file} for checker {self.name}",
-                    self._filepath)
+                raise FatalException(f"Can't find config file {config_file} for checker {self.name}", self._filepath)
         else:
             # Attempt to find one of the `config_file_names` in the project root
             for config_file_name in config_file_names:
@@ -413,9 +470,7 @@ class LintRunner:
                         if 'description' in fixed_up:
                             fixed_up['description'] = f'{self.name}: {fixed_up["description"]}'
                         tokens.update(fixed_up)
-                        template = (
-                            self.out_fmt_w_col if fixed_up.get('column_number')
-                            else self.out_fmt)
+                        template = self.out_fmt_w_col if fixed_up.get('column_number') else self.out_fmt
                         out_lines.append(template % tokens)
                         errors_or_warnings += 1
         return errors_or_warnings, out_lines
@@ -423,7 +478,7 @@ class LintRunner:
     def _user_command_line_option(self):
         # type: () -> str
         command_line_option_name = f'{self.name}_command'
-        command_line_option = getattr(self.options, command_line_option_name, "")
+        command_line_option = getattr(self.options, command_line_option_name, '')
 
         return command_line_option
 
@@ -438,7 +493,7 @@ class LintRunner:
 
         try:
             process = sp.Popen(args, stdout=sp.PIPE, stderr=sp.PIPE)
-        except Exception as e:                   # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             print(e)
             return False
         exec_path, _err = process.communicate()
@@ -458,8 +513,8 @@ class LintRunner:
             # Return a parseable error message so the normal parsing mechanism
             # can display it
             return 1, [
-                (f'ERROR : {self.command}:Checker not found on PATH, '
-                 f'unable to check at {filepath} line 1.')]
+                (f'ERROR : {self.command}:Checker not found on PATH, ' f'unable to check at {filepath} line 1.')
+            ]
 
         # Save the path to the file being checked so we don't have to pass it everywhere.
         # TODO: This means we're carrying state around, double-check that we're ok with this.
@@ -479,9 +534,13 @@ class LintRunner:
         try:
             self.debug(f'{self.name} command: {" ".join(args)}')
             process = sp.Popen(
-                args, stdout=sp.PIPE, stderr=sp.PIPE, universal_newlines=True,
-                env=dict(os.environ, **self.get_env_vars()))
-        except Exception as e:                   # pylint: disable=broad-except
+                args,
+                stdout=sp.PIPE,
+                stderr=sp.PIPE,
+                universal_newlines=True,
+                env=dict(os.environ, **self.get_env_vars()),
+            )
+        except Exception as e:  # pylint: disable=broad-except
             print(e, args)
             return 1, [str(e)]
 
@@ -490,25 +549,22 @@ class LintRunner:
 
         out, err = process.communicate()
         process.wait()
-        errors_or_warnings, out_lines = self._process_streams(
-            filepath, out.splitlines(), err.splitlines())
+        errors_or_warnings, out_lines = self._process_streams(filepath, out.splitlines(), err.splitlines())
 
         if not self.process_returncode(process.returncode):
             errors_or_warnings += 1
-            out_lines += [
-                (f'WARNING : {self.command}:Checker indicated failure of some kind at {filepath} line 1.')]
+            out_lines += [(f'WARNING : {self.command}:Checker indicated failure of some kind at {filepath} line 1.')]
             if self.options.report_checker_errors_inline:
                 for line in err.splitlines():
                     out_lines += [f'WARNING : {self.command}:{line} at {filepath} line 1.']
 
         et = time.time()
-        self.debug('Start: %.2fs  end: %.2fs  duration: %.2fs' % (st, et, (et-st)))
+        self.debug('Start: %.2fs  end: %.2fs  duration: %.2fs' % (st, et, (et - st)))
 
         if self.options.debug:
             debug_output = self._get_debug_output()
             errors_or_warnings += len(debug_output)
-            out_lines += [f'INFO : {self.command}:{line} at {filepath} line 1.'
-                          for line in debug_output]
+            out_lines += [f'INFO : {self.command}:{line} at {filepath} line 1.' for line in debug_output]
 
         return errors_or_warnings, out_lines
 
@@ -529,9 +585,13 @@ class LintRunner:
         args = self.construct_version_args()
         try:
             process = sp.Popen(
-                args, stdout=sp.PIPE, stderr=sp.PIPE, universal_newlines=True,
-                env=dict(os.environ, **self.get_env_vars()))
-        except Exception as e:                   # pylint: disable=broad-except
+                args,
+                stdout=sp.PIPE,
+                stderr=sp.PIPE,
+                universal_newlines=True,
+                env=dict(os.environ, **self.get_env_vars()),
+            )
+        except Exception as e:  # pylint: disable=broad-except
             print(e, args)
             return None
 
@@ -555,10 +615,7 @@ class PyflakesRunner(LintRunner):
 
     command = 'pyflakes'
 
-    output_matcher = re.compile(
-        r'(?P<filename>[^:]+):'
-        r'(?P<line_number>[^:]+):'
-        r'(?P<description>.+)$')
+    output_matcher = re.compile(r'(?P<filename>[^:]+):' r'(?P<line_number>[^:]+):' r'(?P<description>.+)$')
 
     @classmethod
     def fixup_data(cls, _line, data, _filepath):
@@ -582,21 +639,19 @@ class PyflakesRunner(LintRunner):
 
 
 class Flake8Runner(LintRunner):
-    """Flake8 has similar output to Pyflakes
-    """
+    """Flake8 has similar output to Pyflakes"""
 
     command = 'flake8'
 
     output_matcher = re.compile(
         r'(?P<filename>[^:]+):'
-        '(?P<line_number>[^:]+):'
-        '(?P<column_number>[^:]+): '
-        '(?P<error_type>[A-Z])(?P<error_number>[^ ]+) '
-        '(?P<description>.+)$')
-
-    version_matcher = re.compile(
-        r'(?P<version>[0-9.]+).*'
+        r'(?P<line_number>[^:]+):'
+        r'(?P<column_number>[^:]+): '
+        r'(?P<error_type>[A-Z])(?P<error_number>[^ ]+) '
+        r'(?P<description>.+)$'
     )
+
+    version_matcher = re.compile(r'(?P<version>[0-9.]+).*')
 
     @classmethod
     def fixup_data(cls, _line, data, _filepath):
@@ -639,15 +694,15 @@ class Flake8Runner(LintRunner):
                 # nothing (i.e. `--ignore=`, meaning ignore nothing)
                 args.append('--ignore=' + ','.join(self.ignore_codes))
 
-        config_file = self.find_config_file(
-            'flake8_config_file', ['setup.cfg', 'tox.ini', '.flake8'])
+        config_file = self.find_config_file('flake8_config_file', ['setup.cfg', 'tox.ini', '.flake8'])
         if config_file:
             args += ['--config', config_file]
 
         args += [
             # TODO: --select, but additive
             # '-select=' + ','.join(self.enable_codes),
-            '--max-line-length', str(self.options.max_line_length),
+            '--max-line-length',
+            str(self.options.max_line_length),
         ]
         return args
 
@@ -670,7 +725,8 @@ class PycodestyleRunner(LintRunner):
         r'(?P<line_number>[^:]+):'
         r'(?P<column_number>[^:]+):'
         r' (?P<error_number>\w+) '
-        r'(?P<description>.+)$')
+        r'(?P<description>.+)$'
+    )
 
     @classmethod
     def fixup_data(cls, _line, data, _filepath):
@@ -687,19 +743,20 @@ class PycodestyleRunner(LintRunner):
             '--repeat',
             # TODO: make this additive, not a replacement
             # '--select=' + ','.join(self.enable_codes),
-            '--max-line-length', str(self.options.max_line_length),
+            '--max-line-length',
+            str(self.options.max_line_length),
         ]
         return args
 
 
 class PylintRunner(LintRunner):
-    """ Run pylint, producing flycheck readable output.
+    """Run pylint, producing flycheck readable output.
 
     The raw output looks like:
     render.py:49: [C0301] Line too long (82/80)
     render.py:1: [C0111] Missing docstring
     render.py:3: [E0611] No name 'Response' in module 'werkzeug'
-    render.py:32: [C0111, render] Missing docstring """
+    render.py:32: [C0111, render] Missing docstring"""
 
     command = 'pylint'
 
@@ -710,7 +767,8 @@ class PylintRunner(LintRunner):
         r'\s*\[(?P<error_type>[WECR])(?P<error_number>[^(,\]]+)'
         r'\((?P<symbol>[^)]*)\)'
         r'\s*(?P<context>[^\]]*)\]'
-        r'\s*(?P<description>.*)$')
+        r'\s*(?P<description>.*)$'
+    )
 
     @classmethod
     def fixup_data(cls, _line, data, _filepath):
@@ -735,13 +793,15 @@ class PylintRunner(LintRunner):
         if self.ignore_codes is not None:
             args.append('--disable=' + ','.join(self.ignore_codes))
         args += [
-            '--msg-template', ('{path}:{line}:{column}: '
-                               '[{msg_id}({symbol})] {msg}'),
-            '--reports', 'n',
+            '--msg-template',
+            ('{path}:{line}:{column}: ' '[{msg_id}({symbol})] {msg}'),
+            '--reports',
+            'n',
             # This is additive, not replacing
             '--enable=' + ','.join(self.enable_codes),
             '--dummy-variables-rgx=' + '_.*',
-            '--max-line-length', str(self.options.max_line_length),
+            '--max-line-length',
+            str(self.options.max_line_length),
         ]
         if self.options.pylint_rcfile:
             args.extend(['--rcfile', self.options.pylint_rcfile])
@@ -761,11 +821,10 @@ class PylintRunner(LintRunner):
 
 
 class MyPy2Runner(LintRunner):
-
     # A few of our properties vary if we're in daemon mode:
 
     @property
-    def command(self):          # type: ignore
+    def command(self):  # type: ignore
         # type: () -> str
         if self.options.mypy_use_daemon:
             return 'dmypy'
@@ -778,18 +837,16 @@ class MyPy2Runner(LintRunner):
         # root that checks everything.
         return self.options.mypy_use_daemon
 
-
     output_matcher = re.compile(
         r'(?P<filename>[^:]+):'
         r'(?P<line_number>\d+):'
         r'((?P<column_number>\d+):)?'  # Column number is optional, depending on mypy options
         r' (?P<level>[^:]+):'
-        r' (?P<description>.+)$')
+        r' (?P<description>.+)$'
+    )
 
     # Note: this needs to match both mypy and dmypy
-    version_matcher = re.compile(
-        r'd?mypy (?P<version>[0-9.]+)'
-    )
+    version_matcher = re.compile(r'd?mypy (?P<version>[0-9.]+)')
 
     _base_flags = [
         '--incremental',
@@ -846,8 +903,8 @@ class MyPy2Runner(LintRunner):
             flags += ['--py2']
 
         config_file = self.find_config_file(
-            'mypy_config_file',
-            ['mypy.ini', '.mypy.ini', 'pyproject.toml', 'setup.cfg'])
+            'mypy_config_file', ['mypy.ini', '.mypy.ini', 'pyproject.toml', 'setup.cfg']
+        )
         if config_file:
             flags += ['--config-file', config_file]
 
@@ -869,14 +926,11 @@ class MyPy2Runner(LintRunner):
             # line; this way we work well with the find command and support
             # spaces in filenames.
             try:
-                flags += sp.check_output(self.options.mypy_daemon_files_command,
-                                      shell=True).strip().split('\n')
+                flags += sp.check_output(self.options.mypy_daemon_files_command, shell=True).strip().split('\n')
             except sp.CalledProcessError as exc:
                 # Convert this to a FatalException to get it to show up in the
                 # current file buffer.
-                raise FatalException('Mypy daemon files command failed: ' + str(exc),
-                                     filepath)
-
+                raise FatalException('Mypy daemon files command failed: ' + str(exc), filepath)
 
         return flags
 
@@ -924,7 +978,6 @@ class MyPy2Runner(LintRunner):
 
 
 class MyPy3Runner(MyPy2Runner):
-
     @property
     def name(self):
         # type: () -> str
@@ -932,14 +985,21 @@ class MyPy3Runner(MyPy2Runner):
 
 
 class BanditRunner(LintRunner):
-
     command = 'bandit'
     got_header = False
 
     def output_matcher(self, line):  # type: ignore
         # type: (str) -> Optional[Dict[str, str]]
-        keys = ['filename', 'test_name', 'test_id', 'issue_severity',
-                'issue_confidence', 'issue_text', 'line_number', 'line_range']
+        keys = [
+            'filename',
+            'test_name',
+            'test_id',
+            'issue_severity',
+            'issue_confidence',
+            'issue_text',
+            'line_number',
+            'line_range',
+        ]
         f = StringIO(line)
         reader = DictReader(f, fieldnames=keys)
         res = next(reader)
@@ -981,14 +1041,14 @@ RUNNERS = {
 def get_options_from_file(file_path):
     # type: (str) -> Dict[str, Any]
     """Parse options from the config file at `file_path` and return them as a dict"""
-    parsed_options = {}         # type: Dict[str, Union[str, bool]]
+    parsed_options = {}  # type: Dict[str, Union[str, bool]]
 
     config = ConfigParser()
     config.read(file_path)
     # [DEFAULT] section
     for key, value in config.defaults().items():
         if is_false(value):
-            final_value = False           # type: Union[str, bool]
+            final_value = False  # type: Union[str, bool]
         elif is_true(value):
             final_value = True
         else:
@@ -1008,7 +1068,7 @@ def update_options_locally(options):
     project-specific settings.
     """
     allowed_duplicate_options = {'extra_ignore_codes'}
-    set_options = set()         # type: Set[str]
+    set_options = set()  # type: Set[str]
 
     dir_path = os.path.dirname(os.path.abspath(options.file))
     config_file_path = os.path.join(dir_path, CONFIG_FILE_NAME)
@@ -1062,7 +1122,7 @@ def find_vcs_name(dir_):
     for part in ['.git', '.svn', '.hg', '.cvs', '.jedi']:
         path = os.path.join(dir_, part)
         if os.path.exists(path) and os.path.isdir(path):
-            return part[1:]             # return the name of the vcs system
+            return part[1:]  # return the name of the vcs system
     return None
 
 
@@ -1076,15 +1136,14 @@ def find_vcs_root(source_file):
             return cur_dir, vcs_name
         parent = os.path.dirname(cur_dir)
         if parent == cur_dir:
-            break              # Hit the FS root without finding VCS info
+            break  # Hit the FS root without finding VCS info
         cur_dir = parent
     return None, None
 
 
 def get_vcs_branch_name(vcs_root):
     # type: (str) -> Optional[str]
-    """If under source control and the VCS supports branches, find branch name.
-    """
+    """If under source control and the VCS supports branches, find branch name."""
     commands = {
         'git': ['git', 'symbolic-ref', '--short', 'HEAD'],
         'hg': ['hg', 'branch'],
@@ -1095,8 +1154,7 @@ def get_vcs_branch_name(vcs_root):
         return None
 
     args = commands[vcs_name]
-    p = sp.Popen(
-        args, stdout=sp.PIPE, stderr=sp.PIPE, cwd=vcs_root, universal_newlines=True)
+    p = sp.Popen(args, stdout=sp.PIPE, stderr=sp.PIPE, cwd=vcs_root, universal_newlines=True)
     out, _err = p.communicate()
     p.wait()
     out = out.strip()
@@ -1143,72 +1201,136 @@ def parse_args():
     # type: () -> Namespace
 
     parser = ArgumentParser()
-    parser.add_argument('file', type=str, help='Filename to check')
-    parser.add_argument("-c", "--checkers", dest="checkers",
-                        default=default_checkers,
-                        help="Comma-separated list of checkers")
-    parser.add_argument("-i", "--ignore-codes", dest="ignore_codes",
-                        help="Comma-separated list of error codes to ignore")
-    parser.add_argument("-e", "--enable-codes", dest="enable_codes",
-                        default='',
-                        help="Comma-separated list of error codes to ignore")
-    parser.add_argument('--max-line-length', dest='max_line_length',
-                        default=79, action='store',
-                        help='Maximum line length')
-    parser.add_argument('--no-merge-configs', dest='merge_configs',
-                        action='store_false',
-                        help=('Whether to ignore config files found at a '
-                              'higher directory than this one'))
-    parser.add_argument('--multi-thread', type=str2bool, default=True,
-                        action='store',
-                        help=('Run checkers sequentially, '
-                              'rather than simultaneously'))
-    parser.add_argument('--venv-root', dest='venv_root',
-                        default='~/.virtualenvs', action='store',
-                        help=('Location of all Python virtual environments. '
-                              'Used with auto-detecting virtual envs created by virtualenvwrapper'))
-    parser.add_argument('--venv-path', dest='venv_path',
-                        default=None, action='store',
-                        help=('The full path to a virtualenv. Used with a directly-created '
-                              '(not using virtualenvwrapper) virtualenv.'))
-    parser.add_argument('--pylint-rcfile', default=None,
-                        dest='pylint_rcfile',
-                        help='Location of a config file for pylint')
-    parser.add_argument('--mypy-config-file', default=None,
-                        dest='mypy_config_file',
-                        help='Location of a config file for mypy')
-    parser.add_argument('--mypy-use-daemon', type=str2bool, default=False,
-                        action='store',
-                        help='Whether to run mypy in daemon mode. Defaults to'
-                        ' false. This can greatly increase performance but '
-                        ' comes with a few drawbacks: First, it only sees'
-                        ' files as they exist on disk, so unsaved changes'
-                        ' will not be reflected. Second, it requires providing'
-                        ' a static set of python files/dirs to be operated on'
-                        ' (see --mypy-daemon-files-command).')
-    parser.add_argument('--mypy-daemon-files-command',
-                        default='find . -name "*.py"', action='store',
-                        help='A shell command to run to generate the list of'
-                        ' python files/dirs for the mypy daemon.'
-                        ' Mypy in daemon mode will only process files included'
-                        ' here. This command gets run from project root and'
-                        ' should return one filename per line.'
-                        ' It defaults to \'find . -name "*.py"\'. To debug'
-                        ' this, look for a running dmypy process and see which'
-                        ' args have been passed to it.')
-    parser.add_argument('--flake8-config-file', default=None,
-                        dest='flake8_config_file',
-                        help='Location of a config file for flake8')
-    parser.add_argument('--report-checker-errors-inline', type=str2bool, default=True,
-                        action='store',
-                        help=("Whether to fake failing checkers's STDERR as a reported "
-                              "error for easier display."))
+    parser.add_argument(
+        'file',
+        type=str,
+        help='Filename to check',
+    )
+    parser.add_argument(
+        '-c',
+        '--checkers',
+        dest='checkers',
+        default=default_checkers,
+        help='Comma-separated list of checkers',
+    )
+    parser.add_argument(
+        '-i',
+        '--ignore-codes',
+        dest='ignore_codes',
+        help='Comma-separated list of error codes to ignore',
+    )
+    parser.add_argument(
+        '-e',
+        '--enable-codes',
+        dest='enable_codes',
+        default='',
+        help='Comma-separated list of error codes to ignore',
+    )
+    parser.add_argument(
+        '--max-line-length',
+        dest='max_line_length',
+        default=79,
+        action='store',
+        help='Maximum line length',
+    )
+    parser.add_argument(
+        '--no-merge-configs',
+        dest='merge_configs',
+        action='store_false',
+        help='Whether to ignore config files found at a higher directory than this one',
+    )
+    parser.add_argument(
+        '--multi-thread',
+        type=str2bool,
+        default=True,
+        action='store',
+        help='Run checkers sequentially, rather than simultaneously',
+    )
+    parser.add_argument(
+        '--venv-root',
+        dest='venv_root',
+        default='~/.virtualenvs',
+        action='store',
+        help=(
+            'Location of all Python virtual environments. '
+            'Used with auto-detecting virtual envs created by virtualenvwrapper'
+        ),
+    )
+    parser.add_argument(
+        '--venv-path',
+        dest='venv_path',
+        default=None,
+        action='store',
+        help=('The full path to a virtualenv. Used with a directly-created (not using virtualenvwrapper) virtualenv.'),
+    )
+    parser.add_argument(
+        '--pylint-rcfile',
+        default=None,
+        dest='pylint_rcfile',
+        help='Location of a config file for pylint',
+    )
+    parser.add_argument(
+        '--mypy-config-file',
+        default=None,
+        dest='mypy_config_file',
+        help='Location of a config file for mypy',
+    )
+    parser.add_argument(
+        '--mypy-use-daemon',
+        type=str2bool,
+        default=False,
+        action='store',
+        help=(
+            'Whether to run mypy in daemon mode. Defaults to'
+            ' false. This can greatly increase performance but '
+            ' comes with a few drawbacks: First, it only sees'
+            ' files as they exist on disk, so unsaved changes'
+            ' will not be reflected. Second, it requires providing'
+            ' a static set of python files/dirs to be operated on'
+            ' (see --mypy-daemon-files-command).'
+        ),
+    )
+    parser.add_argument(
+        '--mypy-daemon-files-command',
+        default='find . -name "*.py"',
+        action='store',
+        help=(
+            'A shell command to run to generate the list of'
+            ' python files/dirs for the mypy daemon.'
+            ' Mypy in daemon mode will only process files included'
+            ' here. This command gets run from project root and'
+            ' should return one filename per line.'
+            ' It defaults to \'find . -name "*.py"\'. To debug'
+            ' this, look for a running dmypy process and see which'
+            ' args have been passed to it.'
+        ),
+    )
+    parser.add_argument(
+        '--flake8-config-file',
+        default=None,
+        dest='flake8_config_file',
+        help='Location of a config file for flake8',
+    )
+    parser.add_argument(
+        '--report-checker-errors-inline',
+        type=str2bool,
+        default=True,
+        action='store',
+        help="Whether to fake failing checkers's STDERR as a reported error for easier display.",
+    )
 
-    parser.add_argument('--mypy-no-implicit-optional', type=str2bool, default=False,
-                        action='store')
+    parser.add_argument(
+        '--mypy-no-implicit-optional',
+        type=str2bool,
+        default=False,
+        action='store',
+    )
 
-    parser.add_argument('--debug', action='store_true',
-                        help='Enable output to help debug pycheckers itself')
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable output to help debug pycheckers itself',
+    )
 
     return parser.parse_args()
 
@@ -1218,8 +1340,7 @@ def main():
     # python. We can sometimes count on emacs to launch us with the correct
     # python, but we need to handle being run manually, or with emacs in a
     # confused state.
-    os.environ['PATH'] = (os.path.dirname(sys.executable) + ':' +
-                          os.environ['PATH'])
+    os.environ['PATH'] = os.path.dirname(sys.executable) + ':' + os.environ['PATH']
 
     options = parse_args()
 
@@ -1230,24 +1351,28 @@ def main():
     options = update_options_locally(options)
 
     checkers = options.checkers
-    ignore_codes = (tuple(c.strip() for c in options.ignore_codes.split(",") if c)
-                    if options.ignore_codes is not None else None)
-    enable_codes = tuple(c.strip() for c in options.enable_codes.split(",") if c)
+    ignore_codes = (
+        tuple(c.strip() for c in options.ignore_codes.split(',') if c) if options.ignore_codes is not None else None
+    )
+    enable_codes = tuple(c.strip() for c in options.enable_codes.split(',') if c)
     set_path_for_virtualenv(source_file_path, options.venv_path, options.venv_root)
 
     checker_names = [checker.strip() for checker in checkers.split(',')]
     try:
         [RUNNERS[checker_name] for checker_name in checker_names]
     except KeyError as e:
-        croak((f"Unknown checker: {e}",  # pylint: disable=used-before-assignment
-               f"Expected one of {', '.join(RUNNERS.keys())}"),
-              filename=options.file)
+        croak(
+            (
+                f'Unknown checker: {e}',  # pylint: disable=used-before-assignment
+                f"Expected one of {', '.join(RUNNERS.keys())}",
+            ),
+            filename=options.file,
+        )
 
     if options.multi_thread:
         p = Pool(cpu_count() + 1)
 
-        func = partial(
-            run_one_checker, ignore_codes, enable_codes, options, source_file_path)
+        func = partial(run_one_checker, ignore_codes, enable_codes, options, source_file_path)
 
         outputs = p.map(func, checker_names, chunksize=1)
         p.close()
@@ -1258,8 +1383,7 @@ def main():
         errors_or_warnings = 0
         out_lines_list = []
         for checker_name in checker_names:
-            e_or_w, o_l = run_one_checker(
-                ignore_codes, enable_codes, options, source_file_path, checker_name)
+            e_or_w, o_l = run_one_checker(ignore_codes, enable_codes, options, source_file_path, checker_name)
             errors_or_warnings += e_or_w
             out_lines_list.append(o_l)
 
