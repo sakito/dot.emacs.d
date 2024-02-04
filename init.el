@@ -542,6 +542,7 @@
 
   (leaf ddskk-posframe
     :ensure t
+    :blackout t
     :global-minor-mode t
     :custom ((ddskk-posframe-border-width . 2))
     )
@@ -1111,6 +1112,7 @@
 
 (leaf company
   :ensure t
+  :blackout t
   :global-minor-mode global-company-mode
   :custom
   (company-transformers . '(company-sort-by-backend-importance))
@@ -1151,6 +1153,7 @@
 
 (leaf yasnippet
   :ensure t
+  :blackout yas-minor-mode
   :global-minor-mode yas-global-mode
   :config
   (leaf yasnippet-snippets
@@ -1366,6 +1369,7 @@
 TODO 一部設定未整備"
   :url "https://github.com/emacs-helm/helm"
   :ensure t
+  :blackout t
   :require helm helm-autoloads
   :global-minor-mode t
   :custom (
