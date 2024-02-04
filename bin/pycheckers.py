@@ -47,7 +47,7 @@ except ImportError:
 CONFIG_FILE_NAME = '.pycheckers'
 
 # Checkers to run by default, when no --checkers options are supplied.
-default_checkers = 'pycodestyle,pylint'
+default_checkers = 'pycodestyle,pylint,ruff'
 
 
 class FatalException(Exception):
@@ -615,7 +615,11 @@ class PyflakesRunner(LintRunner):
 
     command = 'pyflakes'
 
-    output_matcher = re.compile(r'(?P<filename>[^:]+):' r'(?P<line_number>[^:]+):' r'(?P<description>.+)$')
+    output_matcher = re.compile(
+        r'(?P<filename>[^:]+):'
+        r'(?P<line_number>[^:]+):'
+        r'(?P<description>.+)$'
+    )
 
     @classmethod
     def fixup_data(cls, _line, data, _filepath):
@@ -1027,6 +1031,56 @@ class BanditRunner(LintRunner):
         return flags
 
 
+class RuffRunner(LintRunner):
+    """Flake8 has similar output to Pyflakes
+    """
+
+    command = 'ruff'
+
+    output_matcher = re.compile(
+        r'(?P<filename>[^:]+):'
+        r'(?P<line_number>\d+):'
+        r'(?P<column_number>\d+): '
+        r'(?P<error_type>[WECRF])(?P<error_number>[^ ]+) '
+        r'(?P<description>.+)$')
+
+    version_matcher = re.compile(
+        r'(?P<version>[0-9.]+).*'
+    )
+
+    @classmethod
+    def fixup_data(cls, _line, data, _filepath):
+        # type: (str, Dict[str, str], str) -> Dict[str, str]
+        if data['error_type'] in ['E']:
+            data['level'] = 'WARNING'
+        elif data['error_type'] in ['F']:
+            data['level'] = 'ERROR'
+        else:
+            data['level'] = 'WARNING'
+
+        # Unlike pyflakes, flake8 has an error/warning distinction, but some of
+        # them are incorrect. Borrow the correct definitions from the pyflakes
+        # runner
+        if 'imported but unused' in data['description']:
+            data['level'] = 'WARNING'
+        elif 'redefinition of unused' in data['description']:
+            data['level'] = 'WARNING'
+        elif 'assigned to but never used' in data['description']:
+            data['level'] = 'WARNING'
+        elif 'unable to detect undefined names' in data['description']:
+            data['level'] = 'WARNING'
+
+        # Flake8 seems to give the full path in the error output, but we only want the basename
+        data['filename'] = os.path.basename(data['filename'])
+
+        return data
+
+    def get_run_flags(self, _filepath):
+        # type: (str) -> Iterable[str]
+        flags = ["check"]       # rest is handled by ruff config
+        return flags
+
+
 RUNNERS = {
     'pyflakes': PyflakesRunner,
     'flake8': Flake8Runner,
@@ -1035,6 +1089,7 @@ RUNNERS = {
     'mypy2': MyPy2Runner,
     'mypy3': MyPy3Runner,
     'bandit': BanditRunner,
+    'ruff': RuffRunner,
 }
 
 
