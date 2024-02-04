@@ -305,10 +305,6 @@
            ;; リージョンを kill-ring に入れないで削除できるようにする
            (delete-selection-mode . t)
 
-           ;; TAB はスペース 4 個ぶんを基本
-           (tab-width . 4)
-           (indent-tabs-mode . nil)
-
            ;;  対応するカッコを色表示する
            ;; 特に色をつけなくてもC-M-p、C-M-n を利用すれば対応するカッコ等に移動できる
            (show-paren-mode . t)
@@ -1188,6 +1184,12 @@
          (lisp-interaction-mode-hook . skt:emacs-lisp-hook)
          (emacs-lisp-mode-hook . skt:emacs-lisp-hook)
          ))
+
+
+(leaf editorconfig
+  :ensure t
+  :global-minor-mode t
+  :blackout t)
 
 
 (leaf python
