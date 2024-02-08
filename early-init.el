@@ -31,9 +31,11 @@
 ;; Mac Emacsを利用している場合は以下の設定で停止しておく方が確実で、起動が早い
 ;; $ defaults write org.gnu.Emacs ToolBar -string no
 ;; $ defaults write org.gnu.Emacs MenuBar -string no
+;; 確認 $ defaults read org.gnu.Emacs
+;; 削除 $ defaults delete org.gnu.Emacs MenuBar
 
-(push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
+(push '(menu-bar-lines . t) default-frame-alist)
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 
 ;; 有効化
@@ -57,11 +59,3 @@
 
 (provide 'early-init)
 ;;; early-init.el ends here
-
-
-
-
-
-
-
-
