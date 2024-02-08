@@ -131,7 +131,7 @@ USA
    `(cursor ((t (:background ,red))))
    `(fringe ((t (:background ,color-bg0))))
    `(mouse ((t (:background ,color-fg3))))
-   `(region ((t (:background ,color-bg2 :foreground ,color-fg1))))
+   `(region ((t (:background ,color-bg1 :foreground ,color-fg2))))
    `(secondary-selection ((t (:background ,yellow1 :foreground ,color-fg2))))
    `(scroll-bar ((t (:background ,color-bg0 :foreground ,color-fg0))))
    `(tool-bar ((t (:background ,color-bg0 :foreground ,color-fg0 :box (:line-width 1 :style released-button)))))
