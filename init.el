@@ -1241,9 +1241,6 @@
   :custom (
            ;; コンパイルセッセージの縦幅
            (compilation-window-height . 8)
-
-           ;; 基本オフセット
-           (c-basic-offset . 2)
            )
   :hook (
          (c-mode-common-hook
@@ -1277,15 +1274,6 @@
 (leaf web-mode
   :ensure t
   :mode "\\.\\(html\\|htm\\)\\'" "\\.js[x]?$" "\\.ts[x]?\\'"
-  :custom (
-           ;; html
-           (web-mode-markup-indent-offset . 2)
-           ;; css
-           (web-mode-css-indent-offset . 2)
-           ;; js, php, etc..
-           (web-mode-code-indent-offset . 2)
-           (web-mode-comment-style . 2)
-           )
   :bind (
          (:web-mode-map
           ("C-;" . nil)
