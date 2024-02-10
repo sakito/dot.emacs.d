@@ -8,7 +8,7 @@ leaf.el( https://github.com/conao3/leaf.el )を利用しています
 
 リポジトリの構成は以下のようになっています。
 
-dotfile類は https://bitbucket.org/sakito/dot.zsh.d/ にて管理
+dotfile類は https://github.com/sakito/dot.zsh.d にて管理
 
 .. sourcecode:: text
 
