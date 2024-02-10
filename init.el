@@ -1151,6 +1151,7 @@
   :ensure t
   :blackout yas-minor-mode
   :global-minor-mode yas-global-mode
+  :custom `((yas-snippet-dirs . '(,(locate-user-emacs-file "etc/snippets"))))
   :config
   (leaf yasnippet-snippets
     :ensure t))
