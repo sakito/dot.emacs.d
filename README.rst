@@ -4,9 +4,6 @@ sakito の .emacs.d 以下のファイル を一部公開しています。
 
 検証不十分で動作してないコードがまざることがありますが、ご了承ください。
 
-`ソース <http://bitbucket.org/sakito/dot.emacs.d/src>`_ を参照してください。
-
-
 leaf.el( https://github.com/conao3/leaf.el )を利用しています
 
 リポジトリの構成は以下のようになっています。

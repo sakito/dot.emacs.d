@@ -1315,7 +1315,7 @@
   :doc "AsciiDoc"
   :url "https://github.com/bbatsov/adoc-mode"
   :ensure t
-  :mode "\\.txt\\'"
+  :mode "\\.adoc\\'"
   )
 
 
@@ -1349,6 +1349,7 @@
   :url "https://github.com/jrblevin/markdown-mode"
   :ensure t
   :mode ("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'"
+         "\\.txt\\'"
          (("README\\.md\\'" . gfm-mode)))
   )
 
