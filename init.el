@@ -140,6 +140,8 @@
                 (expand-file-name "~/bin")
                 (expand-file-name "~/.emacs.d/bin")
                 (expand-file-name "~/opt/py3.12.1/bin")
+                (expand-file-name "~/.local/share/mise/shims")
+                (expand-file-name "~/.npm-packages/bin")
                 (expand-file-name "bin" user-emacs-directory)
                 ))
     (when (and (file-exists-p dir) (not (member dir exec-path)))
@@ -1281,6 +1283,11 @@
           ("C-c C-;" . web-mode-comment-or-uncomment)
           )
          )
+  ;; :config
+  ;; (leaf prettier
+  ;;   :ensure t
+  ;;   :preface
+  ;;   :hook (web-mode-hook . prettier-mode))
   )
 
 
