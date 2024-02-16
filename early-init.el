@@ -35,7 +35,7 @@
 ;; 削除 $ defaults delete org.gnu.Emacs MenuBar
 
 (push '(tool-bar-lines . 0) default-frame-alist)
-(push '(menu-bar-lines . t) default-frame-alist)
+(push '(menu-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 
 ;; 有効化
