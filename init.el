@@ -53,7 +53,11 @@
     :ensure t
     :init
     (leaf hydra :ensure t)
-    (leaf el-get :ensure t)
+    (leaf el-get
+      :ensure t
+      :custom (
+               (el-get-notify-type . 'message)
+               (el-get-git-shallow-clone . t)))
     (leaf blackout :ensure t)
 
     :config
