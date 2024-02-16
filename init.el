@@ -1373,7 +1373,7 @@ TODO 一部設定未整備"
   :url "https://github.com/emacs-helm/helm"
   :ensure t
   :blackout t
-  :require helm helm-autoloads
+  :require helm
   :global-minor-mode t
   :custom (
            ;; M-x を保存
@@ -1419,9 +1419,7 @@ TODO 一部設定未整備"
          )
   :defun helm-build-sync-source helm-stringify
   :config
-  ;; TODO Invalid function: helm-build-sync-source が発生する場合があるので、ここでも require している
-  (require 'helm)
-  (require 'helm-autoloads)
+  ;; TODO Invalid function: helm-build-sync-source が発生する場合がある
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
   ;; 上記を参考にして、履歴に保存されるように修正
