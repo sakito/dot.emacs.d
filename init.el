@@ -1199,6 +1199,12 @@
   :blackout t)
 
 
+(leaf side-hustle
+  :url "https://github.com/rnkn/side-hustle"
+  :ensure t
+  :bind ("<f10>" . side-hustle-toggle))
+
+
 (leaf python
   :require t
   :mode "\\.wsgi\\'" "wscript"
