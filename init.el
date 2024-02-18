@@ -1480,12 +1480,6 @@ TODO 一部設定未整備"
     :bind (
            ("C-c l" . helm-flycheck)
            ))
-
-  (leaf helm-posframe
-    :doc "https://github.com/tumashu/helm-posframe"
-    :ensure t
-    :defun helm-posframe-enable
-    :config (helm-posframe-enable))
   )
 
 
