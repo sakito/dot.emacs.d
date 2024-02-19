@@ -725,7 +725,9 @@
     :require t
     :bind (
            ;; dired-x では C-x C-j がdired-jump になるので skk-modeに再割り当て
-           ("C-x C-j" . skk-mode)))
+           ("C-x C-j" . skk-mode)
+           (:dired-mode-map
+            ("o" . dired-omit-mode))))
 
 
   (leaf gls
