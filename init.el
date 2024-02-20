@@ -802,7 +802,7 @@
            )
   :bind (
          ;; C-x C-f
-         ("C-c C-f" . find-file-at-point)
+         ;; ("C-c C-f" . find-file-at-point)
          )
   )
 
@@ -1295,11 +1295,6 @@
           ("C-c C-;" . web-mode-comment-or-uncomment)
           )
          )
-  ;; :config
-  ;; (leaf prettier
-  ;;   :ensure t
-  ;;   :preface
-  ;;   :hook (web-mode-hook . prettier-mode))
   )
 
 
@@ -1414,8 +1409,9 @@ TODO 一部設定未整備"
          ;; kill ring
          ("M-y". helm-show-kill-ring)
 
-         ;; C-x C-f には helm 無効
-         ;; ("C-c C-f" . find-file-at-point)
+         ;; find files
+         ;; ("C-x C-f" . find-file-at-point)
+         ("C-x C-f" . helm-find-files )
 
          ;; imenu
          ("C-c i" . helm-imenu)
