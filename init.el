@@ -1116,19 +1116,27 @@
 
 (leaf company
   :ensure t
+  :require t
   :blackout t
   :global-minor-mode global-company-mode
   :custom
   (company-transformers . '(company-sort-by-backend-importance))
+  ;; 補完遅延無し
   (company-idle-delay . 0)
   (company-echo-delay . 0)
   ;; 開始文字数
   (company-minimum-prefix-length . 2)
   (company-selection-wrap-around . t)
   (completion-ignore-case . t)
+  (company-tooltip-limit . 12)
+  (company-selection-wrap-around . t)
+  (company-transformers . '(company-sort-by-occurrence company-sort-by-backend-importance))
+  (company-frontends . nil)
   :bind
   (
    (:company-active-map
+    ("TAB" . #'my:helm-company-complete)
+    ("<tab>" . #'my:helm-company-complete)
     ("C-n" . company-select-next)
     ("C-p" . company-select-previous)
     ("C-s" . company-filter-candidates)
@@ -1138,9 +1146,28 @@
     ("C-p" . company-select-previous))
    )
   :config
-  (leaf company-posframe
+  (leaf helm-company
+    :url "https://github.com/Sodel-the-Vociferous/helm-company/"
     :ensure t
-    :require t)
+    :after company)
+
+  (progn
+    (defun my:helm-company-complete ()
+      (interactive)
+      (when (company-complete) (helm-company)))
+    (add-to-list 'completion-at-point-functions
+                 #'comint-dynamic-complete-filename))
+
+  (defvar company-mode/enable-yas t
+    "Enable yasnippet for all backends.")
+
+  (defun company-mode/backend-with-yas (backend)
+    (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
+        backend
+      (append (if (consp backend) backend (list backend))
+              '(:with company-yasnippet))))
+
+  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
   )
 
 
