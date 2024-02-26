@@ -612,6 +612,13 @@
   :init
   (leaf recentf-ext
     :ensure t)
+
+  ;; https://qiita.com/itiut@github/items/d917eafd6ab255629346
+  (defmacro with-suppressed-message (&rest body)
+    "Suppress new messages temporarily in the echo area and the `*Messages*' buffer while BODY is evaluated."
+    (declare (indent 0))
+    (let ((message-log-max nil))
+      `(with-temp-message (or (current-message) "") ,@body)))
   :defvar recentf-keep
   :custom
   `(
@@ -642,7 +649,10 @@
   (add-to-list 'recentf-keep 'file-readable-p)
 
   ;; 一定の未使用時間毎に自動保存
-  (run-with-idle-timer (* 5 60) t 'recentf-save-list)
+  ;; (run-with-idle-timer (* 5 60) t 'recentf-save-list)
+  (run-with-idle-timer (* 5 60) t
+                       '(lambda ()
+                          (with-suppressed-message (recentf-save-list))))
 
   :hook ((after-init-hook . recentf-mode))
   )
@@ -1259,7 +1269,7 @@
   :hook (
          (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
          (python-mode-hook . (lambda () (company-mode -1)))
-         (python-mode-hook . (lambda () (company-posframe-mode -1)))
+         ;; (python-mode-hook . (lambda () (company-posframe-mode -1)))
          (python-mode-hook . flycheck-mode)
          )
 
