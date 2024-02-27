@@ -138,6 +138,10 @@ USA
    `(tooltip ((t (:background ,lightyellow :foreground ,color-fg0))))
    `(header-line ((t (:box (:line-width 2 :style released-button) :background ,color-bg2 :foreground ,cyan :box nil))))
 
+   ;; line-number
+   `(line-number ((t (:background ,color-bg2 :foreground ,color-fg0))))
+
+   ;; highlight
    `(highlight ((t (:background ,color-bg0 :foreground ,color-fg2))))
    `(highlight-current-line ((t (:background ,color-bg0 :foreground ,color-fg2))))
    `(lazy-highlight ((t (:background ,color-bg0 :foreground ,color-fg2))))
