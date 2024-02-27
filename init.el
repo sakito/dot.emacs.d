@@ -1260,6 +1260,9 @@
          ("C-c !" . run-python)
          ("C-c C-l" . nil)
 
+         ("M-S-<right>" . python-indent-shift-right)
+         ("M-S-<left>" . python-indent-shift-left)
+
          ;; ("C-c n" . flymake-goto-next-error)
          ;; ("C-c p" . flymake-goto-prev-error)
          ;; ("C-c C-i" . skt:python-import-modules-from-buffer)
