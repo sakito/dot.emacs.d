@@ -168,13 +168,13 @@
     :when (= (display-pixel-height) 1440)
     :config
     (setq default-frame-alist
-          (append (list
-                   '(width . 172)
-                   '(height . 60)
-                   '(top . 123)
-                   '(left . 420)
-                   '(alpha . (92 70))
-                   )
+          (append '(
+                    (width . 172)
+                    (height . 60)
+                    (top . 123)
+                    (left . 420)
+                    (alpha . (92 70))
+                    )
                   default-frame-alist)))
 
   (leaf display-1200
@@ -182,13 +182,13 @@
     :when (= (display-pixel-height) 1200)
     :config
     (setq default-frame-alist
-          (append (list
-                   '(width . 175)
-                   '(height . 65)
-                   '(top . 50)
-                   '(left . 500)
-                   '(alpha . (92 70))
-                   )
+          (append '(
+                    (width . 175)
+                    (height . 65)
+                    (top . 50)
+                    (left . 500)
+                    (alpha . (92 70))
+                    )
                   default-frame-alist)))
   )
 

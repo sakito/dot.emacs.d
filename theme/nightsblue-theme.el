@@ -235,8 +235,9 @@ USA
 
    ;; mode-line
    ;;`(mode-line ((t (:foreground ,color-fg1 :background ,color-bg2 :box (:line-width 1 :color nil :style released-button)))))
-   `(mode-line ((t (:foreground ,color-fg3 :background ,color-bg3 :box (:line-width 1 :color nil :style released-button)))))
    ;;`(mode-line-inactive ((t (:foreground ,color-fg2 :background ,color-bg1))))
+
+   `(mode-line ((t (:foreground ,color-fg3 :background ,color-bg2 :box (:line-width 1 :color nil :style released-button)))))
    `(mode-line-inactive ((t (:foreground ,color-fg2 :background ,color-bg0))))
    `(mode-line-buffer-id ((t (:bold t :foreground ,orange2))))
 
