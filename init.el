@@ -173,6 +173,8 @@
                     (height . 60)
                     (top . 123)
                     (left . 420)
+                    (left-fringe . 12)
+                    (right-fringe . 12)
                     (alpha . (92 70))
                     )
                   default-frame-alist)))
@@ -701,17 +703,17 @@
            )
   :config
   ;; dired の sort を拡張
-  (setq dired-listing-switches "-lhaB --group-directories-first")
+  (setq dired-listing-switches "-lhaB --time-style=long-iso --group-directories-first")
   (defvar list-of-dired-switches
     '(
       ;; 標準ソート(ディレクトリは上)
-      "-lhaB --group-directories-first"
+      "-lhaB --time-style=long-iso --group-directories-first"
       ;; 更新時刻でソート
-      "-lhaBt"
+      "-lhaBt --time-style=long-iso"
       ;; サイズでソート
-      "-lhaBS"
+      "-lhaBS --time-style=long-iso"
       ;; 拡張子でソート(ディレクトリは上)
-      "-lhaBX --group-directories-first"
+      "-lhaBX --time-style=long-iso --group-directories-first"
       )
     "List of ls switches for dired to cycle among.")
 
