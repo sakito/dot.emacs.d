@@ -843,6 +843,7 @@
                 ("*info*" :select t :inhibit-window-quit t :same t)
                 ("\\*[Wo]*Man.*\\*" :regexp t :select t :inhibit-window-quit t :other t)
 
+                ("*helm imenu*" :select t :size 0.2 :align left)
                 ("\\`\\*helm.*?\\*\\'" :regexp t :size 0.3 :align t)
 
                 ("*eshell*" :select t :other t)
@@ -850,7 +851,7 @@
                 ("\\*Async Shell.*\\*" :regexp t :ignore t)
                 ("\\*poporg.*\\*" :regexp t :select t :other t)
 
-                ("*Calendar*" :select t :size 0.3 :align below)
+                ("*Calendar*" :select t :size 0.3)
 
                 ("*aHg diff*" :sise 50 :align above :select t)
                 ("*aHg log*" :align left)
