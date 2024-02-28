@@ -359,6 +359,7 @@
   (setq font-lock-support-mode 'jit-lock-mode)
   :hook (
          (text-mode-hook . turn-off-auto-fill)
+         (text-mode-hook . display-line-numbers-mode)
          (prog-mode-hook . display-line-numbers-mode)
          )
   :bind (
@@ -703,17 +704,17 @@
            )
   :config
   ;; dired の sort を拡張
-  (setq dired-listing-switches "-lhaB --time-style=long-iso --group-directories-first")
+  (setq dired-listing-switches "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first")
   (defvar list-of-dired-switches
     '(
       ;; 標準ソート(ディレクトリは上)
-      "-lhaB --time-style=long-iso --group-directories-first"
+      "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
       ;; 更新時刻でソート
-      "-lhaBt --time-style=long-iso"
+      "-lhaBt --time-style \"+%y-%m-%d %H:%M\""
       ;; サイズでソート
-      "-lhaBS --time-style=long-iso"
+      "-lhaBS --time-style \"+%y-%m-%d %H:%M\""
       ;; 拡張子でソート(ディレクトリは上)
-      "-lhaBX --time-style=long-iso --group-directories-first"
+      "-lhaBX --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
       )
     "List of ls switches for dired to cycle among.")
 
