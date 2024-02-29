@@ -287,6 +287,11 @@
            ))
 
 
+(leaf nerd-icons
+  :doc "M-x nerd-icons-install-fonts"
+  :url "https://github.com/rainstormstudio/nerd-icons.el"
+  :ensure t)
+
 (leaf edit
   :doc "編集関連"
   :preface
@@ -750,6 +755,12 @@
       (when gls
         (setq insert-directory-program gls)
         )))
+
+
+  (leaf nerd-icons-dired
+    :url "https://github.com/rainstormstudio/nerd-icons-dired"
+    :ensure t
+    :hook (dired-mode-hook . nerd-icons-dired-mode))
 
   ;; s で並び変え、C-u s で元に戻る
   ;; @see sorter.el
