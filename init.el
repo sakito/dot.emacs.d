@@ -760,6 +760,7 @@
   (leaf nerd-icons-dired
     :url "https://github.com/rainstormstudio/nerd-icons-dired"
     :ensure t
+    :blackout t
     :hook (dired-mode-hook . nerd-icons-dired-mode))
 
   ;; s で並び変え、C-u s で元に戻る
@@ -1539,6 +1540,13 @@ TODO 一部設定未整備"
 (leaf mode-line
   :doc "mode-line のフォーマット"
   :config
+  ;; 改行文字表現変更
+  (setq eol-mnemonic-dos "(CRLF)")
+  (setq eol-mnemonic-unix "(LF)")
+  (setq eol-mnemonic-mac "(CR)")
+  (setq eol-mnemonic-undecided "(?)")
+
+  ;; 列、行、割合表示
   (setq-default mode-line-position
                 '(:eval
                   (list
@@ -1557,7 +1565,7 @@ TODO 一部設定未整備"
 
   (setq-default mode-line-format
                 '(
-                  (elscreen-display-screen-number ("-" elscreen-e21-mode-line-string))
+                  ;; (elscreen-display-screen-number ("-" elscreen-e21-mode-line-string))
                   "" skk-modeline-input-mode "%e"
                   mode-line-mule-info
                   mode-line-client
@@ -1573,6 +1581,13 @@ TODO 一部設定未整備"
                   "--"
                   ("-%-" 0 3)
                   ))
+
+  (leaf minions
+    :ensure t
+    :custom
+    (minions-mode-line-lighter . "[+]")
+    :config
+    (minions-mode))
   )
 
 
