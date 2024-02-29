@@ -17,11 +17,14 @@ trim_trailing_whitespace = true
 indent_style = space
 quote_type = single
 
+[*.{rst,md}]
+indent_style = space
+indent_size = 2
+
 [Makefile]
 trim_trailing_whitespace = true
 indent_style = tab
 tab_width = 4
-
 
 [.gitmodules]
 trim_trailing_whitespace = true
