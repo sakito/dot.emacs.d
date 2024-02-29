@@ -140,6 +140,7 @@ USA
 
    ;; line-number
    `(line-number ((t (:background ,color-bg2 :foreground ,color-fg0))))
+   `(line-number-current-line ((t (:background ,color-bg2 :foreground ,yellow))))
 
    ;; highlight
    `(highlight ((t (:background ,color-bg0 :foreground ,color-fg2))))
