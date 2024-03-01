@@ -1160,6 +1160,7 @@
   (company-frontends . nil)
   :bind
   (
+   ("C-o" . #'my:helm-company-complete)
    (:company-active-map
     ("TAB" . #'my:helm-company-complete)
     ("<tab>" . #'my:helm-company-complete)
@@ -1281,8 +1282,6 @@
 
   :hook (
          (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-mode-hook . (lambda () (company-mode -1)))
-         ;; (python-mode-hook . (lambda () (company-posframe-mode -1)))
          (python-mode-hook . flycheck-mode)
          )
 
