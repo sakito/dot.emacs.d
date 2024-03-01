@@ -1254,12 +1254,6 @@
   :blackout t)
 
 
-(leaf side-hustle
-  :url "https://github.com/rnkn/side-hustle"
-  :ensure t
-  :bind ("<f10>" . side-hustle-toggle))
-
-
 (leaf python
   :require t
   :mode "\\.wsgi\\'" "wscript"
@@ -1467,15 +1461,28 @@ TODO 一部設定未整備"
 
          ;; find files
          ;; ("C-x C-f" . find-file-at-point)
-         ("C-x C-f" . helm-find-files )
-
-         ;; imenu
-         ("C-c i" . helm-imenu)
+         ("C-x C-f" . helm-find-files)
 
          (:helm-map
           ("C-;" .  abort-recursive-edit)
           ;; C-h で削除を有効に
-          ("C-h" . delete-backward-char))
+          ("C-h" . delete-backward-char)
+
+          ;; helm-imenu 挙動対応
+          ("<f8>" . helm-keyboard-quit)
+          )
+
+         ;; helm-imenuを多用していたので、key設定
+         (:prog-mode-map
+          ;; imenu
+          ("C-c i" . helm-imenu)
+          ("<f8>" . helm-imenu))
+         (:text-mode-map
+          ;; imenu
+          ("C-c i" . helm-imenu)
+          ("<f8>" . helm-imenu))
+         (:dired-mode-map
+          ("<f8>" . helm-find-files))
          )
   :defun helm-build-sync-source helm-stringify
   :config
