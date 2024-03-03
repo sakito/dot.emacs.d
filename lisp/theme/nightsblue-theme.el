@@ -26,26 +26,26 @@
 
 (deftheme nightsblue)
 
-(defvar mark-tabs-face 'mark-tabs-face)
-(defface mark-tabs-face
+(defvar nightsblue-mark-tabs-face 'nightsblue-mark-tabs-face)
+(defface nightsblue-mark-tabs-face
   '((((class color))
      (:foreground "red" :underline t)))
   nil
-  :group 'face)
-(defvar mark-whitespace-face 'mark-whitespace-face)
-(defface mark-whitespace-face
+  :group 'nightsblue)
+(defvar nightsblue-mark-whitespace-face 'nightsblue-mark-whitespace-face)
+(defface nightsblue-mark-whitespace-face
   '((((class color))
      (:background "gray")))
   nil
-  :group 'face)
-(defvar mark-lineendspaces 'mark-lineendspaces-face)
-(defface mark-lineendspaces-face
+  :group 'nightsblue)
+(defvar nightsblue-mark-lineendspaces 'nightsblue-mark-lineendspaces-face)
+(defface nightsblue-mark-lineendspaces-face
   '((((class color))
      (:foreground "SteelBlue" :underline t)))
   nil
-  :group 'face)
-(defvar brackets-face 'brackets-face)
-(defface brackets-face
+  :group 'nightsblue)
+(defvar nightsblue-brackets-face 'nightsblue-brackets-face)
+(defface nightsblue-brackets-face
   '((((class color))
      (:foreground "#e9b96e")))
   "Face for displaying a brackets.
@@ -60,28 +60,28 @@ USA
 { }:brace
 < >:angle brackets
 "
-  :group 'faces)
+  :group 'nightsblue)
 
-(defvar operator-face 'operator-face)
-(defface operator-face
+(defvar nightsblue-operator-face 'nightsblue-operator-face)
+(defface nightsblue-operator-face
   '((((class color))
      (:foreground "#ffa500")))
   "Face for displaying a operator.|&!.+=-/%*,"
-  :group 'faces)
+  :group 'nightsblue)
 
-(defadvice font-lock-mode (before my-font-lock-mode ())
+(defadvice font-lock-mode (before nightsblue-font-lock-mode ())
   (font-lock-add-keywords
    major-mode
    '(
-     ("\t" 0 mark-tabs-face append)
-     ("　" 0 mark-whitespace-face append)
-     ;; ("[ \t]+$" 0 my-mark-lineendspaces append)
-     ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 brackets-face append)
-     ;; ("[|!\\.\\+\\=\\&]\\|-\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 operator-face append)
-     ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 operator-face append)
+     ("\t" 0 nightsblue-mark-tabs-face append)
+     ("　" 0 nightsblue-mark-whitespace-face append)
+     ;; ("[ \t]+$" 0 nightsblue-mark-lineendspaces append)
+     ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 nightsblue-brackets-face append)
+     ;; ("[|!\\.\\+\\=\\&]\\|-\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 nightsblue-operator-face append)
+     ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 nightsblue-operator-face append)
 
      )))
-(ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
+(ad-enable-advice 'font-lock-mode 'before 'nightsblue-font-lock-mode)
 (ad-activate 'font-lock-mode)
 
 (let ((class '((class color) (min-colors 89)))
