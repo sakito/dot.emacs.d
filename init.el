@@ -258,11 +258,11 @@
   )
 
 
-(leaf nightsblue-theme
+(leaf emacs-theme
   :when window-system
   :config
   (add-to-list 'custom-theme-load-path
-               (locate-user-emacs-file "theme"))
+               (locate-user-emacs-file "lisp/theme"))
   (load-theme 'nightsblue t t)
   (enable-theme 'nightsblue)
   )
