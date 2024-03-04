@@ -606,7 +606,7 @@
            (skk-server-portnum . 1178)
 
            ;; カーソル色
-           (skk-cursor-hiragana-color . "hot pink")
+           ;; (skk-cursor-hiragana-color . "hot pink")
            )
   :config
   ;; @ を無効にする
@@ -1539,6 +1539,12 @@ TODO 一部設定未整備"
 
           ;; helm-imenu 挙動対応
           ("<f8>" . helm-keyboard-quit)
+
+          ;; TAB に補完的挙動割り当て
+          ("TAB" . helm-execute-persistent-action)
+          ("<tab>" . helm-execute-persistent-action)
+          ;; 元々TABにある機能を C-i に移動
+          ("C-i" . helm-select-action)
           )
 
          ;; helm-imenuを多用していたので、key設定
