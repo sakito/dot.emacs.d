@@ -1,6 +1,4 @@
-;;; -*- mode: emacs-lisp; coding: utf-8-emacs-unix; indent-tabs-mode: nil -*-
-
-;;init.el -- Emacs init setting elisp file
+;; init.el -- Emacs init setting elisp file -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2010-2024 sakito
 
@@ -38,6 +36,7 @@
     (setq user-emacs-directory
           (expand-file-name
            (file-name-directory (or load-file-name byte-compile-current-file))))))
+
 
 (eval-and-compile
   (customize-set-variable
@@ -252,20 +251,90 @@
           ;; (newline-mark 10 [182 10]) ; newlne, ¶
           (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
           ))
+  :hook
+  (prog-mode-hook . whitespace-mode)
+  (text-mode-hook . whitespace-mode)
   :bind (
          ;; 常に whitespace-mode だと動作が遅くなる場合がある
          ("C-x w" . global-whitespace-mode))
   )
 
 
-(leaf emacs-theme
+;; (leaf emacs-theme
+;;   :when window-system
+;;   :config
+;;   (add-to-list 'custom-theme-load-path
+;;                (locate-user-emacs-file "lisp/theme"))
+;;   (load-theme 'nightsblue t t)
+;;   (enable-theme 'nightsblue)
+;;   )
+
+
+(leaf modus-themes
+  :ensure t
   :when window-system
+  :custom
+  (modus-themes-bold-constructs . nil)
+  (modus-themes-italic-constructs . t)
+  (modus-themes-region . '(bg-only no-extend))
+  :preface
+  (defvar my-mark-tabs-face 'my-mark-tabs-face)
+  (defface my-mark-tabs-face
+    '((((class color))
+       (:foreground "#d00000" :underline t)))
+    nil
+    :group 'face)
+
+  (defvar my-mark-whitespace-face 'my-mark-whitespace-face)
+  (defface my-mark-whitespace-face
+    '((((class color))
+       (:background "#9f9690")))
+    nil
+    :group 'face)
+
+  (defvar my-brackets-face 'my-brackets-face)
+  (defface my-brackets-face
+    '((((class color))
+       (:foreground "#80601f")))
+    nil
+    :group 'face)
+
+  (defvar my-operator-face 'my-operator-face)
+  (defface my-operator-face
+    '((((class color))
+       (:foreground "#6f5500")))
+    nil
+    :group 'face)
+
+  (defadvice font-lock-mode (before my-font-lock-mode ())
+    (font-lock-add-keywords
+     major-mode
+     '(
+       ("\t" 0 my-mark-tabs-face append)
+       ("　" 0 my-mark-whitespace-face append)
+       ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 my-brackets-face append)
+       ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 my-operator-face append)
+       )))
+  (ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode)
+  (ad-activate 'font-lock-mode)
   :config
-  (add-to-list 'custom-theme-load-path
-               (locate-user-emacs-file "lisp/theme"))
-  (load-theme 'nightsblue t t)
-  (enable-theme 'nightsblue)
+  (load-theme 'modus-operandi-tinted t)
+
+  (leaf *custom-modus-themes
+    :after modus-themes
+    :defun modus-themes-with-colors
+    :config
+    (defun my-modus-themes-custom-faces (&rest _)
+      (modus-themes-with-colors
+        (custom-set-faces
+         `(trailing-whitespace ((,c :background ,bg-main :underline "SteelBlue")))
+         )))
+
+    (my-modus-themes-custom-faces)
+
+    )
   )
+
 
 (leaf ui
   :doc "UI関連"

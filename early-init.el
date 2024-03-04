@@ -55,7 +55,7 @@
 (setq byte-compile-warnings '(cl-functions))
 
 ;; 起動時の背景色
-(custom-set-faces '(default ((t (:background "#073642")))))
+;; (custom-set-faces '(default ((t (:background "#073642")))))
 
 (provide 'early-init)
 ;;; early-init.el ends here
