@@ -260,16 +260,6 @@
   )
 
 
-;; (leaf emacs-theme
-;;   :when window-system
-;;   :config
-;;   (add-to-list 'custom-theme-load-path
-;;                (locate-user-emacs-file "lisp/theme"))
-;;   (load-theme 'nightsblue t t)
-;;   (enable-theme 'nightsblue)
-;;   )
-
-
 (leaf modus-themes
   :ensure t
   :when window-system
@@ -575,23 +565,6 @@
        ))
 
 
-(leaf server
-  :doc "emacsclient を利用するためにサーバ起動
-サーバが起動していた場合は先に起動していた方を優先"
-  :require t
-  :defun (server-running-p)
-  :config
-  (unless (server-running-p) (server-start))
-  (defun my/raise-frame()
-    ;; Frame を前面にする
-    (raise-frame (selected-frame))
-    ;; キーボードフォーカスを選択しているFrameにする
-    (x-focus-frame (selected-frame)))
-  :hook (
-         (server-visit-hook . my/raise-frame)
-         (find-file-hook . my/raise-frame)))
-
-
 (leaf skk
   :doc "ddskk設定"
   :ensure ddskk
@@ -838,22 +811,6 @@ the `*Messages*' buffer while BODY is evaluated."
     :ensure t
     :blackout t
     :hook (dired-mode-hook . nerd-icons-dired-mode))
-
-  ;; s で並び変え、C-u s で元に戻る
-  ;; @see sorter.el
-  ;; (leaf sorter
-  ;;   :load-path* "lisp"
-  ;;   :require t)
-
-  ;; ;; システムのlsでなくls-lispを利用して表示
-  ;; (leaf ls-lisp
-  ;;   :require t
-  ;;   :custom ((ls-lisp-use-insert-directory-program . nil)
-  ;;            ;; ls のオプション
-  ;;            (dired-listing-switches . "-lahF")
-  ;;            ;; ディレクトリをより上に表示
-  ;;            (ls-lisp-dirs-first . t)
-  ;;            ))
 
   ;; dired-find-alternate-fileを有効化
   (put 'dired-find-alternate-file 'disabled nil)
