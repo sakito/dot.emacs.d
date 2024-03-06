@@ -322,7 +322,8 @@
 
   (leaf *custom-modus-themes
     :after modus-themes
-    :defun modus-themes-with-colors
+    :defvar bg-main
+    :defun modus-themes-with-colors my/modus-themes-custom-faces
     :config
     (defun my/modus-themes-custom-faces (&rest _)
       (modus-themes-with-colors
@@ -447,6 +448,10 @@
          ;; kill ring 系操作変更
          ("C-w" . kill-ring-save)
          ("M-w" . kill-region)
+
+         ;; home、end割り当て
+         ("<home>" . beginning-of-buffer)
+         ("<end>" . end-of-buffer)
 
          ;; C-m は 改行とインデントに割り当て(SKK に取られてしまうから)
          ("C-m" . newline-and-indent)
