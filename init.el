@@ -364,7 +364,7 @@
 (leaf edit
   :doc "編集関連"
   :preface
-  (defun other-window-or-split ()
+  (defun my/other-window-or-split ()
     (interactive)
     (when (one-window-p)
       (split-window-horizontally))
@@ -405,9 +405,10 @@
            (next-line-add-newlines . nil)
 
            ;; スクロールのマージン
-           (scroll-conservatively . 10000)
+           (scroll-conservatively . 1)
            ;; scroll-conservatively の古いバージョン。一行ずつスクロールする
            (scroll-step . 1)
+           (next-screen-context-lines . 10)
            ;; カーソル位置を変更しない
            (scroll-preserve-screen-position . t)
            ;; shell-mode において最後の行ができるだけウィンドウの一番下にくるようにする
@@ -451,7 +452,7 @@
          ("C-m" . newline-and-indent)
 
          ;; window の移動
-         ("<C-tab>" . other-window-or-split)
+         ("<C-tab>" . my/other-window-or-split)
          ))
 
 
@@ -469,12 +470,12 @@
 (leaf mac
   :doc "mac用の設定"
   :when mac-p
-  :defun mac-translate-from-yen-to-backslash
+  :defun my/mac-translate-from-yen-to-backslash
   :init
   ;; 円マークをバックスラッシュに変換
   ;; inline_patch からコピー
   ;; (C) Taiichi Hashimoto <taiichi2@mac.com>
-  (defun mac-translate-from-yen-to-backslash ()
+  (defun my/mac-translate-from-yen-to-backslash ()
     ;; Convert yen to backslash for JIS keyboard.
     (interactive)
 
@@ -536,7 +537,7 @@
   ;; smooth scroll を on
   (setq mac-mouse-wheel-smooth-scroll t)
 
-  (mac-translate-from-yen-to-backslash)
+  (my/mac-translate-from-yen-to-backslash)
   )
 
 
@@ -576,14 +577,14 @@
   :defun (server-running-p)
   :config
   (unless (server-running-p) (server-start))
-  (defun skt:raise-frame()
+  (defun my/raise-frame()
     ;; Frame を前面にする
     (raise-frame (selected-frame))
     ;; キーボードフォーカスを選択しているFrameにする
     (x-focus-frame (selected-frame)))
   :hook (
-         (server-visit-hook . skt:raise-frame)
-         (find-file-hook . skt:raise-frame)))
+         (server-visit-hook . my/raise-frame)
+         (find-file-hook . my/raise-frame)))
 
 
 (leaf skk
@@ -744,7 +745,7 @@ the `*Messages*' buffer while BODY is evaluated."
          ("C-x C-g" . magit-status)
 
          (:magit-mode-map
-          ("<C-tab>" . other-window-or-split)))
+          ("<C-tab>" . my/other-window-or-split)))
   :init
   (leaf transient
     :custom
@@ -793,7 +794,7 @@ the `*Messages*' buffer while BODY is evaluated."
       )
     "List of ls switches for dired to cycle among.")
 
-  (defun cycle-dired-switches ()
+  (defun my/cycle-dired-switches ()
     "Cycle through the list `list-of-dired-switches' of switches for ls"
     (interactive)
     (setq list-of-dired-switches
@@ -858,7 +859,7 @@ the `*Messages*' buffer while BODY is evaluated."
          ;; 「a」を押したときに新規バッファ作成
          ("a" . 'dired-advertised-find-file)
          ;; 「s」を押すとソート順序を順次変更する
-         ("s" . cycle-dired-switches)
+         ("s" . my/cycle-dired-switches)
          )
   )
 
@@ -954,16 +955,16 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf function
   :doc "独自関数"
-  :defun time-stamp-date
+  :defun my/time-stamp-date
   :init
   ;; 時間(更新日)を挿入する
-  (defun time-stamp-date ()
+  (defun my/time-stamp-date ()
     "Retune the current time as a string in Date from."
     (format-time-string "%04Y-%02m-%02d: "))
-  (defun insert-date nil
+  (defun my/insert-date nil
     "Insert Date."
     (interactive)
-    (insert (time-stamp-date)))
+    (insert (my/time-stamp-date)))
 
   ;; face を調査するための関数
   ;; いろいろ知りたい場合は C-u C-x =
@@ -972,7 +973,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (interactive)
     (message "%s" (get-char-property (point) 'face)))
 
-  :bind ("C-c d" . #'insert-date)
+  :bind ("C-c d" . #'my/insert-date)
   )
 
 
@@ -1104,7 +1105,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
   ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
-  (defun smartchr-custom-keybindings ()
+  (defun my/smartchr-custom-keybindings ()
     ;; !! がカーソルの位置
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -1115,7 +1116,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ";") (smartchr '(";; " ";")))
     )
 
-  (defun smartchr-custom-keybindings-clang ()
+  (defun my/smartchr-custom-keybindings-clang ()
     ;; !! がカーソルの位置
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -1127,7 +1128,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ";") (smartchr '(";" ";;")))
     )
 
-  (defun smartchr-custom-keybindings-py ()
+  (defun my/smartchr-custom-keybindings-py ()
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
     (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
@@ -1141,7 +1142,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
     )
 
-  (defun smartchr-custom-keybindings-rst ()
+  (defun my/smartchr-custom-keybindings-rst ()
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
     (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
@@ -1151,7 +1152,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ".") (smartchr '("." ".. ")))
     )
 
-  (defun skelton-custom-keybindigs ()
+  (defun my/skelton-custom-keybindigs ()
     ;;   (make-variable-buffer-local 'skeleton-pair)
     ;;  (make-variable-buffer-local 'skeleton-pair-on-word)
     ;;  (make-variable-buffer-local 'skeleton-pair-alist)
@@ -1173,18 +1174,18 @@ the `*Messages*' buffer while BODY is evaluated."
                  'emacs-lisp-mode-hook
                  'sql-mode-hook
                  ))
-    (add-hook hook 'smartchr-custom-keybindings))
+    (add-hook hook 'my/smartchr-custom-keybindings))
 
   (dolist (hook (list
                  'makefile-mode-hook
                  ))
-    (add-hook hook 'skelton-custom-keybindigs))
+    (add-hook hook 'my/skelton-custom-keybindigs))
 
   :hook (
          ;; モードオリジナル追加設定
-         (python-mode-hook . smartchr-custom-keybindings-py)
-         (rst-mode-hook . smartchr-custom-keybindings-rst)
-         (c-mode-common-hook . smartchr-custom-keybindings-clang))
+         (python-mode-hook . my/smartchr-custom-keybindings-py)
+         (rst-mode-hook . my/smartchr-custom-keybindings-rst)
+         (c-mode-common-hook . my/smartchr-custom-keybindings-clang))
   )
 
 
@@ -1264,13 +1265,13 @@ the `*Messages*' buffer while BODY is evaluated."
   (defvar company-mode/enable-yas t
     "Enable yasnippet for all backends.")
 
-  (defun company-mode/backend-with-yas (backend)
+  (defun my/company-mode/backend-with-yas (backend)
     (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
         backend
       (append (if (consp backend) backend (list backend))
               '(:with company-yasnippet))))
 
-  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+  (setq company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
   )
 
 
@@ -1427,7 +1428,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :require t
   :mode "\\.css\\'"
   :init
-  (defun hexcolour-luminance (color)
+  (defun my/hexcolour-luminance (color)
     "Calculate the luminance of a color string (e.g. \"#ffaa00\", \"blue\").
   This is 0.3 red + 0.59 green + 0.11 blue and always between 0 and 255."
     (let* ((values (x-color-values color))
@@ -1436,7 +1437,7 @@ the `*Messages*' buffer while BODY is evaluated."
            (b (caddr values)))
       (floor (+ (* .3 r) (* .59 g) (* .11 b)) 256)))
 
-  (defun hexcolour-add-to-font-lock ()
+  (defun my/hexcolour-add-to-font-lock ()
     (interactive)
     (font-lock-add-keywords nil
                             `((,(concat "#[0-9a-fA-F]\\{3\\}[0-9a-fA-F]\\{3\\}?\\|"
@@ -1444,10 +1445,10 @@ the `*Messages*' buffer while BODY is evaluated."
                                (0 (let ((colour (match-string-no-properties 0)))
                                     (put-text-property
                                      (match-beginning 0) (match-end 0)
-                                     'face `((:foreground ,(if (> 128.0 (hexcolour-luminance colour))
+                                     'face `((:foreground ,(if (> 128.0 (my/hexcolour-luminance colour))
                                                                "white" "black"))
                                              (:background ,colour)))))))))
-  :hook (css-mode-hook . hexcolour-add-to-font-lock)
+  :hook (css-mode-hook . my/hexcolour-add-to-font-lock)
   )
 
 
@@ -1465,7 +1466,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :init
   (defvar rst-html-program "open"
     "Program used to preview HTML files.")
-  (defun rst-compile-html-preview ()
+  (defun my/rst-compile-html-preview ()
     "Convert the document to a HTML file and launch a preview program."
     (interactive)
     (let* ((tmp-filename "/tmp/out.html")
@@ -1477,7 +1478,7 @@ the `*Messages*' buffer while BODY is evaluated."
       ))
   :bind (:rst-mode-map
          ("C-c C-c" . rst-compile)
-         ("C-c C-p" . rst-compile-html-preview)
+         ("C-c C-p" . my/rst-compile-html-preview)
          ("C-c ;" . comment-dwim)
          ("C-c :" . comment-dwim)
          )
@@ -1692,14 +1693,14 @@ private 内には自分専用の物がはいっている
 (leaf startup-time
   :doc "起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)"
   :init
-  (defun message-startup-time ()
+  (defun my/message-startup-time ()
     (message "Emacs loaded in %dms"
              (/ (- (+ (cl-third after-init-time)
                       (* 1000000 (cl-second after-init-time)))
                    (+ (cl-third before-init-time)
                       (* 1000000 (cl-second before-init-time))))
                 1000)))
-  :hook (after-init-hook . message-startup-time)
+  :hook (after-init-hook . my/message-startup-time)
   )
 
 
