@@ -863,6 +863,12 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf ignoramus
+  :ensure t
+  :config
+  (ignoramus-setup))
+
+
 (leaf grep
   :config
   (leaf wgrep
@@ -1647,7 +1653,7 @@ TODO 一部設定未整備"
 
   (setq-default mode-line-format
                 '(
-                  ;; (elscreen-display-screen-number ("-" elscreen-e21-mode-line-string))
+                  "--"
                   "" skk-modeline-input-mode "%e"
                   mode-line-mule-info
                   mode-line-client
