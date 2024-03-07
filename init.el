@@ -19,6 +19,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+;; 稼動確認： GUI
+;; OS: Mac、Windows WSL Ubuntu、Ubuntu
 
 ;;; Code:
 
@@ -86,7 +88,7 @@
 
 
 (leaf is_system
-  :doc ";; Emacs の種類バージョンを判別するための変数"
+  :doc "Emacs の種類バージョンを判別するための変数"
   :init
   (defvar mac-p (and (eq window-system 'mac)))
   (defvar windows-p (eq system-type 'windows-nt))
@@ -232,12 +234,12 @@
 
 
 (leaf whitespace
+  :doc "タブ文字、全角空白、文末の空白の色付け"
+  :url "http://www.emacswiki.org/emacs/WhiteSpace"
+  :url "http://xahlee.org/emacs/whitespace-mode.html"
   :require t
   :defvar whitespace-style whitespace-display-mappings
   :config
-  ;; タブ文字、全角空白、文末の空白の色付け
-  ;; @see http://www.emacswiki.org/emacs/WhiteSpace
-  ;; @see http://xahlee.org/emacs/whitespace-mode.html
   (setq whitespace-style '(spaces tabs space-mark tab-mark))
   (setq whitespace-display-mappings
         '(
@@ -670,7 +672,7 @@
     :ensure t)
 
   ;; https://qiita.com/itiut@github/items/d917eafd6ab255629346
-  (defmacro with-suppressed-message (&rest body)
+  (defmacro my/with-suppressed-message (&rest body)
     "Suppress new messages temporarily in the echo area and
 the `*Messages*' buffer while BODY is evaluated."
     (declare (indent 0))
@@ -709,7 +711,7 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; (run-with-idle-timer (* 5 60) t 'recentf-save-list)
   (run-with-idle-timer (* 5 60) t
                        '(lambda ()
-                          (with-suppressed-message (recentf-save-list))))
+                          (my/with-suppressed-message (recentf-save-list))))
 
   :hook ((after-init-hook . recentf-mode))
   )
@@ -759,7 +761,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :config
   ;; dired の sort を拡張
   (setq dired-listing-switches "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first")
-  (defvar list-of-dired-switches
+  (defvar my/list-of-dired-switches
     '(
       ;; 標準ソート(ディレクトリは上)
       "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
@@ -773,12 +775,12 @@ the `*Messages*' buffer while BODY is evaluated."
     "List of ls switches for dired to cycle among.")
 
   (defun my/cycle-dired-switches ()
-    "Cycle through the list `list-of-dired-switches' of switches for ls"
+    "Cycle through the list `my/list-of-dired-switches' of switches for ls"
     (interactive)
-    (setq list-of-dired-switches
-          (append (cdr list-of-dired-switches)
-                  (list (car list-of-dired-switches))))
-    (dired-sort-other (car list-of-dired-switches)))
+    (setq my/list-of-dired-switches
+          (append (cdr my/list-of-dired-switches)
+                  (list (car my/list-of-dired-switches))))
+    (dired-sort-other (car my/list-of-dired-switches)))
 
   ;; dired 上で r を押すと wdired-change-to-wdired-mode を動作させる
   (leaf wdired
