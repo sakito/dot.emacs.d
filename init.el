@@ -1459,6 +1459,44 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf org
+  :doc "Emacs添付の物を利用する前提"
+  :custom `(
+            ;; ディレクトリ設定
+            (org-directory . ,(expand-file-name "~/Documents/doc"))
+            ;; 画像をインラインで表示
+            (org-startup-with-inline-images . t)
+            ;; TODO状態
+            ;; TODO -> RUN -> (待機 WAIT) -> DONE
+            ;; SOMEDAY: いずれ、CANCEL: 却下
+            (org-todo-keywords . '((sequence "TODO(t)" "READY(r)" "RUN(!)" "WAIT(w)" "NOTE(n)"  "|" "DONE(d)" "SOMEDAY(s)" "CANCEL(c)")))
+            ;; DONE時刻記録
+            (org-log-done . 'time)
+            )
+  :config
+
+  (leaf open-junk-file
+    :doc "junkに作成 -> 整理して別の場所に移動"
+    :ensure t
+    :custom `(
+              (open-junk-file-format . ,(expand-file-name "~/Documents/doc/junk/%Y_%m_%d_%H%M%S."))
+              )
+    :bind
+    ("C-c j" . open-junk-file)
+    )
+
+  (leaf plain-org-wiki
+    :doc "最初から継続調査する事項はwikiを利用している"
+    :ensure t
+    :custom `(
+              (plain-org-wiki-directory . ,(expand-file-name "~/Documents/doc/wiki"))
+              )
+    :bind
+    ("C-c w". plain-org-wiki-helm)
+    )
+
+  )
+
 
 (leaf helm
   :doc "helm
