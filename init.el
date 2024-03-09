@@ -197,16 +197,16 @@
 
 
 (leaf font
-  :doc "https://github.com/yuru7/Firge"
+  :url "https://github.com/yuru7/udev-gothic"
   :config
   (set-face-attribute 'default
                       nil
-                      :family "Firge35"
+                      :family "UDEV Gothic 35"
                       :height 180)
-  (set-frame-font "Firge35-18")
+  (set-frame-font "UDEV Gothic 35-18")
   (set-fontset-font nil
                     'unicode
-                    (font-spec :family "Firge35")
+                    (font-spec :family "UDEV Gothic 35")
                     nil
                     'append)
   ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
@@ -220,14 +220,14 @@
   ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
   ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
   (set-fontset-font nil
-                    '( #x3000 .  #x30ff)
-                    (font-spec :family "Firge35")
+                    '(#x3000 . #x30ff)
+                    (font-spec :family "UDEV Gothic 35")
                     nil
                     'prepend)
   ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
   (set-fontset-font nil
-                    '( #xff00 .  #xffef)
-                    (font-spec :family "Firge35")
+                    '(#xff00 . #xffef)
+                    (font-spec :family "UDEV Gothic 35")
                     nil
                     'prepend)
   )

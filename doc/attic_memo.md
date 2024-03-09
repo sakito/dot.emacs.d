@@ -62,5 +62,44 @@ emacsclient利用しなくなったので、削除
 
  * helm-postframe: frameが画面に残ってしまう事があるので、利用断念
 
+# font
+
+```
+(leaf font
+  :doc "https://github.com/yuru7/Firge"
+  :config
+  (set-face-attribute 'default
+                      nil
+                      :family "Firge35"
+                      :height 180)
+  (set-frame-font "Firge35-18")
+  (set-fontset-font nil
+                    'unicode
+                    (font-spec :family "Firge35")
+                    nil
+                    'append)
+  ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
+  ;; http://apagreekkeys.org/NAUdownload.html
+  (set-fontset-font nil
+                    'greek-iso8859-7
+                    (font-spec :family "New Athena Unicode")
+                    nil
+                    'prepend)
+  ;; 記号        3000-303F http://www.triggertek.com/r/unicode/3000-303F
+  ;; 全角ひらがな 3040-309f http://www.triggertek.com/r/unicode/3040-309F
+  ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
+  (set-fontset-font nil
+                    '( #x3000 .  #x30ff)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
+  (set-fontset-font nil
+                    '( #xff00 .  #xffef)
+                    (font-spec :family "Firge35")
+                    nil
+                    'prepend)
+  )
+```
 
 以上
