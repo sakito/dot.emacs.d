@@ -1464,22 +1464,34 @@ the `*Messages*' buffer while BODY is evaluated."
   :custom `(
             ;; ディレクトリ設定
             (org-directory . ,(expand-file-name "~/Documents/doc"))
+
             ;; 画像をインラインで表示
             (org-startup-with-inline-images . t)
+
             ;; TODO状態
             ;; TODO -> RUN -> (待機 WAIT) -> DONE
             ;; SOMEDAY: いずれ、CANCEL: 却下
             (org-todo-keywords . '((sequence "TODO(t)" "READY(r)" "RUN(!)" "WAIT(w)" "NOTE(n)"  "|" "DONE(d)" "SOMEDAY(s)" "CANCEL(c)")))
+
             ;; DONE時刻記録
             (org-log-done . 'time)
+
+            ;; いろいろやるなら org-agenda-custom-commands 設定推奨
+            ;; 予定の表示期間(初期値 week, 日毎なら day)
+            ;; 1日前分から表示
+            (org-agenda-start-day . "-1d")
+            ;; 指定日数(この場合は 14日週間分)表示
+            (org-agenda-span . 13)
+
+            ;; 日曜開始
+            (org-agenda-start-on-weekday . 0)
             )
   :config
-
   (leaf open-junk-file
     :doc "junkに作成 -> 整理して別の場所に移動"
     :ensure t
     :custom `(
-              (open-junk-file-format . ,(expand-file-name "~/Documents/doc/junk/%Y_%m_%d_%H%M%S."))
+              (open-junk-file-format . ,(concat org-directory "/junk/%Y_%m_%d_%H%M%S."))
               )
     :bind
     ("C-c j" . open-junk-file)
@@ -1489,12 +1501,36 @@ the `*Messages*' buffer while BODY is evaluated."
     :doc "最初から継続調査する事項はwikiを利用している"
     :ensure t
     :custom `(
-              (plain-org-wiki-directory . ,(expand-file-name "~/Documents/doc/wiki"))
+              (plain-org-wiki-directory . ,(concat org-directory "/wiki"))
               )
     :bind
     ("C-c w". plain-org-wiki-helm)
     )
 
+  ;; agenda 設定
+  (setq my/org-tasks-directory (concat org-directory "/agenda/"))
+
+  ;; agenda 以下に当日のorgファイル作成
+  (defun my/create-daily-org-file ()
+    (interactive)
+    (let* ((dir my/org-tasks-directory)
+           (path (concat dir (format-time-string "%Y-%m-%d") ".org")))
+      (find-file path)
+      (save-buffer)
+      (setq org-agenda-files (list path))))
+
+  ;; org-agenda-files として本日と特定のファイルのみを候補とする
+  (setq org-agenda-files
+        (let* ((my/today (format-time-string "%Y-%m-%d"))
+               (my/org-today-file (expand-file-name (concat my/org-tasks-directory my/today ".org"))))
+          (list
+           (when (file-exists-p my/org-today-file)
+             my/org-today-file)
+           (concat my/org-tasks-directory "task.org"))))
+
+  :bind
+  ("C-c n" . my/create-daily-org-file)
+  ("C-c a" . org-agenda)
   )
 
 
