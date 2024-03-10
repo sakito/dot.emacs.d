@@ -172,7 +172,7 @@
           (append '(
                     (width . 172)
                     (height . 60)
-                    (top . 123)
+                    (top . 116)
                     (left . 420)
                     (left-fringe . 12)
                     (right-fringe . 12)
@@ -585,9 +585,6 @@
            ;; skk server設定
            (skk-server-host . "localhost")
            (skk-server-portnum . 1178)
-
-           ;; カーソル色
-           ;; (skk-cursor-hiragana-color . "hot pink")
            )
   :config
   ;; @ を無効にする
@@ -1519,13 +1516,17 @@ the `*Messages*' buffer while BODY is evaluated."
       (save-buffer)
       (setq org-agenda-files (list path))))
 
-  ;; org-agenda-files として本日と特定のファイルのみを候補とする
+  ;; org-agenda-files として本日、前日、特定ファイルのみを候補とする
   (setq org-agenda-files
         (let* ((my/today (format-time-string "%Y-%m-%d"))
-               (my/org-today-file (expand-file-name (concat my/org-tasks-directory my/today ".org"))))
+               (my/prevday (format-time-string "%Y-%m-%d" (time-add (current-time) (* -60 60 24))))
+               (my/org-today-file (expand-file-name (concat my/org-tasks-directory my/today ".org")))
+               (my/org-prevday-file (expand-file-name (concat my/org-tasks-directory my/prevday ".org"))))
           (list
            (when (file-exists-p my/org-today-file)
              my/org-today-file)
+           (when (file-exists-p my/org-prevday-file)
+             my/org-prevday-file)
            (concat my/org-tasks-directory "task.org"))))
 
   :bind
