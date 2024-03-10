@@ -1066,7 +1066,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
   ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
-  (defun my/smartchr-custom-keybindings ()
+  (defun my/smartchr-default ()
     ;; !! がカーソルの位置
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -1077,7 +1077,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ";") (smartchr '(";; " ";")))
     )
 
-  (defun my/smartchr-custom-keybindings-clang ()
+  (defun my/smartchr-clang ()
     ;; !! がカーソルの位置
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -1089,7 +1089,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ";") (smartchr '(";" ";;")))
     )
 
-  (defun my/smartchr-custom-keybindings-py ()
+  (defun my/smartchr-py ()
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
     (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
@@ -1103,7 +1103,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
     )
 
-  (defun my/smartchr-custom-keybindings-rst ()
+  (defun my/smartchr-rst ()
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
     (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
@@ -1113,7 +1113,16 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd ".") (smartchr '("." ".. ")))
     )
 
-  (defun my/skelton-custom-keybindigs ()
+  (defun my/smartchr-md ()
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd "`") (smartchr '("\`\`\`\n`!!'\n\`\`\`" "\``!!'\`" "\'")))
+
+    )
+
+  (defun my/smartchr-skelton ()
     ;;   (make-variable-buffer-local 'skeleton-pair)
     ;;  (make-variable-buffer-local 'skeleton-pair-on-word)
     ;;  (make-variable-buffer-local 'skeleton-pair-alist)
@@ -1135,18 +1144,19 @@ the `*Messages*' buffer while BODY is evaluated."
                  'emacs-lisp-mode-hook
                  'sql-mode-hook
                  ))
-    (add-hook hook 'my/smartchr-custom-keybindings))
+    (add-hook hook 'my/smartchr-default))
 
   (dolist (hook (list
                  'makefile-mode-hook
                  ))
-    (add-hook hook 'my/skelton-custom-keybindigs))
+    (add-hook hook 'my/smartchr-skelton))
 
   :hook (
          ;; モードオリジナル追加設定
-         (python-mode-hook . my/smartchr-custom-keybindings-py)
-         (rst-mode-hook . my/smartchr-custom-keybindings-rst)
-         (c-mode-common-hook . my/smartchr-custom-keybindings-clang))
+         (python-mode-hook . my/smartchr-py)
+         (rst-mode-hook . my/smartchr-rst)
+         (markdown-mode-hook . my/smartchr-md)
+         (c-mode-common-hook . my/smartchr-clang))
   )
 
 
