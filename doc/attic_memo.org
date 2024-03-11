@@ -1,8 +1,8 @@
-# 利用しなくなった物などのメモ
+* 利用しなくなった物などのメモ
 
-# theme
+* theme
 
-```
+#+begin_src emacs-lisp
 ;; (leaf emacs-theme
 ;;   :when window-system
 ;;   :config
@@ -11,15 +11,15 @@
 ;;   (load-theme 'nightsblue t t)
 ;;   (enable-theme 'nightsblue)
 ;;   )
+#+end_src
 
-```
 
-# emacsclient
+* emacsclient
 
 teminalでの操作はNeovim利用のため
 emacsclient利用しなくなったので、削除
 
-```
+#+begin_src emacs-lisp
 (leaf server
   :doc "emacsclient を利用するためにサーバ起動
 サーバが起動していた場合は先に起動していた方を優先"
@@ -35,11 +35,11 @@ emacsclient利用しなくなったので、削除
   :hook (
          (server-visit-hook . my/raise-frame)
          (find-file-hook . my/raise-frame)))
-```
+#+end_src
 
-# ls-lisp
+* ls-lisp
 
-```
+#+begin_src emacs-lisp
   ;; s で並び変え、C-u s で元に戻る
   ;; @see sorter.el
   ;; (leaf sorter
@@ -55,16 +55,86 @@ emacsclient利用しなくなったので、削除
   ;;            ;; ディレクトリをより上に表示
   ;;            (ls-lisp-dirs-first . t)
   ;;            ))
-```
+#+end_src
 
 
-# helm
+* helm
 
  * helm-postframe: frameが画面に残ってしまう事があるので、利用断念
 
-# font
 
-```
+* autoinsert
+
+#+begin_src emacs-lisp
+;; (leaf autoinsert
+;;   :require t
+;;   :global-minor-mode auto-insert-mode
+;;   :defvar auto-insert-alist template-replacements-alists
+;;   :init
+;;   ;; 置換用の関数
+;;   (defun my/template ()
+;;     (time-stamp)
+;;     (mapc #'(lambda(c)
+;;               (progn
+;;                 (goto-char (point-min))
+;;                 (replace-string (cl-first c) (funcall (cl-rest c)) nil)))
+;;           template-replacements-alists)
+;;     (goto-char (point-max))
+;;     (message "done."))
+;;   :custom `(
+;;            ;; テンプレートとなるファイルがあるディレクトリ
+;;            ;; 末尾に"/"が必要なので注意
+;;            (auto-insert-directory
+;;             . ,(expand-file-name "etc/autoinsert/" user-emacs-directory))
+
+;;            ;; 質問しないで auto-insertを実行する
+;;            (auto-insert-query . nil))
+
+;;   :config
+;;   ;; テンプレート用の置換文字列
+;;   (defvar template-replacements-alists
+;;     '(
+;;       ("%file%" . (lambda () (file-name-nondirectory (buffer-file-name))))
+;;       ("%module%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+;;       ;;("%time%" . (lambda () (format-time-string "%Y-%m-%d %k:%M:%S" (current-time))))
+;;       ("%time%" . (lambda () (format-time-string "%Y-%m-%d 00:00:00" (current-time))))
+;;       ("%year%" . (lambda () (format-time-string "%Y" (current-time))))
+;;       ;; ("%file-without-ext%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
+;;       ;; ("%include-guard%" . (lambda () (format "__SCHEME_%s__" (upcase (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
+;;       ))
+
+;;   ;; 各モードの設定
+;;   ;; Python
+;;   (setq auto-insert-alist
+;;         (nconc '(
+;;                  ("\\.rst$" . ["rst.rst" my/template])
+;;                  (python-mode . ["python.py" my/template])
+;;                  ) auto-insert-alist))
+;;   ;; Lisp
+;;   (setq auto-insert-alist
+;;         (nconc '(
+;;                  ("\\.cl$" . ["cl.lisp" my/template])
+;;                  ("\\.lisp$" . ["cl.lisp" my/template])
+;;                  (lisp-mode . ["cl.lisp" my/template])
+;;                  ) auto-insert-alist))
+
+;;   ;; Shell
+;;   (setq auto-insert-alist
+;;         (nconc '(
+;;                  ("\\.sh$" . ["shell.sh" my/template])
+;;                  (sh-mode . ["shell.sh" my/template])
+;;                  ) auto-insert-alist))
+;;   :hook (
+;;          ;; ファイルを開いたら実行
+;;          (find-file-hook . auto-insert)
+;;          (find-file-not-found-hooks . auto-insert))
+;;   )
+#+end_src
+
+
+* font
+
+#+begin_src emacs-lisp
 (leaf font
   :doc "https://github.com/yuru7/Firge"
   :config
@@ -100,6 +170,6 @@ emacsclient利用しなくなったので、削除
                     nil
                     'prepend)
   )
-```
+#+end_src
 
 以上

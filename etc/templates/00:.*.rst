@@ -1,0 +1,5 @@
+`(file-name-nondirectory (buffer-file-name))`
+#published `(format-time-string "%Y-%m-%d 00:00:00" (current-time))`
+#created `(format-time-string "%Y-%m-%d 00:00:00" (current-time))`
+.. contents:: 目次
+$0

@@ -980,68 +980,15 @@ the `*Messages*' buffer while BODY is evaluated."
   ))
 
 
-(leaf autoinsert
-  :require t
-  :global-minor-mode auto-insert-mode
-  :defvar auto-insert-alist template-replacements-alists
-  :init
-  ;; 置換用の関数
-  (defun my/template ()
-    (time-stamp)
-    (mapc #'(lambda(c)
-              (progn
-                (goto-char (point-min))
-                (replace-string (cl-first c) (funcall (cl-rest c)) nil)))
-          template-replacements-alists)
-    (goto-char (point-max))
-    (message "done."))
-  :custom `(
-           ;; テンプレートとなるファイルがあるディレクトリ
-           ;; 末尾に"/"が必要なので注意
-           (auto-insert-directory
-            . ,(expand-file-name "etc/autoinsert/" user-emacs-directory))
-
-           ;; 質問しないで auto-insertを実行する
-           (auto-insert-query . nil))
-
+(leaf yatemplate
+  :doc "auto-insertにyasnippetを利用"
+  :url "https://github.com/mineo/yatemplate"
+  :ensure t
   :config
-  ;; テンプレート用の置換文字列
-  (defvar template-replacements-alists
-    '(
-      ("%file%" . (lambda () (file-name-nondirectory (buffer-file-name))))
-      ("%module%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
-      ;;("%time%" . (lambda () (format-time-string "%Y-%m-%d %k:%M:%S" (current-time))))
-      ("%time%" . (lambda () (format-time-string "%Y-%m-%d 00:00:00" (current-time))))
-      ("%year%" . (lambda () (format-time-string "%Y" (current-time))))
-      ;; ("%file-without-ext%" . (lambda () (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))))
-      ;; ("%include-guard%" . (lambda () (format "__SCHEME_%s__" (upcase (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
-      ))
-
-  ;; 各モードの設定
-  ;; Python
-  (setq auto-insert-alist
-        (nconc '(
-                 ("\\.rst$" . ["rst.rst" my/template])
-                 (python-mode . ["python.py" my/template])
-                 ) auto-insert-alist))
-  ;; Lisp
-  (setq auto-insert-alist
-        (nconc '(
-                 ("\\.cl$" . ["cl.lisp" my/template])
-                 ("\\.lisp$" . ["cl.lisp" my/template])
-                 (lisp-mode . ["cl.lisp" my/template])
-                 ) auto-insert-alist))
-
-  ;; Shell
-  (setq auto-insert-alist
-        (nconc '(
-                 ("\\.sh$" . ["shell.sh" my/template])
-                 (sh-mode . ["shell.sh" my/template])
-                 ) auto-insert-alist))
-  :hook (
-         ;; ファイルを開いたら実行
-         (find-file-hook . auto-insert)
-         (find-file-not-found-hooks . auto-insert))
+  (setq yatemplate-dir (locate-user-emacs-file "etc/templates"))
+  (auto-insert-mode t)
+  (setq auto-insert-query nil)
+  (yatemplate-fill-alist)
   )
 
 
@@ -1533,11 +1480,15 @@ the `*Messages*' buffer while BODY is evaluated."
                (my/org-today-file (expand-file-name (concat my/org-tasks-directory my/today ".org")))
                (my/org-prevday-file (expand-file-name (concat my/org-tasks-directory my/prevday ".org"))))
           (list
-           (when (file-exists-p my/org-today-file)
-             my/org-today-file)
-           (when (file-exists-p my/org-prevday-file)
-             my/org-prevday-file)
-           (concat my/org-tasks-directory "task.org"))))
+           (concat my/org-tasks-directory "task.org")
+           (if (file-exists-p my/org-today-file)
+             my/org-today-file
+             (concat my/org-tasks-directory "task.org"))
+           (if (file-exists-p my/org-prevday-file)
+             my/org-prevday-file
+             (concat my/org-tasks-directory "task.org"))
+           )
+          ))
 
   :bind
   ("C-c n" . my/create-daily-org-file)
