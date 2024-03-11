@@ -980,18 +980,6 @@ the `*Messages*' buffer while BODY is evaluated."
   ))
 
 
-(leaf yatemplate
-  :doc "auto-insertにyasnippetを利用"
-  :url "https://github.com/mineo/yatemplate"
-  :ensure t
-  :config
-  (setq yatemplate-dir (locate-user-emacs-file "etc/templates"))
-  (auto-insert-mode t)
-  (setq auto-insert-query nil)
-  (yatemplate-fill-alist)
-  )
-
-
 (leaf hl-line-plus
   :url "https://github.com/emacsmirror/hl-line-plus"
   :require hl-line+
@@ -1211,7 +1199,22 @@ the `*Messages*' buffer while BODY is evaluated."
   :custom `((yas-snippet-dirs . '(,(locate-user-emacs-file "etc/snippets"))))
   :config
   (leaf yasnippet-snippets
-    :ensure t))
+    :ensure t)
+
+
+  (leaf yatemplate
+    :doc "auto-insertにyasnippetを利用"
+    :url "https://github.com/mineo/yatemplate"
+    :ensure t
+    :after yasnippet
+    :defvar auto-insert-query
+    :config
+    (setq yatemplate-dir (locate-user-emacs-file "etc/templates"))
+    (auto-insert-mode t)
+    (setq auto-insert-query nil)
+    (yatemplate-fill-alist)
+  )
+  )
 
 
 (leaf lsp-bridge
