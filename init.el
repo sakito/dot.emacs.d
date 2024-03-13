@@ -1178,10 +1178,6 @@ the `*Messages*' buffer while BODY is evaluated."
               '(:with company-yasnippet))))
 
   (setq company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
-
-  (add-to-list 'company-backends 'company-dabbrev)
-  (add-to-list 'company-backends 'company-semantic)
-  (add-to-list 'company-backends 'company-files)
   )
 
 
