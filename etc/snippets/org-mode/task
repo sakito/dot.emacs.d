@@ -2,4 +2,4 @@
 # name: task
 # key: t
 # --
-* TODO $1<`(format-time-string "%Y-%m-%d %a")` $2:$3>
+* TODO $0<`(format-time-string "%Y-%m-%d")`>
