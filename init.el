@@ -1486,10 +1486,10 @@ the `*Messages*' buffer while BODY is evaluated."
            (concat my/org-tasks-directory "task.org")
            (if (file-exists-p my/org-today-file)
              my/org-today-file
-             (concat my/org-tasks-directory "task.org"))
+             (concat my/org-tasks-directory "dummy.org"))
            (if (file-exists-p my/org-prevday-file)
              my/org-prevday-file
-             (concat my/org-tasks-directory "task.org"))
+             (concat my/org-tasks-directory "dummy.org"))
            )
           ))
 
@@ -1497,6 +1497,13 @@ the `*Messages*' buffer while BODY is evaluated."
   ("C-c n" . my/create-daily-org-file)
   ("C-c a" . org-agenda)
   )
+
+
+(leaf which-key
+  :url "https://github.com/justbur/emacs-which-key"
+  :ensure t
+  :config
+  (which-key-mode))
 
 
 (leaf helm
