@@ -1442,6 +1442,16 @@ the `*Messages*' buffer while BODY is evaluated."
 
             ;; 日曜開始
             (org-agenda-start-on-weekday . 0)
+
+            ;; src 内の挙動設定
+            ;; font-lock
+            (org-src-fontify-natively . t)
+            ;; TAB挙動
+            (org-src-tab-acts-natively . t)
+            ;; インデント
+            (org-edit-src-content-indentation . 0)
+            ;; インデント残す
+            (org-src-preserve-indentation . t)
             )
   :config
   (leaf open-junk-file
