@@ -814,6 +814,10 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; dired-find-alternate-fileを有効化
   (put 'dired-find-alternate-file 'disabled nil)
 
+  (leaf diredfl
+    :ensure t
+    :hook (dired-mode-hook . diredfl-global-mode))
+
   :bind (:dired-mode-map
          ;; RETで新規バッファを作成しないでディレクトリを開く(デフォルトは「a」)
          ("RET" . 'dired-find-alternate-file)
