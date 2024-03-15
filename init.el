@@ -1420,6 +1420,12 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf protobuf-mode
+  :url "https://github.com/protocolbuffers/protobuf"
+  :ensure t
+  :mode "\\.proto\\'")
+
+
 (leaf org
   :doc "Emacs添付の物を利用する前提"
   :custom `(
