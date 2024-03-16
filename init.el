@@ -1540,6 +1540,7 @@ TODO 一部設定未整備"
 
            (helm-display-function . 'pop-to-buffer)
 
+           ;; helm-miniの内容
            (helm-mini-default-sources
             . '(
                 ;; helm-source-flycheck
@@ -1550,6 +1551,16 @@ TODO 一部設定未整備"
                 helm-source-emacs-commands-history
                 helm-source-emacs-commands
                 helm-source-bookmarks
+                ))
+
+           ;; helm-for-filesの内容
+           (helm-for-files-preferred-list
+            . '(
+                helm-source-buffers-list
+                helm-source-recentf
+                helm-source-file-cache
+                helm-ghq-source
+                helm-source-files-in-current-dir
                 ))
            )
   :bind (
@@ -1653,6 +1664,13 @@ TODO 一部設定未整備"
     :bind (
            ("C-c l" . helm-flycheck)
            ))
+
+  (leaf helm-ghq
+    :url "https://github.com/masutaka/emacs-helm-ghq"
+    :ensure t
+    :require helm-for-files helm-ghq
+    :after helm)
+
   )
 
 
