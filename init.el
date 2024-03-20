@@ -249,7 +249,7 @@
           (space-mark 2336 [2340] [95])
           (space-mark 3616 [3620] [95])
           (space-mark 3872 [3876] [95])
-          (space-mark ?\x3000 [?\□]) ;; 全角スペース
+          ;; (space-mark ?\x3000 [?\□]) ;; 全角スペース
           ;; (newline-mark 10 [182 10]) ; newlne, ¶
           (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
           ))
@@ -280,7 +280,7 @@
   (defvar my/mark-whitespace-face 'my/mark-whitespace-face)
   (defface my/mark-whitespace-face
     '((((class color))
-       (:background "#9f9690")))
+       (:background "#9f9690" :foreground "#80601f")))
     nil
     :group 'face)
 
