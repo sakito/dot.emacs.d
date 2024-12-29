@@ -124,6 +124,7 @@
 ;; 初期位置
 (cd "~/")
 
+
 (leaf setenv
   :doc "一部環境で環境変数が正常設定されないので、設定する
 不要な物もあるかもしれない"
@@ -144,7 +145,7 @@
                 "/usr/texbin"
                 (expand-file-name "~/bin")
                 (expand-file-name "~/.emacs.d/bin")
-                (expand-file-name "~/opt/py3.12.1/bin")
+                (expand-file-name "~/opt/py/py3.12.8/bin")
                 (expand-file-name "~/.local/share/mise/shims")
                 (expand-file-name "~/.npm-packages/bin")
                 (expand-file-name "bin" user-emacs-directory)
@@ -1221,11 +1222,11 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
-(leaf lsp-bridge
-  :el-get (lsp-bridge
-           :url "https://github.com/manateelazycat/lsp-bridge.git")
-  :custom (
-           (lsp-bridge-python-lsp-server . "pyright")))
+;; (leaf lsp-bridge
+;;   :el-get (lsp-bridge
+;;            :url "https://github.com/manateelazycat/lsp-bridge.git")
+;;   :custom (
+;;            (lsp-bridge-python-lsp-server . "pyright")))
 
 
 (leaf elisp
@@ -1265,7 +1266,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (setenv "PYTHONSTARTUP"
           (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
   (setenv "PYTHONPATH"
-          (expand-file-name "~/opt/py3.12.1/lib/python3.12/site-packages"))
+          (expand-file-name "~/opt/py/py3.12.8/lib/python3.12/site-packages"))
 
   :bind (:python-mode-map
          ("C-c ;" . comment-dwim)
