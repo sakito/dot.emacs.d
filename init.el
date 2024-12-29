@@ -350,6 +350,23 @@
            ))
 
 
+(leaf *scroll-settings
+  :doc "スクロールに関する設定"
+  :config
+  (setq scroll-preserve-screen-position t) ;; スクロール時カーソル位置維持
+  ;; smooth-scroll
+  ;; スクロールがスムーズになる
+  (leaf smooth-scroll
+    :ensure t
+    :config
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+    (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+    (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+    (setq scroll-step 1) ;; keyboard scroll one line at a time
+    )
+  )
+
+
 (leaf nerd-icons
   :doc "M-x nerd-icons-install-fonts"
   :url "https://github.com/rainstormstudio/nerd-icons.el"
