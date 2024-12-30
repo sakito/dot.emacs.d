@@ -313,20 +313,20 @@
   :config
   (load-theme 'modus-operandi-tinted t)
 
-  (leaf *custom-modus-themes
-    :after modus-themes
-    :defvar bg-main
-    :defun modus-themes-with-colors my/modus-themes-custom-faces
-    :config
-    (defun my/modus-themes-custom-faces (&rest _)
-      (modus-themes-with-colors
-        (custom-set-faces
-         `(trailing-whitespace ((,c :background ,bg-main :underline "SteelBlue")))
-         )))
+  ;; (leaf *custom-modus-themes
+  ;;   :after modus-themes
+  ;;   :defvar bg-main
+  ;;   :defun modus-themes-with-colors my/modus-themes-custom-faces
+  ;;   :config
+  ;;   (defun my/modus-themes-custom-faces (&rest _)
+  ;;     (modus-themes-with-colors
+  ;;       (custom-set-faces
+  ;;        `(trailing-whitespace ((:background ,bg-main :underline "SteelBlue")))
+  ;;        )))
 
-    (my/modus-themes-custom-faces)
+  ;;   (my/modus-themes-custom-faces)
 
-    )
+  ;;   )
   )
 
 
@@ -447,6 +447,7 @@
          (text-mode-hook . turn-off-auto-fill)
          (text-mode-hook . display-line-numbers-mode)
          (prog-mode-hook . display-line-numbers-mode)
+         (conf-mode-hook . display-line-numbers-mode)
          )
   :bind (
          ;; help key変更
@@ -1275,6 +1276,35 @@ the `*Messages*' buffer while BODY is evaluated."
   :blackout t)
 
 
+(leaf treesit
+  :doc "tree-sitter設定"
+  :require t
+  :config
+  (setq treesit-font-lock-level 4)
+
+  ;; M-x treesit-install-language-grammar の候補
+  ;; 参考 https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+  (setq treesit-language-source-alist
+    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+      (cmake "https://github.com/uyha/tree-sitter-cmake")
+      (css "https://github.com/tree-sitter/tree-sitter-css")
+      (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+      (go "https://github.com/tree-sitter/tree-sitter-go")
+      (html "https://github.com/tree-sitter/tree-sitter-html")
+      (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+      (json "https://github.com/tree-sitter/tree-sitter-json")
+      (make "https://github.com/alemuller/tree-sitter-make")
+      (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+      (python "https://github.com/tree-sitter/tree-sitter-python")
+      (rust "https://github.com/tree-sitter/tree-sitter-rust")
+      (toml "https://github.com/tree-sitter/tree-sitter-toml")
+      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+  )
+
+
+
 (leaf python
   :require t
   :mode "\\.wsgi\\'" "wscript"
@@ -1342,6 +1372,10 @@ the `*Messages*' buffer while BODY is evaluated."
          )
   )
 
+
+(leaf toml-ts-mode
+  :require t
+  :mode "\\.toml\\'")
 
 (leaf makefile-mode
   :hook (
@@ -1446,6 +1480,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf org
   :doc "Emacs添付の物を利用する前提"
+  :require t
   :custom `(
             ;; ディレクトリ設定
             (org-directory . ,(expand-file-name "~/Documents/doc"))
@@ -1486,7 +1521,8 @@ the `*Messages*' buffer while BODY is evaluated."
     :doc "junkに作成 -> 整理して別の場所に移動"
     :ensure t
     :custom `(
-              (open-junk-file-format . ,(concat org-directory "/junk/%Y_%m_%d_%H%M%S."))
+              ;; (open-junk-file-format . ,(concat org-directory "/junk/%Y_%m_%d_%H%M%S."))
+              (open-junk-file-format . ,(expand-file-name "~/Documents/doc/junk/%Y_%m_%d_%H%M%S."))
               )
     :bind
     ("C-c j" . open-junk-file)
@@ -1496,7 +1532,8 @@ the `*Messages*' buffer while BODY is evaluated."
     :doc "最初から継続調査する事項はwikiを利用している"
     :ensure t
     :custom `(
-              (plain-org-wiki-directory . ,(concat org-directory "/wiki"))
+              ;; (plain-org-wiki-directory . ,(concat org-directory "/wiki"))
+              (plain-org-wiki-directory . ,(expand-file-name "~/Documents/doc/wiki"))
               )
     :bind
     ("C-c w". plain-org-wiki-helm)
@@ -1566,8 +1603,8 @@ TODO 一部設定未整備"
                 helm-source-file-name-history
                 helm-source-recentf
                 helm-source-files-in-current-dir
-                helm-source-emacs-commands-history
-                helm-source-emacs-commands
+                ;; helm-source-emacs-commands-history
+                ;; helm-source-emacs-commands
                 helm-source-bookmarks
                 ))
 
@@ -1631,33 +1668,33 @@ TODO 一部設定未整備"
   ;; コマンド候補
   ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
   ;; 上記を参考にして、履歴に保存されるように修正
-  (defvar helm-source-emacs-commands
-   (helm-build-sync-source "Emacs commands"
-     :candidates (lambda ()
-                   (let (commands)
-                     (mapatoms (lambda (cmds)
-                                 (if (commandp cmds)
-                                     (push (symbol-name cmds)
-                                           commands))))
-                     (sort commands 'string-lessp)))
-     :coerce #'intern-soft
-     :action (lambda (cmd-or-name)
-               (command-execute cmd-or-name 'record)
-               (setq extended-command-history
-                     (cons (helm-stringify cmd-or-name)
-                           (delete (helm-stringify cmd-or-name) extended-command-history)))))
-   "A simple helm source for Emacs commands.")
+  ;; (defvar helm-source-emacs-commands
+  ;;  (helm-build-sync-source "Emacs commands"
+  ;;    :candidates (lambda ()
+  ;;                  (let (commands)
+  ;;                    (mapatoms (lambda (cmds)
+  ;;                                (if (commandp cmds)
+  ;;                                    (push (symbol-name cmds)
+  ;;                                          commands))))
+  ;;                    (sort commands 'string-lessp)))
+  ;;    :coerce #'intern-soft
+  ;;    :action (lambda (cmd-or-name)
+  ;;              (command-execute cmd-or-name 'record)
+  ;;              (setq extended-command-history
+  ;;                    (cons (helm-stringify cmd-or-name)
+  ;;                          (delete (helm-stringify cmd-or-name) extended-command-history)))))
+  ;;  "A simple helm source for Emacs commands.")
 
-  (defvar helm-source-emacs-commands-history
-   (helm-build-sync-source "Emacs commands history"
-     :candidates (lambda ()
-                   (let (commands)
-                     (dolist (elem extended-command-history)
-                       (push (intern elem) commands))
-                     commands))
-     :coerce #'intern-soft
-     :action #'command-execute)
-   "Emacs commands history")
+  ;; (defvar helm-source-emacs-commands-history
+  ;;  (helm-build-sync-source "Emacs commands history"
+  ;;    :candidates (lambda ()
+  ;;                  (let (commands)
+  ;;                    (dolist (elem extended-command-history)
+  ;;                      (push (intern elem) commands))
+  ;;                    commands))
+  ;;    :coerce #'intern-soft
+  ;;    :action #'command-execute)
+  ;;  "Emacs commands history")
 
   (leaf helm-descbinds
     :ensure t
