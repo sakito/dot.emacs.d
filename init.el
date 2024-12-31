@@ -1096,7 +1096,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
   ;; 適用するモードを限定
   (dolist (hook (list
-                 'css-mode-hook
+                 'css-ts-mode-hook
                  'js2-mode-hook
                  'lisp-mode-hook
                  'emacs-lisp-mode-hook
@@ -1111,7 +1111,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
   :hook (
          ;; モードオリジナル追加設定
-         (python-mode-hook . my/smartchr-py)
+         (python-ts-mode-hook . my/smartchr-py)
          (rst-mode-hook . my/smartchr-rst)
          (markdown-mode-hook . my/smartchr-md)
          (c-mode-common-hook . my/smartchr-clang))
@@ -1200,7 +1200,7 @@ the `*Messages*' buffer while BODY is evaluated."
       (append (if (consp backend) backend (list backend))
               '(:with company-yasnippet))))
 
-  (setq company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
+  (setopt company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
   )
 
 
@@ -1280,11 +1280,9 @@ the `*Messages*' buffer while BODY is evaluated."
   :doc "tree-sitter設定"
   :require t
   :config
-  (setq treesit-font-lock-level 4)
-
   ;; M-x treesit-install-language-grammar の候補
   ;; 参考 https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
-  (setq treesit-language-source-alist
+  (setopt treesit-language-source-alist
     '((bash "https://github.com/tree-sitter/tree-sitter-bash")
       (cmake "https://github.com/uyha/tree-sitter-cmake")
       (css "https://github.com/tree-sitter/tree-sitter-css")
@@ -1301,13 +1299,28 @@ the `*Messages*' buffer while BODY is evaluated."
       (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
       (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
       (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+  (setopt treesit-font-lock-level 4)
+
+  (setopt major-mode-remap-alist
+        '(
+          (yaml-mode . yaml-ts-mode)
+          (c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (c-or-c++-mode . c-or-c++-ts-mode)
+          (java-mode . java-ts-mode)
+          (javascript-mode . js-ts-mode)
+          (js-json-mode . json-ts-mode)
+          (css-mode . css-ts-mode)
+          (python-mode . python-ts-mode)
+          ))
   )
 
 
 
 (leaf python
   :require t
-  :mode "\\.wsgi\\'" "wscript"
+  :mode "\\.py\\'" "\\.wsgi\\'" "wscript"
   :init
   ;; env
   (setenv "PYTHONSTARTUP"
@@ -1315,7 +1328,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (setenv "PYTHONPATH"
           (expand-file-name "~/opt/py/py3.12.8/lib/python3.12/site-packages"))
 
-  :bind (:python-mode-map
+  :bind (:python-ts-mode-map
          ("C-c ;" . comment-dwim)
          ("C-c :". comment-dwim)
          ("C-c !" . run-python)
@@ -1331,8 +1344,8 @@ the `*Messages*' buffer while BODY is evaluated."
          )
 
   :hook (
-         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-mode-hook . flycheck-mode)
+         (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-ts-mode-hook . flycheck-mode)
          )
 
   :config
@@ -1425,7 +1438,7 @@ the `*Messages*' buffer while BODY is evaluated."
                                      'face `((:foreground ,(if (> 128.0 (my/hexcolour-luminance colour))
                                                                "white" "black"))
                                              (:background ,colour)))))))))
-  :hook (css-mode-hook . my/hexcolour-add-to-font-lock)
+  :hook (css-ts-mode-hook . my/hexcolour-add-to-font-lock)
   )
 
 
@@ -1540,7 +1553,7 @@ the `*Messages*' buffer while BODY is evaluated."
     )
 
   ;; agenda 設定
-  (setq my/org-tasks-directory (concat org-directory "/agenda/"))
+  (setopt my/org-tasks-directory (concat org-directory "/agenda/"))
 
   ;; agenda 以下に当日のorgファイル作成
   (defun my/create-daily-org-file ()
@@ -1549,10 +1562,10 @@ the `*Messages*' buffer while BODY is evaluated."
            (path (concat dir (format-time-string "%Y-%m-%d") ".org")))
       (find-file path)
       (save-buffer)
-      (setq org-agenda-files (list path))))
+      (setopt org-agenda-files (list path))))
 
   ;; org-agenda-files として本日、前日、特定ファイルのみを候補とする
-  (setq org-agenda-files
+  (setopt org-agenda-files
         (let* ((my/today (format-time-string "%Y-%m-%d"))
                (my/prevday (format-time-string "%Y-%m-%d" (time-add (current-time) (* -60 60 24))))
                (my/org-today-file (expand-file-name (concat my/org-tasks-directory my/today ".org")))
