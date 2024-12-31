@@ -262,7 +262,7 @@
          ("C-x w" . global-whitespace-mode))
   )
 
-
+(require 'modus-themes)
 (leaf modus-themes
   :ensure t
   :when window-system
@@ -310,23 +310,26 @@
        )))
   (ad-enable-advice 'font-lock-mode 'before 'my/font-lock-mode)
   (ad-activate 'font-lock-mode)
+
   :config
   (load-theme 'modus-operandi-tinted t)
 
-  ;; (leaf *custom-modus-themes
-  ;;   :after modus-themes
-  ;;   :defvar bg-main
-  ;;   :defun modus-themes-with-colors my/modus-themes-custom-faces
-  ;;   :config
-  ;;   (defun my/modus-themes-custom-faces (&rest _)
-  ;;     (modus-themes-with-colors
-  ;;       (custom-set-faces
-  ;;        `(trailing-whitespace ((:background ,bg-main :underline "SteelBlue")))
-  ;;        )))
+  (leaf *custom-modus-themes
+    :after modus-themes
+    :defvar bg-main
+    :defun modus-themes-with-colors my/modus-themes-custom-faces
+    :config
+    (defun my/modus-themes-custom-faces (&rest _)
+      (modus-themes-with-colors
+        (custom-set-faces
+         `(trailing-whitespace ((,c :background ,bg-main :underline "SteelBlue")))
+         )))
 
-  ;;   (my/modus-themes-custom-faces)
+    (my/modus-themes-custom-faces)
 
-  ;;   )
+    )
+
+
   )
 
 
