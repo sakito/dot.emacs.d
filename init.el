@@ -866,15 +866,26 @@ the `*Messages*' buffer while BODY is evaluated."
              (wgrep-enable-key . "r")
              )
     )
+
   (leaf pt
     :url "https://github.com/monochromegane/the_platinum_searcher"
     :url "https://github.com/bling/pt.el"
+    :if (executable-find "pt")
     :ensure t
     :config
     (leaf wgrep-pt
       :ensure t
       :hook ((pt-search-mode-hook . wgrep-pt-setup))
     ))
+
+  (leaf rg
+    :if (executable-find "rg")
+    :ensure t
+    :config
+    (leaf wgrep-rg
+      :require t
+      :hook ((rg-mode-hoo . wgrep-rg-setup)))
+    )
   )
 
 (leaf ffap
@@ -1347,6 +1358,7 @@ the `*Messages*' buffer while BODY is evaluated."
          )
 
   :hook (
+         (python-mode-hook . python-ts-mode)
          (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
          (python-ts-mode-hook . flycheck-mode)
          )
