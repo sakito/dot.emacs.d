@@ -145,7 +145,7 @@
                 "/usr/texbin"
                 (expand-file-name "~/bin")
                 (expand-file-name "~/.emacs.d/bin")
-                (expand-file-name "~/opt/py/py3.12.8/bin")
+                (expand-file-name "~/opt/py/py3.13.4/bin")
                 (expand-file-name "~/.local/share/mise/shims")
                 (expand-file-name "~/.npm-packages/bin")
                 (expand-file-name "bin" user-emacs-directory)
@@ -252,8 +252,11 @@
           (space-mark 3872 [3876] [95])
           ;; (space-mark ?\x3000 [?\□]) ;; 全角スペース
           ;; (newline-mark 10 [182 10]) ; newlne, ¶
-          (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+
+          ;; (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+          (tab-mark 9 [95 9] [92 9])
           ))
+
   :hook
   (prog-mode-hook . whitespace-mode)
   (text-mode-hook . whitespace-mode)
@@ -441,11 +444,16 @@
 
            ;; マーク領域を色付け
            (transient-mark-mode . t)
+
+           ;; タブ幅
+           (tab-width . 2)
+           (custom-tab-width . 2)
   )
   :config
   (global-display-line-numbers-mode)
   (global-font-lock-mode t)
   (setq font-lock-support-mode 'jit-lock-mode)
+  (setq-default tab-width 2)
   :hook (
          (text-mode-hook . turn-off-auto-fill)
          (text-mode-hook . display-line-numbers-mode)
@@ -1125,6 +1133,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
   :hook (
          ;; モードオリジナル追加設定
+         (python-mode-hook . my/smartchr-py)
          (python-ts-mode-hook . my/smartchr-py)
          (rst-mode-hook . my/smartchr-rst)
          (markdown-mode-hook . my/smartchr-md)
@@ -1301,7 +1310,9 @@ the `*Messages*' buffer while BODY is evaluated."
       (cmake "https://github.com/uyha/tree-sitter-cmake")
       (css "https://github.com/tree-sitter/tree-sitter-css")
       (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-      (go "https://github.com/tree-sitter/tree-sitter-go")
+      ;; (go "https://github.com/tree-sitter/tree-sitter-go")
+      (go "https://github.com/tree-sitter/tree-sitter-go" "v0.19.1")
+      (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
       (html "https://github.com/tree-sitter/tree-sitter-html")
       (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
       (json "https://github.com/tree-sitter/tree-sitter-json")
@@ -1314,7 +1325,8 @@ the `*Messages*' buffer while BODY is evaluated."
       (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
       (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-  (setopt treesit-font-lock-level 4)
+  ;; (setopt treesit-font-lock-level 4)
+  ;; (setq treesit-font-lock-level 4)
 
   (setopt major-mode-remap-alist
         '(
@@ -1327,7 +1339,27 @@ the `*Messages*' buffer while BODY is evaluated."
           (js-json-mode . json-ts-mode)
           (css-mode . css-ts-mode)
           (python-mode . python-ts-mode)
+          (go-mode . go-ts-mode)
+          (typescript-mode . typescript-ts-mode)
           ))
+
+
+  :custom
+  (treesit-font-lock-level . 4)
+  )
+
+
+(leaf treesit-auto
+  :ensure t
+  :require t
+  :init
+  (setq treesit-auto-install 'prompt)
+
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+
+   :hook
+  (emacs-startup-hook . global-treesit-auto-mode)
   )
 
 
@@ -1340,7 +1372,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (setenv "PYTHONSTARTUP"
           (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
   (setenv "PYTHONPATH"
-          (expand-file-name "~/opt/py/py3.12.8/lib/python3.12/site-packages"))
+          (expand-file-name "~/opt/py/py3.13.4/lib/python3.13/site-packages"))
 
   :bind (:python-ts-mode-map
          ("C-c ;" . comment-dwim)
@@ -1358,9 +1390,10 @@ the `*Messages*' buffer while BODY is evaluated."
          )
 
   :hook (
-         (python-mode-hook . python-ts-mode)
-         (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-ts-mode-hook . flycheck-mode)
+         ;; (python-mode-hook . python-ts-mode)
+         (python-mode-hook . eglot-ensure)
+         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-mode-hook . flycheck-mode)
          )
 
   :config
@@ -1401,6 +1434,18 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf typescript-ts-mode
+  :mode "\\.ts[x]?\\'"
+  )
+
+(leaf go-ts-mode
+  :mode "\\.go\\'"
+
+  :config
+  (setq tab-width 2)
+  )
+
+
 (leaf toml-ts-mode
   :require t
   :mode "\\.toml\\'")
@@ -1419,7 +1464,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf web-mode
   :ensure t
-  :mode "\\.\\(html\\|htm\\)\\'" "\\.js[x]?$" "\\.ts[x]?\\'"
+  :mode "\\.\\(html\\|htm\\)\\'" "\\.js[x]?$"
   :bind (
          (:web-mode-map
           ("C-;" . nil)
