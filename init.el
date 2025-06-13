@@ -1363,9 +1363,23 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf eglot
+  ;; M-x package-install RET eglot RET
+  ;; 最新をインストールしないと利用できない場合がある
+  :ensure t
+  :config
+  ;; eglot-server-programs を明確に指定しておく方が安全
+  ;; python-ts-mode で pyright 利用
+  ;; uv pip install pyright
+  ;; M-! pyright --help が挙動する事
+  ;; basedpyright を利用したい場合は pyright を basedpyright に変更
+  (add-hook 'eglot-server-programs
+            '((python-mode python-ts-mode) . ("pyright-langserver" "--stdio")))
+  )
 
-(leaf python
-  :require t
+
+(leaf python-ts-mode
+  ;; :require t
   :mode "\\.py\\'" "\\.wsgi\\'" "wscript"
   :init
   ;; env
@@ -1391,13 +1405,13 @@ the `*Messages*' buffer while BODY is evaluated."
 
   :hook (
          ;; (python-mode-hook . python-ts-mode)
-         (python-mode-hook . eglot-ensure)
-         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-mode-hook . flycheck-mode)
+         (python-ts-mode-hook . eglot-ensure)
+         (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-ts-mode-hook . flycheck-mode)
          )
 
   :config
-  (leaf cython-mode :ensure t)
+  ;; (leaf cython-mode :ensure t)
 
   (leaf flycheck-pycheckers
     :after flycheck
