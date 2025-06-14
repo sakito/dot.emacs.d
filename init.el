@@ -146,6 +146,7 @@
                 (expand-file-name "~/bin")
                 (expand-file-name "~/.emacs.d/bin")
                 (expand-file-name "~/opt/py/py3.13.4/bin")
+                (expand-file-name "~/.cargo/bin/")
                 (expand-file-name "~/.local/share/mise/shims")
                 (expand-file-name "~/.npm-packages/bin")
                 (expand-file-name "bin" user-emacs-directory)
@@ -1204,7 +1205,8 @@ the `*Messages*' buffer while BODY is evaluated."
   :config
   (leaf helm-company
     :url "https://github.com/Sodel-the-Vociferous/helm-company/"
-    :ensure t
+    :el-get (helm-company
+             :url "https://github.com/Sodel-the-Vociferous/helm-company.git")
     :after company)
 
   (progn
@@ -1340,6 +1342,7 @@ the `*Messages*' buffer while BODY is evaluated."
           (css-mode . css-ts-mode)
           (python-mode . python-ts-mode)
           (go-mode . go-ts-mode)
+          (rust-mode . rust-ts-mode)
           (typescript-mode . typescript-ts-mode)
           ))
 
@@ -1368,13 +1371,19 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; 最新をインストールしないと利用できない場合がある
   :ensure t
   :config
-  ;; eglot-server-programs を明確に指定しておく方が安全
-  ;; python-ts-mode で pyright 利用
-  ;; uv pip install pyright
-  ;; M-! pyright --help が挙動する事
-  ;; basedpyright を利用したい場合は pyright を basedpyright に変更
+  ;; eglot-server-programs を明確に指定しておく
   (add-hook 'eglot-server-programs
-            '((python-mode python-ts-mode) . ("pyright-langserver" "--stdio")))
+
+            ;; python-ts-mode で pyright 利用
+            ;; uv pip install pyright
+            ;; M-! pyright --help が挙動する事
+            ;; basedpyright を利用したい場合は pyright を basedpyright に変更
+            '((python-mode python-ts-mode) . ("pyright-langserver" "--stdio"))
+
+            ;; 参考 https://rust-analyzer.github.io/book/other_editors.html#eglot
+            ;; M-! rust-analyzer --help が挙動する事
+            '((rust-mode rust-ts-mode) . ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
+            )
   )
 
 
@@ -1422,6 +1431,24 @@ the `*Messages*' buffer while BODY is evaluated."
     :hook
     (flycheck-mode-hook . flycheck-pycheckers-setup)
     )
+  )
+
+
+(leaf pyvenv
+  :ensure t
+  :config
+  ;; 仮想環境のディレクトリを設定
+  (setenv "WORKON_HOME" "~/opt/py/py3.13.4")
+  (pyvenv-mode 1))
+
+
+(leaf rust-mode
+  :ensure t
+  :custom
+  (rust-format-on-save . t)
+  (rust-mode-treesitter-derive . t)
+  :hook
+  (rust-mode-hook . eglot-ensure)
   )
 
 
@@ -1670,9 +1697,16 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf helm
   :doc "helm
-TODO 一部設定未整備"
+TODO 一部設定未整備
+
+helmは最新にすると起動しない場合がある
+特定のバージョンを取得する場合は以下のようにする
+git pull --tags
+git checkout v4.0.0
+"
   :url "https://github.com/emacs-helm/helm"
-  :ensure t
+  :el-get (helm
+           :url "https://github.com/emacs-helm/helm.git")
   :blackout t
   :require helm
   :global-minor-mode t
@@ -1784,12 +1818,16 @@ TODO 一部設定未整備"
   ;;  "Emacs commands history")
 
   (leaf helm-descbinds
-    :ensure t
+    :url "https://github.com/emacs-helm/helm-descbinds"
+    :el-get (helm-descbinds
+             :url "https://github.com/emacs-helm/helm-descbinds.git")
     :global-minor-mode t
     )
 
   (leaf helm-ag
-    :ensure t
+    :url "https://github.com/emacsorphanage/helm-ag"
+    :el-get (helm-ag
+             :url "https://github.com/emacsorphanage/helm-ag.git")
     :custom (
              (helm-ag-base-command . "pt -e --nocolor --nogroup")
              )
@@ -1802,14 +1840,17 @@ TODO 一部設定未整備"
     )
 
   (leaf helm-flycheck
-    :ensure t
+    :url "https://github.com/yasuyk/helm-flycheck"
+    :el-get (helm-flycheck
+             :url "https://github.com/yasuyk/helm-flycheck.git")
     :bind (
            ("C-c l" . helm-flycheck)
            ))
 
   (leaf helm-ghq
     :url "https://github.com/masutaka/emacs-helm-ghq"
-    :ensure t
+    :el-get (helm-ghq
+             :url "https://github.com/masutaka/emacs-helm-ghq.git")
     :require helm-for-files helm-ghq
     :after helm)
 
