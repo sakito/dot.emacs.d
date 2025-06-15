@@ -1371,6 +1371,14 @@ the `*Messages*' buffer while BODY is evaluated."
             ;; M-! rust-analyzer --help が挙動する事
             '((rust-mode rust-ts-mode) . ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
             )
+
+  ;; eglot無効機能
+  (setq eglot-ignored-server-capabilities
+        '(:documentHighlightProvider ;; カーソル下のシンボルハイライト
+          :inlayHintProvider ;; インラインヒント表示
+          ))
+  ;; eldoc echo を1行に抑止
+  (setq eldoc-echo-area-use-multiline-p nil)
   )
 
 
@@ -1408,6 +1416,8 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; (leaf cython-mode :ensure t)
 
   (leaf flycheck-pycheckers
+    :url "https://github.com/msherry/flycheck-pycheckers"
+    :doc "オリジナルの機能にruffのチェック機能を追加した物を利用"
     :after flycheck
     :load-path* "lisp"
     :require t
