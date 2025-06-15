@@ -1084,6 +1084,17 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
     )
 
+  (defun my/smartchr-rust ()
+    ;; !! がカーソルの位置
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd ":") (smartchr '("::" ":")))
+    (local-set-key (kbd ";") (smartchr '(";" ";;")))
+    )
+
   (defun my/smartchr-rst ()
     (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
@@ -1136,6 +1147,8 @@ the `*Messages*' buffer while BODY is evaluated."
          ;; モードオリジナル追加設定
          (python-mode-hook . my/smartchr-py)
          (python-ts-mode-hook . my/smartchr-py)
+         (rust-mode-hook . my/smartchr-rust)
+         (rust-ts-mode-hook . my/smartchr-rust)
          (rst-mode-hook . my/smartchr-rst)
          (markdown-mode-hook . my/smartchr-md)
          (c-mode-common-hook . my/smartchr-clang))
@@ -1265,6 +1278,22 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf reformatter
+  :ensure t
+  :url "https://github.com/purcell/emacs-reformatter"
+  :doc "保存時にフォーマットプログラムを起動する modeの物は利用していない"
+  :config
+  (reformatter-define python-format
+                      :program "ruff"
+                      :args `("format" "--stdin-filename" ,buffer-file-name))
+  (reformatter-define rust-format
+                      :program "rustfmt")
+  :hook
+  (python-ts-mode-hook . python-format-on-save-mode)
+  (rust-ts-mode-hook . rust-format-on-save-mode)
+  )
+
+
 (leaf elisp
   :doc "emacs lisp"
   :init
@@ -1365,11 +1394,13 @@ the `*Messages*' buffer while BODY is evaluated."
             ;; uv pip install pyright
             ;; M-! pyright --help が挙動する事
             ;; basedpyright を利用したい場合は pyright を basedpyright に変更
-            '((python-mode python-ts-mode) . ("pyright-langserver" "--stdio"))
+            '((python-mode python-ts-mode) .
+              ("pyright-langserver" "--stdio"))
 
             ;; 参考 https://rust-analyzer.github.io/book/other_editors.html#eglot
             ;; M-! rust-analyzer --help が挙動する事
-            '((rust-mode rust-ts-mode) . ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
+            '((rust-ts-mode rust-mode) .
+               ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
             )
 
   ;; eglot無効機能
@@ -1437,13 +1468,22 @@ the `*Messages*' buffer while BODY is evaluated."
   (pyvenv-mode 1))
 
 
-(leaf rust-mode
+(leaf rust-ts-mode
   :ensure t
   :custom
-  (rust-format-on-save . t)
   (rust-mode-treesitter-derive . t)
   :hook
   (rust-mode-hook . eglot-ensure)
+
+  :config
+
+  (leaf flycheck-rust
+    :ensure t
+    :url "https://github.com/flycheck/flycheck-rust/"
+    :after flycheck
+    :hook
+    (flycheck-mode-hook . flycheck-rust-setup)
+    )
   )
 
 
