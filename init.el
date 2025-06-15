@@ -1261,15 +1261,8 @@ the `*Messages*' buffer while BODY is evaluated."
     (auto-insert-mode t)
     (setq auto-insert-query nil)
     (yatemplate-fill-alist)
+    )
   )
-  )
-
-
-;; (leaf lsp-bridge
-;;   :el-get (lsp-bridge
-;;            :url "https://github.com/manateelazycat/lsp-bridge.git")
-;;   :custom (
-;;            (lsp-bridge-python-lsp-server . "pyright")))
 
 
 (leaf elisp
@@ -1282,8 +1275,6 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "C-c C-e") 'eval-current-buffer)
     ;; (local-set-key (kbd "C-c C") 'compile-defun)
     (local-set-key (kbd "C-c C-d") 'eval-defun)
-    (local-set-key (kbd "C-c ;") 'comment-dwim)
-    (local-set-key (kbd "C-c :") 'comment-dwim)
     (local-set-key (kbd "C-c f") 'describe-function-at-point)
     (when (fboundp 'expectations)
       ;; C-M-x compile-defun
@@ -1327,9 +1318,6 @@ the `*Messages*' buffer while BODY is evaluated."
       (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
       (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-  ;; (setopt treesit-font-lock-level 4)
-  ;; (setq treesit-font-lock-level 4)
-
   (setopt major-mode-remap-alist
         '(
           (yaml-mode . yaml-ts-mode)
@@ -1345,7 +1333,6 @@ the `*Messages*' buffer while BODY is evaluated."
           (rust-mode . rust-ts-mode)
           (typescript-mode . typescript-ts-mode)
           ))
-
 
   :custom
   (treesit-font-lock-level . 4)
@@ -1397,9 +1384,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (setenv "PYTHONPATH"
           (expand-file-name "~/opt/py/py3.13.4/lib/python3.13/site-packages"))
 
-  :bind (:python-ts-mode-map
-         ("C-c ;" . comment-dwim)
-         ("C-c :". comment-dwim)
+  :bind (
          ("C-c !" . run-python)
          ("C-c C-l" . nil)
 
@@ -1570,8 +1555,6 @@ the `*Messages*' buffer while BODY is evaluated."
   :bind (:rst-mode-map
          ("C-c C-c" . rst-compile)
          ("C-c C-p" . my/rst-compile-html-preview)
-         ("C-c ;" . comment-dwim)
-         ("C-c :" . comment-dwim)
          )
   :hook (rst-mode-hook . turn-off-auto-fill)
   )
@@ -1775,11 +1758,15 @@ git checkout v4.0.0
          (:prog-mode-map
           ;; imenu
           ("C-c i" . helm-imenu)
-          ("<f8>" . helm-imenu))
+          ("<f8>" . helm-imenu)
+          ("C-c ;" . comment-dwim)
+          ("C-c :" . comment-dwim))
          (:text-mode-map
           ;; imenu
           ("C-c i" . helm-imenu)
-          ("<f8>" . helm-imenu))
+          ("<f8>" . helm-imenu)
+          ("C-c ;" . comment-dwim)
+          ("C-c :" . comment-dwim))
          (:dired-mode-map
           ("<f8>" . helm-find-files))
          )

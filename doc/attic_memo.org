@@ -1,5 +1,16 @@
 * 利用しなくなった物などのメモ
 
+* lsp-bridge
+
+#+begin_src emacs-lisp
+(leaf lsp-bridge
+  :el-get (lsp-bridge
+           :url "https://github.com/manateelazycat/lsp-bridge.git")
+  :custom (
+           (lsp-bridge-python-lsp-server . "pyright")))
+#+end_src
+
+
 * theme
 
 #+begin_src emacs-lisp
