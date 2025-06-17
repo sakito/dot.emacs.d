@@ -31,6 +31,13 @@
 ;; cl-lib 利用前提
 (eval-when-compile (require 'cl-lib nil t))
 
+;; cl読み込み停止
+;; free-vars、unresolved無視
+(eval-and-compile
+  (setq byte-compile-warnings t)
+  (setq byte-compile-warnings '(not cl-functions free-vars docstrings unresolved))
+  )
+
 
 ;; leaf
 (eval-and-compile
@@ -42,8 +49,7 @@
 
 (eval-and-compile
   (customize-set-variable
-   'package-archives '(("org"   . "https://orgmode.org/elpa/")
-                       ("melpa" . "https://melpa.org/packages/")
+   'package-archives '(("melpa" . "https://melpa.org/packages/")
                        ("gnu"   . "https://elpa.gnu.org/packages/")))
   (package-initialize)
   (unless (package-installed-p 'leaf)
@@ -738,8 +744,8 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; 一定の未使用時間毎に自動保存
   ;; (run-with-idle-timer (* 5 60) t 'recentf-save-list)
   (run-with-idle-timer (* 5 60) t
-                       '(lambda ()
-                          (my/with-suppressed-message (recentf-save-list))))
+                       #'(lambda ()
+                           (my/with-suppressed-message (recentf-save-list))))
 
   :hook ((after-init-hook . recentf-mode))
   )
@@ -897,6 +903,7 @@ the `*Messages*' buffer while BODY is evaluated."
     )
   )
 
+
 (leaf ffap
   :require t
   :custom (
@@ -909,10 +916,10 @@ the `*Messages*' buffer while BODY is evaluated."
            ;; ffap-kpathsea-expand-path で展開するパスの深さ
            (ffap-kpathsea-depth . 5)
            )
-  :bind (
-         ;; C-x C-f
-         ;; ("C-c C-f" . find-file-at-point)
-         )
+  ;; :bind (
+  ;; C-x C-f
+  ;; ("C-c C-f" . find-file-at-point)
+  ;; )
   )
 
 
@@ -1029,8 +1036,8 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf hl-line-plus
   :url "https://github.com/emacsmirror/hl-line-plus"
   :require hl-line+
-  :el-get (hl-line-plus
-           :url "https://github.com/emacsmirror/hl-line-plus.git")
+  :vc (hl-line-plus
+       :url "https://github.com/emacsmirror/hl-line-plus.git")
   :defun toggle-hl-line-when-idle
   :config
   (toggle-hl-line-when-idle 1)
@@ -1041,8 +1048,8 @@ the `*Messages*' buffer while BODY is evaluated."
   :doc "smartchr の設定"
   :url "http://tech.kayac.com/archive/emacs-tips-smartchr.html"
   :require t
-  :el-get (smartchr
-           :url "https://github.com/imakado/emacs-smartchr.git")
+  :vc (smartchr
+       :url "https://github.com/imakado/emacs-smartchr.git")
   :defun smartchr
   :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
@@ -1158,7 +1165,9 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf vc
   :doc "VCS"
   :custom (
-           (vc-handled-backends . nil)
+           ;; Gitのみ有効
+           (vc-handled-backends . (delq 'Git vc-handled-backends))
+           ;; status無効
            (vc-display-status . nil)
            (vc-consult-headers . nil)
            ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
@@ -1180,6 +1189,173 @@ the `*Messages*' buffer while BODY is evaluated."
             (sl-prev-scratch-string-file
              . ,(expand-file-name "var/scratch-prev.log" user-emacs-directory))
             )
+  )
+
+
+(leaf helm
+  :doc "helm
+TODO 一部設定未整備
+
+helmは最新にすると起動しない場合がある
+特定のバージョンを取得する場合は以下のようにする
+git pull --tags
+git checkout v4.0
+make
+"
+  :url "https://github.com/emacs-helm/helm"
+  :el-get (helm
+           :url "https://github.com/emacs-helm/helm.git")
+  :blackout t
+  :require helm
+  :global-minor-mode t
+  :custom (
+           ;; M-x を保存
+           (helm-M-x-always-save-history . t)
+
+           (helm-display-function . 'pop-to-buffer)
+
+           ;; helm-miniの内容
+           (helm-mini-default-sources
+            . '(
+                ;; helm-source-flycheck
+                helm-source-buffers-list
+                helm-source-file-name-history
+                helm-source-recentf
+                helm-source-files-in-current-dir
+                ;; helm-source-emacs-commands-history
+                ;; helm-source-emacs-commands
+                helm-source-bookmarks
+                ))
+
+           ;; helm-for-filesの内容
+           (helm-for-files-preferred-list
+            . '(
+                helm-source-buffers-list
+                helm-source-recentf
+                helm-source-file-cache
+                helm-ghq-source
+                helm-source-files-in-current-dir
+                ))
+           )
+  :bind (
+         ;; mini buffer 起動
+         ("C-;" . helm-mini)
+
+         ;; コマンド表示
+         ("M-x" . helm-M-x)
+
+         ;; バッファ切り替え時の一覧表示
+         ("C-x C-b" . helm-for-files)
+
+         ;; kill ring
+         ("M-y". helm-show-kill-ring)
+
+         ;; find files
+         ;; ("C-x C-f" . find-file-at-point)
+         ("C-x C-f" . helm-find-files)
+
+         (:helm-map
+          ("C-;" .  abort-recursive-edit)
+          ;; C-h で削除を有効に
+          ("C-h" . delete-backward-char)
+
+          ;; helm-imenu 挙動対応
+          ("<f8>" . helm-keyboard-quit)
+
+          ;; TAB に補完的挙動割り当て
+          ("TAB" . helm-execute-persistent-action)
+          ("<tab>" . helm-execute-persistent-action)
+          ;; 元々TABにある機能を C-i に移動
+          ("C-i" . helm-select-action)
+          )
+
+         ;; helm-imenuを多用していたので、key設定
+         (:prog-mode-map
+          ;; imenu
+          ("C-c i" . helm-imenu)
+          ("<f8>" . helm-imenu)
+          ("C-c ;" . comment-dwim)
+          ("C-c :" . comment-dwim))
+         (:text-mode-map
+          ;; imenu
+          ("C-c i" . helm-imenu)
+          ("<f8>" . helm-imenu)
+          ("C-c ;" . comment-dwim)
+          ("C-c :" . comment-dwim))
+         (:dired-mode-map
+          ("<f8>" . helm-find-files))
+         )
+  :defun helm-build-sync-source helm-stringify
+  :config
+  ;; TODO Invalid function: helm-build-sync-source が発生する場合がある
+  ;; コマンド候補
+  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
+  ;; 上記を参考にして、履歴に保存されるように修正
+  ;; (defvar helm-source-emacs-commands
+  ;;  (helm-build-sync-source "Emacs commands"
+  ;;    :candidates (lambda ()
+  ;;                  (let (commands)
+  ;;                    (mapatoms (lambda (cmds)
+  ;;                                (if (commandp cmds)
+  ;;                                    (push (symbol-name cmds)
+  ;;                                          commands))))
+  ;;                    (sort commands 'string-lessp)))
+  ;;    :coerce #'intern-soft
+  ;;    :action (lambda (cmd-or-name)
+  ;;              (command-execute cmd-or-name 'record)
+  ;;              (setq extended-command-history
+  ;;                    (cons (helm-stringify cmd-or-name)
+  ;;                          (delete (helm-stringify cmd-or-name) extended-command-history)))))
+  ;;  "A simple helm source for Emacs commands.")
+
+  ;; (defvar helm-source-emacs-commands-history
+  ;;  (helm-build-sync-source "Emacs commands history"
+  ;;    :candidates (lambda ()
+  ;;                  (let (commands)
+  ;;                    (dolist (elem extended-command-history)
+  ;;                      (push (intern elem) commands))
+  ;;                    commands))
+  ;;    :coerce #'intern-soft
+  ;;    :action #'command-execute)
+  ;;  "Emacs commands history")
+
+  (leaf helm-descbinds
+    :url "https://github.com/emacs-helm/helm-descbinds"
+    :el-get (helm-descbinds
+             :url "https://github.com/emacs-helm/helm-descbinds.git")
+    :global-minor-mode t
+    )
+
+  (leaf helm-ag
+    :url "https://github.com/emacsorphanage/helm-ag"
+    :el-get (helm-ag
+             :url "https://github.com/emacsorphanage/helm-ag.git")
+    :custom (
+             (helm-ag-base-command . "pt -e --nocolor --nogroup")
+             )
+    :bind (
+           ("M-g ." . helm-ag)
+           ("M-g ," . helm-ag-pop-stack)
+           ("M-g s" . helm-do-ag)
+           ("C-M-s" . helm-ag-this-file)
+           )
+    )
+
+  (leaf helm-flycheck
+    :url "https://github.com/yasuyk/helm-flycheck"
+    :el-get (helm-flycheck
+             :url "https://github.com/yasuyk/helm-flycheck.git")
+    :bind (
+           ("C-c l" . helm-flycheck)
+           ))
+
+  (leaf helm-ghq
+    :url "https://github.com/masutaka/emacs-helm-ghq"
+    :el-get (helm-ghq
+             :url "https://github.com/masutaka/emacs-helm-ghq.git")
+    :require helm-for-files helm-ghq
+    :after helm)
+
   )
 
 
@@ -1278,20 +1454,22 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
-(leaf reformatter
-  :ensure t
-  :url "https://github.com/purcell/emacs-reformatter"
-  :doc "保存時にフォーマットプログラムを起動する modeの物は利用していない"
-  :config
-  (reformatter-define python-format
-                      :program "ruff"
-                      :args `("format" "--stdin-filename" ,buffer-file-name))
-  (reformatter-define rust-format
-                      :program "rustfmt")
-  :hook
-  (python-ts-mode-hook . python-format-on-save-mode)
-  (rust-ts-mode-hook . rust-format-on-save-mode)
-  )
+;; 自分の癖に合わないので停止
+;; pre-commitに設定する実験中
+;; (leaf reformatter
+;;   :ensure t
+;;   :url "https://github.com/purcell/emacs-reformatter"
+;;   :doc "保存時にフォーマットプログラムを起動する modeの物は利用していない"
+;;   :config
+;;   (reformatter-define python-format
+;;                       :program "ruff"
+;;                       :args `("format" "--stdin-filename" ,buffer-file-name))
+;;   (reformatter-define rust-format
+;;                       :program "rustfmt")
+;;   :hook
+;;   (python-ts-mode-hook . python-format-on-save-mode)
+;;   (rust-ts-mode-hook . rust-format-on-save-mode)
+;;   )
 
 
 (leaf elisp
@@ -1327,11 +1505,13 @@ the `*Messages*' buffer while BODY is evaluated."
   :config
   ;; M-x treesit-install-language-grammar の候補
   ;; 参考 https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+  ;; 利用環境によってはバージョン指定しないと「version mismatch」が発生する事がある
   (setopt treesit-language-source-alist
     '((bash "https://github.com/tree-sitter/tree-sitter-bash")
       (cmake "https://github.com/uyha/tree-sitter-cmake")
       (css "https://github.com/tree-sitter/tree-sitter-css")
       (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+      ;; go は Emacs29.x では v0.19.1にしないと色が付かない
       ;; (go "https://github.com/tree-sitter/tree-sitter-go")
       (go "https://github.com/tree-sitter/tree-sitter-go" "v0.19.1")
       (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
@@ -1721,177 +1901,11 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
-(leaf which-key
-  :url "https://github.com/justbur/emacs-which-key"
-  :ensure t
-  :config
-  (which-key-mode))
-
-
-(leaf helm
-  :doc "helm
-TODO 一部設定未整備
-
-helmは最新にすると起動しない場合がある
-特定のバージョンを取得する場合は以下のようにする
-git pull --tags
-git checkout v4.0.0
-"
-  :url "https://github.com/emacs-helm/helm"
-  :el-get (helm
-           :url "https://github.com/emacs-helm/helm.git")
-  :blackout t
-  :require helm
-  :global-minor-mode t
-  :custom (
-           ;; M-x を保存
-           (helm-M-x-always-save-history . t)
-
-           (helm-display-function . 'pop-to-buffer)
-
-           ;; helm-miniの内容
-           (helm-mini-default-sources
-            . '(
-                ;; helm-source-flycheck
-                helm-source-buffers-list
-                helm-source-file-name-history
-                helm-source-recentf
-                helm-source-files-in-current-dir
-                ;; helm-source-emacs-commands-history
-                ;; helm-source-emacs-commands
-                helm-source-bookmarks
-                ))
-
-           ;; helm-for-filesの内容
-           (helm-for-files-preferred-list
-            . '(
-                helm-source-buffers-list
-                helm-source-recentf
-                helm-source-file-cache
-                helm-ghq-source
-                helm-source-files-in-current-dir
-                ))
-           )
-  :bind (
-         ;; mini buffer 起動
-         ("C-;" . helm-mini)
-
-         ;; コマンド表示
-         ("M-x" . helm-M-x)
-
-         ;; バッファ切り替え時の一覧表示
-         ("C-x C-b" . helm-for-files)
-
-         ;; kill ring
-         ("M-y". helm-show-kill-ring)
-
-         ;; find files
-         ;; ("C-x C-f" . find-file-at-point)
-         ("C-x C-f" . helm-find-files)
-
-         (:helm-map
-          ("C-;" .  abort-recursive-edit)
-          ;; C-h で削除を有効に
-          ("C-h" . delete-backward-char)
-
-          ;; helm-imenu 挙動対応
-          ("<f8>" . helm-keyboard-quit)
-
-          ;; TAB に補完的挙動割り当て
-          ("TAB" . helm-execute-persistent-action)
-          ("<tab>" . helm-execute-persistent-action)
-          ;; 元々TABにある機能を C-i に移動
-          ("C-i" . helm-select-action)
-          )
-
-         ;; helm-imenuを多用していたので、key設定
-         (:prog-mode-map
-          ;; imenu
-          ("C-c i" . helm-imenu)
-          ("<f8>" . helm-imenu)
-          ("C-c ;" . comment-dwim)
-          ("C-c :" . comment-dwim))
-         (:text-mode-map
-          ;; imenu
-          ("C-c i" . helm-imenu)
-          ("<f8>" . helm-imenu)
-          ("C-c ;" . comment-dwim)
-          ("C-c :" . comment-dwim))
-         (:dired-mode-map
-          ("<f8>" . helm-find-files))
-         )
-  :defun helm-build-sync-source helm-stringify
-  :config
-  ;; TODO Invalid function: helm-build-sync-source が発生する場合がある
-  ;; コマンド候補
-  ;; http://emacs.stackexchange.com/questions/13539/helm-adding-helm-m-x-to-helm-sources
-  ;; 上記を参考にして、履歴に保存されるように修正
-  ;; (defvar helm-source-emacs-commands
-  ;;  (helm-build-sync-source "Emacs commands"
-  ;;    :candidates (lambda ()
-  ;;                  (let (commands)
-  ;;                    (mapatoms (lambda (cmds)
-  ;;                                (if (commandp cmds)
-  ;;                                    (push (symbol-name cmds)
-  ;;                                          commands))))
-  ;;                    (sort commands 'string-lessp)))
-  ;;    :coerce #'intern-soft
-  ;;    :action (lambda (cmd-or-name)
-  ;;              (command-execute cmd-or-name 'record)
-  ;;              (setq extended-command-history
-  ;;                    (cons (helm-stringify cmd-or-name)
-  ;;                          (delete (helm-stringify cmd-or-name) extended-command-history)))))
-  ;;  "A simple helm source for Emacs commands.")
-
-  ;; (defvar helm-source-emacs-commands-history
-  ;;  (helm-build-sync-source "Emacs commands history"
-  ;;    :candidates (lambda ()
-  ;;                  (let (commands)
-  ;;                    (dolist (elem extended-command-history)
-  ;;                      (push (intern elem) commands))
-  ;;                    commands))
-  ;;    :coerce #'intern-soft
-  ;;    :action #'command-execute)
-  ;;  "Emacs commands history")
-
-  (leaf helm-descbinds
-    :url "https://github.com/emacs-helm/helm-descbinds"
-    :el-get (helm-descbinds
-             :url "https://github.com/emacs-helm/helm-descbinds.git")
-    :global-minor-mode t
-    )
-
-  (leaf helm-ag
-    :url "https://github.com/emacsorphanage/helm-ag"
-    :el-get (helm-ag
-             :url "https://github.com/emacsorphanage/helm-ag.git")
-    :custom (
-             (helm-ag-base-command . "pt -e --nocolor --nogroup")
-             )
-    :bind (
-           ("M-g ." . helm-ag)
-           ("M-g ," . helm-ag-pop-stack)
-           ("M-g s" . helm-do-ag)
-           ("C-M-s" . helm-ag-this-file)
-           )
-    )
-
-  (leaf helm-flycheck
-    :url "https://github.com/yasuyk/helm-flycheck"
-    :el-get (helm-flycheck
-             :url "https://github.com/yasuyk/helm-flycheck.git")
-    :bind (
-           ("C-c l" . helm-flycheck)
-           ))
-
-  (leaf helm-ghq
-    :url "https://github.com/masutaka/emacs-helm-ghq"
-    :el-get (helm-ghq
-             :url "https://github.com/masutaka/emacs-helm-ghq.git")
-    :require helm-for-files helm-ghq
-    :after helm)
-
-  )
+;; (leaf which-key
+;;   :url "https://github.com/justbur/emacs-which-key"
+;;   :ensure t
+;;   :config
+;;   (which-key-mode))
 
 
 (leaf mode-line
