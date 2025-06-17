@@ -96,13 +96,13 @@
 (leaf is_system
   :doc "Emacs の種類バージョンを判別するための変数"
   :init
-  (defvar mac-p (and (eq window-system 'mac)))
+  (defvar mac-p (or (eq window-system 'mac) (eq system-type 'darwin)))
   (defvar windows-p (eq system-type 'windows-nt))
   (defvar linux-p (eq system-type 'gnu/linux))
 
-  (defvar emacs27-p (equal emacs-major-version 27))
-  (defvar emacs28-p (equal emacs-major-version 28))
-  (defvar emacs29-p (equal emacs-major-version 29))
+  (defvar emacs27-p (eq emacs-major-version 27))
+  (defvar emacs28-p (eq emacs-major-version 28))
+  (defvar emacs29-p (eq emacs-major-version 29))
   )
 
 
@@ -131,40 +131,14 @@
 (cd "~/")
 
 
-(leaf setenv
-  :doc "一部環境で環境変数が正常設定されないので、設定する
-不要な物もあるかもしれない"
+(leaf exec-path-from-shell
+  :url "https://github.com/purcell/exec-path-from-shell"
+  :doc "一部環境(wslg、Mac等)で環境変数が正常設定されないのを修正"
+  :ensure t
+  :when (and window-system (or mac-p))
   :config
-  ;; LC_ALL
-  (setenv "LC_ALL" "ja_JP.UTF-8")
-
-  ;; PATH設定
-  ;; Mac OS X の bash の PATH は /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
-  ;; 多数の実行環境にて極力汎用的にパスが設定されるようしたい
-  (dolist (dir (list
-                "/sbin"
-                "/usr/sbin"
-                "/bin"
-                "/usr/bin"
-                "/opt/homebrew/bin"
-                "/usr/local/bin"
-                "/usr/texbin"
-                (expand-file-name "~/bin")
-                (expand-file-name "~/.emacs.d/bin")
-                (expand-file-name "~/opt/py/py3.13.4/bin")
-                (expand-file-name "~/.cargo/bin/")
-                (expand-file-name "~/.local/share/mise/shims")
-                (expand-file-name "~/.npm-packages/bin")
-                (expand-file-name "bin" user-emacs-directory)
-                ))
-    (when (and (file-exists-p dir) (not (member dir exec-path)))
-      (setenv "PATH" (concat dir ":" (getenv "PATH")))
-      (setq exec-path (append (list dir) exec-path))))
-
-  (setenv "CVS_RSH" "ssh")
-  (setenv "DISPLAY" "localhost")
-  (setenv "SSH_AUTH_SOCK" (getenv "SSH_AUTH_SOCK"))
-  )
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-env "LC_ALL"))
 
 
 (leaf *default-frame

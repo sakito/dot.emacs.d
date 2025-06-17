@@ -183,4 +183,33 @@ emacsclient利用しなくなったので、削除
   )
 #+end_src
 
+
+* PATH設定
+
+#+begin_src emacs-lisp
+  ;; PATH設定
+  ;; Mac OS X の bash の PATH は /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
+  ;; 多数の実行環境にて極力汎用的にパスが設定されるようしたい
+  (dolist (dir (list
+                "/sbin"
+                "/usr/sbin"
+                "/bin"
+                "/usr/bin"
+                "/opt/homebrew/bin"
+                "/usr/local/bin"
+                "/usr/texbin"
+                (expand-file-name "~/bin")
+                (expand-file-name "~/.emacs.d/bin")
+                (expand-file-name "~/opt/py/py3.13.4/bin")
+                (expand-file-name "~/.cargo/bin/")
+                (expand-file-name "~/.local/share/mise/shims")
+                (expand-file-name "~/.npm-packages/bin")
+                (expand-file-name "bin" user-emacs-directory)
+                ))
+    (when (and (file-exists-p dir) (not (member dir exec-path)))
+      (setenv "PATH" (concat dir ":" (getenv "PATH")))
+      (setq exec-path (append (list dir) exec-path))))
+#+end_src
+
+
 以上
