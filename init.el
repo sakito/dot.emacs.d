@@ -563,6 +563,19 @@
   )
 
 
+(leaf rainbow-mode
+  :doc "色コード可視化"
+  :ensure t
+  :hook
+  css-mode-hook
+  emacs-lisp-mode-hook
+  lisp-mode-hook
+  help-mode-hook
+  sass-mode-hook
+  scss-mode-hook
+  web-mode-hook)
+
+
 (leaf backup
   :custom `(
            ;; ファイルを編集した場合コピーにてバックアップする
@@ -1701,34 +1714,6 @@ make
           ("C-c C-;" . web-mode-comment-or-uncomment)
           )
          )
-  )
-
-
-(leaf css-mode
-  :require t
-  :mode "\\.css\\'"
-  :init
-  (defun my/hexcolour-luminance (color)
-    "Calculate the luminance of a color string (e.g. \"#ffaa00\", \"blue\").
-  This is 0.3 red + 0.59 green + 0.11 blue and always between 0 and 255."
-    (let* ((values (x-color-values color))
-           (r (car values))
-           (g (cadr values))
-           (b (caddr values)))
-      (floor (+ (* .3 r) (* .59 g) (* .11 b)) 256)))
-
-  (defun my/hexcolour-add-to-font-lock ()
-    (interactive)
-    (font-lock-add-keywords nil
-                            `((,(concat "#[0-9a-fA-F]\\{3\\}[0-9a-fA-F]\\{3\\}?\\|"
-                                        (regexp-opt (x-defined-colors) 'words))
-                               (0 (let ((colour (match-string-no-properties 0)))
-                                    (put-text-property
-                                     (match-beginning 0) (match-end 0)
-                                     'face `((:foreground ,(if (> 128.0 (my/hexcolour-luminance colour))
-                                                               "white" "black"))
-                                             (:background ,colour)))))))))
-  :hook (css-ts-mode-hook . my/hexcolour-add-to-font-lock)
   )
 
 

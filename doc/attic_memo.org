@@ -211,5 +211,38 @@ emacsclient利用しなくなったので、削除
       (setq exec-path (append (list dir) exec-path))))
 #+end_src
 
+* css
+css モードは css-ts-mode に移行
+色は rainbow-mode にて付与
+
+#+begin_src emacs-lisp
+(leaf css-mode
+  :require t)
+  :mode "\\.css\\'"
+  :init
+  (defun my/hexcolour-luminance (color)
+    "Calculate the luminance of a color string (e.g. \"#ffaa00\", \"blue\").
+  This is 0.3 red + 0.59 green + 0.11 blue and always between 0 and 255."
+    (let* ((values (x-color-values color))
+           (r (car values))
+           (g (cadr values))
+           (b (caddr values)))
+      (floor (+ (* .3 r) (* .59 g) (* .11 b)) 256)))
+
+  (defun my/hexcolour-add-to-font-lock ()
+    (interactive)
+    (font-lock-add-keywords nil
+                            `((,(concat "#[0-9a-fA-F]\\{3\\}[0-9a-fA-F]\\{3\\}?\\|"
+                                        (regexp-opt (x-defined-colors) 'words))
+                               (0 (let ((colour (match-string-no-properties 0)))
+                                    (put-text-property
+                                     (match-beginning 0) (match-end 0)
+                                     'face `((:foreground ,(if (> 128.0 (my/hexcolour-luminance colour))
+                                                               "white" "black"))
+                                             (:background ,colour)))))))))
+  :hook (css-ts-mode-hook . my/hexcolour-add-to-font-lock)
+  )
+#+end_src
+
 
 以上
