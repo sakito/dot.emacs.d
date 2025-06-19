@@ -1123,7 +1123,7 @@ the `*Messages*' buffer while BODY is evaluated."
                  'js2-mode-hook
                  'lisp-mode-hook
                  'emacs-lisp-mode-hook
-                 'sql-mode-hookc
+                 'sql-mode-hook
                  ))
     (add-hook hook 'my/smartchr-default))
 
