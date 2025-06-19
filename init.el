@@ -60,11 +60,6 @@
     :ensure t
     :init
     (leaf hydra :ensure t)
-    (leaf el-get
-      :ensure t
-      :custom (
-               (el-get-notify-type . 'message)
-               (el-get-git-shallow-clone . t)))
     (leaf blackout :ensure t)
 
     :config
@@ -1128,7 +1123,7 @@ the `*Messages*' buffer while BODY is evaluated."
                  'js2-mode-hook
                  'lisp-mode-hook
                  'emacs-lisp-mode-hook
-                 'sql-mode-hook
+                 'sql-mode-hookc
                  ))
     (add-hook hook 'my/smartchr-default))
 
@@ -1152,8 +1147,8 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf vc
   :doc "VCS"
   :custom (
-           ;; Gitのみ有効
-           (vc-handled-backends . (delq 'Git vc-handled-backends))
+           ;; Gitのみ無効
+           ;; (vc-handled-backends . (delq 'Git vc-handled-backends))
            ;; status無効
            (vc-display-status . nil)
            (vc-consult-headers . nil)
@@ -1179,6 +1174,17 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf *package-vc
+  :doc "package-vcでは一切依存関係を解決してほしくないので依存判定関数を無効化"
+  :init
+  (require 'package-vc)
+  (defun my/package-vc-install-dependencies (_)
+    (let ((missing '()))
+      missing))
+  (fset #'package-vc-install-dependencies #'my/package-vc-install-dependencies)
+  )
+
+
 (leaf helm
   :doc "helm
 TODO 一部設定未整備
@@ -1190,8 +1196,9 @@ git checkout v4.0
 make
 "
   :url "https://github.com/emacs-helm/helm"
-  :el-get (helm
-           :url "https://github.com/emacs-helm/helm.git")
+  :vc (helm
+       :url "https://github.com/emacs-helm/helm.git"
+       :branch "v4.0")
   :blackout t
   :require helm
   :global-minor-mode t
@@ -1308,15 +1315,15 @@ make
 
   (leaf helm-descbinds
     :url "https://github.com/emacs-helm/helm-descbinds"
-    :el-get (helm-descbinds
-             :url "https://github.com/emacs-helm/helm-descbinds.git")
+    :vc (helm-descbinds
+         :url "https://github.com/emacs-helm/helm-descbinds.git")
     :global-minor-mode t
     )
 
   (leaf helm-ag
     :url "https://github.com/emacsorphanage/helm-ag"
-    :el-get (helm-ag
-             :url "https://github.com/emacsorphanage/helm-ag.git")
+    :vc (helm-ag
+         :url "https://github.com/emacsorphanage/helm-ag.git")
     :custom (
              (helm-ag-base-command . "pt -e --nocolor --nogroup")
              )
@@ -1330,16 +1337,16 @@ make
 
   (leaf helm-flycheck
     :url "https://github.com/yasuyk/helm-flycheck"
-    :el-get (helm-flycheck
-             :url "https://github.com/yasuyk/helm-flycheck.git")
+    :vc (helm-flycheck
+         :url "https://github.com/yasuyk/helm-flycheck.git")
     :bind (
            ("C-c l" . helm-flycheck)
            ))
 
   (leaf helm-ghq
     :url "https://github.com/masutaka/emacs-helm-ghq"
-    :el-get (helm-ghq
-             :url "https://github.com/masutaka/emacs-helm-ghq.git")
+    :vc (helm-ghq
+         :url "https://github.com/masutaka/emacs-helm-ghq.git")
     :require helm-for-files helm-ghq
     :after helm)
 
@@ -1381,7 +1388,7 @@ make
   :config
   (leaf helm-company
     :url "https://github.com/Sodel-the-Vociferous/helm-company/"
-    :el-get (helm-company
+    :vc (helm-company
              :url "https://github.com/Sodel-the-Vociferous/helm-company.git")
     :after company)
 
@@ -1658,7 +1665,7 @@ make
 (leaf c-mode
   :defun c-toggle-hungry-state
   :custom (
-           ;; コンパイルセッセージの縦幅
+           ;; コンパイルメッセージの縦幅
            (compilation-window-height . 8)
            )
   :hook (
