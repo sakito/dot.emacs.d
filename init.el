@@ -731,8 +731,8 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; 一定の未使用時間毎に自動保存
   ;; (run-with-idle-timer (* 5 60) t 'recentf-save-list)
   (run-with-idle-timer (* 5 60) t
-                       #'(lambda ()
-                           (my/with-suppressed-message (recentf-save-list))))
+                       '(lambda ()
+                          (my/with-suppressed-message (recentf-save-list))))
 
   :hook ((after-init-hook . recentf-mode))
   )
@@ -1524,7 +1524,7 @@ make
           (javascript-mode . js-ts-mode)
           (js-json-mode . json-ts-mode)
           (css-mode . css-ts-mode)
-          (python-mode . python-ts-mode)
+          ;; (python-mode . python-ts-mode)
           (go-mode . go-ts-mode)
           (rust-mode . rust-ts-mode)
           (typescript-mode . typescript-ts-mode)
@@ -1575,12 +1575,13 @@ make
         '(:documentHighlightProvider ;; カーソル下のシンボルハイライト
           :inlayHintProvider ;; インラインヒント表示
           ))
+
   ;; eldoc echo を1行に抑止
   (setq eldoc-echo-area-use-multiline-p nil)
   )
 
 
-(leaf python-ts-mode
+(leaf python-mode
   ;; :require t
   :mode "\\.py\\'" "\\.wsgi\\'" "wscript"
   :init
@@ -1605,9 +1606,9 @@ make
 
   :hook (
          ;; (python-mode-hook . python-ts-mode)
-         (python-ts-mode-hook . eglot-ensure)
-         (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-ts-mode-hook . flycheck-mode)
+         ;; (python-ts-mode-hook . eglot-ensure)
+         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-mode-hook . flycheck-mode)
          )
 
   :config
@@ -1755,6 +1756,15 @@ make
   :mode ("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'"
          "\\.txt\\'"
          (("README\\.md\\'" . gfm-mode)))
+
+  :custom-face
+  (markdown-header-delimiter-face . '((t (:foreground "mediumpurple"))))
+  (markdown-header-face-1 . '((t (:foreground "violet" :weight bold))))
+  (markdown-header-face-2 . '((t (:foreground "lightslateblue" :weight bold))))
+  (markdown-header-face-3 . '((t (:foreground "mediumpurple1" :weight bold))))
+  (markdown-link-face . '((t (:foreground "blue" :underline t))))
+  (markdown-list-face . '((t (:foreground "mediumpurple"))))
+  (markdown-pre-face . '((t (:foreground "MidnightBlue"))))
   )
 
 
