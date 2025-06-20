@@ -425,6 +425,11 @@
            (tab-width . 2)
            (custom-tab-width . 2)
   )
+  :init
+  ;; C-h を C-? に変更
+  (define-key key-translation-map [?\C-h] [?\C-?])
+  ;; C-h 該当機能をF1にも割り当て
+  (global-set-key (kbd "<f1>") 'help-command)
   :config
   (global-display-line-numbers-mode)
   (global-font-lock-mode t)
@@ -441,7 +446,7 @@
          ("\M-?" . help-for-help)
 
          ;; BackSpaceをC-hに変更
-         ("\C-h" . backward-delete-char)
+         ;; ("\C-h" . backward-delete-char)
 
          ;; kill ring 系操作変更
          ("C-w" . kill-ring-save)
