@@ -622,9 +622,14 @@
     :global-minor-mode t
     :custom ((ddskk-posframe-border-width . 2))
     )
+
   :hook (
          ;; C-x C-fでファイルを開くとSKK
          (find-file-hook . (lambda () (skk-latin-mode t)))
+         ;; だいたいのmodeでSKK
+         (text-mode-hook . (lambda () (skk-latin-mode t)))
+         (prog-mode-hook . (lambda () (skk-latin-mode t)))
+         (conf-mode-hook . (lambda () (skk-latin-mode t)))
          )
   )
 
@@ -898,10 +903,6 @@ the `*Messages*' buffer while BODY is evaluated."
            ;; ffap-kpathsea-expand-path で展開するパスの深さ
            (ffap-kpathsea-depth . 5)
            )
-  ;; :bind (
-  ;; C-x C-f
-  ;; ("C-c C-f" . find-file-at-point)
-  ;; )
   )
 
 
@@ -1154,6 +1155,9 @@ the `*Messages*' buffer while BODY is evaluated."
            (vc-consult-headers . nil)
            ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
            (vc-follow-symlinks . t))
+  :config
+  ;; package-vcでは一切依存関係を解決してほしくないので依存判定関数を無効化"
+  (fset #'package-vc-install-dependencies (lambda (_) '()))
   :hook
   ;; log-edit で メッセージの挿入を停止
   (log-edit-hook . '(log-edit-insert-cvs-template
@@ -1171,17 +1175,6 @@ the `*Messages*' buffer while BODY is evaluated."
             (sl-prev-scratch-string-file
              . ,(expand-file-name "var/scratch-prev.log" user-emacs-directory))
             )
-  )
-
-
-(leaf *package-vc
-  :doc "package-vcでは一切依存関係を解決してほしくないので依存判定関数を無効化"
-  :init
-  (require 'package-vc)
-  (defun my/package-vc-install-dependencies (_)
-    (let ((missing '()))
-      missing))
-  (fset #'package-vc-install-dependencies #'my/package-vc-install-dependencies)
   )
 
 
