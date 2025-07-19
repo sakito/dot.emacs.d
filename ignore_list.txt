@@ -1,0 +1,28 @@
+# git
+.git
+
+# gitignore
+auto-save-list
+image-dired
+elisp-objects
+*.elc
+*.pyc
+*.exe
+*.o
+elpa
+el-get
+tree-sitter
+.DS_Store
+*.log
+*.orig
+
+
+ignore_list.txt
+
+.ruff_cache
+private
+var
+ac-comphist.dat
+etc/skk
+doc
+

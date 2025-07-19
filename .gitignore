@@ -3,6 +3,7 @@
 auto-save-list
 anything-c-adaptive-history
 image-dired
+elisp-objects
 
 # Compiled
 *.elc

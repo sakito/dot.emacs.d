@@ -1488,6 +1488,7 @@ make
 ;;   )
 
 
+;; lsp設定
 (leaf eglot
   ;; M-x package-install RET eglot RET
   ;; 最新をインストールしないと利用できない場合がある
