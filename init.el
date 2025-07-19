@@ -747,8 +747,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :doc "magit"
   :ensure t
   :require sendmail  ;; 暫定対処
-  :bind (("C-x g" . magit-status)
-         ("C-x C-g" . magit-status)
+  :bind (("C-c g" . magit-status)
 
          (:magit-mode-map
           ("<C-tab>" . my/other-window-or-split)))
