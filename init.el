@@ -425,11 +425,6 @@
            (tab-width . 2)
            (custom-tab-width . 2)
   )
-  :init
-  ;; C-h を C-? に変更
-  (define-key key-translation-map [?\C-h] [?\C-?])
-  ;; C-h 該当機能をF1にも割り当て
-  (global-set-key (kbd "<f1>") 'help-command)
   :config
   (global-display-line-numbers-mode)
   (global-font-lock-mode t)
@@ -445,8 +440,11 @@
          ;; help key変更
          ("\M-?" . help-for-help)
 
+         ;; C-h 該当機能を別キーに
+         ("<f1>" . help-command)
+
          ;; BackSpaceをC-hに変更
-         ;; ("\C-h" . backward-delete-char)
+         ("\C-h" . backward-delete-char)
 
          ;; kill ring 系操作変更
          ("C-w" . kill-ring-save)
@@ -573,6 +571,8 @@
   help-mode-hook
   sass-mode-hook
   scss-mode-hook
+  toml-ts-mode-hook
+  lua-mode-hook
   web-mode-hook)
 
 
@@ -1106,7 +1106,26 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "{") (smartchr '("{`!!'}" "{")))
     (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
     (local-set-key (kbd "`") (smartchr '("\`\`\`\n`!!'\n\`\`\`" "\``!!'\`" "\'")))
+    )
 
+  (defun my/smartchr-ts ()
+    ;; `!!' がカーソルの位置
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (local-set-key (kbd ":") (smartchr '(":" ":: ")))
+    (local-set-key (kbd ";") (smartchr '(";" ";;")))
+    (local-set-key (kbd "/") (smartchr '("/" "// `!!'")))
+    )
+
+  (defun my/smartchr-lua ()
+    (local-set-key (kbd "#") (smartchr '("-- `!!'" "#")))
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
+    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
+    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
     )
 
   (defun my/smartchr-skelton ()
@@ -1120,6 +1139,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
     (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
     (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+    (local-set-key (kbd "'") 'skeleton-pair-insert-maybe)
     (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
     )
 
@@ -1135,6 +1155,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
   (dolist (hook (list
                  'makefile-mode-hook
+                 'toml-ts-mode-hook
                  ))
     (add-hook hook 'my/smartchr-skelton))
 
@@ -1146,7 +1167,11 @@ the `*Messages*' buffer while BODY is evaluated."
          (rust-ts-mode-hook . my/smartchr-rust)
          (rst-mode-hook . my/smartchr-rst)
          (markdown-mode-hook . my/smartchr-md)
-         (c-mode-common-hook . my/smartchr-clang))
+         (c-mode-common-hook . my/smartchr-clang)
+         (lua-mode-hook . my/smartchr-lua)
+         (typescript-mode-hook . my/smartchr-ts)
+         ;; (typescript-ts-mode-hook . my/smartchr-ts)
+         )
   )
 
 
@@ -1464,6 +1489,38 @@ make
 ;;   )
 
 
+(leaf eglot
+  ;; M-x package-install RET eglot RET
+  ;; 最新をインストールしないと利用できない場合がある
+  :ensure t
+  :config
+  ;; eglot-server-programs を明確に指定しておく
+  (add-hook 'eglot-server-programs
+
+            ;; python-ts-mode で pyright 利用
+            ;; uv pip install pyright
+            ;; M-! pyright --help が挙動する事
+            ;; basedpyright を利用したい場合は pyright を basedpyright に変更
+            '((python-mode python-ts-mode) .
+              ("pyright-langserver" "--stdio"))
+
+            ;; 参考 https://rust-analyzer.github.io/book/other_editors.html#eglot
+            ;; M-! rust-analyzer --help が挙動する事
+            '((rust-ts-mode rust-mode) .
+               ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
+            )
+
+  ;; eglot無効機能
+  (setq eglot-ignored-server-capabilities
+        '(:documentHighlightProvider ;; カーソル下のシンボルハイライト
+          :inlayHintProvider ;; インラインヒント表示
+          ))
+
+  ;; eldoc echo を1行に抑止
+  (setq eldoc-echo-area-use-multiline-p nil)
+  )
+
+
 (leaf elisp
   :doc "emacs lisp"
   :init
@@ -1494,6 +1551,26 @@ make
 (leaf treesit
   :doc "tree-sitter設定"
   :require t
+  :preface
+  (defun treesit-p ()
+    "Check if Emacs was built with treesiter in a protable way."
+    (and (fboundp 'treesit-available-p)
+         (treesit-available-p)))
+
+  (cl-defun treesit-install-and-remap (lang url &key revision source-dir modes remap)
+    (when (and (fboundp 'treesit-available-p)
+               (treesit-available-p))
+      (unless (treesit-language-available-p lang)
+        (add-to-list
+         'treesit-language-source-alist
+         (list lang url revision source-dir))
+        (treesit-install-language-grammar lang))
+      (when (and remap (treesit-ready-p lang))
+        (dolist (mode modes)
+          (add-to-list
+           'major-mode-remap-alist
+           (cons mode remap))))))
+
   :config
   ;; M-x treesit-install-language-grammar の候補
   ;; 参考 https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
@@ -1515,49 +1592,56 @@ make
       (python "https://github.com/tree-sitter/tree-sitter-python")
       (rust "https://github.com/tree-sitter/tree-sitter-rust")
       (toml "https://github.com/tree-sitter/tree-sitter-toml")
-      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+
+      ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.2" "tsx/src")
+      ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.2" "typescript/src")
+
+      ;; (lua "https://github.com/tjdevries/tree-sitter-lua")
+      (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
       (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-  (setopt major-mode-remap-alist
-        '(
-          (yaml-mode . yaml-ts-mode)
-          (c-mode . c-ts-mode)
-          (c++-mode . c++-ts-mode)
-          (c-or-c++-mode . c-or-c++-ts-mode)
-          (java-mode . java-ts-mode)
-          (javascript-mode . js-ts-mode)
-          (js-json-mode . json-ts-mode)
-          (css-mode . css-ts-mode)
-          ;; (python-mode . python-ts-mode)
-          (go-mode . go-ts-mode)
-          (rust-mode . rust-ts-mode)
-          (typescript-mode . typescript-ts-mode)
-          ))
+  ;; (setopt major-mode-remap-alist
+  ;;       '(
+  ;;         (yaml-mode . yaml-ts-mode)
+  ;;         (c-mode . c-ts-mode)
+  ;;         (c++-mode . c++-ts-mode)
+  ;;         (c-or-c++-mode . c-or-c++-ts-mode)
+  ;;         (java-mode . java-ts-mode)
+  ;;         (javascript-mode . js-ts-mode)
+  ;;         (js-json-mode . json-ts-mode)
+  ;;         (css-mode . css-ts-mode)
+  ;;         (python-mode . python-ts-mode)
+  ;;         (go-mode . go-ts-mode)
+  ;;         (rust-mode . rust-ts-mode)
+  ;;         (typescript-mode . typescript-ts-mode)
+  ;;         ))
 
   :custom
   (treesit-font-lock-level . 4)
   )
 
 
-(leaf treesit-auto
-  :ensure t
-  :require t
-  :init
-  (setq treesit-auto-install 'prompt)
+;; (leaf treesit-auto
+;;   :ensure t
+;;   :require t
+;;   :init
+;;   (setq treesit-auto-install 'prompt)
 
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
+;;   :config
+;;   (treesit-auto-add-to-auto-mode-alist 'all)
 
-   :hook
-  (emacs-startup-hook . global-treesit-auto-mode)
-  )
+;;    :hook
+;;   (emacs-startup-hook . global-treesit-auto-mode)
+;;   )
 
 
 
 (leaf python-mode
   ;; :require t
   :mode "\\.py\\'" "\\.wsgi\\'" "wscript"
+  :preface
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+
   :init
   ;; env
   (setenv "PYTHONSTARTUP"
@@ -1565,28 +1649,30 @@ make
   (setenv "PYTHONPATH"
           (expand-file-name "~/opt/py/py3.13.4/lib/python3.13/site-packages"))
 
-  :bind (
-         ("C-c !" . run-python)
-         ("C-c C-l" . nil)
+  :bind ((:python-base-mode-map
+          ("C-c !" . run-python)
+          ("C-c C-l" . nil)
 
-         ("M-S-<right>" . python-indent-shift-right)
-         ("M-S-<left>" . python-indent-shift-left)
+          ("M-S-<right>" . python-indent-shift-right)
+          ("M-S-<left>" . python-indent-shift-left)
 
-         ;; ("C-c n" . flymake-goto-next-error)
-         ;; ("C-c p" . flymake-goto-prev-error)
-         ;; ("C-c C-i" . my/python-import-modules-from-buffer)
-         ;; ("C-c C-c" . my/python-shell-send-file)
+          ;; ("C-c n" . flymake-goto-next-error)
+          ;; ("C-c p" . flymake-goto-prev-error)
+          ;; ("C-c C-i" . my/python-import-modules-from-buffer)
+          ;; ("C-c C-c" . my/python-shell-send-file)
+          )
          )
 
-  :hook (
-         ;; (python-mode-hook . python-ts-mode)
-         ;; (python-ts-mode-hook . eglot-ensure)
-         (python-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-mode-hook . flycheck-mode)
-         )
+  :hydra
+  (hydra-py-indent
+   (global-map "<f2>")
+   "indent"
+   (">" python-indent-shift-right "right")
+   ("<" python-indent-shift-left "left"))
 
   :config
-  ;; (leaf cython-mode :ensure t)
+
+  (define-key python-ts-mode-map (kbd "C-c !") 'run-python)
 
   (leaf flycheck-pycheckers
     :url "https://github.com/msherry/flycheck-pycheckers"
@@ -1599,6 +1685,12 @@ make
     :hook
     (flycheck-mode-hook . flycheck-pycheckers-setup)
     )
+
+  :hook (
+         (python-ts-mode-hook . eglot-ensure)
+         (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
+         (python-ts-mode-hook . flycheck-mode)
+         )
   )
 
 
@@ -1610,12 +1702,14 @@ make
   (pyvenv-mode 1))
 
 
-(leaf rust-ts-mode
+(leaf rust-mode
   :ensure t
+  :preface
+  (add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
   :custom
   (rust-mode-treesitter-derive . t)
   :hook
-  ;; (rust-mode-hook . eglot-ensure)
+  (rust-ts-mode-hook . eglot-ensure)
 
   :config
 
@@ -1652,16 +1746,42 @@ make
   )
 
 
-(leaf typescript-ts-mode
-  :mode "\\.ts[x]?\\'"
+(leaf typescript-mode
+  :mode (
+         ("\\.ts\\'" . typescript-mode)
+         ;; ("\\.tsx\\'" . tsx-ts-mode)
+         )
+
+  :ensure t
+
+  ;; :preface
+  ;; (add-to-list 'major-mode-remap-alist '(typescript-mode . typescript-ts-mode))
   )
+
+(leaf json-ts-mode
+  :mode "\\.json[c]?\\'"
+
+  :preface
+  (add-to-list 'major-mode-remap-alist '(json-mode . json-ts-mode))
+)
 
 (leaf go-ts-mode
   :mode "\\.go\\'"
 
+  :preface
+  (add-to-list 'major-mode-remap-alist '(go-mode . go-ts-mode))
+
   :config
   (setq tab-width 2)
   )
+
+(leaf lua-mode
+  :when (treesit-p)
+  :preface
+  :init
+  (treesit-install-and-remap
+   'lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+  :mode "\\.lua\\'")
 
 
 (leaf toml-ts-mode
