@@ -197,12 +197,12 @@
   :config
   (set-face-attribute 'default
                       nil
-                      :family "UDEV Gothic 35"
+                      :family "UDEV Gothic 35NF"
                       :height 180)
   (set-frame-font "UDEV Gothic 35-18")
   (set-fontset-font nil
                     'unicode
-                    (font-spec :family "UDEV Gothic 35")
+                    (font-spec :family "UDEV Gothic 35NF")
                     nil
                     'append)
   ;; 古代ギリシア文字、コプト文字を表示したい場合は以下のフォントをインストールする
@@ -217,13 +217,13 @@
   ;; 全角カタカナ 30a0-30ff http://www.triggertek.com/r/unicode/30A0-30FF
   (set-fontset-font nil
                     '(#x3000 . #x30ff)
-                    (font-spec :family "UDEV Gothic 35")
+                    (font-spec :family "UDEV Gothic 35NF")
                     nil
                     'prepend)
   ;; 半角カタカナ、全角アルファベット ff00-ffef http://www.triggertek.com/r/unicode/FF00-FFEF
   (set-fontset-font nil
                     '(#xff00 . #xffef)
-                    (font-spec :family "UDEV Gothic 35")
+                    (font-spec :family "UDEV Gothic 35NF")
                     nil
                     'prepend)
   )
@@ -605,6 +605,9 @@
            ;; ファイルを編集した場合コピーにてバックアップする
            ;; inode 番号を変更しない
            (backup-by-copying . t)
+
+           ;; tramp関連停止
+           (tramp-mode . nil)
 
            ;; バックアップファイルの保存位置指定
            ;; !path!to!file-name~ で保存される
@@ -1126,36 +1129,27 @@ the `*Messages*' buffer while BODY is evaluated."
   :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
   ;; 無名関数だと add-hook や remove-hook がめんどいのでまとめておく
-  (defun my/smartchr-default ()
+  (defun my/smartchr-common ()
     ;; !! がカーソルの位置
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
     (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
+    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
     (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
     (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
-    (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
-    (local-set-key (kbd ";") (smartchr '(";; " ";")))
+    (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'" "\'\'\'`!!'\'\'\'")))
     )
 
   (defun my/smartchr-clang ()
-    ;; !! がカーソルの位置
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
-    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (my/smartchr-common)
+
     (local-set-key (kbd ">") (smartchr '(">" " => " " => '`!!''" " => \"`!!'\"")))
     (local-set-key (kbd ":") (smartchr '(":: " ":")))
     (local-set-key (kbd ";") (smartchr '(";" ";;")))
     )
 
   (defun my/smartchr-py ()
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
-    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"" "\"\"\"`!!'\"\"\"")))
-    (local-set-key (kbd "\'") (smartchr '("\'`!!'\'" "\'" "\'\'\'`!!'\'\'\'")))
+    (my/smartchr-common)
+
     (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
     (local-set-key (kbd "#") (smartchr '("# " "### " "#")))
     (local-set-key (kbd "=") (smartchr '("=" " == " " = ")))
@@ -1164,24 +1158,20 @@ the `*Messages*' buffer while BODY is evaluated."
     )
 
   (defun my/smartchr-rust ()
-    ;; !! がカーソルの位置
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
-    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (my/smartchr-common)
+
     (local-set-key (kbd ":") (smartchr '("::" ":")))
     (local-set-key (kbd ";") (smartchr '(";" ";;")))
     )
 
   (defun my/smartchr-rst ()
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{\n`!!'\n}" "{`!!'}" "{")))
-    (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (my/smartchr-common)
+
     (local-set-key (kbd ">") (smartchr '(">" ">>>" " => " " => '`!!''" " => \"`!!'\"")))
     (local-set-key (kbd ".") (smartchr '("." ".. ")))
+
+    ;; 上書き
+    (local-set-key (kbd "`") (smartchr '("\`\``!!'\`\`" "\``!!'\`" "\'")))
     )
 
   (defun my/smartchr-md ()
@@ -1193,23 +1183,23 @@ the `*Messages*' buffer while BODY is evaluated."
     )
 
   (defun my/smartchr-ts ()
-    ;; `!!' がカーソルの位置
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
-    (local-set-key (kbd "`") (smartchr '("\``!!''" "\`")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    (my/smartchr-common)
+
     (local-set-key (kbd ":") (smartchr '(":" ":: ")))
     (local-set-key (kbd ";") (smartchr '(";" ";;")))
     (local-set-key (kbd "/") (smartchr '("/" "// `!!'")))
     )
 
   (defun my/smartchr-lua ()
+    (my/smartchr-common)
+
     (local-set-key (kbd "#") (smartchr '("-- `!!'" "#")))
-    (local-set-key (kbd "(") (smartchr '("(`!!')" "(")))
-    (local-set-key (kbd "[") (smartchr '("[`!!']" "[ [`!!'] ]" "[")))
-    (local-set-key (kbd "{") (smartchr '("{`!!'}" "{\n`!!'\n}" "{")))
-    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"")))
+    )
+
+  (defun my/smartchr-el ()
+    (my/smartchr-common)
+
+    (local-set-key (kbd ";") (smartchr '(";" ";;")))
     )
 
   (defun my/smartchr-skelton ()
@@ -1231,11 +1221,9 @@ the `*Messages*' buffer while BODY is evaluated."
   (dolist (hook (list
                  'css-ts-mode-hook
                  'js2-mode-hook
-                 'lisp-mode-hook
-                 'emacs-lisp-mode-hook
                  'sql-mode-hook
                  ))
-    (add-hook hook 'my/smartchr-default))
+    (add-hook hook 'my/smartchr-common))
 
   (dolist (hook (list
                  'makefile-mode-hook
@@ -1245,6 +1233,8 @@ the `*Messages*' buffer while BODY is evaluated."
 
   :hook (
          ;; モードオリジナル追加設定
+         (lisp-mode-hook . my/smartchr-el)
+         (emacs-lisp-mode-hook . my/smartchr-el)
          (python-mode-hook . my/smartchr-py)
          (python-ts-mode-hook . my/smartchr-py)
          (rust-mode-hook . my/smartchr-rust)
@@ -1514,7 +1504,7 @@ make
                                         orderless-initialism
                                         orderless-migemo)))
   :custom
-  (completion-styles . '(orderless))
+  (completion-styles . '(orderless helm basic))
   (orderless-matching-styles
    . '(orderless-literal
        orderless-regexp
@@ -1630,20 +1620,21 @@ make
     ("C-c o g" . cape-sgml)
     ("C-c o r" . cape-rfc1345))
 
-  (leaf company
-    :ensure t
-    :doc "capeで既存のcompany補完も利用"
-    :custom
-    (company-dabbrev-ignore-case . t)
-    (company-dabbrev-code-ignore-case . t)
-    (company-etags-ignore-case . t)
-    :bind
-    (
-     (:company-active-map
-      ("C-h" . nil) ;; c-h BackSpace
-      )
-     )
-    )
+  ;; company 補完が2重に出るので一旦停止
+  ;; (leaf company
+  ;;   :ensure t
+  ;;   :doc "capeで既存のcompany補完も利用"
+  ;;   :custom
+  ;;   (company-dabbrev-ignore-case . t)
+  ;;   (company-dabbrev-code-ignore-case . t)
+  ;;   (company-etags-ignore-case . t)
+  ;;   :bind
+  ;;   (
+  ;;    (:company-active-map
+  ;;     ("C-h" . nil) ;; c-h BackSpace
+  ;;     )
+  ;;    )
+  ;;   )
 
   (leaf tempel
     :doc "モダンなsnippet補完"
@@ -1654,68 +1645,6 @@ make
     :ensure t
     :after tempel)
   )
-
-
-
-;; (leaf company
-;;   :ensure t
-;;   :require t
-;;   :blackout t
-;;   :global-minor-mode global-company-mode
-;;   :custom
-;;   (company-transformers . '(company-sort-by-backend-importance))
-;;   ;; 補完遅延無し
-;;   (company-idle-delay . 0)
-;;   (company-echo-delay . 0)
-;;   ;; 開始文字数
-;;   (company-minimum-prefix-length . 2)
-;;   (company-selection-wrap-around . t)
-;;   (completion-ignore-case . t)
-;;   (company-tooltip-limit . 12)
-;;   (company-selection-wrap-around . t)
-;;   (company-transformers . '(company-sort-by-occurrence company-sort-by-backend-importance))
-;;   (company-frontends . nil)
-;;   :bind
-;;   (
-;;    ("C-o" . #'my/helm-company-complete)
-;;    (:company-active-map
-;;     ("C-h" . nil) ;; c-h BackSpace
-;;     ("TAB" . #'my/helm-company-complete)
-;;     ("<tab>" . #'my/helm-company-complete)
-;;     ("C-n" . company-select-next)
-;;     ("C-p" . company-select-previous)
-;;     ("C-s" . company-filter-candidates)
-;;     ("C-i" . company-complete-selection))
-;;    (:company-search-map
-;;     ("C-n" . company-select-next)
-;;     ("C-p" . company-select-previous))
-;;    )
-;;   :config
-;;   (leaf helm-company
-;;     :url "https://github.com/Sodel-the-Vociferous/helm-company/"
-;;     :el-get (helm-company
-;;              :url "https://github.com/Sodel-the-Vociferous/helm-company.git")
-;;     :after company)
-
-;;   (progn
-;;     (defun my/helm-company-complete ()
-;;       (interactive)
-;;       (when (company-complete) (helm-company)))
-;;     (add-to-list 'completion-at-point-functions
-;;                  #'comint-dynamic-complete-filename))
-
-;;   (defvar company-mode/enable-yas t
-;;     "Enable yasnippet for all backends.")
-
-;;   (defun my/company-mode/backend-with-yas (backend)
-;;     (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
-;;         backend
-;;       (append (if (consp backend) backend (list backend))
-;;               '(:with company-yasnippet))))
-
-;;   (setopt company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
-;;   )
-
 
 (leaf yasnippet
   :ensure t
@@ -1740,24 +1669,6 @@ make
     (yatemplate-fill-alist)
     )
   )
-
-
-;; 自分の癖に合わないので停止
-;; pre-commitに設定する実験中
-;; (leaf reformatter
-;;   :ensure t
-;;   :url "https://github.com/purcell/emacs-reformatter"
-;;   :doc "保存時にフォーマットプログラムを起動する modeの物は利用していない"
-;;   :config
-;;   (reformatter-define python-format
-;;                       :program "ruff"
-;;                       :args `("format" "--stdin-filename" ,buffer-file-name))
-;;   (reformatter-define rust-format
-;;                       :program "rustfmt")
-;;   :hook
-;;   (python-ts-mode-hook . python-format-on-save-mode)
-;;   (rust-ts-mode-hook . rust-format-on-save-mode)
-;;   )
 
 
 ;; lsp設定
@@ -1878,40 +1789,9 @@ make
       (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
       (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-  ;; (setopt major-mode-remap-alist
-  ;;       '(
-  ;;         (yaml-mode . yaml-ts-mode)
-  ;;         (c-mode . c-ts-mode)
-  ;;         (c++-mode . c++-ts-mode)
-  ;;         (c-or-c++-mode . c-or-c++-ts-mode)
-  ;;         (java-mode . java-ts-mode)
-  ;;         (javascript-mode . js-ts-mode)
-  ;;         (js-json-mode . json-ts-mode)
-  ;;         (css-mode . css-ts-mode)
-  ;;         (python-mode . python-ts-mode)
-  ;;         (go-mode . go-ts-mode)
-  ;;         (rust-mode . rust-ts-mode)
-  ;;         (typescript-mode . typescript-ts-mode)
-  ;;         ))
-
   :custom
   (treesit-font-lock-level . 4)
   )
-
-
-;; (leaf treesit-auto
-;;   :ensure t
-;;   :require t
-;;   :init
-;;   (setq treesit-auto-install 'prompt)
-
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all)
-
-;;    :hook
-;;   (emacs-startup-hook . global-treesit-auto-mode)
-;;   )
-
 
 
 (leaf python-mode
@@ -2252,6 +2132,17 @@ make
 (leaf mode-line
   :doc "mode-line のフォーマット"
   :config
+  (leaf nerd-icons-mode-line
+    :ensure t
+    :require t
+    :vc (:url "https://github.com/grolongo/nerd-icons-mode-line")
+    :custom
+    ;; default value
+    (nerd-icons-mode-line-v-adjust . 0.1)
+    ;; default value
+    (nerd-icons-mode-line-size . 1.0)
+    )
+
   ;; 改行文字表現変更
   (setq eol-mnemonic-dos "(CRLF)")
   (setq eol-mnemonic-unix "(LF)")
@@ -2324,6 +2215,7 @@ make
                   mode-line-readonly
                   mode-line-remote
                   mode-line-frame-identification
+                  mode-line-nerd-icon
                   mode-line-buffer-identification
                   mode-line-position
                   'mode-line-modes
