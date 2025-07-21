@@ -4,12 +4,15 @@ auto-save-list
 anything-c-adaptive-history
 image-dired
 elisp-objects
+eln-cache
+tramp
 
 # Compiled
 *.elc
 *.pyc
 *.exe
 *.o
+*.so
 
 # Packaging
 .cask

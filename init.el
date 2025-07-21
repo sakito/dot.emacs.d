@@ -22,6 +22,15 @@
 ;; 稼動確認： GUI
 ;; OS: Mac、Windows WSL Ubuntu、Ubuntu
 
+;; 事前処理
+;; git clone https://github.com/axelf4/hotfuzz
+;; cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS=-march=native
+;; cmake --build build
+;; cp hotfuzz-module.so ~/.emacs.d/lisp
+
+
+;; 
+
 ;;; Code:
 
 ;; デバッグ
@@ -62,6 +71,9 @@
     (leaf hydra :ensure t)
     (leaf blackout :ensure t)
 
+    (leaf el-get :ensure t
+      :custom ((el-get-git-shallow-clone  . t)))
+
     :config
     (leaf-keywords-init)))
 
@@ -77,6 +89,11 @@
   :ensure t
   :bind (("C-c e" . macrostep-expand)))
 
+
+;; 一部パッケージは強制インストールする必要がある
+(when (not (package-installed-p 'orderless))
+  (package-install 'orderless))
+
 ;; 以下個別設定
 
 (leaf cus-edit
@@ -91,7 +108,7 @@
 (leaf is_system
   :doc "Emacs の種類バージョンを判別するための変数"
   :init
-  (defvar mac-p (or (eq window-system 'mac) (eq system-type 'darwin)))
+  (defvar mac-p (or (eq window-system 'mac) (eq window-system 'ns) (eq system-type 'darwin)))
   (defvar windows-p (eq system-type 'windows-nt))
   (defvar linux-p (eq system-type 'gnu/linux))
 
@@ -137,6 +154,7 @@
 
 
 (leaf *default-frame
+  :when window-system
   :doc "デフォルトのフレーム設定
 ディスプレイサイズによって分離する
 デュアルだったりトリプルだったりするので width の方は条件に入れてない
@@ -153,7 +171,7 @@
                     (left . 420)
                     (left-fringe . 12)
                     (right-fringe . 12)
-                    (alpha . (92 70))
+                    (alpha . (92 92))
                     )
                   default-frame-alist)))
 
@@ -167,7 +185,7 @@
                     (height . 65)
                     (top . 50)
                     (left . 500)
-                    (alpha . (92 70))
+                    (alpha . (92 92))
                     )
                   default-frame-alist)))
   )
@@ -175,6 +193,7 @@
 
 (leaf font
   :url "https://github.com/yuru7/udev-gothic"
+  :when window-system
   :config
   (set-face-attribute 'default
                       nil
@@ -244,7 +263,6 @@
 (require 'modus-themes)
 (leaf modus-themes
   :ensure t
-  :when window-system
   :custom
   (modus-themes-bold-constructs . nil)
   (modus-themes-italic-constructs . t)
@@ -302,13 +320,12 @@
       (modus-themes-with-colors
         (custom-set-faces
          `(trailing-whitespace ((,c :background ,bg-main :underline "SteelBlue")))
+         `(skk-show-mode-inline-face ((,c :background ,bg-main)))
          )))
 
     (my/modus-themes-custom-faces)
 
     )
-
-
   )
 
 
@@ -318,8 +335,12 @@
            ;; scroll bar
            (toggle-scroll-bar . nil)
 
-           ;; 警告を視覚的にする
-           (visible-bell . t)
+           ;; 警告を視覚的にする(画面がフラッシュしたり、アイコンが表示される)
+           ;; (visible-bell . t)
+
+           ;; 警告音停止
+           ;; 警告関連が停止するので、注意
+           (ring-bell-function . 'ignore)
 
            ;; scratch のメッセージを空にする
            (initial-scratch-message . nil)
@@ -430,6 +451,9 @@
   (global-font-lock-mode t)
   (setq font-lock-support-mode 'jit-lock-mode)
   (setq-default tab-width 2)
+
+  ;; help 関連 C-h 停止
+  (global-unset-key (kbd "<help> C-h"))
   :hook (
          (text-mode-hook . turn-off-auto-fill)
          (text-mode-hook . display-line-numbers-mode)
@@ -534,7 +558,7 @@
   ;; 起動したら US にする
   ;; (add-hook 'after-init-hook 'mac-change-language-to-us)
   ;; minibuffer 内は US にする
-  (mac-auto-ascii-mode t)
+  ;; (mac-auto-ascii-mode t)
   ;; (add-hook 'minibuffer-setup-hook 'mac-change-language-to-us)
 
   ;; 入力モードを英語に変更
@@ -609,6 +633,19 @@
            ;; skk server設定
            (skk-server-host . "localhost")
            (skk-server-portnum . 1178)
+
+           ;; モードを入力位置近くに表示
+           ;; この設定を有効にすると、バッファ表示が遅くなるので設定していない
+           ;; (skk-show-tooltip . t)
+           ;; (skk-show-mode-show . t)
+
+           ;; モード文字列
+           (skk-latin-mode-string . "＠")
+           (skk-hiragana-mode-string . "あ")
+           (skk-katakana-mode-string . "ア")
+           (skk-jisx0208-latin-mode-string . "Ａ")
+           (skk-jisx0201-mode-string . "ｱｲ")
+           (skk-abbrev-mode-string . "※")
            )
   :config
   ;; @ を無効にする
@@ -616,16 +653,18 @@
       (append skk-rom-kana-rule-list
               '(("@" nil "@"))))
 
-  (defadvice skk-latin-mode (after no-latin-mode-in-lisp-interaction activate)
-    "`lisp-interaction-mode' において英数モードを回避する。"
-    (when (eq major-mode 'lisp-interaction-mode)
-      (skk-mode-off)))
+  ;; lisp-interaction-mode での実行は C-c C-j に割り当て elisp の項参照
 
   (leaf ddskk-posframe
     :ensure t
     :blackout t
     :global-minor-mode t
-    :custom ((ddskk-posframe-border-width . 2))
+    :custom (
+             (ddskk-posframe-border-width . 2)
+             )
+    :custom-face (
+                  (ddskk-posframe . '((t (:background "#ffcfbf"))))
+                  )
     )
 
   :hook (
@@ -748,6 +787,8 @@ the `*Messages*' buffer while BODY is evaluated."
   :ensure t
   :require sendmail  ;; 暫定対処
   :bind (("C-c g" . magit-status)
+         ;; 打鍵ミスするので暫定でこれも設定しておく
+         ("C-, g" . magit-status)
 
          (:magit-mode-map
           ("<C-tab>" . my/other-window-or-split)))
@@ -773,6 +814,9 @@ the `*Messages*' buffer while BODY is evaluated."
            ;; 再帰削除
            ;; (dired-recursive-deletes . 'always)
 
+           ;; mode-line での switchesの表示長
+           (dired-switches-in-mode-line . 6)
+
            ;; C-x 2 で分割した隣にコピーや移動をする
            (dired-dwim-target . t)
 
@@ -789,7 +833,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (defvar my/list-of-dired-switches
     '(
       ;; 標準ソート(ディレクトリは上)
-      "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
+      "-lhaB  --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
       ;; 更新時刻でソート
       "-lhaBt --time-style \"+%y-%m-%d %H:%M\""
       ;; サイズでソート
@@ -832,7 +876,6 @@ the `*Messages*' buffer while BODY is evaluated."
         (setq insert-directory-program gls)
         )))
 
-
   (leaf nerd-icons-dired
     :url "https://github.com/rainstormstudio/nerd-icons-dired"
     :ensure t
@@ -859,6 +902,7 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf ignoramus
   :ensure t
+  :doc "dired-omit-mode(o) にて on/off する"
   :config
   (ignoramus-setup))
 
@@ -1023,20 +1067,61 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf hl-line-plus
   :url "https://github.com/emacsmirror/hl-line-plus"
   :require hl-line+
-  :vc (hl-line-plus
-       :url "https://github.com/emacsmirror/hl-line-plus.git")
+  :el-get (hl-line-plus
+           :url "https://github.com/emacsmirror/hl-line-plus.git")
   :defun toggle-hl-line-when-idle
   :config
   (toggle-hl-line-when-idle 1)
   )
 
 
+(leaf puni
+  :doc "領域選択機能"
+  :ensure t
+  :require t
+  :config
+  (defun my/puni-wrap-single-quote (&optional n)
+    (interactive "P")
+    (puni-wrap-next-sexps
+     (puni--parse-interactive-argument-for-wrap n)
+     "'" "'"))
+  (defun my/puni-wrap-double-quote (&optional n)
+    (interactive "P")
+    (puni-wrap-next-sexps
+     (puni--parse-interactive-argument-for-wrap n)
+     "\"" "\""))
+  :hydra
+  (hydra-puni
+   ;; puni 系は C-c v 割り当て
+   (global-map "C-c v")
+   "puni"
+   ;; リスト周辺
+   ("c" puni-mark-list-around-point "list")
+   ;; S式周辺
+   ("x" puni-mark-sexp-around-point "sexp")
+   ;; 選択領域拡張
+   ("v" puni-expand-region "expand")
+
+   ("[" puni-wrap-square "wrap []")
+   ("{" puni-wrap-curly "wrap {}")
+   ("(" puni-wrap-round "wrap ()")
+   ("<" puni-wrap-angle "wrap <")
+   ("'" my/puni-wrap-single-quote)
+   ("\"" my/puni-wrap-double-quote)
+
+   ("l" puni-slurp-forward "slurp")
+   ("a" puni-barf-forward "barf")
+   ("d" puni-splice "splice")
+
+   (")" puni-raise "raise")
+  ))
+
 (leaf smartchr
   :doc "smartchr の設定"
   :url "http://tech.kayac.com/archive/emacs-tips-smartchr.html"
   :require t
-  :vc (smartchr
-       :url "https://github.com/imakado/emacs-smartchr.git")
+  :el-get (smartchr
+           :url "https://github.com/imakado/emacs-smartchr.git")
   :defun smartchr
   :defvar skeleton-pair skeleton-pair-on-word skeleton-end-hook
   :config
@@ -1184,12 +1269,9 @@ the `*Messages*' buffer while BODY is evaluated."
            (vc-consult-headers . nil)
            ;; シンボリックリンク先がバージョン管理されていても確認しないでリンク先の実ファイルを開く
            (vc-follow-symlinks . t))
-  :config
-  ;; package-vcでは一切依存関係を解決してほしくないので依存判定関数を無効化"
-  (fset #'package-vc-install-dependencies (lambda (_) '()))
   :hook
   ;; log-edit で メッセージの挿入を停止
-  (log-edit-hook . '(log-edit-insert-cvs-template
+  (log-edit-hook . '(log-edit-insert-cvs-templat
                      log-edit-insert-changelog
                      log-edit-show-files)))
 
@@ -1207,6 +1289,30 @@ the `*Messages*' buffer while BODY is evaluated."
   )
 
 
+(leaf flycheck
+  :ensure t
+  :custom
+  (flycheck-help-echo-function . nil)
+  (flycheck-display-errors-function . nil)
+  :config
+  (leaf flycheck-posframe
+    :ensure t
+    :after flycheck
+    :hook
+    (flycheck-mode-hook . flycheck-posframe-mode)
+    :custom
+    ;; 右下に表示
+    ;; エラー内容の詳細は helm で確認
+    (flycheck-posframe-position . 'window-bottom-right-corner)
+    ;; エラー表示文字表示する
+    ;; アイコンも設定してみたが、文字の方が自分に合ってたので文字にした
+    (flycheck-posframe-error-prefix . "[E] ")
+    (flycheck-posframe-warning-prefix . "[W] ")
+    (flycheck-posframe-info-prefix . "[I] ")
+    )
+  :hook
+  (prog-mode-hook . flycheck-mode))
+
 (leaf helm
   :doc "helm
 TODO 一部設定未整備
@@ -1218,9 +1324,9 @@ git checkout v4.0
 make
 "
   :url "https://github.com/emacs-helm/helm"
-  :vc (helm
-       :url "https://github.com/emacs-helm/helm.git"
-       :branch "v4.0")
+  :el-get (helm
+           :url "https://github.com/emacs-helm/helm.git"
+           :branch "v4.0")
   :blackout t
   :require helm
   :global-minor-mode t
@@ -1337,15 +1443,15 @@ make
 
   (leaf helm-descbinds
     :url "https://github.com/emacs-helm/helm-descbinds"
-    :vc (helm-descbinds
-         :url "https://github.com/emacs-helm/helm-descbinds.git")
+    :el-get (helm-descbinds
+             :url "https://github.com/emacs-helm/helm-descbinds.git")
     :global-minor-mode t
     )
 
   (leaf helm-ag
     :url "https://github.com/emacsorphanage/helm-ag"
-    :vc (helm-ag
-         :url "https://github.com/emacsorphanage/helm-ag.git")
+    :el-get (helm-ag
+             :url "https://github.com/emacsorphanage/helm-ag.git")
     :custom (
              (helm-ag-base-command . "pt -e --nocolor --nogroup")
              )
@@ -1359,90 +1465,256 @@ make
 
   (leaf helm-flycheck
     :url "https://github.com/yasuyk/helm-flycheck"
-    :vc (helm-flycheck
-         :url "https://github.com/yasuyk/helm-flycheck.git")
+    :el-get (helm-flycheck
+             :url "https://github.com/yasuyk/helm-flycheck.git")
     :bind (
            ("C-c l" . helm-flycheck)
            ))
 
   (leaf helm-ghq
     :url "https://github.com/masutaka/emacs-helm-ghq"
-    :vc (helm-ghq
-         :url "https://github.com/masutaka/emacs-helm-ghq.git")
+    :el-get (helm-ghq
+             :url "https://github.com/masutaka/emacs-helm-ghq.git")
     :require helm-for-files helm-ghq
     :after helm)
 
   )
 
-
-(leaf company
+(leaf migemo
+  :doc "cmigemoコマンド依存"
+  :url "https://github.com/koron/cmigemo"
   :ensure t
+  :defun migemo-init
+  :if (executable-find "cmigemo")
   :require t
-  :blackout t
-  :global-minor-mode global-company-mode
   :custom
-  (company-transformers . '(company-sort-by-backend-importance))
-  ;; 補完遅延無し
-  (company-idle-delay . 0)
-  (company-echo-delay . 0)
-  ;; 開始文字数
-  (company-minimum-prefix-length . 2)
-  (company-selection-wrap-around . t)
-  (completion-ignore-case . t)
-  (company-tooltip-limit . 12)
-  (company-selection-wrap-around . t)
-  (company-transformers . '(company-sort-by-occurrence company-sort-by-backend-importance))
-  (company-frontends . nil)
-  :bind
-  (
-   ("C-o" . #'my/helm-company-complete)
-   (:company-active-map
-    ("TAB" . #'my/helm-company-complete)
-    ("<tab>" . #'my/helm-company-complete)
-    ("C-n" . company-select-next)
-    ("C-p" . company-select-previous)
-    ("C-s" . company-filter-candidates)
-    ("C-i" . company-complete-selection))
-   (:company-search-map
-    ("C-n" . company-select-next)
-    ("C-p" . company-select-previous))
-   )
+  (migemo-user-dictionary . nil)
+  (migemo-regex-dictionary . nil)
+  `(migemo-dictionary . ,(expand-file-name "~/opt/migemo/migemo-dict"))
   :config
-  (leaf helm-company
-    :url "https://github.com/Sodel-the-Vociferous/helm-company/"
-    :vc (helm-company
-             :url "https://github.com/Sodel-the-Vociferous/helm-company.git")
-    :after company)
+  (migemo-init))
 
-  (progn
-    (defun my/helm-company-complete ()
+
+(leaf orderless
+  :doc "補完候補を空白区切りで複数検索可能にする設定"
+  :doc "https://github.com/oantolin/orderless#defining-custom-orderless-styles"
+  :defun (migemo-get-pattern . migemo)
+  :ensure t
+  :config
+  (defun orderless-migemo (component)
+    (let ((pattern (migemo-get-pattern component)))
+      (condition-case nil
+          (progn (string-match-p pattern "") pattern)
+          (invalid-regexp nil))))
+  (eval-when-compile (require 'orderless))
+  (orderless-define-completion-style orderless+migemo
+                                     (orderless-matching-styles
+                                      '(orderless-literal
+                                        orderless-regexp
+                                        orderless-initialism
+                                        orderless-migemo)))
+  :custom
+  (completion-styles . '(orderless))
+  (orderless-matching-styles
+   . '(orderless-literal
+       orderless-regexp
+       orderless-initialism))
+  ;; カテゴリによってcompletion-stylesを変更する
+  (completion-category-overrides
+   . '((file (styles orderless+migemo partial-completion))
+       (buffer (styles orderless+migemo))
+       (unicode-name (styles orderless+migemo))
+       (kill-ring (styles orderless+migemo))
+
+       ;; eglot
+       (eglot (styles orderless+migemo))
+       ;; consult with migemo
+       ;; (consult-location (styles orderless+migemo)) ; consult-line
+       ;; (consult-multi (styles orderless+migemo))    ; consult-buffer
+       )))
+
+(leaf corfu
+  :leaf-path nil
+  :preface
+  (leaf hotfuzz
+    :ensure t
+    :load-path* "lisp"
+    :doc "事前にコンパイルが必要 https://github.com/axelf4/hotfuzz"
+    )
+
+  (leaf corfu
+    :ensure t
+    :commands (corfu-quit)
+    :init
+    (setq completion-ignore-case t)
+    ;; インデント済みのときTABキーで補完開始
+    (setq tab-always-indent 'complete)
+    (defun my/corfu-mode ()
+      "Turn on corfu mode."
+      (corfu-mode)
+      (corfu-popupinfo-mode)
+      (corfu-history-mode))
+    :custom
+    (corfu-cycle . t)
+    (corfu-auto . t)
+    (corfu-auto-delay . 0.2)
+    ;; corfu中に選択候補をカーソル先に表示しない
+    (corfu-preview-current . nil)
+    (corfu-auto-prefix . 2)
+    (corfu-popupinfo-delay . '(0.3 . 0.3))
+    (corfu-popupinfo-max-height . 30)
+    :custom-face (
+                  ;; 色は検討中
+                  (corfu-default . '((t (:background "#F2D916"))))
+                  )
+    :config
+    (defun corfu-complete-and-quit ()
       (interactive)
-      (when (company-complete) (helm-company)))
-    (add-to-list 'completion-at-point-functions
-                 #'comint-dynamic-complete-filename))
+      (corfu-complete)
+      (corfu-quit))
+    :hook
+    ;; corfuではhotfuzzでフィルター/ソートする
+    (corfu-mode-hook
+     . (lambda () (setq-local completion-styles '(hotfuzz))))
+    ;; shellではcorfu起動遅延
+    ((shell-mode-hook eshell-mode-hook)
+     . (lambda () (setq-local corfu-auto nil) (my/corfu-mode)))
+    (prog-mode-hook . my/corfu-mode)
+    :bind (
+           (:corfu-map
+            ;; ("C-f" . corfu-insert)
+            ;; ("C-c C-d" . corfu-info-documentation)
 
-  (defvar company-mode/enable-yas t
-    "Enable yasnippet for all backends.")
+            ("C-n" . corfu-next)
+            ("C-p" . corfu-previous)
 
-  (defun my/company-mode/backend-with-yas (backend)
-    (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
-        backend
-      (append (if (consp backend) backend (list backend))
-              '(:with company-yasnippet))))
+            ([remap completion-at-point] . corfu-complete)
+            ("RET" . corfu-complete-and-quit)
+            ("<return>" . corfu-complete-and-quit)
 
-  (setopt company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
+            ("C-s" . corfu-insert-separator)
+            )
+           )
+    )
+
+  (leaf nerd-icons-corfu
+    :ensure t
+    :custom
+    (corfu-margin-formatters . '(nerd-icons-corfu-formatter)))
+
+  (leaf cape
+    :ensure t
+    :doc "バックエンド合成、companyバックエンドの変換"
+    :init
+    (defun my/elisp-mode-init ()
+      "Set completion function to cape"
+      (setq-local completion-at-point-functions
+                  (list (cape-capf-inside-code
+                         (cape-capf-super #'cape-elisp-symbol
+                                          #'cape-dabbrev))
+                        (cape-capf-inside-string #'cape-file))))
+    :hook (emacs-lisp-mode-hook . my/elisp-mode-init)
+    :bind
+    ("C-c o t" . complete-tag)
+    ("C-c o d" . cape-dabbrev)
+    ("C-c o h" . cape-history)
+    ("C-c o f" . cape-file)
+    ("C-c o k" . cape-keyword)
+    ("C-c o s" . cape-elisp-symbol)
+    ("C-c o e" . cape-elisp-block)
+    ("C-c o a" . cape-abbrev)
+    ("C-c o l" . cape-line)
+    ("C-c o w" . cape-dict)
+    ("C-c o :" . cape-emoji)
+    ("C-c o x" . cape-tex)
+    ("C-c o g" . cape-sgml)
+    ("C-c o r" . cape-rfc1345))
+
+  (leaf company
+    :ensure t
+    :doc "capeで既存のcompany補完も利用"
+    :custom
+    (company-dabbrev-ignore-case . t)
+    (company-dabbrev-code-ignore-case . t)
+    (company-etags-ignore-case . t)
+    :bind
+    (
+     (:company-active-map
+      ("C-h" . nil) ;; c-h BackSpace
+      )
+     )
+    )
+
+  (leaf tempel
+    :doc "モダンなsnippet補完"
+    :ensure t
+    :bind ("C-M-o" . tempel-insert))
+
+  (leaf tempel-collection
+    :ensure t
+    :after tempel)
   )
 
 
-(leaf flycheck
-  :ensure t
-  :config
-  (leaf flycheck-posframe
-    :ensure t
-    :hook
-    (flycheck-mode-hook . flycheck-posframe-mode))
-  :hook
-  (prog-mode-hook . flycheck-mode))
+
+;; (leaf company
+;;   :ensure t
+;;   :require t
+;;   :blackout t
+;;   :global-minor-mode global-company-mode
+;;   :custom
+;;   (company-transformers . '(company-sort-by-backend-importance))
+;;   ;; 補完遅延無し
+;;   (company-idle-delay . 0)
+;;   (company-echo-delay . 0)
+;;   ;; 開始文字数
+;;   (company-minimum-prefix-length . 2)
+;;   (company-selection-wrap-around . t)
+;;   (completion-ignore-case . t)
+;;   (company-tooltip-limit . 12)
+;;   (company-selection-wrap-around . t)
+;;   (company-transformers . '(company-sort-by-occurrence company-sort-by-backend-importance))
+;;   (company-frontends . nil)
+;;   :bind
+;;   (
+;;    ("C-o" . #'my/helm-company-complete)
+;;    (:company-active-map
+;;     ("C-h" . nil) ;; c-h BackSpace
+;;     ("TAB" . #'my/helm-company-complete)
+;;     ("<tab>" . #'my/helm-company-complete)
+;;     ("C-n" . company-select-next)
+;;     ("C-p" . company-select-previous)
+;;     ("C-s" . company-filter-candidates)
+;;     ("C-i" . company-complete-selection))
+;;    (:company-search-map
+;;     ("C-n" . company-select-next)
+;;     ("C-p" . company-select-previous))
+;;    )
+;;   :config
+;;   (leaf helm-company
+;;     :url "https://github.com/Sodel-the-Vociferous/helm-company/"
+;;     :el-get (helm-company
+;;              :url "https://github.com/Sodel-the-Vociferous/helm-company.git")
+;;     :after company)
+
+;;   (progn
+;;     (defun my/helm-company-complete ()
+;;       (interactive)
+;;       (when (company-complete) (helm-company)))
+;;     (add-to-list 'completion-at-point-functions
+;;                  #'comint-dynamic-complete-filename))
+
+;;   (defvar company-mode/enable-yas t
+;;     "Enable yasnippet for all backends.")
+
+;;   (defun my/company-mode/backend-with-yas (backend)
+;;     (if (or (not company-mode/enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
+;;         backend
+;;       (append (if (consp backend) backend (list backend))
+;;               '(:with company-yasnippet))))
+
+;;   (setopt company-backends (mapcar #'my/company-mode/backend-with-yas company-backends))
+;;   )
 
 
 (leaf yasnippet
@@ -1508,6 +1780,9 @@ make
             ;; M-! rust-analyzer --help が挙動する事
             '((rust-ts-mode rust-mode) .
                ("rust-analyzer" :initializationOptions (:check (:command "clippy"))))
+
+            '((lua-ts-mode lua-mode) .
+               ("lua-language-server"))
             )
 
   ;; eglot無効機能
@@ -1518,6 +1793,8 @@ make
 
   ;; eldoc echo を1行に抑止
   (setq eldoc-echo-area-use-multiline-p nil)
+  ;; デフォルトはeldocを停止
+  (global-eldoc-mode -1)
   )
 
 
@@ -1532,6 +1809,7 @@ make
     ;; (local-set-key (kbd "C-c C") 'compile-defun)
     (local-set-key (kbd "C-c C-d") 'eval-defun)
     (local-set-key (kbd "C-c f") 'describe-function-at-point)
+    (local-set-key (kbd "C-c C-j") 'eval-print-last-sexp)
     (when (fboundp 'expectations)
       ;; C-M-x compile-defun
       (local-set-key (kbd "C-c C-t") 'expectations-execute))
@@ -1920,7 +2198,7 @@ make
 
   (leaf plain-org-wiki
     :doc "最初から継続調査する事項はwikiを利用している"
-    :ensure t
+    :load-path* "lisp/plain-org-wiki"
     :custom `(
               ;; (plain-org-wiki-directory . ,(concat org-directory "/wiki"))
               (plain-org-wiki-directory . ,(expand-file-name "~/Documents/doc/wiki"))
@@ -1997,23 +2275,64 @@ make
                    ))
                 )
 
+  (defface my/mode-line-warning
+    '((((class color))
+       (:background "#dfd5cf" :foreground "#d00000")))
+    nil
+    :group 'face)
+
+  ;; 保存状態
+  (setq-default mode-line-modified
+                '(:eval
+                  (when (and (buffer-file-name)
+                             (buffer-modified-p))
+                    (list
+                     (propertize "  "
+                                 'face 'my/mode-line-warning)
+                     )))
+                )
+
+  ;; 読み取り専用
+  (setq-default mode-line-readonly
+                '(:eval
+                    (when (and (buffer-file-name)
+                               buffer-read-only)
+                      (list
+                       (propertize "  "
+                                   'face 'my/mode-line-warning)
+                       )))
+                )
+
+  ;; flycheck-mode-line
+  (setq my/flycheck-mode-line
+        '(:eval
+          (when
+              (and (bound-and-true-p flycheck-mode)
+                   (or flycheck-current-errors
+                       (eq 'running flycheck-last-status-change)))
+            'flycheck-mode-line
+          ))
+        )
+
   (setq-default mode-line-format
-                '(
+                (list
                   "--"
                   "" skk-modeline-input-mode "%e"
                   mode-line-mule-info
                   mode-line-client
                   mode-line-modified
+                  mode-line-readonly
                   mode-line-remote
                   mode-line-frame-identification
                   mode-line-buffer-identification
                   mode-line-position
-                  mode-line-modes
+                  'mode-line-modes
+                  my/flycheck-mode-line
                   "--"
-                  (which-func-mode ("" which-func-format ("--" 0 2)))
-                  (global-mode-string ("" global-mode-string))
+                  ;; (which-func-mode ("" which-func-format ("--" 0 2)))
+                  ;; (global-mode-string ("" global-mode-string))
                   "--"
-                  ("-%-" 0 3)
+                  '("-%-" 0 3)
                   ))
 
   (leaf minions
