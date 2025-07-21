@@ -2,13 +2,19 @@
 
 sakito の .emacs.d 以下のファイル を一部公開しています。
 
-検証不十分で動作してないコードがまざることがありますが、ご了承ください。
+> [!WARNING]
+> 公開している物は利用している最新ではなく手動反映です
+> 検証不十分で動作してないコードがまざることがあります ご了承ください
+
+
+
 
 leaf.el( https://github.com/conao3/leaf.el )を利用しています
 
 リポジトリの構成は以下のようになっています。
 
-dotfile類は https://github.com/sakito/dot.zsh.d にて管理
+- dotfile類は https://github.com/sakito/dot.zsh.d にて管理
+- neovim関連は https://github.com/sakito/config.nvim にて管理
 
 .. sourcecode:: text
 
@@ -27,3 +33,5 @@ dotfile類は https://github.com/sakito/dot.zsh.d にて管理
      … キャシュファイルやバックアップファイル用
     private
      … 公開しないファイル類など
+
+以上
