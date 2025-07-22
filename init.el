@@ -37,6 +37,26 @@
 (set-variable 'debug-on-error t)
 (set-variable 'init-file-debug t)
 
+;; 起動高速化設定
+;; file-name-handler-alistを一旦無効にし、起動完了後に戻している
+(unless (or (daemonp) noninteractive init-file-debug)
+  (let ((my/tmp-file-name-handler-alist file-name-handler-alist))
+    (setq file-name-handler-alist nil)
+    (add-hook 'emacs-startup-hook
+              (lambda ()
+                ;; 起動完了後戻す
+                (setq file-name-handler-alist
+                      (delete-dups (append file-name-handler-alist
+                                           my/tmp-file-name-handler-alist)))))))
+
+;; gc遅延
+;; gcの値を最大にしておき、起動完了後戻す事で起動中のgcを停止する
+(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            ;; 起動後戻す 8MB程度あればだいたいの場合問題ないはず
+            (setq gc-cons-threshold (* 8 1024 1024))))
+
 ;; cl-lib 利用前提
 (eval-when-compile (require 'cl-lib nil t))
 
@@ -46,6 +66,11 @@
   (setq byte-compile-warnings t)
   (setq byte-compile-warnings '(not cl-functions free-vars docstrings unresolved))
   )
+
+;; tramp関連停止
+(setq tramp-mode nil)
+
+
 
 
 ;; leaf
@@ -98,7 +123,7 @@
 
 (leaf cus-edit
   :doc "custom-file"
-  :custom `((custom-file . ,(locate-user-emacs-file "private/customize.el"))))
+  :custom `((custom-file . ,(expand-file-name "private/customize.el" user-emacs-directory))))
 
 (leaf user
   :custom ((user-full-name . "sakito")
@@ -606,14 +631,11 @@
            ;; inode 番号を変更しない
            (backup-by-copying . t)
 
-           ;; tramp関連停止
-           (tramp-mode . nil)
-
            ;; バックアップファイルの保存位置指定
            ;; !path!to!file-name~ で保存される
            (backup-directory-alist . '(
-               ("^/etc/" . ,(locate-user-emacs-file "var/etc"))
-               ("." . ,(locate-user-emacs-file "var/emacs"))
+               ("^/etc/" . ,(expand-file-name "var/etc" user-emacs-directory))
+               ("." . ,(expand-file-name "var/emacs" user-emacs-directory))
                (,tramp-file-name-regexp . nil)))
        ))
 
@@ -1199,7 +1221,7 @@ the `*Messages*' buffer while BODY is evaluated."
   (defun my/smartchr-el ()
     (my/smartchr-common)
 
-    (local-set-key (kbd ";") (smartchr '(";" ";;")))
+    (local-set-key (kbd ";") (smartchr '(";;" ";")))
     )
 
   (defun my/smartchr-skelton ()
@@ -1547,11 +1569,14 @@ make
     :custom
     (corfu-cycle . t)
     (corfu-auto . t)
-    (corfu-auto-delay . 0.2)
+
+    ;; companyも同時利用する場合は delay 時間を合せる必要がある
+    (corfu-auto-delay . 0)
+    (corfu-popupinfo-delay . '(0.1 . 0.1))
+
     ;; corfu中に選択候補をカーソル先に表示しない
     (corfu-preview-current . nil)
     (corfu-auto-prefix . 2)
-    (corfu-popupinfo-delay . '(0.3 . 0.3))
     (corfu-popupinfo-max-height . 30)
     :custom-face (
                   ;; 色は検討中
@@ -1620,21 +1645,25 @@ make
     ("C-c o g" . cape-sgml)
     ("C-c o r" . cape-rfc1345))
 
-  ;; company 補完が2重に出るので一旦停止
-  ;; (leaf company
-  ;;   :ensure t
-  ;;   :doc "capeで既存のcompany補完も利用"
-  ;;   :custom
-  ;;   (company-dabbrev-ignore-case . t)
-  ;;   (company-dabbrev-code-ignore-case . t)
-  ;;   (company-etags-ignore-case . t)
-  ;;   :bind
-  ;;   (
-  ;;    (:company-active-map
-  ;;     ("C-h" . nil) ;; c-h BackSpace
-  ;;     )
-  ;;    )
-  ;;   )
+  (leaf company
+    :ensure t
+    :doc "capeで既存のcompany補完も利用"
+    :custom
+    ;; delay 時間等を corfu と合わせないと候補窓が2重に開いてしまう
+    (company-idle-delay . 0)
+    (company-minimum-prefix-length . 2)
+    (company-tooltip-idle-delay . 0)
+
+    (company-dabbrev-ignore-case . t)
+    (company-dabbrev-code-ignore-case . t)
+    (company-etags-ignore-case . t)
+    :bind
+    (
+     (:company-active-map
+      ("C-h" . nil) ;; c-h BackSpace
+      )
+     )
+    )
 
   (leaf tempel
     :doc "モダンなsnippet補完"
@@ -1650,7 +1679,7 @@ make
   :ensure t
   :blackout yas-minor-mode
   :global-minor-mode yas-global-mode
-  :custom `((yas-snippet-dirs . '(,(locate-user-emacs-file "etc/snippets"))))
+  :custom `((yas-snippet-dirs . '(,(expand-file-name "etc/snippets" user-emacs-directory))))
   :config
   (leaf yasnippet-snippets
     :ensure t)
@@ -1663,7 +1692,7 @@ make
     :after yasnippet
     :defvar auto-insert-query
     :config
-    (setq yatemplate-dir (locate-user-emacs-file "etc/templates"))
+    (setq yatemplate-dir (expand-file-name "etc/templates" user-emacs-directory))
     (auto-insert-mode t)
     (setq auto-insert-query nil)
     (yatemplate-fill-alist)

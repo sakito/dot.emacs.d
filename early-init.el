@@ -49,8 +49,8 @@
 
 
 ;; 起動時のmessageを表示しない
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
+(setopt inhibit-splash-screen t)
+(setopt inhibit-startup-screen t)
 
 (setq byte-compile-warnings '(cl-functions))
 
