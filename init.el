@@ -840,7 +840,7 @@ the `*Messages*' buffer while BODY is evaluated."
            ;; (dired-recursive-deletes . 'always)
 
            ;; mode-line での switchesの表示長
-           (dired-switches-in-mode-line . 6)
+           (dired-switches-in-mode-line . 7)
 
            ;; C-x 2 で分割した隣にコピーや移動をする
            (dired-dwim-target . t)
@@ -854,17 +854,18 @@ the `*Messages*' buffer while BODY is evaluated."
            )
   :config
   ;; dired の sort を拡張
-  (setq dired-listing-switches "-lhaB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first")
+  (setq dired-listing-switches
+        "-lhavB --time-style \"+%y-%m-%d %H:%M\" --group-directories-first")
   (defvar my/list-of-dired-switches
     '(
       ;; 標準ソート(ディレクトリは上)
-      "-lhaB  --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
+      "-lhavB  --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
       ;; 更新時刻でソート
-      "-lhaBt --time-style \"+%y-%m-%d %H:%M\""
+      "-lhavBt --time-style \"+%y-%m-%d %H:%M\""
       ;; サイズでソート
-      "-lhaBS --time-style \"+%y-%m-%d %H:%M\""
+      "-lhavBS --time-style \"+%y-%m-%d %H:%M\""
       ;; 拡張子でソート(ディレクトリは上)
-      "-lhaBX --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
+      "-lhavBX --time-style \"+%y-%m-%d %H:%M\" --group-directories-first"
       )
     "List of ls switches for dired to cycle among.")
 
@@ -1467,18 +1468,14 @@ make
     :custom (
              (helm-ag-base-command . "pt -e --nocolor --nogroup")
              )
-    :bind (
-           ("M-g ." . helm-ag)
-           ("M-g ," . helm-ag-pop-stack)
-           ("M-g s" . helm-do-ag)
-           ("C-M-s" . helm-ag-this-file)
-           )
+    :after helm
     )
 
   (leaf helm-flycheck
     :url "https://github.com/yasuyk/helm-flycheck"
     :el-get (helm-flycheck
              :url "https://github.com/yasuyk/helm-flycheck.git")
+    :after helm
     :bind (
            ("C-c l" . helm-flycheck)
            ))
@@ -1490,6 +1487,16 @@ make
     :require helm-for-files helm-ghq
     :after helm)
 
+  :hydra
+  (hydra-helm-key
+   (global-map "C-c s")
+   "helm-key"
+   ("." helm-ag "ag")
+   ("," helm-ag-pop-stack "pop-stack")
+   ("s" helm-do-ag "do-ag")
+   ("/" helm-ag-this-file "this-file")
+   ("q" helm-ghq "ghq")
+   )
   )
 
 (leaf migemo
@@ -1874,7 +1881,7 @@ make
     )
 
   :hook (
-         (python-ts-mode-hook . eglot-ensure)
+         ;;(python-ts-mode-hook . eglot-ensure)
          (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
          (python-ts-mode-hook . flycheck-mode)
          )
@@ -2060,7 +2067,7 @@ make
   :require t
   :custom `(
             ;; ディレクトリ設定
-            (org-directory . ,(expand-file-name "~/Documents/doc"))
+            (org-directory . ,(expand-file-name "~/Documents/doc/org/"))
 
             ;; 画像をインラインで表示
             (org-startup-with-inline-images . t)
@@ -2099,7 +2106,7 @@ make
     :ensure t
     :custom `(
               ;; (open-junk-file-format . ,(concat org-directory "/junk/%Y_%m_%d_%H%M%S."))
-              (open-junk-file-format . ,(expand-file-name "~/Documents/doc/junk/%Y_%m_%d_%H%M%S."))
+              (open-junk-file-format . ,(expand-file-name "~/Documents/doc/org/junk/%Y_%m_%d_%H%M%S."))
               )
     :bind
     ("C-c j" . open-junk-file)
@@ -2276,7 +2283,7 @@ private 内には自分専用の物がはいっている
 
 
 (leaf startup-time
-  :doc "起動時間計測 目標は常に 3000ms 圏内(dump-emacs すれば可能だがしてない)"
+  :doc "起動時間計測 目標は常に 3000ms 圏内"
   :init
   (defun my/message-startup-time ()
     (message "Emacs loaded in %dms"
