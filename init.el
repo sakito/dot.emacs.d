@@ -293,35 +293,40 @@
   (modus-themes-italic-constructs . t)
   (modus-themes-region . '(bg-only no-extend))
   :preface
+  ;; tab
   (defvar my/mark-tabs-face 'my/mark-tabs-face)
   (defface my/mark-tabs-face
-    '((((class color))
+    '((t
        (:foreground "#d00000" :underline t)))
     nil
-    :group 'face)
+    :group 'font-lock-highlighting-faces)
 
+  ;; 全角スペース
   (defvar my/mark-whitespace-face 'my/mark-whitespace-face)
   (defface my/mark-whitespace-face
-    '((((class color))
+    '((t
        (:background "#9f9690" :foreground "#80601f")))
     nil
-    :group 'face)
+    :group 'font-lock-highlighting-faces)
 
+  ;; bracket
   (defvar my/brackets-face 'my/brackets-face)
   (defface my/brackets-face
-    '((((class color))
+    '((t
        (:foreground "#80601f")))
     nil
-    :group 'face)
+    :group 'font-lock-highlighting-faces)
 
+  ;; operator
   (defvar my/operator-face 'my/operator-face)
   (defface my/operator-face
-    '((((class color))
+    '((t
        (:foreground "#6f5500")))
     nil
-    :group 'face)
+    :group 'font-lock-highlighting-faces)
 
-  (defadvice font-lock-mode (before my/font-lock-mode ())
+  ;; 色付け有効化
+  (defun my/font-lock-mode (&optional _ARG)
     (font-lock-add-keywords
      major-mode
      '(
@@ -330,8 +335,7 @@
        ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 my/brackets-face append)
        ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 my/operator-face append)
        )))
-  (ad-enable-advice 'font-lock-mode 'before 'my/font-lock-mode)
-  (ad-activate 'font-lock-mode)
+  (advice-add 'font-lock-mode :before #'my/font-lock-mode)
 
   :config
   (load-theme 'modus-operandi-tinted t)
@@ -1178,6 +1182,9 @@ the `*Messages*' buffer while BODY is evaluated."
     (local-set-key (kbd "=") (smartchr '("=" " == " " = ")))
     (local-set-key (kbd "+") (smartchr '("+" " + " " += 1")))
     (local-set-key (kbd "-") (smartchr '("-" " - " " -= 1")))
+
+    ;; 上書き
+    (local-set-key (kbd "\"") (smartchr '("\"`!!'\"" "\"" "\"\"\"`!!'\"\"\"")))
     )
 
   (defun my/smartchr-rust ()
@@ -1242,9 +1249,9 @@ the `*Messages*' buffer while BODY is evaluated."
 
   ;; 適用するモードを限定
   (dolist (hook (list
-                 'css-ts-mode-hook
-                 'js2-mode-hook
-                 'sql-mode-hook
+                 'prog-mode-hook
+                 'text-mode-hook
+                 'org-mode-hook
                  ))
     (add-hook hook 'my/smartchr-common))
 
@@ -1635,6 +1642,14 @@ make
                          (cape-capf-super #'cape-elisp-symbol
                                           #'cape-dabbrev))
                         (cape-capf-inside-string #'cape-file))))
+
+    ;; 現在バッファからの補完
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    ;; path補完
+    (add-hook 'completion-at-point-functions #'cape-file)
+    ;; keyword補完
+    (add-hook 'completion-at-point-functions #'cape-keyword)
+
     :hook (emacs-lisp-mode-hook . my/elisp-mode-init)
     :bind
     ("C-c o t" . complete-tag)
@@ -1686,8 +1701,10 @@ make
   :ensure t
   :blackout yas-minor-mode
   :global-minor-mode yas-global-mode
-  :custom `((yas-snippet-dirs . '(,(expand-file-name "etc/snippets" user-emacs-directory))))
+  :custom
+  `(yas-snippet-dirs . '(,(expand-file-name "~/.emacs.d/etc/snippets")))
   :config
+
   (leaf yasnippet-snippets
     :ensure t)
 
@@ -1704,6 +1721,15 @@ make
     (setq auto-insert-query nil)
     (yatemplate-fill-alist)
     )
+
+  (leaf yasnippet-capf
+    :doc "yasnippet completion-at-point-functions(capf)"
+    :ensure t
+    :after yasnippet
+    :init
+    (add-hook 'completion-at-point-functions #'yasnippet-capf 30 'local)
+    )
+
   )
 
 
@@ -1830,9 +1856,8 @@ make
   )
 
 
-(leaf python-mode
-  ;; :require t
-  :mode "\\.py\\'" "\\.wsgi\\'" "wscript"
+(leaf python-ts-mode
+  :mode "\\.py\\'"
   :preface
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 
@@ -2095,7 +2120,7 @@ make
             (org-src-fontify-natively . t)
             ;; TAB挙動
             (org-src-tab-acts-natively . t)
-            ;; インデント
+            ;; src内インデント
             (org-edit-src-content-indentation . 0)
             ;; インデント残す
             (org-src-preserve-indentation . t)
