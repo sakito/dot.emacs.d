@@ -123,7 +123,7 @@
 
 (leaf cus-edit
   :doc "custom-file"
-  :custom `((custom-file . ,(expand-file-name "private/customize.el" user-emacs-directory))))
+  :custom `((custom-file . ,(expand-file-name (concat user-emacs-directory "private/customize.el")))))
 
 (leaf user
   :custom ((user-full-name . "sakito")
@@ -137,9 +137,10 @@
   (defvar windows-p (eq system-type 'windows-nt))
   (defvar linux-p (eq system-type 'gnu/linux))
 
-  (defvar emacs27-p (eq emacs-major-version 27))
   (defvar emacs28-p (eq emacs-major-version 28))
   (defvar emacs29-p (eq emacs-major-version 29))
+  (defvar emacs30-p (eq emacs-major-version 30))
+  (defvar emacs31-p (eq emacs-major-version 31))
   )
 
 
@@ -285,6 +286,119 @@
          ("C-x w" . global-whitespace-mode))
   )
 
+
+(leaf rainbow-mode
+  :doc "色コード可視化"
+  :ensure t
+  :hook
+  css-mode-hook
+  emacs-lisp-mode-hook
+  lisp-mode-hook
+  help-mode-hook
+  sass-mode-hook
+  scss-mode-hook
+  toml-ts-mode-hook
+  lua-mode-hook
+  web-mode-hook)
+
+(leaf rainbow-delimiters
+  :ensure t
+  :config
+
+  ;; オリジナル https://github.com/bigos/Pyrulis/blob/master/Emacs/personal.el#L159
+  (require 'color)
+  (defun hsl-to-hex (h s l)
+    "Convert H S L to hex colours."
+    (let (rgb)
+      (setq rgb (color-hsl-to-rgb h s l))
+      (color-rgb-to-hex (nth 0 rgb)
+                        (nth 1 rgb)
+                        (nth 2 rgb))))
+
+  (defun hex-to-rgb (hex)
+    "Convert a 6 digit HEX color to r g b."
+    (mapcar #'(lambda (s) (/ (string-to-number s 16) 255.0))
+            (list (substring hex 1 3)
+                  (substring hex 3 5)
+                  (substring hex 5 7))))
+
+  (defun bg-color ()
+    "Return COLOR or it's hexvalue."
+    (let ((color (face-attribute 'default :background)))
+      (if (equal (substring color 0 1) "#")
+          color
+        (apply 'color-rgb-to-hex (color-name-to-rgb color)))))
+
+  (defun bg-light ()
+    "Calculate background brightness."
+    (< (color-distance  "white"
+                        (bg-color))
+       (color-distance  "black"
+                        (bg-color))))
+
+  (defun whitespace-line-bg ()
+    "Calculate long line highlight depending on background brightness."
+    (apply 'color-rgb-to-hex
+           (apply 'color-hsl-to-rgb
+                  (apply (if (bg-light) 'color-darken-hsl 'color-lighten-hsl)
+                         (append
+                          (apply 'color-rgb-to-hsl
+                                 (hex-to-rgb
+                                  (bg-color)))
+                          '(7))))))
+
+  (defun bracket-colors ()
+    "Calculate the bracket colours based on background."
+    (let (hexcolors lightvals)
+      (setq lightvals (if (bg-light)
+                          (list (list .60 1.0 0.55)
+                                (list .30 1.0 0.40)
+                                (list .11 1.0 0.55)
+                                (list .01 1.0 0.65)
+                                (list .75 0.9 0.55)
+                                (list .49 0.9 0.40)
+                                (list .17 0.9 0.47)
+                                (list .05 0.9 0.55))
+                        (list (list .70 1.0 0.68)
+                              (list .30 1.0 0.40)
+                              (list .11 1.0 0.50)
+                              (list .01 1.0 0.50)
+                              (list .81 0.9 0.55)
+                              (list .49 0.9 0.40)
+                              (list .17 0.9 0.45)
+                              (list .05 0.9 0.45))))
+      (dolist (n lightvals)
+        (push (apply 'hsl-to-hex n) hexcolors))
+      (reverse hexcolors)))
+
+  (defun colorise-brackets ()
+    "Apply my own colours to rainbow delimiters."
+    (interactive)
+    (require 'rainbow-delimiters)
+    (custom-set-faces
+     ;; change the background but do not let theme to interfere with the foreground
+     `(whitespace-line ((t (:background ,(whitespace-line-bg)))))
+     ;; or use (list-colors-display)
+     `(rainbow-delimiters-depth-1-face ((t (:foreground "#80601f"))))
+     `(rainbow-delimiters-depth-2-face ((t (:foreground ,(nth 0 (bracket-colors))))))
+     `(rainbow-delimiters-depth-3-face ((t (:foreground ,(nth 1 (bracket-colors))))))
+     `(rainbow-delimiters-depth-4-face ((t (:foreground ,(nth 2 (bracket-colors))))))
+     `(rainbow-delimiters-depth-5-face ((t (:foreground ,(nth 3 (bracket-colors))))))
+     `(rainbow-delimiters-depth-6-face ((t (:foreground ,(nth 4 (bracket-colors))))))
+     `(rainbow-delimiters-depth-7-face ((t (:foreground ,(nth 5 (bracket-colors))))))
+     `(rainbow-delimiters-depth-8-face ((t (:foreground ,(nth 6 (bracket-colors))))))
+     `(rainbow-delimiters-depth-9-face ((t (:foreground ,(nth 7 (bracket-colors))))))
+     `(rainbow-delimiters-unmatched-face ((t (:foreground "white" :background "red"))))
+     `(highlight ((t (:foreground "#ff0000" :background "#888"))))))
+
+  (colorise-brackets)
+
+  :hook
+  prog-mode-hook
+  text-mode-hook
+  org-mdoe-hook)
+
+
 (require 'modus-themes)
 (leaf modus-themes
   :ensure t
@@ -332,7 +446,7 @@
      '(
        ("\t" 0 my/mark-tabs-face append)
        ("　" 0 my/mark-whitespace-face append)
-       ("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 my/brackets-face append)
+       ;;("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 my/brackets-face append)
        ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 my/operator-face append)
        )))
   (advice-add 'font-lock-mode :before #'my/font-lock-mode)
@@ -433,13 +547,15 @@
            ;;  対応するカッコを色表示する
            ;; 特に色をつけなくてもC-M-p、C-M-n を利用すれば対応するカッコ等に移動できる
            (show-paren-mode . t)
+           ;; 対応表示時間
+           (show-paren-delay . 0)
            ;; カッコ対応表示のスタイル
            ;; カッコその物に色が付く(デフォルト)
            ;; (show-paren-style . parenthesis)
            ;; カッコ内に色が付く
            ;; (show-paren-style . expression)
            ;; 画面内に収まる場合はカッコのみ、画面外に存在する場合はカッコ内全体に色が付く
-           ;; (show-paren-style . mixed)
+           (show-paren-style . 'mixed)
 
            ;;動的略語展開で大文字小文字を区別
            (dabbrev-case-fold-search . nil)
@@ -600,47 +716,23 @@
   )
 
 
-(leaf highlight
-  :defvar highlight-changes-visibility-initial-state
-  :config
-  ;; 変更点に色付け
-  (global-highlight-changes-mode t)
-  ;; 初期は非表示として highlight-changes-visible-mode で表示する
-  (setq highlight-changes-visibility-initial-state nil)
-  :bind (
-         ("M-]" . highlight-changes-next-change)
-         ("M-[" . highlight-changes-previous-change)
-         )
-  )
-
-
-(leaf rainbow-mode
-  :doc "色コード可視化"
-  :ensure t
-  :hook
-  css-mode-hook
-  emacs-lisp-mode-hook
-  lisp-mode-hook
-  help-mode-hook
-  sass-mode-hook
-  scss-mode-hook
-  toml-ts-mode-hook
-  lua-mode-hook
-  web-mode-hook)
-
-
 (leaf backup
   :custom `(
+            ;; backup~ files 作成しない
+            (make-backup-files . nil)
+            ;; #autosave# files 作成しない
+            (auto-save-default . nil)
+
            ;; ファイルを編集した場合コピーにてバックアップする
            ;; inode 番号を変更しない
-           (backup-by-copying . t)
+           ;;(backup-by-copying . t)
 
            ;; バックアップファイルの保存位置指定
            ;; !path!to!file-name~ で保存される
-           (backup-directory-alist . '(
-               ("^/etc/" . ,(expand-file-name "var/etc" user-emacs-directory))
-               ("." . ,(expand-file-name "var/emacs" user-emacs-directory))
-               (,tramp-file-name-regexp . nil)))
+           ;; (backup-directory-alist . '(
+           ;;     ("^/etc/" . ,(expand-file-name (concat user-emacs-directory "var/etc")))
+           ;;     ("." . ,(expand-file-name (concat user-emacs-directory "var/emacs")))
+           ;;     (,tramp-file-name-regexp . nil)))
        ))
 
 
@@ -722,6 +814,23 @@
   :global-minor-mode desktop-save-mode
   :custom
   `(
+
+    ;; 保存内容を限定
+    (desktop-globals-to-save . '(
+                                 search-ring
+                                 register-alist
+                                 file-name-history))
+    (desktop-locals-to-save . '(
+                                ;; 順序注意
+                                desktop-locals-to-save ;; 先頭記載必須？
+                                truncate-lines
+                                case-fold-search
+                                case-replace))
+
+    (desktop-restore-frames . nil)
+
+    (desktop-lazy-verbose . nil)
+
     ;; 保存場所を変更
     (desktop-base-file-name
      . ,(expand-file-name "var/session/desktop" user-emacs-directory))
@@ -1302,19 +1411,25 @@ the `*Messages*' buffer while BODY is evaluated."
   :ensure t
   :custom `(
             (sl-scratch-log-file
-             . ,(expand-file-name "var/scratch.log" user-emacs-directory))
+             . ,(expand-file-name (concat user-emacs-directory "var/scratch.log")))
             (sl-prev-scratch-string-file
-             . ,(expand-file-name "var/scratch-prev.log" user-emacs-directory))
+             . ,(expand-file-name (concat user-emacs-directory "var/scratch-prev.log")))
             )
   )
 
 
 (leaf flycheck
+  :doc "挙動がおかしい場合は、 M-x flycheck-verify-setup で確認"
   :ensure t
   :custom
   (flycheck-help-echo-function . nil)
   (flycheck-display-errors-function . nil)
+
+  (flycheck-check-syntax-automatically . '(save mode-enabled))
   :config
+  ;; python-pylint を停止
+  (setq-default flycheck-disabled-checkers '(python-pylint python-flake8 python-mypy))
+
   (leaf flycheck-posframe
     :ensure t
     :after flycheck
@@ -1330,6 +1445,7 @@ the `*Messages*' buffer while BODY is evaluated."
     (flycheck-posframe-warning-prefix . "[W] ")
     (flycheck-posframe-info-prefix . "[I] ")
     )
+
   :hook
   (prog-mode-hook . flycheck-mode))
 
@@ -1585,8 +1701,8 @@ make
     (corfu-auto . t)
 
     ;; companyも同時利用する場合は delay 時間を合せる必要がある
-    (corfu-auto-delay . 0)
-    (corfu-popupinfo-delay . '(0.1 . 0.1))
+    (corfu-auto-delay . 1)
+    (corfu-popupinfo-delay . '(0.6 . 0.6))
 
     ;; corfu中に選択候補をカーソル先に表示しない
     (corfu-preview-current . nil)
@@ -1672,7 +1788,7 @@ make
     :doc "capeで既存のcompany補完も利用"
     :custom
     ;; delay 時間等を corfu と合わせないと候補窓が2重に開いてしまう
-    (company-idle-delay . 0)
+    (company-idle-delay . 1)
     (company-minimum-prefix-length . 2)
     (company-tooltip-idle-delay . 0)
 
@@ -1716,7 +1832,7 @@ make
     :after yasnippet
     :defvar auto-insert-query
     :config
-    (setq yatemplate-dir (expand-file-name "etc/templates" user-emacs-directory))
+    (setq yatemplate-dir (expand-file-name (concat user-emacs-directory "etc/templates")))
     (auto-insert-mode t)
     (setq auto-insert-query nil)
     (yatemplate-fill-alist)
@@ -1856,17 +1972,37 @@ make
   )
 
 
+(leaf pythonic
+  :ensure t)
+
+(leaf uv-mode
+  :ensure t
+  :hook (python-base-mode . uv-mode-auto-activate-hook))
+
+(leaf pet
+  :ensure t
+  :commands (pet-mode)
+  :init
+  (add-hook 'python-base-mode-hook 'pet-mode -10)
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (setq-local python-shell-interpreter (pet-executable-find "python")
+                          python-shell-virtualenv-root (pet-virtualenv-root))
+              (pet-eglot-setup)
+              (pet-flycheck-setup))))
+
 (leaf python-ts-mode
   :mode "\\.py\\'"
   :preface
   (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 
   :init
-  ;; env
-  (setenv "PYTHONSTARTUP"
-          (expand-file-name "rc.d/pythonrc.py" user-emacs-directory))
-  (setenv "PYTHONPATH"
-          (expand-file-name "~/opt/py/py3.13.4/lib/python3.13/site-packages"))
+
+  (defun my/python-flycheck ()
+    ;;(flycheck-add-next-checker 'python-ruff 'python-pyright)
+    (flycheck-add-next-checker 'python-ruff 'python-pycompile)
+    (flycheck-mode 1)
+    )
 
   :bind ((:python-base-mode-map
           ("C-c !" . run-python)
@@ -1893,32 +2029,25 @@ make
 
   (define-key python-ts-mode-map (kbd "C-c !") 'run-python)
 
-  (leaf flycheck-pycheckers
-    :url "https://github.com/msherry/flycheck-pycheckers"
-    :doc "オリジナルの機能にruffのチェック機能を追加した物を利用"
-    :after flycheck
-    :load-path* "lisp"
-    :require t
-    :custom
-    (flycheck-pycheckers-command . "pycheckers.py")
-    :hook
-    (flycheck-mode-hook . flycheck-pycheckers-setup)
-    )
+  ;; (leaf flycheck-pycheckers
+  ;;   :url "https://github.com/msherry/flycheck-pycheckers"
+  ;;   :doc "オリジナルの機能にruffのチェック機能を追加した物を利用"
+  ;;   :after flycheck
+  ;;   :load-path* "lisp"
+  ;;   :require t
+  ;;   :custom
+  ;;   (flycheck-pycheckers-command . "pycheckers.py")
+  ;;   :hook
+  ;;   (flycheck-mode-hook . flycheck-pycheckers-setup)
+  ;;   )
 
   :hook (
          ;;(python-ts-mode-hook . eglot-ensure)
          (python-ts-mode-hook . (lambda () (electric-indent-local-mode -1)))
-         (python-ts-mode-hook . flycheck-mode)
+         ;;(python-ts-mode-hook . flycheck-mode)
+         (python-ts-mode-hook . my/python-flycheck)
          )
   )
-
-
-(leaf pyvenv
-  :ensure t
-  :config
-  ;; 仮想環境のディレクトリを設定
-  (setenv "WORKON_HOME" "~/opt/py/py3.13.4")
-  (pyvenv-mode 1))
 
 
 (leaf rust-mode
