@@ -5,6 +5,10 @@ all:
 	emacs --batch -f batch-byte-compile init.el
 
 
+.PHONY: setup
+setup:
+	ln -sf ${HOME}/.emacs.d/etc/snippets ${TMPDIR}/etc/snippets
+
 
 .PHONY: dry_sync
 dry_sync:

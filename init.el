@@ -70,9 +70,6 @@
 ;; tramp関連停止
 (setq tramp-mode nil)
 
-
-
-
 ;; leaf
 (eval-and-compile
   (when (or load-file-name byte-compile-current-file)
@@ -303,103 +300,26 @@
 
 (leaf rainbow-delimiters
   :ensure t
-  :config
-
-  ;; オリジナル https://github.com/bigos/Pyrulis/blob/master/Emacs/personal.el#L159
-  (require 'color)
-  (defun hsl-to-hex (h s l)
-    "Convert H S L to hex colours."
-    (let (rgb)
-      (setq rgb (color-hsl-to-rgb h s l))
-      (color-rgb-to-hex (nth 0 rgb)
-                        (nth 1 rgb)
-                        (nth 2 rgb))))
-
-  (defun hex-to-rgb (hex)
-    "Convert a 6 digit HEX color to r g b."
-    (mapcar #'(lambda (s) (/ (string-to-number s 16) 255.0))
-            (list (substring hex 1 3)
-                  (substring hex 3 5)
-                  (substring hex 5 7))))
-
-  (defun bg-color ()
-    "Return COLOR or it's hexvalue."
-    (let ((color (face-attribute 'default :background)))
-      (if (equal (substring color 0 1) "#")
-          color
-        (apply 'color-rgb-to-hex (color-name-to-rgb color)))))
-
-  (defun bg-light ()
-    "Calculate background brightness."
-    (< (color-distance  "white"
-                        (bg-color))
-       (color-distance  "black"
-                        (bg-color))))
-
-  (defun whitespace-line-bg ()
-    "Calculate long line highlight depending on background brightness."
-    (apply 'color-rgb-to-hex
-           (apply 'color-hsl-to-rgb
-                  (apply (if (bg-light) 'color-darken-hsl 'color-lighten-hsl)
-                         (append
-                          (apply 'color-rgb-to-hsl
-                                 (hex-to-rgb
-                                  (bg-color)))
-                          '(7))))))
-
-  (defun bracket-colors ()
-    "Calculate the bracket colours based on background."
-    (let (hexcolors lightvals)
-      (setq lightvals (if (bg-light)
-                          (list (list .60 1.0 0.55)
-                                (list .30 1.0 0.40)
-                                (list .11 1.0 0.55)
-                                (list .01 1.0 0.65)
-                                (list .75 0.9 0.55)
-                                (list .49 0.9 0.40)
-                                (list .17 0.9 0.47)
-                                (list .05 0.9 0.55))
-                        (list (list .70 1.0 0.68)
-                              (list .30 1.0 0.40)
-                              (list .11 1.0 0.50)
-                              (list .01 1.0 0.50)
-                              (list .81 0.9 0.55)
-                              (list .49 0.9 0.40)
-                              (list .17 0.9 0.45)
-                              (list .05 0.9 0.45))))
-      (dolist (n lightvals)
-        (push (apply 'hsl-to-hex n) hexcolors))
-      (reverse hexcolors)))
-
-  (defun colorise-brackets ()
-    "Apply my own colours to rainbow delimiters."
-    (interactive)
-    (require 'rainbow-delimiters)
-    (custom-set-faces
-     ;; change the background but do not let theme to interfere with the foreground
-     `(whitespace-line ((t (:background ,(whitespace-line-bg)))))
-     ;; or use (list-colors-display)
-     `(rainbow-delimiters-depth-1-face ((t (:foreground "#80601f"))))
-     `(rainbow-delimiters-depth-2-face ((t (:foreground ,(nth 0 (bracket-colors))))))
-     `(rainbow-delimiters-depth-3-face ((t (:foreground ,(nth 1 (bracket-colors))))))
-     `(rainbow-delimiters-depth-4-face ((t (:foreground ,(nth 2 (bracket-colors))))))
-     `(rainbow-delimiters-depth-5-face ((t (:foreground ,(nth 3 (bracket-colors))))))
-     `(rainbow-delimiters-depth-6-face ((t (:foreground ,(nth 4 (bracket-colors))))))
-     `(rainbow-delimiters-depth-7-face ((t (:foreground ,(nth 5 (bracket-colors))))))
-     `(rainbow-delimiters-depth-8-face ((t (:foreground ,(nth 6 (bracket-colors))))))
-     `(rainbow-delimiters-depth-9-face ((t (:foreground ,(nth 7 (bracket-colors))))))
-     `(rainbow-delimiters-unmatched-face ((t (:foreground "white" :background "red"))))
-     `(highlight ((t (:foreground "#ff0000" :background "#888"))))))
-
-  (colorise-brackets)
+  :custom-face
+  ;; 色参考 https://github.com/bigos/Pyrulis/blob/master/Emacs/personal.el#L159
+  (rainbow-delimiters-depth-1-face . '((t (:foreground "#80601f"))))
+  (rainbow-delimiters-depth-2-face . '((t (:foreground "#199975c2ffff"))))
+  (rainbow-delimiters-depth-3-face . '((t (:foreground "#28f5cccc0000"))))
+  (rainbow-delimiters-depth-4-face . '((t (:foreground "#ffffb1a91999"))))
+  (rainbow-delimiters-depth-5-face . '((t (:foreground "#fffe578c4ccc"))))
+  (rainbow-delimiters-depth-6-face . '((t (:foreground "#8ccc251ef479"))))
+  (rainbow-delimiters-depth-7-face . '((t (:foreground "#0a3dc28eb77f"))))
+  (rainbow-delimiters-depth-8-face . '((t (:foreground "#e045e49a0c08"))))
+  (rainbow-delimiters-depth-9-face . '((t (:foreground "#f4796353251e"))))
+  (rainbow-delimiters-unmatched-face . '((t (:foreground "white" :background "red"))))
 
   :hook
   prog-mode-hook
-  text-mode-hook
-  org-mdoe-hook)
+  ;;text-mode-hook
+  ;;org-mdoe-hook
+  )
 
 
-(require 'modus-themes)
 (leaf modus-themes
   :ensure t
   :custom
@@ -809,37 +729,37 @@
   )
 
 
-(leaf desktop
-  :doc "状態保存"
-  :global-minor-mode desktop-save-mode
-  :custom
-  `(
+;; (leaf desktop
+;;   :doc "状態保存"
+;;   :global-minor-mode desktop-save-mode
+;;   :custom
+;;   `(
 
-    ;; 保存内容を限定
-    (desktop-globals-to-save . '(
-                                 search-ring
-                                 register-alist
-                                 file-name-history))
-    (desktop-locals-to-save . '(
-                                ;; 順序注意
-                                desktop-locals-to-save ;; 先頭記載必須？
-                                truncate-lines
-                                case-fold-search
-                                case-replace))
+;;     ;; 保存内容を限定
+;;     (desktop-globals-to-save . '(
+;;                                  search-ring
+;;                                  register-alist
+;;                                  file-name-history))
+;;     (desktop-locals-to-save . '(
+;;                                 ;; 順序注意
+;;                                 desktop-locals-to-save ;; 先頭記載必須？
+;;                                 truncate-lines
+;;                                 case-fold-search
+;;                                 case-replace))
 
-    (desktop-restore-frames . nil)
+;;     (desktop-restore-frames . nil)
 
-    (desktop-lazy-verbose . nil)
+;;     (desktop-lazy-verbose . nil)
 
-    ;; 保存場所を変更
-    (desktop-base-file-name
-     . ,(expand-file-name "var/session/desktop" user-emacs-directory))
-    (desktop-base-lock-name
-     . ,(expand-file-name "var/session/desktop.lock" user-emacs-directory))
+;;     ;; 保存場所を変更
+;;     (desktop-base-file-name
+;;      . ,(expand-file-name "var/session/desktop" user-emacs-directory))
+;;     (desktop-base-lock-name
+;;      . ,(expand-file-name "var/session/desktop.lock" user-emacs-directory))
 
-    ;; 保存間隔(初期値は30秒)
-    (desktop-auto-save-timeout . ,(* 5 60))
-  ))
+;;     ;; 保存間隔(初期値は30秒)
+;;     (desktop-auto-save-timeout . ,(* 5 60))
+;;   ))
 
 
 (leaf savehist
@@ -925,6 +845,7 @@ the `*Messages*' buffer while BODY is evaluated."
   :ensure t
   :require sendmail  ;; 暫定対処
   :bind (("C-c g" . magit-status)
+         ("C-c C-g" . magit-status)
          ;; 打鍵ミスするので暫定でこれも設定しておく
          ("C-, g" . magit-status)
 
@@ -1411,9 +1332,9 @@ the `*Messages*' buffer while BODY is evaluated."
   :ensure t
   :custom `(
             (sl-scratch-log-file
-             . ,(expand-file-name (concat user-emacs-directory "var/scratch.log")))
+             . ,(expand-file-name "~/.emacs.d/var/scratch.log"))
             (sl-prev-scratch-string-file
-             . ,(expand-file-name (concat user-emacs-directory "var/scratch-prev.log")))
+             . ,(expand-file-name "~/.emacs.d/var/scratch-prev.log"))
             )
   )
 
@@ -1447,7 +1368,12 @@ the `*Messages*' buffer while BODY is evaluated."
     )
 
   :hook
-  (prog-mode-hook . flycheck-mode))
+  (prog-mode-hook . flycheck-mode)
+  )
+
+
+(leaf async
+  :ensure t)
 
 (leaf helm
   :doc "helm
@@ -1701,7 +1627,7 @@ make
     (corfu-auto . t)
 
     ;; companyも同時利用する場合は delay 時間を合せる必要がある
-    (corfu-auto-delay . 1)
+    (corfu-auto-delay . 0)
     (corfu-popupinfo-delay . '(0.6 . 0.6))
 
     ;; corfu中に選択候補をカーソル先に表示しない
@@ -1788,7 +1714,7 @@ make
     :doc "capeで既存のcompany補完も利用"
     :custom
     ;; delay 時間等を corfu と合わせないと候補窓が2重に開いてしまう
-    (company-idle-delay . 1)
+    (company-idle-delay . 0)
     (company-minimum-prefix-length . 2)
     (company-tooltip-idle-delay . 0)
 
@@ -1972,24 +1898,9 @@ make
   )
 
 
-(leaf pythonic
-  :ensure t)
-
 (leaf uv-mode
   :ensure t
   :hook (python-base-mode . uv-mode-auto-activate-hook))
-
-(leaf pet
-  :ensure t
-  :commands (pet-mode)
-  :init
-  (add-hook 'python-base-mode-hook 'pet-mode -10)
-  (add-hook 'python-mode-hook
-            (lambda ()
-              (setq-local python-shell-interpreter (pet-executable-find "python")
-                          python-shell-virtualenv-root (pet-virtualenv-root))
-              (pet-eglot-setup)
-              (pet-flycheck-setup))))
 
 (leaf python-ts-mode
   :mode "\\.py\\'"
@@ -1999,8 +1910,8 @@ make
   :init
 
   (defun my/python-flycheck ()
-    ;;(flycheck-add-next-checker 'python-ruff 'python-pyright)
-    (flycheck-add-next-checker 'python-ruff 'python-pycompile)
+    (flycheck-add-next-checker 'python-ruff 'python-pyright)
+    ;;(flycheck-add-next-checker 'python-ruff 'python-pycompile)
     (flycheck-mode 1)
     )
 
