@@ -70,14 +70,11 @@
 ;; tramp関連停止
 (setq tramp-mode nil)
 
+;; user-emacs-directory が未定にならないように対策
+(when load-file-name
+  (setq user-emacs-directory (file-name-directory load-file-name)))
+
 ;; leaf
-(eval-and-compile
-  (when (or load-file-name byte-compile-current-file)
-    (setq user-emacs-directory
-          (expand-file-name
-           (file-name-directory (or load-file-name byte-compile-current-file))))))
-
-
 (eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -275,9 +272,9 @@
           (tab-mark 9 [95 9] [92 9])
           ))
 
-  :hook
-  (prog-mode-hook . whitespace-mode)
-  (text-mode-hook . whitespace-mode)
+  ;;:hook
+  ;;(prog-mode-hook . whitespace-mode)
+  ;;(text-mode-hook . whitespace-mode)
   :bind (
          ;; 常に whitespace-mode だと動作が遅くなる場合がある
          ("C-x w" . global-whitespace-mode))
@@ -320,6 +317,8 @@
   )
 
 
+(eval-when-compile
+  (require 'modus-themes))
 (leaf modus-themes
   :ensure t
   :custom
@@ -369,22 +368,24 @@
        ;;("(\\|)\\|{\\|\\}\\|\\[\\|\\]" 0 my/brackets-face append)
        ("[|!\\.\\+\\=\\&]\\|\\/\\|\\:\\|\\%\\|\\*\\|\\," 0 my/operator-face append)
        )))
-  (advice-add 'font-lock-mode :before #'my/font-lock-mode)
+  ;;(advice-add 'font-lock-mode :before #'my/font-lock-mode)
 
   :config
   (load-theme 'modus-operandi-tinted t)
 
   (leaf *custom-modus-themes
     :after modus-themes
-    :defvar bg-main
     :defun modus-themes-with-colors my/modus-themes-custom-faces
     :config
     (defun my/modus-themes-custom-faces (&rest _)
       (modus-themes-with-colors
         (custom-set-faces
-         `(trailing-whitespace ((,c :background ,bg-main :underline "SteelBlue")))
-         `(skk-show-mode-inline-face ((,c :background ,bg-main)))
+         `(trailing-whitespace ((t ,(modus-themes-with-colors (list :background bg-main :underline "SteelBlue")))))
+         `(skk-show-mode-inline-face ((t ,(modus-themes-with-colors (list :background bg-main)))))
          )))
+
+    ;; テーマ変更時に自動追従させる
+    (add-hook 'modus-themes-after-load-theme-hook #'my/modus-themes-custom-faces)
 
     (my/modus-themes-custom-faces)
 
@@ -512,7 +513,7 @@
            (custom-tab-width . 2)
   )
   :config
-  (global-display-line-numbers-mode)
+  ;;(global-display-line-numbers-mode)
   (global-font-lock-mode t)
   (setq font-lock-support-mode 'jit-lock-mode)
   (setq-default tab-width 2)
@@ -521,7 +522,7 @@
   (global-unset-key (kbd "<help> C-h"))
   :hook (
          (text-mode-hook . turn-off-auto-fill)
-         (text-mode-hook . display-line-numbers-mode)
+         ;;(text-mode-hook . display-line-numbers-mode)
          (prog-mode-hook . display-line-numbers-mode)
          (conf-mode-hook . display-line-numbers-mode)
          )
@@ -665,20 +666,14 @@
            ;; C-\ でも SKK に切り替えられるように設定
            (default-input-method . "japanese-skk")
 
+           ;; 14.4 以降での推奨設定
+           (skk-isearch-mode-enable . 'always)
+
            ;; 送り仮名が厳密に正しい候補を優先して表示
            (skk-henkan-strict-okuri-precedence . t)
 
            ;; 漢字登録時、送り仮名が厳密に正しいかをチェック
            (skk-check-okurigana-on-touroku . t)
-
-           ;; skk server設定
-           (skk-server-host . "localhost")
-           (skk-server-portnum . 1178)
-
-           ;; モードを入力位置近くに表示
-           ;; この設定を有効にすると、バッファ表示が遅くなるので設定していない
-           ;; (skk-show-tooltip . t)
-           ;; (skk-show-mode-show . t)
 
            ;; モード文字列
            (skk-latin-mode-string . "＠")
@@ -694,6 +689,27 @@
       (append skk-rom-kana-rule-list
               '(("@" nil "@"))))
 
+  ;; SKK 関連ファイル
+  (setq skk-user-directory
+        (expand-file-name "etc/skk/" user-emacs-directory))
+
+  (setq skk-jisyo
+        (expand-file-name "SKK-JISYO.user" skk-user-directory))
+
+  ;; skk server設定
+  (if mac-p
+      ;; mac: skk server 使用
+      (setq skk-server-host "localhost"
+            skk-server-portnum 1178
+            skk-large-jisyo nil)
+
+    ;; Linux/WSL: L辞書直接参照
+    (setq skk-server-host nil
+          skk-server-portnum nil
+          skk-large-jisyo
+          (expand-file-name "etc/skk/SKK-JISYO.L"
+                            user-emacs-directory)))
+
   ;; lisp-interaction-mode での実行は C-c C-j に割り当て elisp の項参照
 
   (leaf ddskk-posframe
@@ -708,14 +724,9 @@
                   )
     )
 
-  :hook (
-         ;; C-x C-fでファイルを開くとSKK
-         (find-file-hook . (lambda () (skk-latin-mode t)))
-         ;; だいたいのmodeでSKK
-         (text-mode-hook . (lambda () (skk-latin-mode t)))
-         (prog-mode-hook . (lambda () (skk-latin-mode t)))
-         (conf-mode-hook . (lambda () (skk-latin-mode t)))
-         )
+  :hook
+  ;; C-x C-fでファイルを開くとSKK
+  (find-file-hook . (lambda () (skk-latin-mode t)))
   )
 
 
@@ -781,15 +792,18 @@
     (savehist-save-minibuffer-history . t)
   )
   :config
-  ;; history、ring系全部保存
+  ;; 特定ringのみ保存
   (setopt savehist-additional-variables
-        (apropos-internal "-\\(\\(history\\)\\|\\(ring\\)\\)\\'" 'boundp))
+          '(kill-ring
+            search-ring
+            regexp-search-ring))
+  ;; history、ring系全部保存
+  ;;(apropos-internal "-\\(\\(history\\)\\|\\(ring\\)\\)\\'" 'boundp))
   )
 
 
 (leaf recentf
   :doc "recentf"
-  :require t
   :init
   (leaf recentf-ext
     :ensure t)
@@ -866,7 +880,6 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf dired
   :doc "dired"
-  :require t
   :custom `(
            ;; 再帰コピー
            (dired-recursive-copies . 'always)
@@ -1000,7 +1013,6 @@ the `*Messages*' buffer while BODY is evaluated."
 
 
 (leaf ffap
-  :require t
   :custom (
            (ffap-c-path
             . '("/opt/local/include" "/usr/include" "/usr/local/include"))
@@ -1083,7 +1095,6 @@ the `*Messages*' buffer while BODY is evaluated."
 
 
 (leaf calendar
-  :require t
   :custom (
            ;; week number
            (calendar-intermonth-text
@@ -1106,7 +1117,6 @@ the `*Messages*' buffer while BODY is evaluated."
   ;; https://github.com/emacs-jp/japanese-holidays
   (leaf japanese-holidays
     :ensure t
-    :require t
     :after calendar
     :defvar calendar-holidays japanese-holidays calendar-mark-holidays-flag
     :config
@@ -1138,7 +1148,6 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf puni
   :doc "領域選択機能"
   :ensure t
-  :require t
   :config
   (defun my/puni-wrap-single-quote (&optional n)
     (interactive "P")
@@ -1179,7 +1188,6 @@ the `*Messages*' buffer while BODY is evaluated."
 (leaf smartchr
   :doc "smartchr の設定"
   :url "http://tech.kayac.com/archive/emacs-tips-smartchr.html"
-  :require t
   :el-get (smartchr
            :url "https://github.com/imakado/emacs-smartchr.git")
   :defun smartchr
@@ -1328,13 +1336,14 @@ the `*Messages*' buffer while BODY is evaluated."
 
 (leaf scratch-log
   :doc "scratch バッファを保存する"
-  :require t
   :ensure t
+  ;; 遅延ロードすると起動時に scratch が復旧しないようなのでrequireしている
+  :require t
   :custom `(
             (sl-scratch-log-file
-             . ,(expand-file-name "~/.emacs.d/var/scratch.log"))
+             . ,(expand-file-name "var/scratch.log" user-emacs-directory))
             (sl-prev-scratch-string-file
-             . ,(expand-file-name "~/.emacs.d/var/scratch-prev.log"))
+             . ,(expand-file-name "var/scratch-prev.log" user-emacs-directory))
             )
   )
 
@@ -1744,7 +1753,7 @@ make
   :blackout yas-minor-mode
   :global-minor-mode yas-global-mode
   :custom
-  `(yas-snippet-dirs . '(,(expand-file-name "~/.emacs.d/etc/snippets")))
+  `(yas-snippet-dirs . '(,(expand-file-name "etc/snippets" user-emacs-directory)))
   :config
 
   (leaf yasnippet-snippets
@@ -1843,7 +1852,6 @@ make
 
 (leaf treesit
   :doc "tree-sitter設定"
-  :require t
   :preface
   (defun treesit-p ()
     "Check if Emacs was built with treesiter in a protable way."
@@ -2044,7 +2052,6 @@ make
 
 
 (leaf toml-ts-mode
-  :require t
   :mode "\\.toml\\'")
 
 (leaf makefile-mode
@@ -2080,7 +2087,6 @@ make
 
 
 (leaf rst
-  :require t
   :mode "\\.rst$" "\\.rest$"
   :init
   (defvar rst-html-program "open"
@@ -2129,7 +2135,6 @@ make
 
 (leaf org
   :doc "Emacs添付の物を利用する前提"
-  :require t
   :custom `(
             ;; ディレクトリ設定
             (org-directory . ,(expand-file-name "~/Documents/doc/org/"))
@@ -2235,6 +2240,7 @@ make
   :config
   (leaf nerd-icons-mode-line
     :ensure t
+    ;; mode-line-nerd-icon のために require している
     :require t
     :vc (:url "https://github.com/grolongo/nerd-icons-mode-line")
     :custom
